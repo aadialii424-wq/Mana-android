@@ -51,6 +51,7 @@ class WakeWordService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     @Volatile private var running = false
     private var watchdogRuns = 0
+    private var lastWakeAt = 0L
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -193,6 +194,9 @@ class WakeWordService : Service() {
         }
         // App band hai — Maya khud jaag jaye
         if (isWake) {
+            /* ECHO-LOOP GUARD: apni hi awaz dobara wake na gine */
+            if (System.currentTimeMillis() - lastWakeAt < 12000) return
+            lastWakeAt = System.currentTimeMillis()
             val cmd = text.replace(Regex("^(hey\\\\s+)?(maya|maywa|mya|maaya|boss)[\\\\s,.!:-]*", RegexOption.IGNORE_CASE), "").trim()
             speakLocal("Ji Boss! Ek second, main aa rahi hoon.")
             try {
