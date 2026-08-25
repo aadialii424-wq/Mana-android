@@ -264,7 +264,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.1.3 — NATIVE FIX • 0-BUDGET</div>
+  <div class="ver">VERSION 2.2.0 — SMART BRAIN • 0-BUDGET</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -277,7 +277,7 @@
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
-    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.1</small></div>
+    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.2</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -319,6 +319,7 @@
         <div class="chip"><div class="k">◈ MEMORY BANK</div><div class="v" id="hudMem">0</div></div>
         <div class="chip"><div class="k">◈ ACTIVE TIMERS</div><div class="v" id="hudTimers">0</div></div>
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
+        <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
       </div>
 
       <div class="qactions">
@@ -379,6 +380,8 @@
         <h3>👤 PILOT PROFILE</h3>
         <label class="f">AAP KA NAAM (Maya isi se bulayegi)</label>
         <input class="f" id="sName" placeholder="Sir">
+        <label class="f">MAUSAM KA SHEHER (weather city)</label>
+        <input class="f" id="sCity" placeholder="Hyderabad">
         <h3 style="margin-top:18px">🧠 NEURAL LINK</h3>
         <label class="f">GEMINI API KEY (FREE — Commands tab mein guide)</label>
         <input class="f" id="sKey" type="password" placeholder="AIza... se shuru hoti hai">
@@ -441,7 +444,7 @@
         <h3>🚀 ROADMAP — Project MAYA</h3>
         <div class="phase"><span class="st">✅</span><span><b>Phase 1</b> — PWA Pro (multi-tab, HUD, memory, offline)</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 2</b> — Asli APK (native: alarm, timer, notifications, battery)</span></div>
-        <div class="phase"><span class="st">⏳</span><span><b>Phase 3</b> — Smart Brain (AI actions, routines)</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Phase 3</b> — Smart Brain (13 AI tools, weather, routines, reminders)</span></div>
         <div class="phase"><span class="st">⏳</span><span><b>Phase 4</b> — Boss Level (wake word, offline AI)</span></div>
       </div>
       <div class="vtag">MAYA v2.0.0 • 0-BUDGET BUILD • MADE WITH ❤️ + AI</div>
@@ -492,7 +495,7 @@ setTimeout(function(){
 window.__mayaJSOK = true;
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
-var DEFAULTS = { name:"Sir", apikey:"", stt:"ur-PK", tts:"ur-PK", rate:1.0, model:"auto", autoListen:false, voiceOn:true };
+var DEFAULTS = { name:"Sir", apikey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, model:"auto", autoListen:false, voiceOn:true };
 var settings = Object.assign({}, DEFAULTS);
 try {
   var s1 = JSON.parse(localStorage.getItem("maya_settings") || "null");
@@ -554,7 +557,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.1.3 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.2.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -919,74 +922,288 @@ function tryLocal(t){
   m = q.match(/(?:message|msg|sms)\s*(?:karo|send|bhejo)?\s*(?:on|to|par|pe)?\s*(\+?\d[\d\s-]{6,})/);
   if (m) return { reply:"Message screen khul raha hai.", url:"sms:" + m[1].replace(/[\s-]/g,""), link:"sms:" + m[1].replace(/[\s-]/g,"") };
 
+  /* Phase 3: mausam + routines */
+  if (/(mausam|mosam|weather|barish hone|garmi kitn|thand kitn)/.test(q)) {
+    fetchWeather().then(function(w){
+      if (w && w.temp != null)
+        reply(settings.name + ", " + w.city + " mein abhi " + w.temp + " degree hai — " + w.desc + (w.max != null ? ". Aaj high " + w.max + " aur low " + w.min + " degree rahega." : "."), true);
+      else reply("Mausam ka data nahi mil pa raha — internet check karo, " + settings.name + ".", true);
+    });
+    return { reply: "" };
+  }
+  if (/(good morning|subah bakhair|subah bakhayr|morning maya|morning briefing|din shuru)/.test(q)) {
+    morningBrief();
+    return { reply: "" };
+  }
+  if (/(good night|shab bakhair|raat bakhair|so ja|sojta)/.test(q)) {
+    var gn = "Shab bakhair, " + settings.name + "! Main aap ke khwaboon ki guard ban kar baithi rahungi.";
+    try {
+      if (NATIVE) {
+        var b = JSON.parse(window.MayaBridge.battery());
+        if (!b.charging && b.level < 25) gn = " " + settings.name + ", pehle charger laga lo — battery sirf " + b.level + " percent hai, werna main bhi so jaungi! " + gn;
+      }
+    } catch(e){}
+    return { reply: gn };
+  }
+
   return null;
 }
 
-/* ---------- TIMERS ---------- */
-function startTimer(secs, label){
-  timers.push({ end: Date.now() + secs * 1000, label: label });
-  pushLog("TIMER SET: " + label);
-  if (!startTimer.tick) {
-    startTimer.tick = setInterval(function(){
-      timers = timers.filter(function(t){
-        if (Date.now() >= t.end) {
-          alarmBeep();
-          try { navigator.vibrate && navigator.vibrate([300,150,300,150,500]); } catch(e){}
-          reply(settings.name + ", aap ka " + t.label + " ka timer poora ho gaya!", true);
-          return false;
-        }
-        return true;
-      });
-      hudRefresh();
-    }, 1000);
-  }
+/* ---------- TIMERS & REMINDERS (Phase 3) ---------- */
+function startTimer(secs, label, speakText){
+  timers.push({ end: Date.now() + secs * 1000, label: label, text: speakText || "" });
+  pushLog("TIMER: " + label + (speakText ? " (reminder)" : ""));
+  if (!startTimer.tick) startTimer.tick = setInterval(tickTimers, 1000);
+  hudRefresh();
+}
+function tickTimers(){
+  timers = timers.filter(function(t){
+    if (Date.now() >= t.end) {
+      alarmBeep();
+      try {
+        if (NATIVE && window.MayaBridge && window.MayaBridge.vibrate) window.MayaBridge.vibrate(600);
+        else if (navigator.vibrate) navigator.vibrate([300,150,300]);
+      } catch(e){}
+      if (t.text) {
+        if (NATIVE) { try { window.MayaBridge.notify("⏰ MAYA Reminder", t.text); } catch(e){} }
+        reply("Yaad dilana " + settings.name + ": " + t.text, true);
+      } else {
+        reply(settings.name + ", aap ka " + t.label + " ka timer poora ho gaya!", true);
+      }
+      return false;
+    }
+    return true;
+  });
   hudRefresh();
 }
 
 /* ---------- GEMINI ---------- */
 function sysPrompt(){
-  var p = "You are MAYA — a witty, warm, fiercely loyal personal AI assistant running on the user's Android phone as a home-made 0-budget project (the user's custom-built JARVIS, named MAYA). Address the user as '" + settings.name + "'. Personality: playful but sharp, caring like a best friend, with light sci-fi flair — occasionally calls the user 'Boss'. STRICT RULES: (1) Your reply is SPOKEN ALOUD via text-to-speech, so keep it SHORT — 1 to 3 sentences, under 60 words — unless the user explicitly asks for detail or a written piece. (2) Plain spoken text only: no markdown, no bullet lists, no asterisks, no emojis. (3) Reply in the SAME language and script as the user: Urdu script → Urdu script; Roman Urdu → Roman Urdu; English → simple English. (4) You cannot directly control the phone; the app handles device commands. If asked to open apps or set alarms, tell " + settings.name + " to use voice commands like 'open WhatsApp' or 'paanch minute ka timer lagao'. (5) If asked who you are: you are MAYA, " + settings.name + "'s personal AI, built with love on a 0 budget.";
-  if (facts.length) p += " KNOWN FACTS about " + settings.name + " (use naturally when relevant): " + facts.slice(0, 15).map(function(f){ return "- " + f; }).join(" ");
+  var p = "You are MAYA — witty, warm, fiercely loyal personal AI running on the user's Android phone (their home-made 0-budget JARVIS, named MAYA). Address the user as '" + settings.name + "' (occasionally 'Boss' for fun). Personality: playful but sharp, caring like a best friend, light sci-fi flair.\n" +
+    "SUPERPOWERS — you have PHONE TOOLS. Use them naturally whenever the user wants an action:\n" +
+    "- Alarm ('jaga dena', 'waqt par uthana', 'alarm lagao') -> set_alarm\n" +
+    "- Timer/reminders -> set_timer ya set_reminder\n" +
+    "- Apps kholna -> open_app; gaana/video -> play_youtube; search -> search_web\n" +
+    "- Call/SMS -> call_number / send_sms (number na ho to pooch laina)\n" +
+    "- Mausam -> get_weather (default sheher: " + settings.city + ")\n" +
+    "- Battery -> battery_status\n" +
+    "- Zaroori cheez (birthday, appointment, pasand, kisi ka naam, kaam) -> khud save_memory use karo, 'yaad rakhna' bole na bole\n" +
+    "- Yaad karna ho -> recall_memory\n" +
+    "Tool use karne ke baad ek chhoti friendly line mein confirm karo. Jo tools se mumkin nahi, wo bRIEFLY bata do.\n" +
+    "RULES: (1) Reply SPOKEN ALOUD hoti hai — 1-3 jumlay, 60 words se kam (detail na maangi jaye to). (2) Plain spoken text: koi markdown, list, asterisk, emoji nahi. (3) User ki language aur script mein jawab: Urdu script -> Urdu script, Roman Urdu -> Roman Urdu, English -> English. (4) Kaam aksar tools se karo, sirf baat mat karo. (5) Kaun ho? MAYA, " + settings.name + " ki personal AI — mohabbat se 0 budget par bani.";
+  if (facts.length) p += "\nKNOWN FACTS about " + settings.name + " (natural tor par use karo): " + facts.slice(0, 15).map(function(f){ return "- " + f; }).join(" ");
   return p;
 }
+
+/* ---------- WEATHER (Open-Meteo — free, no key) ---------- */
+var WMO = {0:"saaf aasman",1:"thoda saaf",2:"badal chhaye hue",3:"ghane badal",45:"dhund",48:"dhund",51:"halki boondabandi",53:"boondabandi",55:"tez boondabandi",56:"barf bari",57:"barf bari",61:"halki barish",63:"barish",65:"tez barish",66:"barf bari",67:"barf bari",71:"halki barf",73:"barf bari",75:"tez barf bari",77:"barf ke kanay",80:"baarish ke chhinte",81:"baarish",82:"bohat tez baarish",85:"barf bari",86:"barf bari",95:"toofan o graaj",96:"toofan o graaj (ballay)",99:"tez toofan o graaj"};
+var CITY_CACHE = {};
+function pad2(n){ return (n < 10 ? "0" : "") + n; }
+async function geoCity(city){
+  var key = String(city || "Hyderabad").toLowerCase();
+  if (CITY_CACHE[key]) return CITY_CACHE[key];
+  var g = null;
+  try {
+    var r = await fetch("https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&name=" + encodeURIComponent(city)).then(function(x){ return x.json(); });
+    g = r && r.results && r.results[0];
+  } catch(e){}
+  var c = g ? { lat: g.latitude, lon: g.longitude, name: g.name + (g.country_code ? ", " + g.country_code : "") }
+            : { lat: 25.396, lon: 68.377, name: "Hyderabad, PK" };
+  CITY_CACHE[key] = c;
+  return c;
+}
+async function fetchWeather(cityName){
+  try {
+    var c = await geoCity(cityName || settings.city || "Hyderabad");
+    var url = "https://api.open-meteo.com/v1/forecast?latitude=" + c.lat + "&longitude=" + c.lon +
+      "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1";
+    var d = await fetch(url).then(function(x){ return x.json(); });
+    var cur = d.current || {};
+    var mx = d.daily && d.daily.temperature_2m_max ? d.daily.temperature_2m_max[0] : null;
+    var mn = d.daily && d.daily.temperature_2m_min ? d.daily.temperature_2m_min[0] : null;
+    return { city: c.name, temp: cur.temperature_2m, desc: WMO[cur.weather_code] || "aam mausam",
+             humidity: cur.relative_humidity_2m, wind: cur.wind_speed_10m, max: mx, min: mn, unit: "C" };
+  } catch(e){ return { error: "weather unavailable", detail: String(e && e.message || e) }; }
+}
+async function fillWeatherChip(){
+  try {
+    var w = await fetchWeather();
+    var el = $("#hudWeather");
+    if (el && w && w.temp != null) el.textContent = w.temp + "°C — " + w.desc;
+  } catch(e){}
+}
+async function morningBrief(){
+  var h = new Date().getHours();
+  var parts = [(h < 12 ? "Good morning" : "Good afternoon") + ", " + settings.name + "!"];
+  try {
+    var w = await fetchWeather();
+    if (w && w.temp != null) parts.push(w.city + " mein abhi " + w.temp + " degree hai — " + w.desc + (w.max != null ? ", aaj high " + w.max + " aur low " + w.min + " degree." : "."));
+  } catch(e){}
+  try {
+    if (NATIVE) { var b = JSON.parse(window.MayaBridge.battery()); parts.push("Battery " + b.level + " percent" + (b.charging ? " par charging hai." : " baqi hai.")); }
+  } catch(e){}
+  if (facts.length) parts.push("Yaaddasht mein " + facts.length + " baatein hain — sab se pehli: " + facts[0] + ".");
+  parts.push("Bataiye, aaj kya plan hai?");
+  reply(parts.join(" "), true);
+}
+
+/* ---------- AI TOOLS (Gemini function calling — Phase 3) ---------- */
+var TOOL_DECLS = [
+  { name: "set_alarm", description: "Phone par REAL alarm lagata hai (24h format). Jab user kahe jaga dena / uthana / alarm.",
+    parameters: { type: "OBJECT", properties: { hour: { type: "INTEGER", description: "0-23" }, minute: { type: "INTEGER", description: "0-59" }, message: { type: "STRING", description: "Alarm ka label" } }, required: ["hour", "minute"] } },
+  { name: "set_timer", description: "System timer (seconds mein) — screen band ho to bhi bajta hai.",
+    parameters: { type: "OBJECT", properties: { seconds: { type: "INTEGER" }, label: { type: "STRING" } }, required: ["seconds"] } },
+  { name: "set_reminder", description: "Reminder — X minutes baad notification + bol kar yaad dilata hai.",
+    parameters: { type: "OBJECT", properties: { minutes: { type: "NUMBER" }, text: { type: "STRING", description: "Kya yaad dilana hai" } }, required: ["minutes", "text"] } },
+  { name: "open_app", description: "App kholta hai. Available: whatsapp, youtube, instagram, telegram, facebook, gmail, maps, play store, google, netflix, spotify",
+    parameters: { type: "OBJECT", properties: { app: { type: "STRING" } }, required: ["app"] } },
+  { name: "play_youtube", description: "YouTube par query search kar ke kholta hai (gaana, video).",
+    parameters: { type: "OBJECT", properties: { query: { type: "STRING" } }, required: ["query"] } },
+  { name: "search_web", description: "Google search kholta hai.",
+    parameters: { type: "OBJECT", properties: { query: { type: "STRING" } }, required: ["query"] } },
+  { name: "call_number", description: "Phone dial karta hai.",
+    parameters: { type: "OBJECT", properties: { number: { type: "STRING" } }, required: ["number"] } },
+  { name: "send_sms", description: "SMS screen kholta hai number ke saath.",
+    parameters: { type: "OBJECT", properties: { number: { type: "STRING" }, text: { type: "STRING" } }, required: ["number"] } },
+  { name: "get_weather", description: "Current mausam lauta deta hai (default sheher settings wala).",
+    parameters: { type: "OBJECT", properties: { city: { type: "STRING" } } } },
+  { name: "battery_status", description: "Phone battery ka status.", parameters: { type: "OBJECT", properties: {} } },
+  { name: "save_memory", description: "Zaroori cheez hamesha ke liye yaad rakhta hai (birthday, appointment, pasand, naam).",
+    parameters: { type: "OBJECT", properties: { fact: { type: "STRING" } }, required: ["fact"] } },
+  { name: "recall_memory", description: "Yaad rakhi hui sab baatein lauta deta hai.", parameters: { type: "OBJECT", properties: {} } },
+  { name: "notify", description: "Turant notification bhejta hai screen par.",
+    parameters: { type: "OBJECT", properties: { title: { type: "STRING" }, message: { type: "STRING" } }, required: ["title", "message"] } }
+];
+async function execTool(name, args){
+  args = args || {};
+  var out;
+  try {
+    if (name === "set_alarm") {
+      var hr = Math.max(0, Math.min(23, parseInt(args.hour, 10) || 0));
+      var mi = Math.max(0, Math.min(59, parseInt(args.minute, 10) || 0));
+      var okA = false;
+      if (NATIVE) { try { okA = window.MayaBridge.setAlarm(hr, mi, String(args.message || "MAYA Alarm")) === true; } catch(e){} }
+      out = okA ? { done: true, how: "system alarm", time: pad2(hr) + ":" + pad2(mi) }
+                : { done: false, note: "Browser mode mein system alarm nahi lag sakta" };
+    } else if (name === "set_timer") {
+      var sec = Math.max(5, Math.min(86400, parseInt(args.seconds, 10) || 60));
+      var lbl = String(args.label || (sec + " sec timer"));
+      var okT = false;
+      if (NATIVE) { try { okT = window.MayaBridge.setTimer(sec, "MAYA: " + lbl) === true; } catch(e){} }
+      if (!okT) startTimer(sec, lbl);
+      out = { done: true, how: okT ? "system timer" : "in-app timer" };
+    } else if (name === "set_reminder") {
+      var mins = Math.max(0.1, Math.min(1440, parseFloat(args.minutes) || 5));
+      startTimer(Math.round(mins * 60), mins + " min reminder", String(args.text || "Reminder"));
+      out = { done: true, note: "app khuli rahe to notification + awaz dono aayenge" };
+    } else if (name === "open_app") {
+      var a = String(args.app || "").toLowerCase().trim();
+      var rec = APPS[a];
+      if (rec) { openURL(rec.s); out = { done: true, app: a }; }
+      else out = { done: false, available: Object.keys(APPS).join(", ") };
+    } else if (name === "play_youtube") {
+      var qy = String(args.query || "").trim();
+      if (qy) { openURL("https://www.youtube.com/results?search_query=" + encodeURIComponent(qy)); out = { done: true }; }
+      else out = { done: false, note: "query khali" };
+    } else if (name === "search_web") {
+      var qs = String(args.query || "").trim();
+      if (qs) { openURL("https://www.google.com/search?q=" + encodeURIComponent(qs)); out = { done: true }; }
+      else out = { done: false };
+    } else if (name === "call_number") {
+      var n1 = String(args.number || "").replace(/[^\d+]/g, "");
+      if (n1.length >= 4) { openURL("tel:" + n1); out = { done: true }; } else out = { done: false, note: "number ghalat" };
+    } else if (name === "send_sms") {
+      var n2 = String(args.number || "").replace(/[^\d+]/g, "");
+      if (n2.length >= 4) { openURL("sms:" + n2); out = { done: true }; } else out = { done: false };
+    } else if (name === "get_weather") {
+      out = await fetchWeather(args.city);
+    } else if (name === "battery_status") {
+      var bat = null;
+      if (NATIVE) { try { bat = JSON.parse(window.MayaBridge.battery()); } catch(e){} }
+      if (!bat && navigator.getBattery) { try { var bb = await navigator.getBattery(); bat = { level: Math.round(bb.level * 100), charging: bb.charging }; } catch(e){} }
+      out = bat || { error: "battery info nahi mili" };
+    } else if (name === "save_memory") {
+      var f = String(args.fact || "").trim().slice(0, 200);
+      if (f) { facts.unshift(f); saveFacts(); out = { saved: true, total: facts.length }; }
+      else out = { saved: false };
+    } else if (name === "recall_memory") {
+      out = { facts: facts.slice(0, 15), total: facts.length };
+    } else if (name === "notify") {
+      var ttl = String(args.title || "MAYA"), msgn = String(args.message || "");
+      var okN = false;
+      if (NATIVE) { try { window.MayaBridge.notify(ttl, msgn); okN = true; } catch(e){} }
+      if (!okN) toast(ttl + ": " + msgn);
+      out = { done: true, how: okN ? "notification" : "toast" };
+    } else {
+      out = { error: "unknown tool: " + name };
+    }
+  } catch (e) { out = { error: String(e && e.message || e) }; }
+  return out;
+}
+
+/* ---------- GEMINI BRAIN (function-calling loop) ---------- */
 async function askGemini(wasVoice){
   thinking = true; setOrb("thinking");
   var models = settings.model === "auto" ? MODELS.slice(modelIdx) : [settings.model];
   var lastErr = "";
-  for (var i = 0; i < models.length; i++) {
-    var url = "https://generativelanguage.googleapis.com/v1beta/models/" + models[i] + ":generateContent?key=" + encodeURIComponent(settings.apikey);
+  for (var mi2 = 0; mi2 < models.length; mi2++) {
+    var url = "https://generativelanguage.googleapis.com/v1beta/models/" + models[mi2] + ":generateContent?key=" + encodeURIComponent(settings.apikey);
     try {
-      var res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      var contents = chatHist.slice(-12).map(function(h){ return { role: h.role, parts: [{ text: h.text }] }; });
+      var out = "";
+      for (var step = 0; step < 3; step++) {
+        var body = {
           systemInstruction: { parts: [{ text: sysPrompt() }] },
-          contents: chatHist.slice(-12).map(function(h){ return { role: h.role, parts: [{ text: h.text }] }; }),
-          generationConfig: { temperature: 0.7, maxOutputTokens: 300 }
-        })
-      });
-      if (res.status === 404) { lastErr = "404"; continue; }
-      var data = await res.json();
-      if (!res.ok) {
-        var errStr = JSON.stringify(data.error || {});
-        if (res.status === 400 && /api key/i.test(errStr)) {
-          thinking = false; setOrb("idle");
-          reply("API key ghalat lag rahi hai — Settings mein dobara check karo.", wasVoice); return;
+          contents: contents,
+          generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
+        };
+        if (step < 2) body.tools = [{ function_declarations: TOOL_DECLS }];
+        var res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        if (res.status === 404) { lastErr = "404"; break; }
+        var data = await res.json();
+        if (!res.ok) {
+          var errStr = JSON.stringify(data.error || {});
+          if (res.status === 400 && /api key/i.test(errStr)) {
+            thinking = false; setOrb("idle");
+            reply("API key ghalat lag rahi hai — Settings mein dobara check karo.", wasVoice); return;
+          }
+          if (res.status === 429) {
+            thinking = false; setOrb("idle");
+            reply("Free limit is waqt khatam ho gayi, " + settings.name + ". Ek minute ruk kar dobara try karo.", wasVoice); return;
+          }
+          lastErr = res.status + ""; break;
         }
-        if (res.status === 429) {
-          thinking = false; setOrb("idle");
-          reply("Free limit is waqt khatam ho gayi, " + settings.name + ". Ek minute ruk kar dobara try karo.", wasVoice); return;
+        var cand = data.candidates && data.candidates[0];
+        var parts = (cand && cand.content && cand.content.parts) || [];
+        var fnCalls = parts.filter(function(p){ return p.functionCall; });
+        if (fnCalls.length && step < 2) {
+          contents.push({ role: "model", parts: parts });
+          for (var fc = 0; fc < fnCalls.length; fc++) {
+            var name = fnCalls[fc].functionCall.name;
+            pushLog("AI TOOL: " + name);
+            var result = await execTool(name, fnCalls[fc].functionCall.args || {});
+            contents.push({ role: "user", parts: [{ functionResponse: { name: name, response: result } }] });
+          }
+          continue;
         }
-        lastErr = res.status + ""; continue;
+        out = parts.map(function(p){ return p.text || ""; }).join("").trim();
+        if (out) break;
+        lastErr = "empty"; break;
       }
-      var parts = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts;
-      var out = parts ? parts.map(function(p){ return p.text || ""; }).join("").trim() : "";
-      if (!out) { lastErr = "empty"; continue; }
-      modelIdx = MODELS.indexOf(models[i]) >= 0 ? MODELS.indexOf(models[i]) : modelIdx;
-      thinking = false; setOrb("idle");
-      pushLog("GEMINI OK (" + models[i] + ")");
-      reply(out, wasVoice);
-      return;
+      if (out) {
+        modelIdx = MODELS.indexOf(models[mi2]) >= 0 ? MODELS.indexOf(models[mi2]) : modelIdx;
+        thinking = false; setOrb("idle");
+        pushLog("GEMINI OK (" + models[mi2] + ")");
+        reply(out, wasVoice);
+        return;
+      }
+      if (lastErr === "404") continue;
+      if (lastErr && lastErr !== "empty") continue;
+      if (lastErr === "empty") continue;
     } catch (err) { lastErr = "network"; }
   }
   thinking = false; setOrb("idle");
@@ -1065,6 +1282,13 @@ var CMDS = [
     { c:"maya, yaad rakhna ki mera birthday 14 august hai", run:true },
     { c:"kya yaad hai?", run:true }
   ]},
+  { g:"🧠 SMART — bas bolo, AI khud karegi (key chahiye)", items:[
+    { c:"maya, kal subah 7 baje jaga dena", run:true },
+    { c:"maya, bhai ko message bhejna hai", run:true },
+    { c:"maya, 10 minute baad yaad dilana paani peena hai", run:true },
+    { c:"mausam kaisa hai", run:true },
+    { c:"good morning maya", run:true }
+  ]},
   { g:"🧠 AI CHAT — kuch bhi poocho (free key ke saath)", items:[
     { c:"aaj karachi ka mausam kaisa hoga?", run:true },
     { c:"mujhe ek chhoti shayari sunao", run:true },
@@ -1111,7 +1335,7 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 
 /* ---------- SETTINGS TAB ---------- */
 function loadSettingsForm(){
-  $("#sName").value = settings.name; $("#sKey").value = settings.apikey;
+  $("#sName").value = settings.name; $("#sCity").value = settings.city || "Hyderabad"; $("#sKey").value = settings.apikey;
   $("#sStt").value = settings.stt; $("#sTts").value = settings.tts;
   $("#sRate").value = settings.rate; $("#rateVal").textContent = Number(settings.rate).toFixed(2);
   $("#sModel").value = settings.model;
@@ -1120,6 +1344,7 @@ function loadSettingsForm(){
 $("#sRate").addEventListener("input", function(){ $("#rateVal").textContent = Number(this.value).toFixed(2); });
 $("#saveSettings").addEventListener("click", function(){
   settings.name = $("#sName").value.trim() || "Sir";
+  settings.city = $("#sCity").value.trim() || "Hyderabad";
   settings.apikey = $("#sKey").value.trim();
   settings.stt = $("#sStt").value; settings.tts = $("#sTts").value;
   settings.rate = parseFloat($("#sRate").value) || 1;
@@ -1143,7 +1368,7 @@ $("#clearChat").addEventListener("click", function(){
 /* ---------- DIAGNOSTICS ---------- */
 $("#diagBtn").addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.1.3 — DOCTOR REPORT");
+  out.push("MAYA v2.2.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));
@@ -1203,6 +1428,8 @@ function paintQuick(){
 
 /* ---------- INIT ---------- */
 renderCmds(""); renderFacts(); loadSettingsForm(); paintQuick(); setOrb("idle");
+fillWeatherChip();
+setInterval(fillWeatherChip, 1800000);
 if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
