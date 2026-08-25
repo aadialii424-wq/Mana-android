@@ -264,7 +264,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.8.0 — TURBO ⚡ • 0-BUDGET</div>
+  <div class="ver">VERSION 2.9.0 — FULL-AUTO PRO 💀 • 0-BUDGET</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -277,7 +277,7 @@
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
-    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.8 ⚡</small></div>
+    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.9 💀</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -323,7 +323,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.8.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.9.0</div></div>
       </div>
 
       <div class="qactions">
@@ -481,6 +481,13 @@
         <button class="save" id="autoSendBtn">☠️ WHATSAPP AUTO-SEND ENABLE KARO</button>
         <div class="note" style="margin-top:6px">Auto-send = Maya WhatsApp mein message <b>khud bhej</b> degi. Enable: Phone Settings → Accessibility → <b>MAYA AutoSend</b> → ON. (Beta — WhatsApp update par badal sakta hai)</div>
         <div class="note" id="asStatus" style="margin-top:4px">Status: checking...</div>
+        <div class="switchrow" style="margin-top:8px"><span>\u{1F4EC} WhatsApp Reader — "naye messages sunao"</span>
+          <label class="switch"><input type="checkbox" id="sNotifOn"><i></i></label></div>
+        <div class="note">Reader: notification access chahiye (enable par settings khulenge \u2192 MAYA ON karo). ON karne par Maya aaye hue messages khud bhi bolti hai.</div>
+        <button class="save" id="readerBtn" style="background:#0891b2">\u{1F4EC} READER PERMISSION ENABLE KARO</button>
+        <div class="note" id="notifStatus" style="margin-top:4px">Status: checking...</div>
+        <div class="switchrow"><span>\u{1F50B} Battery-full alert ("charger nikal do!")</span>
+          <label class="switch"><input type="checkbox" id="sBatAlert"><i></i></label></div>
       </div>
 
       <div class="card">
@@ -494,8 +501,9 @@
         <div class="phase"><span class="st">✅</span><span><b>Phase 7</b> — TABAHI: 7 Voice Artists (neural Urdu/Hindi) + Agent Mode (code runner) + Web Fetch + Smart Diary</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 8</b> — WORKHORSE: File Manager + Web Shark + MEMORY X + Cache</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 8b</b> — TURBO: thinking-off + Groq-instant + live mic meter + partial results</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Phase 9</b> — FULL-AUTO PRO: WhatsApp Reader+Reply, Vision camera, Namaz times, Torch/Volume/Brightness/Lock, Find-my-Maya, Scheduler, AutoSend 2.0</span></div>
       </div>
-      <div class="vtag">MAYA v2.8.0 — TURBO EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v2.9.0 — FULL-AUTO PRO • 0-BUDGET • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -543,7 +551,7 @@ setTimeout(function(){
 window.__mayaJSOK = true;
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
-var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", groqModel:"llama-3.3-70b-versatile", ghKey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"auto", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true };
+var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", groqModel:"llama-3.3-70b-versatile", ghKey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"auto", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true };
 var settings = Object.assign({}, DEFAULTS);
 try {
   var s1 = JSON.parse(localStorage.getItem("maya_settings") || "null");
@@ -620,7 +628,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.8.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.9.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1094,6 +1102,82 @@ function tryLocal(t, wasVoice){
     return { reply:"Timer kitne ka, " + settings.name + "? Bolo: 'paanch minute ka timer lagao'." };
   }
 
+  /* VISION fast path */
+  if (/(ye|yeh|ye wali|is)\s*(dekho|chiz)/.test(q) || /(photo|tasveer)\s*(khincho|khich|lo|lena)/.test(q) || /camera khol/.test(q)) {
+    if (NATIVE) {
+      pendingVisionPrompt = stripped;
+      var okc2 = false;
+      try { okc2 = window.MayaBridge.takePhoto() === true; } catch(e){}
+      return { reply: okc2 ? "Camera khol rahi hoon — photo khincho, main dekh loongi!" : "Camera nahi khul saka." };
+    }
+  }
+  if (/(gallery|gallary)\s*(wali\s*)?(photo|image|tasveer|se)/.test(q) && NATIVE) {
+    pendingVisionPrompt = stripped;
+    try { window.MayaBridge.pickImage(); } catch(e){}
+    return { reply: "Gallery khol rahi hoon — chunko photo." };
+  }
+
+  /* TORCH fast path */
+  if (/(torch|flash\s?light|phone ki light|lighter)/.test(q) && /(jala|on|chalao|bujha|off|band|bandh)/.test(q)) {
+    if (NATIVE) {
+      var onT = /(jala|on|chalao)/.test(q);
+      var okT2 = false;
+      try { okT2 = window.MayaBridge.torch(onT) === true; } catch(e){}
+      return { reply: okT2 ? (onT ? "Light jala di, " + settings.name + "!" : "Light band kar di.") : "Torch nahi chali." };
+    }
+    return { reply: "Torch sirf APK version mein, " + settings.name + "." };
+  }
+
+  /* VOLUME fast path */
+  if (/(volume|awaaz|awaz|sound)/.test(q) && /(full|max|100|tez|loud|kam|low|down|silent|mute|badha|barha)/.test(q) && NATIVE) {
+    var vp = /(kam|low|down|silent|mute)/.test(q) ? 15 : 100;
+    try { window.MayaBridge.volume(vp); } catch(e){}
+    return { reply: vp === 100 ? "Volume full kar diya!" : "Volume kam kar diya." };
+  }
+
+  /* BRIGHTNESS fast path */
+  if (/brightness/.test(q) && /(kam|low|zyada|high|full|max|barha|badha)/.test(q) && NATIVE) {
+    var bp = /(kam|low)/.test(q) ? 25 : 90;
+    var bres = -1;
+    try { bres = parseInt(window.MayaBridge.brightness(bp), 10); } catch(e){}
+    return { reply: bres === -2 ? "Ek dafa permission allow karo, phir dobara bolo." : (bres >= 0 ? "Brightness set kar di." : "Brightness nahi badal saki.") };
+  }
+
+  /* PHONE LOCK */
+  if (/(phone|mobile)\s*(lock|band)\s*(karo|kar do|karna)?/.test(q) && NATIVE) {
+    var lok = false;
+    try { lok = window.MayaBridge.lockScreen() === true; } catch(e){}
+    return { reply: lok ? "Lock kar rahi hoon — milte hain " + settings.name + "!" : "Lock ke liye AutoSend (Accessibility) ON hona chahiye." };
+  }
+
+  /* MAYA KAHAN HAI — phone dhoondo! */
+  if (/(maya\s*kahan|kahan\s*ho|where are you|mujhe dhoondo)/.test(q) && NATIVE) {
+    try { window.MayaBridge.volume(100); } catch(e){}
+    try { window.MayaBridge.vibrate(400); } catch(e){}
+    try {
+      window.MayaBridge.torch(true);
+      setTimeout(function(){ try { window.MayaBridge.torch(false); } catch(e){} }, 400);
+      setTimeout(function(){ try { window.MayaBridge.torch(true); } catch(e){} }, 900);
+      setTimeout(function(){ try { window.MayaBridge.torch(false); } catch(e){} }, 1400);
+    } catch(e){}
+    return { reply: "MAIN YAHAN HOON " + settings.name + "! YAHAN! AWAAZ KA PECHA KARO!" };
+  }
+
+  /* NAMAZ fast path */
+  if (/(namaz|namaaz|prayer)/.test(q) && /(waqt|time|kab|batao|kitne)/.test(q)) {
+    prayerTimes().then(function(p){
+      if (p) reply(settings.name + ", " + (settings.city || "Hyderabad") + " ke namaz ke waqt: Fajr " + p.fajr + ", Zohar " + p.dhuhr + ", Asar " + p.asr + ", Maghrib " + p.maghrib + ", Isha " + p.isha + ".", true);
+      else reply("Namaz ke waqt nahi mile — internet check karo.", true);
+    });
+    return { reply: "" };
+  }
+
+  /* WHATSAPP READER fast path */
+  if (/(nayi?|naye?|sab)?\s*(whatsapp|messages?|khabrein)\s*(sunao|padho|dikhao|batao|kya aaye)/.test(q)) {
+    readMessages(wasVoice);
+    return { reply: "" };
+  }
+
   /* FILES fast path */
   if (/(downloads?|files?)\s*(mein|main|ka|ki)?\s*(kya|what|list|dikhao|kholo|dhoondo)/.test(q) && NATIVE) {
     listFilesAction("downloads").then(function(r){
@@ -1209,7 +1293,7 @@ function sysPrompt(){
     "- Zaroori cheez (birthday, appointment, pasand, kisi ka naam, kaam) -> khud save_memory use karo, 'yaad rakhna' bole na bole\n" +
     "- Yaad karna ho -> recall_memory\n" +
     "Tool use karne ke baad ek chhoti friendly line mein confirm karo. Jo tools se mumkin nahi, wo bRIEFLY bata do.\n" +
-    "RULES: (1) Reply SPOKEN ALOUD hoti hai — 1-3 jumlay, 60 words se kam (detail na maangi jaye to). (2) Plain spoken text: koi markdown, list, asterisk, emoji nahi. (3) User ki language aur script mein jawab: Urdu script -> Urdu script, Roman Urdu -> Roman Urdu, English -> English. (4) Kaam aksar tools se karo, sirf baat mat karo. (4b) Calculations, lists, data-parse, conversion -> run_javascript mein khud code likh kar chalao. (4c) Live info (rates, news, koi bhi site) -> web_fetch. (4d) Roznamcha: diary likhne/parhne ke liye diary_write/diary_search. (5) Kaun ho? MAYA, " + settings.name + " ki personal AI — mohabbat se 0 budget par bani.";
+    "RULES: (1) Reply SPOKEN ALOUD hoti hai — 1-3 jumlay, 60 words se kam (detail na maangi jaye to). (2) Plain spoken text: koi markdown, list, asterisk, emoji nahi. (3) User ki language aur script mein jawab: Urdu script -> Urdu script, Roman Urdu -> Roman Urdu, English -> English. (4) Kaam aksar tools se karo, sirf baat mat karo. (4b) Calculations, lists, data-parse, conversion -> run_javascript mein khud code likh kar chalao. (4c) Live info (rates, news, koi bhi site) -> web_fetch. (4d) Roznamcha: diary_write/diary_search. (4e) Messages: read_messages/reply_message/schedule_message. (4f) Namaz: prayer_times. (4g) Phone: torch_control/volume_control/brightness_control. (5) Kaun ho? MAYA, " + settings.name + " ki personal AI — mohabbat se 0 budget par bani.";
   if (memorySummary) p += "\nLONG-TERM MEMORY SUMMARY (pichli baatein): " + memorySummary;
   if (diary.length) p += "\nRECENT DIARY: " + diary.slice(-3).map(function(d){ return d.text; }).join(" | ").slice(0, 300);
   if (facts.length) p += "\nKNOWN FACTS about " + settings.name + " (natural tor par use karo): " + facts.slice(0, 15).map(function(f){ return "- " + f; }).join(" ");
@@ -1310,6 +1394,20 @@ var TOOL_DECLS = [
     parameters: { type: "OBJECT", properties: { name: { type: "STRING" } }, required: ["name"] } },
   { name: "search_memory", description: "MAYA ki poori yaaddasht mein talash — facts, diary, purani chats.",
     parameters: { type: "OBJECT", properties: { query: { type: "STRING" } }, required: ["query"] } },
+  { name: "prayer_times", description: "Namaz ke waqt lauta deta hai (Fajr se Isha) — settings wale sheher ke liye.",
+    parameters: { type: "OBJECT", properties: {} } },
+  { name: "read_messages", description: "Aaye hue naye WhatsApp/Telegram messages padhta hai.",
+    parameters: { type: "OBJECT", properties: {} } },
+  { name: "reply_message", description: "Kisi ke aaye hue message ka jawab bhehta hai: 'Ali ko reply karo ki main aa raha hoon'.",
+    parameters: { type: "OBJECT", properties: { name: { type: "STRING" }, text: { type: "STRING" } }, required: ["name", "text"] } },
+  { name: "schedule_message", description: "Baad ke waqt par message khud bhejta hai. minutes = kitne minute baad.",
+    parameters: { type: "OBJECT", properties: { minutes: { type: "NUMBER" }, name: { type: "STRING" }, text: { type: "STRING" } }, required: ["minutes", "name", "text"] } },
+  { name: "torch_control", description: "Phone ki torch/light on-off.",
+    parameters: { type: "OBJECT", properties: { on: { type: "BOOLEAN" } }, required: ["on"] } },
+  { name: "volume_control", description: "Phone volume set karo (0-100).",
+    parameters: { type: "OBJECT", properties: { percent: { type: "INTEGER" } }, required: ["percent"] } },
+  { name: "brightness_control", description: "Screen brightness (5-100).",
+    parameters: { type: "OBJECT", properties: { percent: { type: "INTEGER" } }, required: ["percent"] } },
   { name: "get_weather", description: "Current mausam lauta deta hai (default sheher settings wala).",
     parameters: { type: "OBJECT", properties: { city: { type: "STRING" } } } },
   { name: "battery_status", description: "Phone battery ka status.", parameters: { type: "OBJECT", properties: {} } },
@@ -1361,6 +1459,43 @@ async function execTool(name, args){
     } else if (name === "send_sms") {
       var n2 = String(args.number || "").replace(/[^\d+]/g, "");
       if (n2.length >= 4) { openURL("sms:" + n2); out = { done: true }; } else out = { done: false };
+    } else if (name === "prayer_times") {
+      var pt = await prayerTimes();
+      out = pt ? { city: settings.city, timings: pt } : { error: "namaz times nahi mile — internet check" };
+    } else if (name === "read_messages") {
+      if (!NATIVE) out = { error: "sirf APK" };
+      else if (!notifAccessOk()) out = { error: "notification access permission chahiye — user se bolo Settings > Notification Access > MAYA ON kare" };
+      else {
+        try { out = { messages: JSON.parse(window.MayaBridge.notifHistory() || "[]").slice(-8) }; } catch(e){ out = { messages: [] }; }
+      }
+    } else if (name === "reply_message") {
+      if (!NATIVE) out = { done: false, note: "sirf APK" };
+      else {
+        var rok = false;
+        try { rok = window.MayaBridge.notifReply(String(args.name || ""), String(args.text || "")) === 1; } catch(e){}
+        out = rok ? { done: true, how: "whatsapp draft + autosend" } : { done: false, note: "reply nahi bhej saki — contact/accessibility check" };
+      }
+    } else if (name === "schedule_message") {
+      var mins2 = Math.max(1, Math.min(2880, parseFloat(args.minutes) || 10));
+      var id2 = "t" + Date.now();
+      schedTasks[id2] = { kind: "message", name: String(args.name || ""), text: String(args.text || ""), at: Date.now() + mins2 * 60000 };
+      saveSched();
+      var osk = false;
+      if (NATIVE) { try { osk = window.MayaBridge.scheduleTask(id2, Math.round(mins2 * 60000)) === true; } catch(e){} }
+      out = osk ? { done: true, note: mins2 + " min baad WhatsApp draft+autosend khulega (phone unlocked ho to)" }
+                : { done: false, note: "scheduler nahi chala — app khuli rakho" };
+    } else if (name === "torch_control") {
+      var ot1 = false;
+      if (NATIVE) { try { ot1 = window.MayaBridge.torch(args.on === true) === true; } catch(e){} }
+      out = ot1 ? { done: true } : { done: false, note: "torch nahi chali (sirf APK)" };
+    } else if (name === "volume_control") {
+      var ov1 = -1;
+      if (NATIVE) { try { ov1 = parseInt(window.MayaBridge.volume(Math.max(0, Math.min(100, parseInt(args.percent, 10) || 50))), 10); } catch(e){} }
+      out = ov1 >= 0 ? { done: true, level: ov1 } : { done: false };
+    } else if (name === "brightness_control") {
+      var ob1 = -1;
+      if (NATIVE) { try { ob1 = parseInt(window.MayaBridge.brightness(Math.max(5, Math.min(100, parseInt(args.percent, 10) || 50))), 10); } catch(e){} }
+      out = ob1 === -2 ? { done: false, note: "permission dialog khula hai — allow kar ke dobara" } : (ob1 >= 0 ? { done: true, level: ob1 } : { done: false });
     } else if (name === "web_search") {
       out = await webSearch(String(args.query || ""));
     } else if (name === "wiki_search") {
@@ -1702,6 +1837,139 @@ async function askAI(wasVoice){
 
 function openURL(u){ var w = window.open(u, "_blank"); if (!w) { try { location.href = u; } catch(e){} } }
 
+/* ---------- VISION ENGINE (Phase 9): Maya ki aankhein ---------- */
+var pendingVisionPrompt = null;
+async function visionAsk(prompt, b64){
+  var models = await resolveModels();
+  for (var i = 0; i < models.length; i++) {
+    try {
+      var body = {
+        contents: [{ role: "user", parts: [
+          { text: (prompt || "Ye dekho aur mukhtasir batado ye kya hai — Roman Urdu mein.") },
+          { inline_data: { mime_type: "image/jpeg", data: b64 } }
+        ]}],
+        generationConfig: { temperature: 0.4, maxOutputTokens: 200 }
+      };
+      if (/2\.5|gemini-3/.test(models[i])) body.generationConfig.thinkingConfig = { thinkingBudget: 0 };
+      var res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + models[i] + ":generateContent?key=" + encodeURIComponent(settings.apikey), {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body)
+      });
+      if (!res.ok) continue;
+      var data = await res.json();
+      var parts = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
+      var out = parts.map(function(p){ return p.text || ""; }).join("").trim();
+      if (out) { aiState.provider = "VISION"; return out; }
+    } catch (e) {}
+  }
+  return null;
+}
+window.__photoTaken = async function(b64){
+  if (!settings.apikey) { reply("Photo samajhne ke liye Gemini key chahiye, " + settings.name + ".", true); return; }
+  addBubble("ai", "\u{1F4F8} Photo mili — dekh rahi hoon...");
+  pushLog("VISION: analyze...");
+  var out = await visionAsk(pendingVisionPrompt, b64);
+  pendingVisionPrompt = null;
+  reply(out || "Photo samajh nahi aa paayi ya network ka masla hua, " + settings.name + ".", true);
+};
+
+/* ---------- NAMAZ TIMES (Aladhan — free, Pakistan method) ---------- */
+var prayerCache = null;
+async function prayerTimes(){
+  try {
+    var today = new Date().toISOString().slice(0, 10);
+    if (prayerCache && prayerCache.d === today) return prayerCache;
+    var r = await nativeGet("https://api.aladhan.com/v1/timingsByCity?city=" + encodeURIComponent(settings.city || "Hyderabad") + "&country=Pakistan&method=1");
+    if (!r.body) return null;
+    var j = JSON.parse(r.body);
+    var t = j && j.data && j.data.timings;
+    if (!t) return null;
+    var p = { d: today, fajr: t.Fajr, dhuhr: t.Dhuhr, asr: t.Asr, maghrib: t.Maghrib, isha: t.Isha };
+    prayerCache = p;
+    return p;
+  } catch (e) { return null; }
+}
+
+/* ---------- WHATSAPP READER (Phase 9) ---------- */
+function notifAccessOk(){
+  try { return NATIVE && window.MayaBridge.notifEnabled() === true; } catch(e){ return false; }
+}
+function readMessages(wasVoice){
+  if (!NATIVE) { reply("WhatsApp Reader sirf APK mein hai.", wasVoice); return; }
+  if (!notifAccessOk()) {
+    reply(settings.name + ", ek dafa permission deni hai — main settings khol rahi hoon. Notification Access mein MAYA ko ON karo.", wasVoice);
+    try { window.MayaBridge.openNotifAccess(); } catch(e){}
+    return;
+  }
+  try { window.MayaBridge.notifSpeak(settings.notifSpeak === true); } catch(e){}
+  var list = [];
+  try { list = JSON.parse(window.MayaBridge.notifHistory() || "[]"); } catch(e){}
+  try { window.MayaBridge.notifClear(); } catch(e){}
+  if (!list.length) { reply("Koi naya WhatsApp ya Telegram message nahi aaya abhi, " + settings.name + ".", wasVoice); return; }
+  var s = list.slice(-5).map(function(m){ return m.time + " par " + m.from + " ne kaha: " + m.text; }).join(". ");
+  reply("Aakhri " + Math.min(5, list.length) + " messages: " + s + ".", wasVoice);
+}
+window.__notifIncoming = function(from){
+  pushLog("MESSAGE: " + from);
+  toast("\u{1F4EC} " + from + " ka message aaya — 'naye messages sunao' bolo");
+};
+window.__autoSent = function(){
+  pushLog("AUTO-SEND \u2713");
+  addBubble("ai", "\u2713 Bhej diya, " + settings.name + "!");
+  speak("Bhej diya, " + settings.name + "!", lastWasVoice);
+};
+
+/* ---------- SCHEDULER (Phase 9) ---------- */
+var schedTasks = {};
+try { schedTasks = JSON.parse(localStorage.getItem("maya_sched") || "{}"); } catch(e){}
+function saveSched(){ try { localStorage.setItem("maya_sched", JSON.stringify(schedTasks)); } catch(e){} }
+window.__taskDue = function(id){
+  var t = schedTasks[id];
+  if (!t) return;
+  delete schedTasks[id]; saveSched();
+  pushLog("TASK DUE: " + (t.kind || "?"));
+  if (t.kind === "message") {
+    execTool("call_contact", { name: t.name }).then(function(){
+      /* number mil chuka hoga; ab draft+autosend kholein */
+    });
+    // seedha: naam se number dhoondo
+    if (NATIVE) {
+      try {
+        var r = JSON.parse(window.MayaBridge.contactsSearch(t.name));
+        if (r.matches && r.matches.length) {
+          var asend = false;
+          try { asend = window.MayaBridge.accessibilityEnabled() === true; } catch(e){}
+          var ok = window.MayaBridge.openWhatsAppDraft(r.matches[0].number, t.text, asend);
+          if (ok) {
+            try { window.MayaBridge.notify("\u{1F4E4} MAYA", "Scheduled message " + t.name + " ko bheja gaya"); } catch(e){}
+            reply("Waqt ho gaya tha — maine " + r.matches[0].name + " ko message bhej diya: " + t.text, true);
+            return;
+          }
+        }
+        try { window.MayaBridge.notify("\u{1F4E4} MAYA", t.name + " ko bhejna tha: " + t.text); } catch(e){}
+        reply(settings.name + ", message ka waqt ho gaya tha par phone lock tha shayad — notification mein text rakh diya hai: " + t.text, true);
+      } catch(e){}
+    }
+  }
+};
+
+/* ---------- BATTERY FULL ALERT (app khuli ho to) ---------- */
+var _batAlerted = false;
+setInterval(function(){
+  if (!settings.batteryAlert) return;
+  try {
+    var done = function(b){
+      if (b && b.charging && b.level >= 100 && !_batAlerted) {
+        _batAlerted = true;
+        if (NATIVE) { try { window.MayaBridge.notify("\u{1F50B} MAYA", "Charger nikal do " + settings.name + " — battery full!"); } catch(e){} }
+        reply("Charger nikal do " + settings.name + ", battery hundred percent ho gayi hai!", true);
+      }
+      if (b && (!b.charging || b.level < 95)) _batAlerted = false;
+    };
+    if (NATIVE) { done(JSON.parse(window.MayaBridge.battery())); }
+    else if (navigator.getBattery) { navigator.getBattery().then(done); }
+  } catch(e){}
+}, 60000);
+
 /* ---------- WEB SHARK (Phase 8): search + wiki ---------- */
 async function nativeGet(url){
   if (NATIVE && window.MayaBridge.httpGet) {
@@ -1968,7 +2236,7 @@ function loadSettingsForm(){
   $("#sPitch").value = settings.pitch || 1.05; $("#pitchVal").textContent = Number(settings.pitch || 1.05).toFixed(2);
   $("#sVoice").value = settings.voiceName || "";
   $("#sModel").value = settings.model;
-  $("#sVoice").checked = settings.voiceOn; $("#sAuto").checked = settings.autoListen; $("#sWake").checked = !!settings.wakeWord; $("#sTurbo").checked = settings.turbo !== false;
+  $("#sVoice").checked = settings.voiceOn; $("#sAuto").checked = settings.autoListen; $("#sWake").checked = !!settings.wakeWord; $("#sTurbo").checked = settings.turbo !== false; $("#sNotifOn").checked = settings.notifSpeak === true; $("#sBatAlert").checked = settings.batteryAlert !== false;
 }
 $("#sRate").addEventListener("input", function(){ $("#rateVal").textContent = Number(this.value).toFixed(2); });
 $("#saveSettings").addEventListener("click", function(){
@@ -2000,6 +2268,8 @@ $("#saveSettings").addEventListener("click", function(){
   settings.voiceName = $("#sVoice").value;
   settings.model = $("#sModel").value;
   settings.voiceOn = $("#sVoice").checked; settings.autoListen = $("#sAuto").checked; settings.turbo = $("#sTurbo").checked !== false;
+  settings.notifSpeak = $("#sNotifOn").checked; settings.batteryAlert = $("#sBatAlert").checked;
+  if (NATIVE) { try { window.MayaBridge.notifSpeak(settings.notifSpeak); } catch(e){} }
   var wakeOn = $("#sWake").checked;
   if (wakeOn !== !!settings.wakeWord) { settings.wakeWord = wakeOn; setWakeService(wakeOn); } else settings.wakeWord = wakeOn;
   saveSettings(); loadSettingsForm(); setOrb("idle"); paintQuick(); greetMiniRefresh(); renderArtists();
@@ -2018,6 +2288,7 @@ $("#clearChat").addEventListener("click", function(){
 });
 
 function refreshHandsFreeStatus(){
+  var ns = $("#notifStatus"); if (ns && NATIVE) { try { ns.textContent = "Reader: " + (window.MayaBridge.notifEnabled() ? "\u2705 ON" : "OFF — button dabao"); } catch(e){} }
   if (!NATIVE) { var b1 = $("#batStatus"), a1 = $("#asStatus"); if (b1) b1.textContent = "Status: sirf APK mein"; if (a1) a1.textContent = "Status: sirf APK mein"; return; }
   try { $("#batStatus").textContent = "Status: " + (window.MayaBridge.batteryUnrestricted() ? "✅ SHIELDED (unrestricted)" : "⚠️ NOT shielded — button dabao"); } catch(e){}
   try { $("#asStatus").textContent = "Status: " + (window.MayaBridge.accessibilityEnabled() ? "✅ AUTO-SEND ON" : "OFF — button dabao aur MAYA AutoSend ON karo"); } catch(e){}
@@ -2026,6 +2297,11 @@ $("#batShield").addEventListener("click", function(){
   if (!NATIVE) return toast("Sirf APK mein");
   try { window.MayaBridge.requestBatteryUnrestricted(); toast("Prompt aaya — Allow dabao"); setTimeout(refreshHandsFreeStatus, 1500); } catch(e){}
 });
+$("#readerBtn").addEventListener("click", function(){
+  if (!NATIVE) return toast("Sirf APK mein");
+  try { window.MayaBridge.openNotifAccess(); toast("Notification Access \u2192 MAYA ON karo"); setTimeout(refreshHandsFreeStatus, 2500); } catch(e){}
+});
+
 $("#autoSendBtn").addEventListener("click", function(){
   if (!NATIVE) return toast("Sirf APK mein");
   try {
@@ -2173,7 +2449,7 @@ $("#testVoice").addEventListener("click", function(){
 /* ---------- DIAGNOSTICS ---------- */
 $("#diagBtn").addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.8.0 — DOCTOR REPORT");
+  out.push("MAYA v2.9.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));

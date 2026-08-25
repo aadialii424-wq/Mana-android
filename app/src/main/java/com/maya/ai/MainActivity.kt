@@ -8,6 +8,11 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.app.Activity
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
+import android.media.AudioManager
+import android.provider.Settings
 import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.MediaStore
@@ -676,6 +681,177 @@ class MainActivity : AppCompatActivity() {
                 ActivityCompat.requestPermissions(this@MainActivity, perms, REQ_PERMS)
                 true
             } catch (e: Exception) { false }
+        }
+
+        /* ===== QUICK CONTROLS (Phase 9) ===== */
+        @JavascriptInterface
+        fun torch(on: Boolean): Boolean {
+            return try {
+                val cm = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+                val id = cm.cameraIdList.firstOrNull { cid ->
+                    cm.getCameraCharacteristics(cid)
+                        .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
+                } ?: return false
+                cm.setTorchMode(id, on)
+                true
+            } catch (e: Exception) { false }
+        }
+
+        @JavascriptInterface
+        fun volume(pct: Int): Int {
+            return try {
+                val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                val max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                val v = (max * pct.coerceIn(0, 100)) / 100
+                am.setStreamVolume(AudioManager.STREAM_MUSIC, v, 0)
+                v * 100 / max
+            } catch (e: Exception) { -1 }
+        }
+
+        @JavascriptInterface
+        fun brightness(pct: Int): Int {
+            return try {
+                if (!Settings.System.canWrite(this@MainActivity)) {
+                    startActivity(Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS,
+                        Uri.parse("package:" + packageName)))
+                    return -2
+                }
+                val max = 255
+                val b = (max * pct.coerceIn(5, 100)) / 100
+                Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS, b)
+                b * 100 / max
+            } catch (e: Exception) { -1 }
+        }
+
+        @JavascriptInterface
+        fun lockScreen(): Boolean {
+            return try {
+                val svc = com.maya.ai.AutoSendService.instance
+                svc?.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN) == true
+            } catch (e: Exception) { false }
+        }
+
+        @JavascriptInterface
+        fun scheduleTask(id: String, delayMs: Long): Boolean =
+            try { com.maya.ai.ScheduledReceiver.schedule(this@MainActivity, id, delayMs) } catch (e: Exception) { false }
+
+        /* ===== WHATSAPP READER ===== */
+        @JavascriptInterface
+        fun notifHistory(): String =
+            try { com.maya.ai.MayaNotifService.historyJson() } catch (e: Exception) { "[]" }
+
+        @JavascriptInterface
+        fun notifClear() { try { com.maya.ai.MayaNotifService.clear() } catch (e: Exception) {} }
+
+        @JavascriptInterface
+        fun notifSpeak(on: Boolean) { com.maya.ai.MayaNotifService.speakOn = on }
+
+        @JavascriptInterface
+        fun notifEnabled(): Boolean {
+            return try {
+                val s = Settings.Secure.getString(contentResolver, "enabled_notification_listeners") ?: return false
+                s.contains(packageName)
+            } catch (e: Exception) { false }
+        }
+
+        @JavascriptInterface
+        fun openNotifAccess(): Boolean {
+            return try { startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")); true }
+            catch (e: Exception) { false }
+        }
+
+        /* ===== REPLY via notification action (asli auto-reply) ===== */
+        @JavascriptInterface
+        fun notifReply(fromName: String, text: String): Int {
+            return try {
+                val nb = com.maya.ai.MayaNotifService.buffer
+                val target = synchronized(nb) {
+                    nb.toList().lastOrNull { it.optString("from") == fromName && it.optBoolean("canReply") }
+                } ?: return -1
+                // dobara live notification se action lo (posted list se)
+                val sbns = this@MainActivity.let { _ ->
+                    // listener instance ke through activeNotifications nahi milta yahan se,
+                    // to buffer wala pendingIntent nahi hota — is liye reply sirf tab jab
+                    // listener attached ho; hum notif list scan nahi kar sakte activity se.
+                    null
+                }
+                // Simple robust raasta: WhatsApp draft kholo (auto-send ke saath)
+                val okDraft = openWhatsAppDraftLookup(fromName, text)
+                if (okDraft) 1 else 0
+            } catch (e: Exception) { 0 }
+        }
+
+        private fun openWhatsAppDraftLookup(fromName: String, text: String): Boolean {
+            return try {
+                // contact se number dhoondo aur draft + autosend kholo
+                if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.READ_CONTACTS)
+                    == PackageManager.PERMISSION_GRANTED) {
+                    val cur = contentResolver.query(
+                        ContactsContract.Contacts.CONTENT_FILTER_URI.buildUpon().appendPath(fromName).build(),
+                        arrayOf(ContactsContract.Contacts._ID), null, null, null)
+                    var number: String? = null
+                    cur?.use { c ->
+                        if (c.moveToNext()) {
+                            val id = c.getString(0)
+                            val pc = contentResolver.query(
+                                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                                arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER),
+                                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=?",
+                                arrayOf(id), null)
+                            pc?.use { p -> if (p.moveToNext()) number = p.getString(0) }
+                        }
+                    }
+                    if (number != null) {
+                        return openWhatsAppDraft(number!!, text, true)
+                    }
+                }
+                false
+            } catch (e: Exception) { false }
+        }
+
+        /* ===== CAMERA / VISION ===== */
+        @JavascriptInterface
+        fun takePhoto(): Boolean {
+            return try {
+                val dir = cacheDir
+                val f = java.io.File(dir, "maya_photo.jpg")
+                val uri = androidx.core.content.FileProvider.getUriForFile(
+                    this@MainActivity, "$packageName.fileprovider", f)
+                val i = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                    putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri)
+                    addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                startActivityForResult(i, 5001)
+                true
+            } catch (e: Exception) { false }
+        }
+
+        @JavascriptInterface
+        fun pickImage(): Boolean {
+            return try {
+                val i = Intent(Intent.ACTION_GET_CONTENT)
+                i.type = "image/*"
+                startActivityForResult(Intent.createChooser(i, "Photo chunko"), 5002)
+                true
+            } catch (e: Exception) { false }
+        }
+
+        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+            super.onActivityResult(requestCode, resultCode, data)
+            if (resultCode != Activity.RESULT_OK) return
+            try {
+                var bytes: ByteArray? = null
+                if (requestCode == 5001) {
+                    val f = java.io.File(cacheDir, "maya_photo.jpg")
+                    if (f.exists()) bytes = f.readBytes()
+                } else if (requestCode == 5002 && data?.data != null) {
+                    contentResolver.openInputStream(data.data!!)?.use { it.readBytes() }?.let { bytes = it }
+                }
+                if (bytes != null && bytes!!.size in 1..4_000_000) {
+                    val b64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
+                    evalAsync("window.__photoTaken && window.__photoTaken('" + b64 + "')")
+                }
+            } catch (e: Exception) {}
         }
 
         /** Universal HTTP (CORS-proof) — backup brains ke liye */

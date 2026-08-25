@@ -9,16 +9,17 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
 
 /**
- * MAYA AutoSend (Phase 5 — TABAHI LEVEL ☠️)
- * Jab Maya WhatsApp draft kholti hai (aur auto-send ON ho),
- * ye service khud SEND button dhoond kar dabati hai — bilkul hands-free.
- * 
+ * MAYA AutoSend 2.0 (Phase 9)
+ * WhatsApp/Telegram draft khulte hi khud SEND dabati hai + wapas aa jati hai.
  * Enable: Phone Settings → Accessibility → MAYA AutoSend → ON
- * Sirf com.whatsapp package watch karti hai. 45 second window ke andar.
  */
 class AutoSendService : AccessibilityService() {
 
     companion object {
+        @Volatile
+        var instance: AutoSendService? = null
+
+        @JvmStatic
         fun pending(ctx: Context): Boolean {
             return try {
                 val t = ctx.getSharedPreferences("maya", Context.MODE_PRIVATE)
@@ -27,6 +28,7 @@ class AutoSendService : AccessibilityService() {
             } catch (e: Exception) { false }
         }
 
+        @JvmStatic
         fun consume(ctx: Context) {
             try {
                 ctx.getSharedPreferences("maya", Context.MODE_PRIVATE)
@@ -37,27 +39,47 @@ class AutoSendService : AccessibilityService() {
 
     private val handler = Handler(Looper.getMainLooper())
 
+    override fun onServiceConnected() {
+        super.onServiceConnected()
+        instance = this
+    }
+
+    override fun onDestroy() {
+        instance = null
+        super.onDestroy()
+    }
+
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
-        if (event.packageName != "com.whatsapp") return
+        val pkg = event.packageName ?: return
+        if (pkg != "com.whatsapp" && pkg != "com.whatsapp.w4b" && pkg != "com.telegram.messenger") return
         if (!pending(this)) return
         val root = rootInActiveWindow ?: return
         try {
             if (findAndClick(root)) {
                 consume(this)
                 handler.post {
-                    Toast.makeText(this, "MAYA: message bhej diya \u2713", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "MAYA: bhej diya \u2713", Toast.LENGTH_SHORT).show()
+                    try {
+                        MainActivity.instance?.evalAsyncPublic("window.__autoSent && window.__autoSent()")
+                    } catch (x: Exception) {}
+                    handler.postDelayed({
+                        try { performGlobalAction(GLOBAL_ACTION_BACK) } catch (x: Exception) {}
+                    }, 1200)
                 }
             }
         } catch (e: Exception) {}
     }
 
     private fun findAndClick(root: AccessibilityNodeInfo): Boolean {
-        // Layer 1: WhatsApp ke mashhoor send button IDs
+        // Layer 1: mashhoor send button IDs
         val ids = listOf(
             "com.whatsapp:id/send",
             "com.whatsapp:id/send_button",
-            "com.whatsapp:id/entry_send_button"
+            "com.whatsapp:id/entry_send_button",
+            "com.whatsapp.w4b:id/send",
+            "com.whatsapp.w4b:id/send_button",
+            "org.telegram.messenger:id/btn_send"  // Telegram (kabhi kabhi)
         )
         for (id in ids) {
             try {
@@ -66,8 +88,8 @@ class AutoSendService : AccessibilityService() {
                 }
             } catch (e: Exception) {}
         }
-        // Layer 2: "Send" text/content-desc se dhoondo
-        for (label in listOf("Send", "send")) {
+        // Layer 2: text/content-desc multi-language
+        for (label in listOf("Send", "send", "Bhejo", "bhejo", "Bhej", "Enviar")) {
             try {
                 root.findAccessibilityNodeInfosByText(label).forEach { n ->
                     if (clickUp(n)) return true
