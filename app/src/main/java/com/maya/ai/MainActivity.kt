@@ -590,6 +590,45 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) { false }
         }
 
+        /** Universal HTTP (CORS-proof) — backup brains ke liye */
+        @JavascriptInterface
+        fun httpPost(url: String, authHeader: String, body: String): String {
+            return try {
+                val conn = URL(url).openConnection() as HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.doOutput = true
+                conn.connectTimeout = 15000
+                conn.readTimeout = 25000
+                conn.setRequestProperty("Content-Type", "application/json")
+                if (authHeader.isNotEmpty()) conn.setRequestProperty("Authorization", authHeader)
+                conn.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+                val code = conn.responseCode
+                val txt = (if (code in 200..399) conn.inputStream else conn.errorStream)
+                    ?.bufferedReader()?.use { it.readText() } ?: ""
+                conn.disconnect()
+                JSONObject().put("status", code).put("body", txt).toString()
+            } catch (e: Exception) {
+                JSONObject().put("status", 0).put("body", e.message ?: "error").toString()
+            }
+        }
+
+        @JavascriptInterface
+        fun httpGet(url: String, authHeader: String): String {
+            return try {
+                val conn = URL(url).openConnection() as HttpURLConnection
+                conn.connectTimeout = 10000
+                conn.readTimeout = 15000
+                if (authHeader.isNotEmpty()) conn.setRequestProperty("Authorization", authHeader)
+                val code = conn.responseCode
+                val txt = (if (code in 200..399) conn.inputStream else conn.errorStream)
+                    ?.bufferedReader()?.use { it.readText() } ?: ""
+                conn.disconnect()
+                JSONObject().put("status", code).put("body", txt).toString()
+            } catch (e: Exception) {
+                JSONObject().put("status", 0).put("body", e.message ?: "error").toString()
+            }
+        }
+
         /** Persistent prefs (boot autostart wake) */
         @JavascriptInterface
         fun setPref(k: String, v: Boolean) { try { prefs().edit().putBoolean(k, v).apply() } catch (e: Exception) {} }

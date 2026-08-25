@@ -264,7 +264,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.5.0 — NEVER-STOP 🧠 • 0-BUDGET</div>
+  <div class="ver">VERSION 2.5.1 — KEY DOCTOR 🧪 • 0-BUDGET</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -277,7 +277,7 @@
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
-    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.5 🧠</small></div>
+    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.5.1 🧪</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -321,7 +321,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.5.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.5.1</div></div>
       </div>
 
       <div class="qactions">
@@ -407,6 +407,8 @@
         </select>
         <label class="f">GITHUB MODELS PAT (backup #2 — optional)</label>
         <input class="f" id="sGhKey" type="password" placeholder="github_pat_... (GitHub → Settings → Developer settings)">
+        <button class="save" id="testKeys" style="background:#7c3aed">🧪 SAB KEYS TEST KARO</button>
+        <div class="note" id="keyTestOut" style="margin-top:8px; display:none; font-family:ui-monospace,Menlo,monospace; white-space:pre-wrap; color:#a5f3fc; background:rgba(2,8,16,.8); border:1px solid var(--line); border-radius:10px; padding:10px">—</div>
         <div class="note" style="margin-top:8px">Gemini ki limit khatam? Maya <b>khud</b> Groq → GitHub par switch karti hai. Aap ko mehsoos tak nahi hoga. Local commands to hamesha unlimited hain!</div>
       </div>
 
@@ -484,7 +486,7 @@
         <div class="phase"><span class="st">✅</span><span><b>Phase 5</b> — HANDS-FREE: naam se call, WhatsApp draft/auto-send, battery shield, boot start</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 6</b> — NEVER-STOP BRAIN: Gemini pool → Groq → GitHub → auto-queue</span></div>
       </div>
-      <div class="vtag">MAYA v2.5.0 — NEVER-STOP EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v2.5.1 — KEY DOCTOR EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -594,7 +596,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.5.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.5.1 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1370,14 +1372,23 @@ async function openaiCompatChat(provider){
   try {
     var msgs = [{ role: "system", content: sysPrompt() + " NOTE: Ye backup mode hai — phone tools is waqt off hain. Phone ke kaam (open app, alarm, timer) app khud handle karta hai; aap sirf baat cheet aur knowledge ka jawab do, chhota aur doosra." }];
     chatHist.slice(-10).forEach(function(h){ msgs.push({ role: h.role === "model" ? "assistant" : "user", content: h.text }); });
-    var res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
-      body: JSON.stringify({ model: model, messages: msgs, temperature: 0.7, max_tokens: 300 })
-    });
-    if (!res.ok) { pushLog(provider.toUpperCase() + " FAIL (" + res.status + ")"); return null; }
-    var data = await res.json();
-    var out = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    var out = null;
+    var payload = JSON.stringify({ model: model, messages: msgs, temperature: 0.7, max_tokens: 300 });
+    if (NATIVE && window.MayaBridge.httpPost) {
+      var nr = JSON.parse(window.MayaBridge.httpPost(url, "Bearer " + key, payload));
+      if (nr.status < 200 || nr.status >= 300) { pushLog(provider.toUpperCase() + " FAIL (" + nr.status + ")"); return null; }
+      var nd = JSON.parse(nr.body || "{}");
+      out = nd.choices && nd.choices[0] && nd.choices[0].message && nd.choices[0].message.content;
+    } else {
+      var res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
+        body: payload
+      });
+      if (!res.ok) { pushLog(provider.toUpperCase() + " FAIL (" + res.status + ")"); return null; }
+      var data = await res.json();
+      out = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    }
     if (out && String(out).trim()) { aiState.provider = provider === "groq" ? "GROQ" : "GITHUB"; pushLog("BRAIN: " + aiState.provider); return String(out).trim(); }
   } catch (e) {}
   return null;
@@ -1389,11 +1400,7 @@ async function askAI(wasVoice){
   geminiChat.keyErr = false;
   var out = null;
   try { out = await geminiChat(); } catch (e) {}
-  if (geminiChat.keyErr) {
-    thinking = false; setOrb("idle");
-    reply("Gemini key ghalat lag rahi hai, " + settings.name + " — Settings mein check karo ya Groq key daal do.", wasVoice);
-    return;
-  }
+  var keyErr = geminiChat.keyErr;
   if (!out) { try { out = await openaiCompatChat("groq"); } catch (e) {} }
   if (!out) { try { out = await openaiCompatChat("github"); } catch (e) {} }
   if (out) {
@@ -1415,7 +1422,12 @@ async function askAI(wasVoice){
   }
   askAI._retried = false;
   aiState.provider = "—";
-  reply("Sab free brains is waqt busy hain, " + settings.name + ". Ek minute baad bolo — ya local commands use karo: waqt, battery, alarm, timer, open WhatsApp!", wasVoice);
+  if (keyErr && !settings.groqKey && !settings.ghKey)
+    reply("Gemini key ghalat lag rahi hai aur koi backup brain nahi hai, " + settings.name + ". Settings mein BACKUP BRAINS (Groq key) daalo — phir ye masla kabhi nahi hoga!", wasVoice);
+  else if (keyErr)
+    reply("Gemini key ghalat hai lekin backup brain ne kaam kar diya! Settings mein Gemini key theek kar lena.", wasVoice);
+  else
+    reply("Sab free brains is waqt busy hain, " + settings.name + ". Ek minute baad bolo — ya local commands use karo: waqt, battery, alarm, timer, open WhatsApp!", wasVoice);
 }
 
 function openURL(u){ var w = window.open(u, "_blank"); if (!w) { try { location.href = u; } catch(e){} } }
@@ -1600,8 +1612,26 @@ $("#sRate").addEventListener("input", function(){ $("#rateVal").textContent = Nu
 $("#saveSettings").addEventListener("click", function(){
   settings.name = $("#sName").value.trim() || "Sir";
   settings.city = $("#sCity").value.trim() || "Hyderabad";
-  settings.apikey = $("#sKey").value.trim();
-  settings.groqKey = $("#sGqKey").value.trim(); settings.groqModel = $("#sGqModel").value; settings.ghKey = $("#sGhKey").value.trim();
+  /* AUTO KEY-DETECT — galat field mein key? Maya khud theek karegi */
+  var kGem = $("#sKey").value.trim();
+  var kGrq = $("#sGqKey").value.trim();
+  var kGit = $("#sGhKey").value.trim();
+  if (/^gsk_/.test(kGem)) {
+    $("#sGqKey").value = kGem; if (!/^AIza/.test(kGrq)) kGem = settings.apikey || "";
+    $("#sKey").value = kGem;
+    toast("Ye GROQ key thi — Backup Brains field mein rakh di ✓");
+  }
+  if (/^AIza/.test(kGrq)) {
+    $("#sKey").value = kGrq; if (!/^gsk_/.test(kGem)) kGrq = settings.groqKey || "";
+    $("#sGqKey").value = kGrq;
+    toast("Ye GEMINI key thi — Neural Link field mein rakh di ✓");
+  }
+  if (kGem.indexOf("ghp_") === 0 || kGem.indexOf("github_pat_") === 0) { $("#sGhKey").value = kGem; kGem = settings.apikey || ""; $("#sKey").value = kGem; toast("Ye GITHUB key thi — sahi jagah rakh di ✓"); }
+  kGem = $("#sKey").value.trim().replace(/\s+/g, "");
+  kGrq = $("#sGqKey").value.trim().replace(/\s+/g, "");
+  kGit = $("#sGhKey").value.trim().replace(/\s+/g, "");
+  settings.apikey = kGem;
+  settings.groqKey = kGrq; settings.groqModel = $("#sGqModel").value; settings.ghKey = kGit;
   settings.stt = $("#sStt").value; settings.tts = $("#sTts").value;
   settings.rate = parseFloat($("#sRate").value) || 1;
   settings.pitch = parseFloat($("#sPitch").value) || 1.05;
@@ -1641,6 +1671,34 @@ $("#autoSendBtn").addEventListener("click", function(){
     else { window.MayaBridge.openAccessibilitySettings(); toast("MAYA AutoSend dhoond kar ON karo"); }
     setTimeout(refreshHandsFreeStatus, 2500);
   } catch(e){}
+});
+
+async function testKey(kind, key){
+  try {
+    if (kind === "gemini") {
+      var u1 = "https://generativelanguage.googleapis.com/v1beta/models?key=" + encodeURIComponent(key);
+      if (NATIVE && window.MayaBridge.httpGet) { var n1 = JSON.parse(window.MayaBridge.httpGet(u1, "")); return n1.status >= 200 && n1.status < 300; }
+      var r1 = await fetch(u1); return r1.ok;
+    }
+    var u2 = kind === "groq" ? "https://api.groq.com/openai/v1/models" : "https://models.github.ai/inference/models";
+    if (NATIVE && window.MayaBridge.httpGet) { var n2 = JSON.parse(window.MayaBridge.httpGet(u2, "Bearer " + key)); return n2.status >= 200 && n2.status < 300; }
+    var r2 = await fetch(u2, { headers: { "Authorization": "Bearer " + key } });
+    return r2.ok;
+  } catch (e) { return false; }
+}
+$("#testKeys").addEventListener("click", async function(){
+  var out = $("#keyTestOut");
+  out.style.display = "block";
+  out.textContent = "Testing... (internet chahiye, 5-10s)";
+  var kG = $("#sKey").value.trim().replace(/\s+/g, "");
+  var kQ = $("#sGqKey").value.trim().replace(/\s+/g, "");
+  var kH = $("#sGhKey").value.trim().replace(/\s+/g, "");
+  var lines = [];
+  lines.push(kG ? "GEMINI (" + kG.slice(0, 6) + "...): " + (await testKey("gemini", kG) ? "\u2705 VALID" : "\u274C INVALID") : "GEMINI: khali");
+  lines.push(kQ ? "GROQ (" + kQ.slice(0, 6) + "...): " + (await testKey("groq", kQ) ? "\u2705 VALID" : "\u274C INVALID") : "GROQ: khali (optional)");
+  lines.push(kH ? "GITHUB: " + (await testKey("github", kH) ? "\u2705 VALID" : "\u274C INVALID") : "GITHUB: khali (optional)");
+  out.textContent = lines.join("\n");
+  toast("Key test complete");
 });
 
 /* ---------- WAKE WORD SERVICE ---------- */
@@ -1697,7 +1755,7 @@ $("#testVoice").addEventListener("click", function(){
 /* ---------- DIAGNOSTICS ---------- */
 $("#diagBtn").addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.5.0 — DOCTOR REPORT");
+  out.push("MAYA v2.5.1 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));
