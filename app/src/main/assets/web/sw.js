@@ -1,7 +1,7 @@
 /* MAYA Service Worker — v2.0.0 (Phase 1: PWA Pro)
    Cache-first for app shell, network for everything else.
    Gemini API calls (POST, cross-origin) are never cached. */
-const CACHE = 'maya-v2.10.3';
+const CACHE = 'maya-v2.10.4';
 const ASSETS = [
   './',
   './index.html',

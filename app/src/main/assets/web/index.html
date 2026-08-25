@@ -264,7 +264,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.10.3 — STABLE KEY 🔧 • 0-BUDGET
+  <div class="ver">VERSION 2.10.4 — DEBUG EYES 🔧 • 0-BUDGET
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -324,7 +324,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.10.3</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.10.4</div></div>
       </div>
 
       <div class="qactions">
@@ -527,8 +527,16 @@
 </div>
 
 <div id="toast"></div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(8,20,35,.92);border:1px solid rgba(56,189,248,.4);color:#67e8f9;padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v2.10.4 &middot; OPEN</div>
 
 <script>
+/* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
+window.__consoleErr = function(m){
+  try {
+    var b = document.getElementById("dbgBadge");
+    if (b) { b.textContent = "E: " + String(m).slice(0, 60); b.style.color = "#f87171"; }
+  } catch (x) {}
+};
 /* ===== MAYA BOOT-GUARD (Doctor Build) — ye script sab se pehle chalti hai =====
    Agar main app script crash ho jaye to error screen par dikhta hai + FORCE ENTRY milti hai */
 window.__mayaErr = null;
@@ -547,6 +555,7 @@ function __mayaForceEnter(){
     document.getElementById("app").classList.add("on");
   } catch (x) {}
 }
+setTimeout(function(){ try { __mayaForceEnter(); } catch (x) {} }, 4000);
 setTimeout(function(){
   if (!window.__mayaJSOK) {
     var p = document.getElementById("errPanel");
@@ -559,6 +568,7 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
+try { document.getElementById("dbgBadge").textContent = "v2.10.4 ON"; } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
 var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", groqModel:"llama-3.3-70b-versatile", ghKey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"auto", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true };
@@ -638,7 +648,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.10.3 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.10.4 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -2521,7 +2531,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.10.3 — DOCTOR REPORT");
+  out.push("MAYA v2.10.4 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));

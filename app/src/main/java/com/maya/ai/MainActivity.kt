@@ -91,6 +91,16 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
         }
         webView.addJavascriptInterface(MayaBridge(), "MayaBridge")
+        webView.webChromeClient = object : android.webkit.WebChromeClient() {
+            override fun onConsoleMessage(msg: android.webkit.ConsoleMessage): Boolean {
+                val t = msg.message() ?: ""
+                if (msg.messageLevel() == android.webkit.ConsoleMessage.MessageLevel.ERROR && t.isNotBlank()) {
+                    evalAsync("window.__consoleErr && window.__consoleErr('" +
+                        t.replace("\\", "\\\\").replace("'", "\\'").replace("\n", " ").replace("\r", " ") + "')")
+                }
+                return true
+            }
+        }
         webView.webViewClient = MayaWebViewClient()
         setContentView(webView)
         webView.loadUrl("https://$VIRTUAL_HOST/assets/web/index.html")
