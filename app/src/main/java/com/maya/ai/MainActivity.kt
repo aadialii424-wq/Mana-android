@@ -22,6 +22,7 @@ import android.content.pm.PackageManager
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -69,6 +70,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
     private lateinit var assetLoader: WebViewAssetLoader
+    @Volatile private var webViewAlive = false
     private var tts: TextToSpeech? = null
     private var ttsReady = false
     private var recognizer: SpeechRecognizer? = null
@@ -104,6 +106,14 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = MayaWebViewClient()
         setContentView(webView)
         webView.loadUrl("https://$VIRTUAL_HOST/assets/web/index.html")
+        Toast.makeText(this, "MAYA v2.11.1 • nayi build install hui hai", Toast.LENGTH_LONG).show()
+        // WebView zinda hai ya nahi — 8 second baad native check
+        webViewAlive = false
+        android.os.Handler(Looper.getMainLooper()).postDelayed({
+            if (!webViewAlive) {
+                Toast.makeText(this, "WebView load NAHI hua (blank ka wajah) — developer ko batayen", Toast.LENGTH_LONG).show()
+            }
+        }, 8000)
 
         initTts()
         createNotificationChannel()
@@ -875,6 +885,9 @@ class MainActivity : AppCompatActivity() {
                 true
             } catch (e: Exception) { false }
         }
+
+        @JavascriptInterface
+        fun markAlive() { webViewAlive = true }
 
         /** Universal HTTP (CORS-proof) — backup brains ke liye */
         @JavascriptInterface
