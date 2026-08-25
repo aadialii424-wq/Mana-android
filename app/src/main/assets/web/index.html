@@ -264,7 +264,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.9.0 — FULL-AUTO PRO 💀 • 0-BUDGET</div>
+  <div class="ver">VERSION 2.10.0 — ALWAYS-ON 🔝 • 0-BUDGET</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -277,7 +277,7 @@
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
-    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.9 💀</small></div>
+    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.10 🔝</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -297,6 +297,7 @@
         <button class="quick" id="qStop">⏹️ STOP</button>
       </div>
       <div class="chatbar">
+        <button id="camBtn" title="Ye dekho" style="width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--cyan2);font-size:17px;cursor:pointer;flex:none">📸</button>
         <button id="micBtn" title="Bolo">🎤</button>
         <input id="txt" placeholder="Maya se kuch poocho..." autocomplete="off">
         <button id="send">BHEJO</button>
@@ -323,7 +324,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.9.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.10.0</div></div>
       </div>
 
       <div class="qactions">
@@ -447,7 +448,7 @@
           <label class="switch"><input type="checkbox" id="sVoice"><i></i></label></div>
         <div class="switchrow"><span>🔁 Auto-listen (jawab ke baad khud sune)</span>
           <label class="switch"><input type="checkbox" id="sAuto"><i></i></label></div>
-        <div class="switchrow"><span>👂 Wake Word — bolo "Maya" ya "Boss" (background listening)</span>
+        <div class="switchrow"><span>👂 ALWAYS-ON Wake Word — "Maya"/"Boss" (bg + screen off try)</span>
           <label class="switch"><input type="checkbox" id="sWake"><i></i></label></div>
         <div class="note" style="padding-bottom:8px">Wake word ON = Maya hamesha sunti hai (notification mein chalti hai). Battery thori zyada lagti hai. Best: battery optimization MAYA ko "Unrestricted" karo.</div>
       </div>
@@ -478,7 +479,15 @@
         <h3>☠️ HANDS-FREE + AUTO-SEND (Phase 5)</h3>
         <button class="save" id="batShield" style="background:#0891b2">🔋 BATTERY SHIELD (zaroori — 1 dafa)</button>
         <div class="note" id="batStatus" style="margin-top:6px">Status: checking...</div>
-        <button class="save" id="autoSendBtn">☠️ WHATSAPP AUTO-SEND ENABLE KARO</button>
+        <div class="note" style="margin-top:8px"><b>☠️ AUTO-SEND SETUP (3 steps — security error ka pakka ilaaj):</b><br>
+        <b>STEP 1:</b> Neeche button dabao → App info khulegi → upar right <b>⋮ (3 dots)</b> → <b>"Allow restricted settings"</b> dabao (Android 13+ par zaroori — Google ka rule hai)<br>
+        <b>STEP 2:</b> Phir doosra button → Accessibility → <b>MAYA AutoSend</b> → ON<br>
+        <b>STEP 3:</b> Teesra button = status check</div>
+        <button class="save" id="asStep1" style="background:#b45309">1️⃣ APP SETTINGS KHOLO (⋮ → Allow restricted settings)</button>
+        <button class="save" id="asStep2" style="background:#7c3aed">2️⃣ ACCESSIBILITY KHOLO (MAYA AutoSend ON)</button>
+        <button class="save" id="asStep3" style="background:#0891b2">3️⃣ STATUS CHECK KARO</button>
+        <div class="note" id="asWizardStatus" style="margin-top:4px">—</div>
+        <button class="save" id="autoSendBtn">☠️ WHATSAPP AUTO-SEND ENABLE KARO (purana rasta)</button>
         <div class="note" style="margin-top:6px">Auto-send = Maya WhatsApp mein message <b>khud bhej</b> degi. Enable: Phone Settings → Accessibility → <b>MAYA AutoSend</b> → ON. (Beta — WhatsApp update par badal sakta hai)</div>
         <div class="note" id="asStatus" style="margin-top:4px">Status: checking...</div>
         <div class="switchrow" style="margin-top:8px"><span>\u{1F4EC} WhatsApp Reader — "naye messages sunao"</span>
@@ -501,9 +510,10 @@
         <div class="phase"><span class="st">✅</span><span><b>Phase 7</b> — TABAHI: 7 Voice Artists (neural Urdu/Hindi) + Agent Mode (code runner) + Web Fetch + Smart Diary</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 8</b> — WORKHORSE: File Manager + Web Shark + MEMORY X + Cache</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 8b</b> — TURBO: thinking-off + Groq-instant + live mic meter + partial results</span></div>
-        <div class="phase"><span class="st">✅</span><span><b>Phase 9</b> — FULL-AUTO PRO: WhatsApp Reader+Reply, Vision camera, Namaz times, Torch/Volume/Brightness/Lock, Find-my-Maya, Scheduler, AutoSend 2.0</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Phase 9</b> — FULL-AUTO PRO: Reader, Vision, Namaz, Controls, Scheduler, AutoSend 2.0</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Phase 10</b> — ALWAYS-ON: auto-boot, wake service khud app kholta hai, AutoSend 3-step wizard, 1-tap Vision</span></div>
       </div>
-      <div class="vtag">MAYA v2.9.0 — FULL-AUTO PRO • 0-BUDGET • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v2.10.0 — ALWAYS-ON EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -628,13 +638,31 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.9.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.10.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
   } catch(e){}
   try { if (settings.voiceOn) speak("Maya online. Sab systems ready, " + settings.name + ".", false); } catch(e){}
   try { greetMiniRefresh(); } catch(e){}
+  /* ALWAYS-ON: app khula — ab hamesha sunna */
+  try {
+    if (NATIVE && settings.wakeWord) {
+      setTimeout(function(){ try { setWakeService(true); } catch(e){} }, 1200);
+      setTimeout(function(){ if (!listening) startListening(); }, 2200);
+    }
+  } catch(e){}
+  /* Service ne app khola tha? pending command process karo */
+  try {
+    if (NATIVE && window.MayaBridge.getPrefString) {
+      var pw = window.MayaBridge.getPrefString("pending_wake");
+      if (pw) {
+        window.MayaBridge.clearPref("pending_wake");
+        pushLog("WAKE RELAUNCH: pending command");
+        setTimeout(function(){ if (pw.length > 2) handleUserText(pw, true); else startListening(); }, 2500);
+      }
+    }
+  } catch(e){}
 }
 $("#bootBtn").addEventListener("click", function(){
   if (booted) return; booted = true;
@@ -653,8 +681,10 @@ $("#bootBtn").addEventListener("click", function(){
     finishBoot();
   }
 });
-/* Safety net: agar 9 second mein boot na ho to khud andar ghus jao */
+/* Safety net: 9s mein boot na ho to khud andar */
 setTimeout(function(){ if (!booted) { booted = true; finishBoot(); } }, 9000);
+/* ALWAYS-ON: 1.2s mein khud andar — INITIALIZE ki zaroorat nahi! */
+setTimeout(function(){ if (!booted) { booted = true; finishBoot(); } }, 1200);
 function greetMiniRefresh(){
   var h = new Date().getHours();
   var p = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : h < 21 ? "Good evening" : "Good night";
@@ -2297,6 +2327,23 @@ $("#batShield").addEventListener("click", function(){
   if (!NATIVE) return toast("Sirf APK mein");
   try { window.MayaBridge.requestBatteryUnrestricted(); toast("Prompt aaya — Allow dabao"); setTimeout(refreshHandsFreeStatus, 1500); } catch(e){}
 });
+$("#asStep1").addEventListener("click", function(){
+  if (!NATIVE) return toast("Sirf APK mein");
+  try { window.MayaBridge.openAppDetails(); toast("⋮ dabao → Allow restricted settings → phir wapas aao STEP 2 par"); } catch(e){}
+});
+$("#asStep2").addEventListener("click", function(){
+  if (!NATIVE) return toast("Sirf APK mein");
+  try { window.MayaBridge.openAccessibilitySettings(); toast("MAYA AutoSend dhundo → ON karo"); } catch(e){}
+});
+$("#asStep3").addEventListener("click", function(){
+  if (!NATIVE) return toast("Sirf APK mein");
+  var ok = false;
+  try { ok = window.MayaBridge.accessibilityEnabled() === true; } catch(e){}
+  var el = $("#asWizardStatus");
+  el.textContent = ok ? "\u2705 AUTO-SEND READY! Ab bolo: 'bhai ko whatsapp karo...'" : "\u274C Abhi OFF — STEP 1 check karo (⋮ → Allow restricted settings)";
+  toast(ok ? "READY \u2705" : "STEP 1 phir karo");
+});
+
 $("#readerBtn").addEventListener("click", function(){
   if (!NATIVE) return toast("Sirf APK mein");
   try { window.MayaBridge.openNotifAccess(); toast("Notification Access \u2192 MAYA ON karo"); setTimeout(refreshHandsFreeStatus, 2500); } catch(e){}
@@ -2449,7 +2496,7 @@ $("#testVoice").addEventListener("click", function(){
 /* ---------- DIAGNOSTICS ---------- */
 $("#diagBtn").addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.9.0 — DOCTOR REPORT");
+  out.push("MAYA v2.10.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));
@@ -2478,6 +2525,13 @@ $("#diagBtn").addEventListener("click", function(){
 /* ---------- CHAT EVENTS ---------- */
 orb.addEventListener("click", startListening);
 micBtn.addEventListener("click", startListening);
+$("#camBtn").addEventListener("click", function(){
+  if (!NATIVE) return toast("Vision sirf APK mein");
+  pendingVisionPrompt = "Ye photo dekho aur mukhtasir Roman Urdu mein batado ye kya hai, kya likha hai.";
+  var okc = false;
+  try { okc = window.MayaBridge.takePhoto() === true; } catch(e){}
+  if (okc) toast("Camera khol rahi hoon — khincho! 📸");
+});
 $("#send").addEventListener("click", sendText);
 txt.addEventListener("keydown", function(e){ if (e.key === "Enter") sendText(); });
 function sendText(){

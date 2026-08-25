@@ -617,6 +617,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         @JavascriptInterface
+        fun openAppDetails(): Boolean {
+            return try {
+                startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.parse("package:" + packageName)))
+                true
+            } catch (e: Exception) { false }
+        }
+
+        @JavascriptInterface
         fun openAccessibilitySettings(): Boolean {
             return try {
                 startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
@@ -899,6 +908,12 @@ class MainActivity : AppCompatActivity() {
 
         @JavascriptInterface
         fun getPref(k: String): Boolean = try { prefs().getBoolean(k, false) } catch (e: Exception) { false }
+
+        @JavascriptInterface
+        fun getPrefString(k: String): String = try { prefs().getString(k, "") ?: "" } catch (e: Exception) { "" }
+
+        @JavascriptInterface
+        fun clearPref(k: String) { try { prefs().edit().remove(k).apply() } catch (e: Exception) {} }
 
         /** Auto-listen mode — screen jagti rahe */
         @JavascriptInterface

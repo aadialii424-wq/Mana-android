@@ -16,12 +16,15 @@ import android.content.pm.ServiceInfo
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.speech.tts.TextToSpeech
 import androidx.core.app.NotificationCompat
 
 /**
- * MAYA Wake Word Service (Phase 4)
- * Background mein hamesha sunta hai — "Maya" ya "Boss" sunte hi app ko signal deta hai.
- * Notification mein chalta hai (Android rule) — battery-friendly rakha gaya hai.
+ * MAYA Wake Word Service 2.0 (Phase 10: ALWAYS-ON)
+ * - Background mein hamesha sunta hai — "Maya" ya "Boss"
+ * - App khula ho → WebView ke raaste poora flow (chime + listen + kaam)
+ * - App band ho → apna TTS bolta hai + khud app khol deta hai
+ * - Watchdog: har 45s check; har 12 min recognizer refresh
  */
 class WakeWordService : Service() {
 
@@ -43,8 +46,11 @@ class WakeWordService : Service() {
     }
 
     private var sr: SpeechRecognizer? = null
+    private var tts: TextToSpeech? = null
+    private var ttsReady = false
     private val handler = Handler(Looper.getMainLooper())
     @Volatile private var running = false
+    private var watchdogRuns = 0
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -52,41 +58,58 @@ class WakeWordService : Service() {
         super.onCreate()
         running = true
         startAsForeground()
+        try {
+            tts = TextToSpeech(this) { st -> ttsReady = st == TextToSpeech.SUCCESS }
+        } catch (e: Exception) {}
         startLoop()
+        handler.postDelayed(::watchdog, 45000)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_STICKY
 
     override fun onDestroy() {
         running = false
+        handler.removeCallbacksAndMessages(null)
         try { sr?.destroy(); sr = null } catch (e: Exception) {}
+        try { tts?.stop(); tts?.shutdown() } catch (e: Exception) {}
         super.onDestroy()
     }
 
     private fun startAsForeground() {
-        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            nm.createNotificationChannel(
-                NotificationChannel(CHANNEL_ID, "MAYA Wake Word", NotificationManager.IMPORTANCE_LOW)
+        try {
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                nm.createNotificationChannel(
+                    NotificationChannel(CHANNEL_ID, "MAYA Wake Word", NotificationManager.IMPORTANCE_LOW)
+                )
+            }
+            val pi = PendingIntent.getActivity(
+                this, 1, Intent(this, MainActivity::class.java),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-        }
-        val pi = PendingIntent.getActivity(
-            this, 1, Intent(this, MainActivity::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        val notif: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("MAYA sun rahi hai \uD83D\uDC42")
-            .setContentText("Bolo: \u201CMaya\u201D ya \u201CBoss\u201D")
-            .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setContentIntent(pi)
-            .build()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
-        } else {
-            startForeground(NOTIF_ID, notif)
-        }
+            val notif: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle("MAYA hamesha sun rahi hai \uD83D\uDC42")
+                .setContentText("Bolo: \u201CMaya\u201D ya \u201CBoss\u201D — kahin se bhi")
+                .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setContentIntent(pi)
+                .build()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
+            } else {
+                startForeground(NOTIF_ID, notif)
+            }
+        } catch (e: Exception) {}
+    }
+
+    private fun speakLocal(text: String) {
+        try {
+            if (ttsReady) {
+                tts?.language = java.util.Locale.forLanguageTag("ur-PK")
+                tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "wake_" + System.currentTimeMillis())
+            }
+        } catch (e: Exception) {}
     }
 
     private fun evalToApp(js: String) {
@@ -103,6 +126,15 @@ class WakeWordService : Service() {
         .replace("\n", " ")
         .replace("\r", " ")
 
+    private fun launchApp() {
+        try {
+            val i = Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
+            startActivity(i)
+        } catch (e: Exception) {}
+    }
+
     private fun startLoop() {
         handler.post {
             if (!SpeechRecognizer.isRecognitionAvailable(this)) {
@@ -110,40 +142,69 @@ class WakeWordService : Service() {
                 stopSelf()
                 return@post
             }
-            stopRecognizer()
-            sr = SpeechRecognizer.createSpeechRecognizer(this).apply {
-                setRecognitionListener(object : RecognitionListener {
-                    override fun onReadyForSpeech(params: Bundle?) {}
-                    override fun onBeginningOfSpeech() {}
-                    override fun onRmsChanged(rmsdB: Float) {}
-                    override fun onBufferReceived(buffer: ByteArray?) {}
-                    override fun onEndOfSpeech() {}
-                    override fun onError(error: Int) {
-                        when (error) {
-                            6, 7 -> restart(250)          // timeout / no-match — turant dobara
-                            1, 2 -> restart(2000)          // network — thora intezar
-                            4 -> restart(1200)             // busy
-                            8 -> {                        // permission — band
-                                evalToApp("window.__wakeErr && window.__wakeErr(8)")
-                                stopSelf()
-                            }
-                            else -> restart(900)
+            resetRecognizer()
+            actuallyStart()
+        }
+    }
+
+    private fun resetRecognizer() {
+        try { sr?.destroy() } catch (e: Exception) {}
+        sr = SpeechRecognizer.createSpeechRecognizer(this).apply {
+            setRecognitionListener(object : RecognitionListener {
+                override fun onReadyForSpeech(params: Bundle?) {}
+                override fun onBeginningOfSpeech() {}
+                override fun onRmsChanged(rmsdB: Float) {}
+                override fun onBufferReceived(buffer: ByteArray?) {}
+                override fun onEndOfSpeech() {}
+                override fun onError(error: Int) {
+                    when (error) {
+                        6, 7 -> restart(250)
+                        1, 2 -> restart(2000)
+                        4 -> restart(1200)
+                        8 -> {
+                            evalToApp("window.__wakeErr && window.__wakeErr(8)")
+                            stopSelf()
                         }
+                        else -> restart(900)
                     }
-                    override fun onResults(results: Bundle?) {
-                        val text = results
-                            ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                            ?.firstOrNull() ?: ""
-                        if (text.isNotBlank()) {
-                            evalToApp("window.__wakeHeard && window.__wakeHeard('" + jsEsc(text) + "')")
-                        }
-                        restart(200)
-                    }
-                    override fun onPartialResults(partialResults: Bundle?) {}
-                    override fun onEvent(eventType: Int, params: Bundle?) {}
-                })
-                actuallyStart()
-            }
+                }
+                override fun onResults(results: Bundle?) {
+                    val text = results
+                        ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                        ?.firstOrNull() ?: ""
+                    if (text.isNotBlank()) handle(text)
+                    restart(200)
+                }
+                override fun onPartialResults(partialResults: Bundle?) {}
+                override fun onEvent(eventType: Int, params: Bundle?) {}
+            })
+        }
+    }
+
+    /** ASLI DIMAAG: app khula ho to JS ko; band ho to khud kaam karo */
+    private fun handle(text: String) {
+        val t = text.lowercase()
+        val isWake = t.contains("maya") || t.contains("maywa") || t.contains("mya") ||
+            t.contains("maaya") || t.contains("boss") || t.contains("\\u0645\\u0627\\u06CC\\u0627")
+        val appAlive = MainActivity.instance != null
+        if (appAlive) {
+            evalToApp("window.__wakeHeard && window.__wakeHeard('" + jsEsc(text) + "')")
+            return
+        }
+        // App band hai — Maya khud jaag jaye
+        if (isWake) {
+            val cmd = text.replace(Regex("^(hey\\\\s+)?(maya|maywa|mya|maaya|boss)[\\\\s,.!:-]*", RegexOption.IGNORE_CASE), "").trim()
+            speakLocal("Ji Boss! Ek second, main aa rahi hoon.")
+            try {
+                val vib = getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    vib.vibrate(android.os.VibrationEffect.createOneShot(200, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+                else @Suppress("DEPRECATION") vib.vibrate(200)
+            } catch (e: Exception) {}
+            launchApp()
+            // command bhi sath le jao (app init par __pendingWake se process hoga)
+            getSharedPreferences("maya", Context.MODE_PRIVATE).edit()
+                .putString("pending_wake", cmd).apply()
         }
     }
 
@@ -155,10 +216,7 @@ class WakeWordService : Service() {
         if (!running) return
         try {
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                putExtra(
-                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-                )
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-IN")
                 putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
                 putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
@@ -167,7 +225,15 @@ class WakeWordService : Service() {
         } catch (e: Exception) {}
     }
 
-    private fun stopRecognizer() {
-        try { sr?.destroy(); sr = null } catch (e: Exception) {}
+    /** Har 45s zinda hai? har 12 min fresh recognizer */
+    private fun watchdog() {
+        if (!running) return
+        watchdogRuns++
+        if (watchdogRuns >= 16) { // ~12 min
+            watchdogRuns = 0
+            resetRecognizer()
+            actuallyStart()
+        }
+        handler.postDelayed(::watchdog, 45000)
     }
 }
