@@ -11,7 +11,7 @@ class BootReceiver : BroadcastReceiver() {
             try {
                 if (context.getSharedPreferences("maya", Context.MODE_PRIVATE)
                         .getBoolean("wake", false)) {
-                    WakeWordService.start(context)
+                    /* SAFE MODE v2.12.1: boot autostart band */ // WakeWordService.start(context)
                 }
             } catch (e: Exception) {}
         }

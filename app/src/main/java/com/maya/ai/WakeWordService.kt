@@ -192,24 +192,9 @@ class WakeWordService : Service() {
             evalToApp("window.__wakeHeard && window.__wakeHeard('" + jsEsc(text) + "')")
             return
         }
-        // App band hai — Maya khud jaag jaye
-        if (isWake) {
-            /* ECHO-LOOP GUARD: apni hi awaz dobara wake na gine */
-            if (System.currentTimeMillis() - lastWakeAt < 12000) return
-            lastWakeAt = System.currentTimeMillis()
-            val cmd = text.replace(Regex("^(hey\\\\s+)?(maya|maywa|mya|maaya|boss)[\\\\s,.!:-]*", RegexOption.IGNORE_CASE), "").trim()
-            speakLocal("Ji Boss! Ek second, main aa rahi hoon.")
-            try {
-                val vib = getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    vib.vibrate(android.os.VibrationEffect.createOneShot(200, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
-                else @Suppress("DEPRECATION") vib.vibrate(200)
-            } catch (e: Exception) {}
-            launchApp()
-            // command bhi sath le jao (app init par __pendingWake se process hoga)
-            getSharedPreferences("maya", Context.MODE_PRIVATE).edit()
-                .putString("pending_wake", cmd).apply()
-        }
+        /* SAFE MODE (v2.12.1): app band ho to KUCH NA KARO —
+           v2.10.0 ka khud-app-kholna engine hi black screen ka mujrim nikla.
+           App khuli ho to wake word poora kaam karta hai. */
     }
 
     private fun restart(delay: Long) {
