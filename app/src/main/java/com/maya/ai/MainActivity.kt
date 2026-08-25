@@ -8,6 +8,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.content.pm.PackageManager
 import android.os.BatteryManager
 import android.os.Build
@@ -34,6 +35,9 @@ import androidx.core.content.ContextCompat
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewClientCompat
 import org.json.JSONArray
+import java.net.HttpURLConnection
+import java.net.URL
+import java.net.URLEncoder
 import org.json.JSONObject
 import java.util.Locale
 
@@ -51,6 +55,7 @@ class MainActivity : AppCompatActivity() {
         const val VIRTUAL_HOST = "appassets.androidplatform.net"
         const val CHANNEL_ID = "maya_notifications"
         const val REQ_PERMS = 7001
+        var instance: MainActivity? = null
     }
 
     private lateinit var webView: WebView
@@ -63,6 +68,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        instance = this
 
         assetLoader = WebViewAssetLoader.Builder()
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
@@ -86,6 +92,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        instance = null
         stopRecognizer()
         try { tts?.stop(); tts?.shutdown() } catch (e: Exception) {}
         super.onDestroy()
@@ -114,7 +121,22 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(Intent.ACTION_VIEW, url))  // bahar ke links/apps
                 true
             } catch (e: ActivityNotFoundException) {
-                toast("Ye app/link is phone par nahi mila")
+                val fb = when (url.scheme) {
+                    "instagram" -> "https://www.instagram.com/"
+                    "market" -> "https://play.google.com/store/apps"
+                    "fb" -> "https://m.facebook.com/"
+                    "tg" -> "https://web.telegram.org/"
+                    "googlegmail" -> "https://mail.google.com/"
+                    "nflx" -> "https://www.netflix.com/"
+                    "spotify" -> "https://open.spotify.com/"
+                    "whatsapp" -> "https://web.whatsapp.com/"
+                    "geo" -> "https://maps.google.com/"
+                    else -> null
+                }
+                if (fb != null) {
+                    try { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(fb))) }
+                    catch (x: Exception) { toast("Ye app is phone par install nahi hai") }
+                } else toast("Ye app/link is phone par nahi mila")
                 true
             }
         }
@@ -356,6 +378,43 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        /** Wake word service — background mein 'Maya'/'Boss' sunti hai */
+        @JavascriptInterface
+        fun wakeService(start: Boolean): Boolean {
+            return try {
+                if (start) {
+                    if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.RECORD_AUDIO)
+                        != PackageManager.PERMISSION_GRANTED) {
+                        requestMicPermission()
+                        return false
+                    }
+                    WakeWordService.start(this@MainActivity)
+                    true
+                } else {
+                    WakeWordService.stop(this@MainActivity)
+                    true
+                }
+            } catch (e: Exception) { false }
+        }
+
+        /** YouTube: pehle result ka videoId (auto-play ke liye) — native HTTP, no key */
+        @JavascriptInterface
+        fun ytSearch(query: String): String {
+            return try {
+                val url = URL("https://www.youtube.com/results?search_query=" + URLEncoder.encode(query, "UTF-8"))
+                val conn = url.openConnection() as HttpURLConnection
+                conn.connectTimeout = 8000
+                conn.readTimeout = 8000
+                conn.instanceFollowRedirects = true
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36")
+                conn.setRequestProperty("Accept-Language", "en-US,en;q=0.9")
+                val html = conn.inputStream.bufferedReader().use { it.readText() }
+                conn.disconnect()
+                val m = Regex("\"videoId\":\"([a-zA-Z0-9_-]{11})\"").find(html)
+                m?.groupValues?.get(1) ?: ""
+            } catch (e: Exception) { "" }
+        }
+
         /** Auto-listen mode — screen jagti rahe */
         @JavascriptInterface
         fun keepScreenOn(on: Boolean) {
@@ -367,6 +426,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     /* ================= HELPERS ================= */
+
+    fun evalAsyncPublic(js: String) { evalAsync(js) }
 
     private fun evalAsync(js: String) {
         webView.post { webView.evaluateJavascript(js, null) }

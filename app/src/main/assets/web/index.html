@@ -264,7 +264,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.2.1 — VOICE STUDIO • 0-BUDGET</div>
+  <div class="ver">VERSION 2.3.0 — WAKE WORD • 0-BUDGET</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -277,7 +277,7 @@
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
-    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.2.1</small></div>
+    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.3</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -320,6 +320,7 @@
         <div class="chip"><div class="k">◈ ACTIVE TIMERS</div><div class="v" id="hudTimers">0</div></div>
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
+        <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
       </div>
 
       <div class="qactions">
@@ -423,6 +424,9 @@
           <label class="switch"><input type="checkbox" id="sVoice"><i></i></label></div>
         <div class="switchrow"><span>🔁 Auto-listen (jawab ke baad khud sune)</span>
           <label class="switch"><input type="checkbox" id="sAuto"><i></i></label></div>
+        <div class="switchrow"><span>👂 Wake Word — bolo "Maya" ya "Boss" (background listening)</span>
+          <label class="switch"><input type="checkbox" id="sWake"><i></i></label></div>
+        <div class="note" style="padding-bottom:8px">Wake word ON = Maya hamesha sunti hai (notification mein chalti hai). Battery thori zyada lagti hai. Best: battery optimization MAYA ko "Unrestricted" karo.</div>
       </div>
 
       <button class="save" id="saveSettings">💾 SAVE KARO</button>
@@ -452,7 +456,7 @@
         <div class="phase"><span class="st">✅</span><span><b>Phase 1</b> — PWA Pro (multi-tab, HUD, memory, offline)</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 2</b> — Asli APK (native: alarm, timer, notifications, battery)</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 3</b> — Smart Brain (13 AI tools, weather, routines, reminders)</span></div>
-        <div class="phase"><span class="st">⏳</span><span><b>Phase 4</b> — Boss Level (wake word, offline AI)</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Phase 4</b> — Wake Word ("Maya"/"Boss") + YouTube auto-play • offline AI ⏳</span></div>
       </div>
       <div class="vtag">MAYA v2.0.0 • 0-BUDGET BUILD • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
@@ -502,7 +506,7 @@ setTimeout(function(){
 window.__mayaJSOK = true;
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
-var DEFAULTS = { name:"Sir", apikey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", model:"auto", autoListen:false, voiceOn:true };
+var DEFAULTS = { name:"Sir", apikey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", model:"auto", autoListen:false, voiceOn:true, wakeWord:false };
 var settings = Object.assign({}, DEFAULTS);
 try {
   var s1 = JSON.parse(localStorage.getItem("maya_settings") || "null");
@@ -564,7 +568,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.2.1 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.3.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -766,12 +770,12 @@ function addBubble(who, text, link){
 }
 
 /* ---------- MAIN HANDLER ---------- */
-function stripWake(t){ return t.replace(/^\s*(hey\s+)?(maya|maywa|mya|maya\s+ai)[\s,.!:-]*/i, "").trim(); }
+function stripWake(t){ return t.replace(/^\s*(hey\s+)?(maya|maywa|mya|maaya|boss)[\s,.!:-]*/i, "").trim(); }
 function handleUserText(text, wasVoice){
   var stripped = stripWake(text) || text;
   addBubble("user", stripped);
   chatHist.push({ role:"user", text:stripped }); persistChat();
-  var local = tryLocal(stripped);
+  var local = tryLocal(stripped, wasVoice);
   if (local) {
     if (local.reply !== "") {
       if (local.url) setTimeout(function(){ openURL(local.url); }, 900);
@@ -815,24 +819,30 @@ function renderFacts(){
 
 /* ---------- LOCAL COMMANDS ---------- */
 var APPS = {
-  "whatsapp":{s:"whatsapp://send",w:"https://web.whatsapp.com"},
+  "whatsapp":{s:"https://wa.me/",w:"https://web.whatsapp.com"},
   "youtube":{s:"https://m.youtube.com",w:"https://m.youtube.com"},
-  "instagram":{s:"instagram://app",w:"https://www.instagram.com"},
-  "facebook":{s:"fb://",w:"https://m.facebook.com"},
-  "telegram":{s:"tg://",w:"https://web.telegram.org"},
-  "gmail":{s:"googlegmail://",w:"https://mail.google.com"},
-  "maps":{s:"geo:0,0?q=",w:"https://maps.google.com"},
-  "play store":{s:"market://",w:"https://play.google.com"},
-  "playstore":{s:"market://",w:"https://play.google.com"},
+  "instagram":{s:"https://www.instagram.com/",w:"https://www.instagram.com"},
+  "facebook":{s:"https://m.facebook.com/",w:"https://m.facebook.com"},
+  "telegram":{s:"https://web.telegram.org/",w:"https://web.telegram.org"},
+  "gmail":{s:"https://mail.google.com/",w:"https://mail.google.com"},
+  "maps":{s:"https://maps.google.com/",w:"https://maps.google.com"},
+  "play store":{s:"https://play.google.com/store/apps",w:"https://play.google.com"},
+  "playstore":{s:"https://play.google.com/store/apps",w:"https://play.google.com"},
   "google":{s:"https://www.google.com",w:"https://www.google.com"},
   "chrome":{s:"https://www.google.com",w:"https://www.google.com"},
-  "netflix":{s:"nflx://",w:"https://www.netflix.com"},
-  "spotify":{s:"spotify://",w:"https://open.spotify.com"}
+  "netflix":{s:"https://www.netflix.com/",w:"https://www.netflix.com"},
+  "spotify":{s:"https://open.spotify.com/",w:"https://open.spotify.com"},
+  "snapchat":{s:"https://www.snapchat.com/",w:"https://www.snapchat.com"},
+  "twitter":{s:"https://x.com/",w:"https://x.com"},
+  "x":{s:"https://x.com/",w:"https://x.com"},
+  "tiktok":{s:"https://www.tiktok.com/",w:"https://www.tiktok.com"},
+  "daraz":{s:"https://www.daraz.pk/",w:"https://www.daraz.pk"}
 };
 var NUMWORDS = {ek:1,do:2,teen:3,char:4,chaar:4,paanch:5,panch:5,chhe:6,che:6,chah:6,saat:7,aath:8,nau:9,das:10,barah:12,pandrah:15,bees:20,pachees:25,tees:30,chalis:40,pachas:50,sow:100};
 function toNum(w){ return /^\d+$/.test(w) ? parseInt(w,10) : (NUMWORDS[w] || null); }
 
-function tryLocal(t){
+function tryLocal(t, wasVoice){
+  wasVoice = (wasVoice !== false);
   var q = t.toLowerCase().trim();
 
   if (!settings.apikey) {
@@ -855,11 +865,10 @@ function tryLocal(t){
       q.match(/^(.+?)\s*(?:chalao|laga do|play karo)\s*(?:youtube pe|youtube par|on youtube)$/);
   if (m && m[1]) {
     var song = m[1].replace(/^(pe|par|on|karo|play)\s+/,"").trim();
-    if (song) return {
-      reply:song + " YouTube par chala rahi hoon, " + settings.name + ".",
-      url:"https://www.youtube.com/results?search_query=" + encodeURIComponent(song),
-      link:"https://www.youtube.com/results?search_query=" + encodeURIComponent(song)
-    };
+    if (song) {
+      ytPlay(song).then(function(t2){ reply(t2, wasVoice); });
+      return { reply: "" };
+    }
   }
 
   m = q.match(/(?:search|khojo|dhoondo|dhundo)\s*(?:karo|kar do)?\s*(?:for|about|pe|par)?\s*(.+)/);
@@ -1064,7 +1073,7 @@ var TOOL_DECLS = [
     parameters: { type: "OBJECT", properties: { seconds: { type: "INTEGER" }, label: { type: "STRING" } }, required: ["seconds"] } },
   { name: "set_reminder", description: "Reminder — X minutes baad notification + bol kar yaad dilata hai.",
     parameters: { type: "OBJECT", properties: { minutes: { type: "NUMBER" }, text: { type: "STRING", description: "Kya yaad dilana hai" } }, required: ["minutes", "text"] } },
-  { name: "open_app", description: "App kholta hai. Available: whatsapp, youtube, instagram, telegram, facebook, gmail, maps, play store, google, netflix, spotify",
+  { name: "open_app", description: "App kholta hai. Available: whatsapp, youtube, instagram, telegram, facebook, gmail, maps, play store, google, netflix, spotify, snapchat, twitter, tiktok, daraz",
     parameters: { type: "OBJECT", properties: { app: { type: "STRING" } }, required: ["app"] } },
   { name: "play_youtube", description: "YouTube par query search kar ke kholta hai (gaana, video).",
     parameters: { type: "OBJECT", properties: { query: { type: "STRING" } }, required: ["query"] } },
@@ -1112,7 +1121,7 @@ async function execTool(name, args){
       else out = { done: false, available: Object.keys(APPS).join(", ") };
     } else if (name === "play_youtube") {
       var qy = String(args.query || "").trim();
-      if (qy) { openURL("https://www.youtube.com/results?search_query=" + encodeURIComponent(qy)); out = { done: true }; }
+      if (qy) out = { done: true, msg: await ytPlay(qy) };
       else out = { done: false, note: "query khali" };
     } else if (name === "search_web") {
       var qs = String(args.query || "").trim();
@@ -1264,8 +1273,47 @@ async function askGemini(wasVoice){
 
 function openURL(u){ var w = window.open(u, "_blank"); if (!w) { try { location.href = u; } catch(e){} } }
 
+/* ---------- YOUTUBE AUTO-PLAY (pehla result seedha chalega) ---------- */
+async function ytPlay(query){
+  var q = String(query || "").trim();
+  if (!q) return "Kya chalana hai, " + settings.name + "?";
+  pushLog("YT PLAY: " + q);
+  if (NATIVE && window.MayaBridge.ytSearch) {
+    try {
+      var vid = window.MayaBridge.ytSearch(q);
+      if (vid) {
+        openURL("https://www.youtube.com/watch?v=" + vid);
+        return "YouTube par chala rahi hoon, " + settings.name + "!";
+      }
+    } catch(e){}
+  }
+  openURL("https://www.youtube.com/results?search_query=" + encodeURIComponent(q));
+  return "YouTube search khol rahi hoon, " + settings.name + " — pehla wala dabana.";
+}
+
+/* ---------- WAKE WORD ('Maya' / 'Boss') ---------- */
+window.__wakeHeard = function(text){
+  var t = String(text || "").toLowerCase();
+  if (!/(maya|maywa|mya|maaya|boss|\u0645\u0627\u06cc\u0627)/.test(t)) return;
+  var cmd = stripWake(String(text));
+  if (cmd && cmd.replace(/[^a-z\u0600-\u06FF]/gi, "").length >= 2) {
+    if (!listening) handleUserText(cmd, true);
+    return;
+  }
+  chime(880, 0.1); chime(1175, 0.16, 0.12);
+  statusText.textContent = "\u{1F442} BOLIYE, MAYA SUN RAHI HAI...";
+  addBubble("ai", "\u{1F442} Ji " + settings.name + "? Boliye...");
+  if (!listening) setTimeout(startListening, 500);
+};
+window.__wakeErr = function(code){
+  toast("Wake word masla (code " + code + ") — service band kar rahi hoon");
+  settings.wakeWord = false; saveSettings(); paintQuick(); hudRefresh();
+  var sw = $("#sWake"); if (sw) sw.checked = false;
+};
+
 /* ---------- HUD ---------- */
 function hudRefresh(){
+  var wk = $("#hudWake"); if (wk) wk.textContent = settings.wakeWord ? "ON \u{1F442}" : "OFF";
   var ai = $("#hudAI"); if (ai) ai.textContent = settings.apikey ? "ONLINE" : "NO KEY";
   var mem = $("#hudMem"); if (mem) mem.textContent = facts.length + " facts • " + chatHist.length + " msgs";
   var tm = $("#hudTimers"); if (tm) tm.textContent = String(timers.length);
@@ -1376,6 +1424,12 @@ function renderCmds(filter){
 }
 $("#cmdFilter").addEventListener("input", function(){ renderCmds(this.value); });
 
+$("#hudWakeChip").addEventListener("click", function(){
+  settings.wakeWord = !settings.wakeWord; saveSettings();
+  setWakeService(settings.wakeWord);
+  var sw = $("#sWake"); if (sw) sw.checked = settings.wakeWord;
+});
+
 /* HUD quick actions */
 document.querySelectorAll(".qactions button").forEach(function(b){
   b.addEventListener("click", function(){
@@ -1392,7 +1446,7 @@ function loadSettingsForm(){
   $("#sPitch").value = settings.pitch || 1.05; $("#pitchVal").textContent = Number(settings.pitch || 1.05).toFixed(2);
   $("#sVoice").value = settings.voiceName || "";
   $("#sModel").value = settings.model;
-  $("#sVoice").checked = settings.voiceOn; $("#sAuto").checked = settings.autoListen;
+  $("#sVoice").checked = settings.voiceOn; $("#sAuto").checked = settings.autoListen; $("#sWake").checked = !!settings.wakeWord;
 }
 $("#sRate").addEventListener("input", function(){ $("#rateVal").textContent = Number(this.value).toFixed(2); });
 $("#saveSettings").addEventListener("click", function(){
@@ -1405,6 +1459,8 @@ $("#saveSettings").addEventListener("click", function(){
   settings.voiceName = $("#sVoice").value;
   settings.model = $("#sModel").value;
   settings.voiceOn = $("#sVoice").checked; settings.autoListen = $("#sAuto").checked;
+  var wakeOn = $("#sWake").checked;
+  if (wakeOn !== !!settings.wakeWord) { settings.wakeWord = wakeOn; setWakeService(wakeOn); } else settings.wakeWord = wakeOn;
   saveSettings(); loadSettingsForm(); setOrb("idle"); paintQuick(); greetMiniRefresh();
   if (NATIVE) { try { window.MayaBridge.keepScreenOn(settings.autoListen); } catch(e){} }
   if (settings.autoListen) requestWakeLock();
@@ -1419,6 +1475,17 @@ $("#clearChat").addEventListener("click", function(){
   addBubble("ai", "Memory wipe complete, " + settings.name + ". Taaza shuruaat karein?");
   toast("Chat history clear"); hudRefresh();
 });
+
+/* ---------- WAKE WORD SERVICE ---------- */
+function setWakeService(on){
+  if (!NATIVE) { toast("Wake word sirf APK version mein hai"); return; }
+  try {
+    window.MayaBridge.wakeService(on);
+    toast(on ? "\u{1F442} Wake word ON — ab 'Maya' ya 'Boss' bolo" : "Wake word OFF");
+    pushLog("WAKE WORD: " + (on ? "ON" : "OFF"));
+  } catch(e){ toast("Wake service start nahi hui"); }
+  hudRefresh();
+}
 
 /* ---------- VOICE STUDIO (Phase 3.5) ---------- */
 function populateVoiceSelect(){
@@ -1462,7 +1529,7 @@ $("#testVoice").addEventListener("click", function(){
 /* ---------- DIAGNOSTICS ---------- */
 $("#diagBtn").addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.2.1 — DOCTOR REPORT");
+  out.push("MAYA v2.3.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));
@@ -1479,6 +1546,7 @@ $("#diagBtn").addEventListener("click", function(){
     try { out.push("NATIVE BATTERY: " + window.MayaBridge.battery()); } catch (e) { out.push("NATIVE BATTERY: FAIL ❌"); }
     try { window.MayaBridge.speak("Diagnostic test complete, " + settings.name + ".", settings.tts, settings.rate); out.push("NATIVE TTS: TEST BOLA ✅"); } catch (e) { out.push("NATIVE TTS: FAIL ❌"); }
   }
+  out.push("WAKE WORD: " + (settings.wakeWord ? "ON" : "OFF") + (NATIVE ? "" : " (sirf APK)"));
   out.push("TTS VOICES: " + (settings._voiceCount != null ? settings._voiceCount : "0") + " available");
   out.push("LAST ERROR: " + (window.__mayaErr || "koi nahi ✅"));
   var el = $("#diagOut");
@@ -1526,6 +1594,7 @@ renderCmds(""); renderFacts(); loadSettingsForm(); paintQuick(); setOrb("idle");
 fillWeatherChip();
 setInterval(fillWeatherChip, 1800000);
 populateVoiceSelect();
+if (NATIVE && settings.wakeWord) setTimeout(function(){ try { setWakeService(true); } catch(e){} }, 1500);
 if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
