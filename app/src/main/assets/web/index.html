@@ -264,7 +264,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.1.1 — DOCTOR BUILD • 0-BUDGET</div>
+  <div class="ver">VERSION 2.1.2 — HISTORY FIX • 0-BUDGET</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -507,9 +507,9 @@ try { facts = JSON.parse(localStorage.getItem("maya_facts") || "[]"); } catch(e)
 function saveFacts(){ localStorage.setItem("maya_facts", JSON.stringify(facts.slice(0, 30))); renderFacts(); hudRefresh(); }
 
 /* ---------- CHAT HISTORY ---------- */
-var history = [];
-try { history = JSON.parse(localStorage.getItem("maya_chat") || "[]"); } catch(e){}
-function persistChat(){ try { localStorage.setItem("maya_chat", JSON.stringify(history.slice(-100))); } catch(e){} }
+var chatHist = [];
+try { chatHist = JSON.parse(localStorage.getItem("maya_chat") || "[]"); } catch(e){}
+function persistChat(){ try { localStorage.setItem("maya_chat", JSON.stringify(chatHist.slice(-100))); } catch(e){} }
 
 /* ---------- DOM ---------- */
 var $ = function(s){ return document.querySelector(s); };
@@ -554,7 +554,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.1.1 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.1.2 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -659,7 +659,7 @@ function afterSpeak(wasVoice){
 }
 function reply(text, wasVoice, link){
   addBubble("ai", text, link);
-  history.push({ role:"model", text:text }); persistChat();
+  chatHist.push({ role:"model", text:text }); persistChat();
   speak(text, wasVoice);
 }
 
@@ -743,7 +743,7 @@ function stripWake(t){ return t.replace(/^\s*(hey\s+)?(maya|maywa|mya|maya\s+ai)
 function handleUserText(text, wasVoice){
   var stripped = stripWake(text) || text;
   addBubble("user", stripped);
-  history.push({ role:"user", text:stripped }); persistChat();
+  chatHist.push({ role:"user", text:stripped }); persistChat();
   var local = tryLocal(stripped);
   if (local) {
     if (local.reply !== "") {
@@ -946,7 +946,7 @@ async function askGemini(wasVoice){
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: sysPrompt() }] },
-          contents: history.slice(-12).map(function(h){ return { role: h.role, parts: [{ text: h.text }] }; }),
+          contents: chatHist.slice(-12).map(function(h){ return { role: h.role, parts: [{ text: h.text }] }; }),
           generationConfig: { temperature: 0.7, maxOutputTokens: 300 }
         })
       });
@@ -984,7 +984,7 @@ function openURL(u){ var w = window.open(u, "_blank"); if (!w) { try { location.
 /* ---------- HUD ---------- */
 function hudRefresh(){
   var ai = $("#hudAI"); if (ai) ai.textContent = settings.apikey ? "ONLINE" : "NO KEY";
-  var mem = $("#hudMem"); if (mem) mem.textContent = facts.length + " facts • " + history.length + " msgs";
+  var mem = $("#hudMem"); if (mem) mem.textContent = facts.length + " facts • " + chatHist.length + " msgs";
   var tm = $("#hudTimers"); if (tm) tm.textContent = String(timers.length);
   var au = $("#hudAuto"); if (au) au.textContent = settings.autoListen ? "ON" : "OFF";
 }
@@ -1020,9 +1020,11 @@ $("#installBtn").addEventListener("click", async function(){
 });
 
 /* SW registration */
-if ("serviceWorker" in navigator && location.protocol === "https:") {
-  navigator.serviceWorker.register("sw.js").then(function(){ pushLog("SERVICE WORKER: ACTIVE (OFFLINE OK)"); }).catch(function(){});
-}
+try {
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    navigator.serviceWorker.register("sw.js").then(function(){ pushLog("SERVICE WORKER: ACTIVE (OFFLINE OK)"); }).catch(function(){});
+  }
+} catch (e) {}
 
 /* ---------- COMMANDS TAB ---------- */
 var CMDS = [
@@ -1118,7 +1120,7 @@ $("#clearFacts").addEventListener("click", function(){
   facts = []; saveFacts(); toast("Memory bank khali kar diya"); pushLog("MEMORY BANK WIPED");
 });
 $("#clearChat").addEventListener("click", function(){
-  history = []; persistChat(); log.innerHTML = "";
+  chatHist = []; persistChat(); log.innerHTML = "";
   addBubble("ai", "Memory wipe complete, " + settings.name + ". Taaza shuruaat karein?");
   toast("Chat history clear"); hudRefresh();
 });
@@ -1126,7 +1128,7 @@ $("#clearChat").addEventListener("click", function(){
 /* ---------- DIAGNOSTICS ---------- */
 $("#diagBtn").addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.1.1 — DOCTOR REPORT");
+  out.push("MAYA v2.1.2 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));
@@ -1193,8 +1195,8 @@ if (NATIVE) {
   if (sver) sver.textContent = "VERSION 2.1 — NATIVE APK BUILD";
 }
 greetMiniRefresh();
-history.slice(-40).forEach(function(h){ addBubble(h.role === "user" ? "user" : "ai", h.text); });
-if (!history.length) {
+chatHist.slice(-40).forEach(function(h){ addBubble(h.role === "user" ? "user" : "ai", h.text); });
+if (!chatHist.length) {
   addBubble("ai", "MAYA online, " + settings.name + "! 🎉 Main aap ki personal AI hoon — mic 🎤 dabao aur bolo, ya type karo. " +
     (settings.apikey ? "Neural link tayyar hai — kuch bhi poocho!" : "Smart banane ke liye ⚡Commands tab se FREE API key lo. Aur yaad rakhna kaam bhi karta hoon — kaho: 'yaad rakhna ki ...'"));
 }
