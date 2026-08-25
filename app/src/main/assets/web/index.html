@@ -264,7 +264,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.4.0 — HANDS-FREE ☠️ • 0-BUDGET</div>
+  <div class="ver">VERSION 2.5.0 — NEVER-STOP 🧠 • 0-BUDGET</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -277,7 +277,7 @@
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
-    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.4 ☠️</small></div>
+    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.5 🧠</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -321,7 +321,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.4.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.5.0</div></div>
       </div>
 
       <div class="qactions">
@@ -397,6 +397,20 @@
       </div>
 
       <div class="card">
+        <h3>🧠 BACKUP BRAINS — Never-Stop System</h3>
+        <label class="f">GROQ API KEY (FREE backup #1 — console.groq.com → Google login)</label>
+        <input class="f" id="sGqKey" type="password" placeholder="gsk_... se shuru hoti hai">
+        <label class="f">GROQ MODEL</label>
+        <select class="f" id="sGqModel">
+          <option value="llama-3.3-70b-versatile">llama-3.3-70b (smart)</option>
+          <option value="llama-3.1-8b-instant">llama-3.1-8b (turant)</option>
+        </select>
+        <label class="f">GITHUB MODELS PAT (backup #2 — optional)</label>
+        <input class="f" id="sGhKey" type="password" placeholder="github_pat_... (GitHub → Settings → Developer settings)">
+        <div class="note" style="margin-top:8px">Gemini ki limit khatam? Maya <b>khud</b> Groq → GitHub par switch karti hai. Aap ko mehsoos tak nahi hoga. Local commands to hamesha unlimited hain!</div>
+      </div>
+
+      <div class="card">
         <h3>🗣️ VOICE & LANGUAGE</h3>
         <label class="f">AAP KI BOLI (Speech-to-Text)</label>
         <select class="f" id="sStt">
@@ -468,8 +482,9 @@
         <div class="phase"><span class="st">✅</span><span><b>Phase 3</b> — Smart Brain (13 AI tools, weather, routines, reminders)</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 4</b> — Wake Word ("Maya"/"Boss") + YouTube auto-play</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 5</b> — HANDS-FREE: naam se call, WhatsApp draft/auto-send, battery shield, boot start</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Phase 6</b> — NEVER-STOP BRAIN: Gemini pool → Groq → GitHub → auto-queue</span></div>
       </div>
-      <div class="vtag">MAYA v2.4.0 — HANDS-FREE EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v2.5.0 — NEVER-STOP EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -517,7 +532,7 @@ setTimeout(function(){
 window.__mayaJSOK = true;
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
-var DEFAULTS = { name:"Sir", apikey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", model:"auto", autoListen:false, voiceOn:true, wakeWord:false };
+var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", groqModel:"llama-3.3-70b-versatile", ghKey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", model:"auto", autoListen:false, voiceOn:true, wakeWord:false };
 var settings = Object.assign({}, DEFAULTS);
 try {
   var s1 = JSON.parse(localStorage.getItem("maya_settings") || "null");
@@ -579,7 +594,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.4.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.5.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -795,11 +810,13 @@ function handleUserText(text, wasVoice){
     }
     return;
   }
-  if (!settings.apikey) {
-    reply("Ye sawal ke liye mujhe dimaag chahiye, " + settings.name + " — ⚡ Commands tab mein guide se FREE Gemini key lo (2 minute ka kaam). Local commands abhi bhi chal rahe hain!", wasVoice);
+  var st = trySmalltalk(stripped);
+  if (st) { reply(st, wasVoice); return; }
+  if (!settings.apikey && !settings.groqKey && !settings.ghKey) {
+    reply("Ye sawal ke liye mujhe dimaag chahiye, " + settings.name + " — Settings (⚙️) mein FREE Gemini ya Groq key daalo (2 minute ka kaam). Local commands chal rahe hain!", wasVoice);
     return;
   }
-  askGemini(wasVoice);
+  askAI(wasVoice);
 }
 
 /* ---------- MEMORY ---------- */
@@ -1225,7 +1242,22 @@ async function execTool(name, args){
   return out;
 }
 
-/* ---------- GEMINI BRAIN v2 (self-repairing models + tools) ---------- */
+/* =========== NEVER-STOP BRAIN (Phase 6: Gemini pool -> Groq -> GitHub -> queue) =========== */
+var aiState = { provider: "—" };
+var modelCooldowns = {};
+var lastRetryDelay = 45000;
+
+function trySmalltalk(q){
+  var t = String(q).toLowerCase().trim();
+  if (/^(salam|assalam[ -]?o[ -]?alaikum|asalam[ -]?o[ -]?alaikum|aoa|hello|hi|hey|yo)\??$/.test(t))
+    return "Wa alaikum assalam, " + settings.name + "! Hukum karo.";
+  if (/^(hello maya|hi maya|hey maya|salam maya)\??$/.test(t)) return "Ji " + settings.name + "? Boliye!";
+  if (/^(thanks|thank you|shukriya|jazakallah|shukria)\b[.!]?$/.test(t)) return "Hamesha hazir, " + settings.name + "!";
+  if (/^(kaise ho|kya haal hai|how are you|kaise ho aap)\??$/.test(t)) return "Main bilkul tayyar hoon, " + settings.name + "! Aap sunao, kaise ho?";
+  if (/^(ok|theek hai|acha|alright|hmm)\??$/.test(t)) return "Ji " + settings.name + ".";
+  return null;
+}
+
 var MODEL_CACHE = null;
 try { MODEL_CACHE = JSON.parse(localStorage.getItem("maya_models") || "null"); } catch(e){}
 function saveModelCache(){ try { localStorage.setItem("maya_models", JSON.stringify(MODEL_CACHE)); } catch(e){} }
@@ -1259,12 +1291,16 @@ async function resolveModels(){
     return MODELS;
   }
 }
-async function askGemini(wasVoice){
-  thinking = true; setOrb("thinking");
+
+/* --- Provider 1: Gemini pool (tools ke saath) --- */
+async function geminiChat(){
+  if (!settings.apikey) return null;
   var models = await resolveModels();
-  var lastErr = "";
-  for (var mi2 = 0; mi2 < models.length; mi2++) {
-    var url = "https://generativelanguage.googleapis.com/v1beta/models/" + models[mi2] + ":generateContent?key=" + encodeURIComponent(settings.apikey);
+  var any404 = false;
+  for (var i = 0; i < models.length; i++) {
+    var m = models[i];
+    if (Date.now() < (modelCooldowns[m] || 0)) continue;   // is model ka cooldown chal raha hai
+    var url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + encodeURIComponent(settings.apikey);
     try {
       var contents = chatHist.slice(-12).map(function(h){ return { role: h.role, parts: [{ text: h.text }] }; });
       var out = "";
@@ -1275,24 +1311,22 @@ async function askGemini(wasVoice){
           generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
         };
         if (step < 2) body.tools = [{ functionDeclarations: TOOL_DECLS }];
-        var res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body)
-        });
-        if (res.status === 404) { lastErr = "404"; break; }
+        var res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+        if (res.status === 429) {
+          var e429 = await res.json().catch ? await res.clone().json().catch(function(){ return {}; }) : {};
+          var dmatch = /"(\d+)s"/.exec(JSON.stringify(e429));
+          var delay = (dmatch ? parseInt(dmatch[1], 10) : 50) * 1000;
+          modelCooldowns[m] = Date.now() + delay;
+          lastRetryDelay = delay;
+          pushLog("COOLDOWN: " + m + " (" + (dmatch ? dmatch[1] : 50) + "s)");
+          break;   // agla model try karo
+        }
+        if (res.status === 404) { any404 = true; break; }
         var data = await res.json();
         if (!res.ok) {
           var errStr = JSON.stringify(data.error || {});
-          if (res.status === 400 && /api key/i.test(errStr)) {
-            thinking = false; setOrb("idle");
-            reply("API key ghalat lag rahi hai — Settings mein dobara check karo.", wasVoice); return;
-          }
-          if (res.status === 429) {
-            thinking = false; setOrb("idle");
-            reply("Free limit is waqt khatam ho gayi, " + settings.name + ". Ek minute ruk kar dobara try karo.", wasVoice); return;
-          }
-          lastErr = res.status + ""; break;
+          if (res.status === 400 && /api key/i.test(errStr)) { geminiChat.keyErr = true; return null; }
+          break;
         }
         var cand = data.candidates && data.candidates[0];
         var parts = (cand && cand.content && cand.content.parts) || [];
@@ -1308,33 +1342,80 @@ async function askGemini(wasVoice){
           continue;
         }
         out = parts.map(function(p){ return p.text || ""; }).join("").trim();
-        if (out) break;
-        lastErr = "empty"; break;
+        if (out) { aiState.provider = "GEMINI"; return out; }
+        break;
       }
-      if (out) {
-        modelIdx = 0;
-        thinking = false; setOrb("idle");
-        pushLog("GEMINI OK (" + models[mi2] + ")");
-        reply(out, wasVoice);
-        return;
-      }
-      if (lastErr === "404" || lastErr === "empty") continue;
-      if (lastErr) continue;
-    } catch (err) { lastErr = "network"; }
+    } catch (err) { /* agla model */ }
   }
-  /* Self-repair: sab 404 hue → model list refresh kar ke ek aur koshish */
-  if (lastErr === "404" && !askGemini._retried) {
-    askGemini._retried = true;
-    MODEL_CACHE = null; saveModelCache();
+  if (any404 && !geminiChat._r404) { geminiChat._r404 = true; MODEL_CACHE = null; saveModelCache(); return await geminiChat(); }
+  geminiChat._r404 = false;
+  return null;
+}
+geminiChat.keyErr = false;
+
+/* --- Provider 2 & 3: OpenAI-compatible (Groq / GitHub Models) — plain chat --- */
+async function openaiCompatChat(provider){
+  var url, key, model;
+  if (provider === "groq") {
+    if (!settings.groqKey) return null;
+    url = "https://api.groq.com/openai/v1/chat/completions";
+    key = settings.groqKey;
+    model = settings.groqModel || "llama-3.3-70b-versatile";
+  } else {
+    if (!settings.ghKey) return null;
+    url = "https://models.github.ai/inference/chat/completions";
+    key = settings.ghKey;
+    model = "openai/gpt-4o-mini";
+  }
+  try {
+    var msgs = [{ role: "system", content: sysPrompt() + " NOTE: Ye backup mode hai — phone tools is waqt off hain. Phone ke kaam (open app, alarm, timer) app khud handle karta hai; aap sirf baat cheet aur knowledge ka jawab do, chhota aur doosra." }];
+    chatHist.slice(-10).forEach(function(h){ msgs.push({ role: h.role === "model" ? "assistant" : "user", content: h.text }); });
+    var res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
+      body: JSON.stringify({ model: model, messages: msgs, temperature: 0.7, max_tokens: 300 })
+    });
+    if (!res.ok) { pushLog(provider.toUpperCase() + " FAIL (" + res.status + ")"); return null; }
+    var data = await res.json();
+    var out = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    if (out && String(out).trim()) { aiState.provider = provider === "groq" ? "GROQ" : "GITHUB"; pushLog("BRAIN: " + aiState.provider); return String(out).trim(); }
+  } catch (e) {}
+  return null;
+}
+
+/* --- Main: kabhi rukne wala nahi --- */
+async function askAI(wasVoice){
+  thinking = true; setOrb("thinking");
+  geminiChat.keyErr = false;
+  var out = null;
+  try { out = await geminiChat(); } catch (e) {}
+  if (geminiChat.keyErr) {
     thinking = false; setOrb("idle");
-    pushLog("MODEL LIST REFRESH — retry");
-    return askGemini(wasVoice);
+    reply("Gemini key ghalat lag rahi hai, " + settings.name + " — Settings mein check karo ya Groq key daal do.", wasVoice);
+    return;
   }
-  askGemini._retried = false;
+  if (!out) { try { out = await openaiCompatChat("groq"); } catch (e) {} }
+  if (!out) { try { out = await openaiCompatChat("github"); } catch (e) {} }
+  if (out) {
+    askAI._retried = false;
+    thinking = false; setOrb("idle");
+    reply(out, wasVoice);
+    return;
+  }
   thinking = false; setOrb("idle");
-  if (lastErr === "network") reply("Internet se raabta nahi ho pa raha, " + settings.name + " — connection check karo. Local commands phir bhi chalte hain!", wasVoice);
-  else if (lastErr === "404") reply("Koi model available nahi mila, " + settings.name + ". Settings mein model 'Auto' par hai? AI Studio se key ki models check karo.", wasVoice);
-  else reply("Technical masla aa gaya (" + lastErr + "). Thodi der baad try karo ya Settings mein model Auto rakho.", wasVoice);
+  /* Sab busy — khud retry schedule karo */
+  if (!askAI._retried) {
+    askAI._retried = true;
+    var wait = lastRetryDelay || 45000;
+    aiState.provider = "COOLDOWN";
+    toast("Sab brains thake hue — " + Math.round(wait / 1000) + "s baad KHUD dobara try");
+    pushLog("ALL BRAINS BUSY — auto retry " + Math.round(wait / 1000) + "s");
+    setTimeout(function(){ askAI(wasVoice); }, wait);
+    return;
+  }
+  askAI._retried = false;
+  aiState.provider = "—";
+  reply("Sab free brains is waqt busy hain, " + settings.name + ". Ek minute baad bolo — ya local commands use karo: waqt, battery, alarm, timer, open WhatsApp!", wasVoice);
 }
 
 function openURL(u){ var w = window.open(u, "_blank"); if (!w) { try { location.href = u; } catch(e){} } }
@@ -1380,7 +1461,7 @@ window.__wakeErr = function(code){
 /* ---------- HUD ---------- */
 function hudRefresh(){
   var wk = $("#hudWake"); if (wk) wk.textContent = settings.wakeWord ? "ON \u{1F442}" : "OFF";
-  var ai = $("#hudAI"); if (ai) ai.textContent = settings.apikey ? "ONLINE" : "NO KEY";
+  var ai = $("#hudAI"); if (ai) ai.textContent = (settings.apikey || settings.groqKey || settings.ghKey) ? aiState.provider : "NO KEY";
   var mem = $("#hudMem"); if (mem) mem.textContent = facts.length + " facts • " + chatHist.length + " msgs";
   var tm = $("#hudTimers"); if (tm) tm.textContent = String(timers.length);
   var au = $("#hudAuto"); if (au) au.textContent = settings.autoListen ? "ON" : "OFF";
@@ -1507,6 +1588,7 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 /* ---------- SETTINGS TAB ---------- */
 function loadSettingsForm(){
   $("#sName").value = settings.name; $("#sCity").value = settings.city || "Hyderabad"; $("#sKey").value = settings.apikey;
+  $("#sGqKey").value = settings.groqKey; $("#sGqModel").value = settings.groqModel || "llama-3.3-70b-versatile"; $("#sGhKey").value = settings.ghKey;
   $("#sStt").value = settings.stt; $("#sTts").value = settings.tts;
   $("#sRate").value = settings.rate; $("#rateVal").textContent = Number(settings.rate).toFixed(2);
   $("#sPitch").value = settings.pitch || 1.05; $("#pitchVal").textContent = Number(settings.pitch || 1.05).toFixed(2);
@@ -1519,6 +1601,7 @@ $("#saveSettings").addEventListener("click", function(){
   settings.name = $("#sName").value.trim() || "Sir";
   settings.city = $("#sCity").value.trim() || "Hyderabad";
   settings.apikey = $("#sKey").value.trim();
+  settings.groqKey = $("#sGqKey").value.trim(); settings.groqModel = $("#sGqModel").value; settings.ghKey = $("#sGhKey").value.trim();
   settings.stt = $("#sStt").value; settings.tts = $("#sTts").value;
   settings.rate = parseFloat($("#sRate").value) || 1;
   settings.pitch = parseFloat($("#sPitch").value) || 1.05;
@@ -1614,7 +1697,7 @@ $("#testVoice").addEventListener("click", function(){
 /* ---------- DIAGNOSTICS ---------- */
 $("#diagBtn").addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.4.0 — DOCTOR REPORT");
+  out.push("MAYA v2.5.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));
