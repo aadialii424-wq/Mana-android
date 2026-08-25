@@ -36,6 +36,8 @@
     transition:opacity .6s; text-align:center; padding:20px;
   }
   #splash.gone{opacity:0; pointer-events:none}
+  @keyframes splashAutoFade{to{opacity:0; pointer-events:none; visibility:hidden}}
+  #splash{animation:splashAutoFade .6s ease 3.2s forwards}
   .sring{position:relative; width:150px; height:150px}
   .sring div{
     position:absolute; border-radius:50%; border:1.5px solid rgba(34,211,238,.45);
@@ -61,7 +63,7 @@
   .bootline{font-size:11px; color:var(--dim); letter-spacing:2px; min-height:14px}
 
   /* ============ APP FRAME ============ */
-  #app{display:none; flex-direction:column; height:100%}
+  #app{display:flex; flex-direction:column; height:100%}
   #app.on{display:flex}
   header{
     display:flex; align-items:center; gap:10px; padding:10px 14px; flex:none;
@@ -264,7 +266,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.11.1 — SKILLS 🔧 • 0-BUDGET
+  <div class="ver">VERSION 2.12.0 — UNBREAKABLE 🔧 • 0-BUDGET
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -324,7 +326,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.11.1</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.12.0</div></div>
       </div>
 
       <div class="qactions">
@@ -534,7 +536,7 @@
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(8,20,35,.92);border:1px solid rgba(56,189,248,.4);color:#67e8f9;padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v2.11.1 &middot; OPEN</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(8,20,35,.92);border:1px solid rgba(56,189,248,.4);color:#67e8f9;padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v2.12.0 &middot; OPEN</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -566,7 +568,7 @@ setTimeout(function(){ try { __mayaForceEnter(); } catch (x) {} }, 4000);
 setTimeout(function(){
   if (!window.__mayaJSOK) {
     var p = document.getElementById("errPanel");
-    if (p) { p.style.display = "block"; var t = document.getElementById("errText"); if (t) t.textContent = window.__mayaErr || "App ka main script load nahi hua (parse/early crash)"; }
+    if (p) { p.style.display = "block"; var t = document.getElementById("errText"); if (t) t.textContent = window.__mayaErr || "App ka main script load nahi hua. 99% wajah: PURANA WebView. Hal: Play Store kholo -> 'Android System WebView' update karo -> phone restart -> MAYA kholo"; }
   }
 }, 7000);
 </script>
@@ -575,7 +577,7 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v2.11.1 ON \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v2.12.0 ON \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
@@ -602,7 +604,7 @@ try { memorySummary = localStorage.getItem("maya_summary") || ""; } catch(e){}
 var _fileIndex = [];
 var replyCache = {};
 try { replyCache = JSON.parse(localStorage.getItem("maya_cache") || "{}"); } catch(e){}
-function cacheKey(t){ return String(t).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim(); }
+function cacheKey(t){ return String(t).toLowerCase().replace(/[^a-z0-9\u0600-\u06FF\u0900-\u097F ]/g, "").replace(/\s+/g, " ").trim(); }
 var ACTION_WORDS = /(alarm|timer|reminder|call|phone|whatsapp|message|sms|open|khol|chalao|play|baja|download|file|pdf|photo|screenshot|search|khojo|dhoond|wiki|wikipedia|fetch|yaad rakh|diary|battery|mausam|weather|share|youtube|google|average|nikalo|calculate|convert|kitna|kitne)/i;
 function needsTools(t){ return ACTION_WORDS.test(t); }
 
@@ -656,7 +658,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.11.1 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.12.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -2602,7 +2604,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.11.1 — DOCTOR REPORT");
+  out.push("MAYA v2.12.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));
