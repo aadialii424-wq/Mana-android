@@ -264,7 +264,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.6.0 — TABAHI + VOICES 🎭 • 0-BUDGET</div>
+  <div class="ver">VERSION 2.7.0 — WORKHORSE 🐎 • 0-BUDGET</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -277,7 +277,7 @@
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
-    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.6 🎭</small></div>
+    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.7 🐎</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -321,7 +321,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.6.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.7.0</div></div>
       </div>
 
       <div class="qactions">
@@ -488,8 +488,9 @@
         <div class="phase"><span class="st">✅</span><span><b>Phase 5</b> — HANDS-FREE: naam se call, WhatsApp draft/auto-send, battery shield, boot start</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 6</b> — NEVER-STOP BRAIN: Gemini pool → Groq → GitHub → auto-queue</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 7</b> — TABAHI: 7 Voice Artists (neural Urdu/Hindi) + Agent Mode (code runner) + Web Fetch + Smart Diary</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Phase 8</b> — WORKHORSE: File Manager + Web Shark (search/wiki) + MEMORY X (summary+search) + Response Cache</span></div>
       </div>
-      <div class="vtag">MAYA v2.6.0 — TABAHI EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v2.7.0 — WORKHORSE EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -549,17 +550,24 @@ function saveSettings(){ localStorage.setItem("maya_settings", JSON.stringify(se
 /* ---------- MEMORY ---------- */
 var facts = [];
 try { facts = JSON.parse(localStorage.getItem("maya_facts") || "[]"); } catch(e){}
-function saveFacts(){ localStorage.setItem("maya_facts", JSON.stringify(facts.slice(0, 30))); renderFacts(); hudRefresh(); }
+function saveFacts(){ localStorage.setItem("maya_facts", JSON.stringify(facts.slice(0, 100))); renderFacts(); hudRefresh(); }
 
 /* ---------- SMART DIARY (Phase 7) ---------- */
 var diary = [];
 try { diary = JSON.parse(localStorage.getItem("maya_diary") || "[]"); } catch(e){}
-function saveDiary(){ try { localStorage.setItem("maya_diary", JSON.stringify(diary.slice(-200))); } catch(e){} }
+function saveDiary(){ try { localStorage.setItem("maya_diary", JSON.stringify(diary.slice(-1000))); } catch(e){} }
+var memorySummary = "";
+try { memorySummary = localStorage.getItem("maya_summary") || ""; } catch(e){}
+var _fileIndex = [];
+var replyCache = {};
+try { replyCache = JSON.parse(localStorage.getItem("maya_cache") || "{}"); } catch(e){}
+function cacheKey(t){ return String(t).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim(); }
+function cachePut(k, v){ var ks = Object.keys(replyCache); if (ks.length > 60) { for (var i = 0; i < 15; i++) delete replyCache[ks[i]]; } replyCache[k] = { t: Date.now(), text: v }; try { localStorage.setItem("maya_cache", JSON.stringify(replyCache)); } catch(e){} }
 
 /* ---------- CHAT HISTORY ---------- */
 var chatHist = [];
 try { chatHist = JSON.parse(localStorage.getItem("maya_chat") || "[]"); } catch(e){}
-function persistChat(){ try { localStorage.setItem("maya_chat", JSON.stringify(chatHist.slice(-100))); } catch(e){} }
+function persistChat(){ try { localStorage.setItem("maya_chat", JSON.stringify(chatHist.slice(-300))); } catch(e){} }
 
 /* ---------- DOM ---------- */
 var $ = function(s){ return document.querySelector(s); };
@@ -604,7 +612,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.6.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.7.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1071,6 +1079,24 @@ function tryLocal(t, wasVoice){
     return { reply:"Timer kitne ka, " + settings.name + "? Bolo: 'paanch minute ka timer lagao'." };
   }
 
+  /* FILES fast path */
+  if (/(downloads?|files?)\s*(mein|main|ka|ki)?\s*(kya|what|list|dikhao|kholo|dhoondo)/.test(q) && NATIVE) {
+    listFilesAction("downloads").then(function(r){
+      if (r.error) { reply("Files ki permission chahiye — dialog aaya hai, allow kar ke dobara bolo, " + settings.name + ".", wasVoice); return; }
+      var names = (r.files || []).slice(0, 6).map(function(f2){ return f2.name; });
+      reply((r.files || []).length ? "Downloads mein " + (r.files || []).length + " files hain. Sab se nayi: " + names.join("; ") + "." : "Downloads mein kuch nahi mila, " + settings.name + ".", wasVoice);
+    });
+    return { reply: "" };
+  }
+  if (/(latest|aakhiri|new|nayi)\s*(photo|screenshot|picture|tasveer|image)/.test(q) && NATIVE) {
+    listFilesAction("pictures").then(function(r){
+      var f3 = (r.files || [])[0];
+      if (f3) { var okp = false; try { okp = window.MayaBridge.openFile(f3.uri, f3.type) === true; } catch(e){} reply(okp ? "Khol rahi hoon: " + f3.name : "Khol nahi saki.", wasVoice); }
+      else reply("Pictures mein kuch nahi mila.", wasVoice);
+    });
+    return { reply: "" };
+  }
+
   /* DIARY fast path */
   if (/(diary|roznamcha|dairy)/.test(q)) {
     var dm = q.match(/(?:diary|roznamcha|dairy)(?:\s*mein)?\s*(?:likho|likh do|entry karo|note)\s*[:]?\s*(.+)/);
@@ -1169,6 +1195,8 @@ function sysPrompt(){
     "- Yaad karna ho -> recall_memory\n" +
     "Tool use karne ke baad ek chhoti friendly line mein confirm karo. Jo tools se mumkin nahi, wo bRIEFLY bata do.\n" +
     "RULES: (1) Reply SPOKEN ALOUD hoti hai — 1-3 jumlay, 60 words se kam (detail na maangi jaye to). (2) Plain spoken text: koi markdown, list, asterisk, emoji nahi. (3) User ki language aur script mein jawab: Urdu script -> Urdu script, Roman Urdu -> Roman Urdu, English -> English. (4) Kaam aksar tools se karo, sirf baat mat karo. (4b) Calculations, lists, data-parse, conversion -> run_javascript mein khud code likh kar chalao. (4c) Live info (rates, news, koi bhi site) -> web_fetch. (4d) Roznamcha: diary likhne/parhne ke liye diary_write/diary_search. (5) Kaun ho? MAYA, " + settings.name + " ki personal AI — mohabbat se 0 budget par bani.";
+  if (memorySummary) p += "\nLONG-TERM MEMORY SUMMARY (pichli baatein): " + memorySummary;
+  if (diary.length) p += "\nRECENT DIARY: " + diary.slice(-3).map(function(d){ return d.text; }).join(" | ").slice(0, 300);
   if (facts.length) p += "\nKNOWN FACTS about " + settings.name + " (natural tor par use karo): " + facts.slice(0, 15).map(function(f){ return "- " + f; }).join(" ");
   return p;
 }
@@ -1255,6 +1283,18 @@ var TOOL_DECLS = [
     parameters: { type: "OBJECT", properties: { entry: { type: "STRING" } }, required: ["entry"] } },
   { name: "diary_search", description: "Diary mein talash karo — date, keyword, ya pichle hafte ki entries.",
     parameters: { type: "OBJECT", properties: { query: { type: "STRING", description: "keyword ya 'kal' 'pichle hafte' jaisa lafz" } }, required: ["query"] } },
+  { name: "web_search", description: "Internet par talaash (DuckDuckGo engine). Top 5 results with titles+links.",
+    parameters: { type: "OBJECT", properties: { query: { type: "STRING" } }, required: ["query"] } },
+  { name: "wiki_search", description: "Wikipedia se kisi bhi topic ki summary (Urdu/English wikipedia auto).",
+    parameters: { type: "OBJECT", properties: { query: { type: "STRING" } }, required: ["query"] } },
+  { name: "list_files", description: "Phone ki files list: downloads, pictures, music, videos",
+    parameters: { type: "OBJECT", properties: { folder: { type: "STRING", description: "downloads|pictures|music|videos" } }, required: ["folder"] } },
+  { name: "open_file", description: "Pehle list_files se list lo, phir naam se file kholo (PDF, photo, video — jo bhi).",
+    parameters: { type: "OBJECT", properties: { name: { type: "STRING" } }, required: ["name"] } },
+  { name: "share_file", description: "File share karne ka menu kholo (naam se).",
+    parameters: { type: "OBJECT", properties: { name: { type: "STRING" } }, required: ["name"] } },
+  { name: "search_memory", description: "MAYA ki poori yaaddasht mein talash — facts, diary, purani chats.",
+    parameters: { type: "OBJECT", properties: { query: { type: "STRING" } }, required: ["query"] } },
   { name: "get_weather", description: "Current mausam lauta deta hai (default sheher settings wala).",
     parameters: { type: "OBJECT", properties: { city: { type: "STRING" } } } },
   { name: "battery_status", description: "Phone battery ka status.", parameters: { type: "OBJECT", properties: {} } },
@@ -1306,6 +1346,28 @@ async function execTool(name, args){
     } else if (name === "send_sms") {
       var n2 = String(args.number || "").replace(/[^\d+]/g, "");
       if (n2.length >= 4) { openURL("sms:" + n2); out = { done: true }; } else out = { done: false };
+    } else if (name === "web_search") {
+      out = await webSearch(String(args.query || ""));
+    } else if (name === "wiki_search") {
+      out = await wikiLookup(String(args.query || ""));
+    } else if (name === "list_files") {
+      out = await listFilesAction(String(args.folder || "downloads"));
+    } else if (name === "open_file") {
+      var fo = fileFind(String(args.name || ""));
+      if (!fo && NATIVE) { await listFilesAction("downloads"); fo = fileFind(String(args.name || "")); }
+      if (fo) { var oko = false; try { oko = window.MayaBridge.openFile(fo.uri, fo.type) === true; } catch(e){} out = oko ? { done: true, file: fo.name } : { done: false, note: "kholne wala app nahi mila" }; }
+      else out = { done: false, note: "file nahi mili — pehle list_files se check karo" };
+    } else if (name === "share_file") {
+      var fs2 = fileFind(String(args.name || ""));
+      if (fs2) { var oks = false; try { oks = window.MayaBridge.shareFile(fs2.uri, fs2.type) === true; } catch(e){} out = oks ? { done: true } : { done: false }; }
+      else out = { done: false, note: "file nahi mili" };
+    } else if (name === "search_memory") {
+      var sq = String(args.query || "").toLowerCase().trim();
+      var hits = [];
+      facts.forEach(function(f){ if (!sq || f.toLowerCase().indexOf(sq) >= 0) hits.push("FACT: " + f); });
+      diary.forEach(function(d){ if (!sq || d.text.toLowerCase().indexOf(sq) >= 0) hits.push("DIARY: " + d.text); });
+      chatHist.slice(-200).forEach(function(h){ if (sq && h.text.toLowerCase().indexOf(sq) >= 0) hits.push((h.role === "user" ? "USER: " : "MAYA: ") + h.text.slice(0, 150)); });
+      out = { matches: hits.slice(0, 12), total: hits.length };
     } else if (name === "run_javascript") {
       out = await sandboxRun(String(args.code || ""), String(args.input || ""));
     } else if (name === "web_fetch") {
@@ -1498,6 +1560,7 @@ async function geminiChat(){
         var parts = (cand && cand.content && cand.content.parts) || [];
         var fnCalls = parts.filter(function(p){ return p.functionCall; });
         if (fnCalls.length && step < 2) {
+          geminiChat.toolsUsed = true;
           contents.push({ role: "model", parts: parts });
           for (var fc = 0; fc < fnCalls.length; fc++) {
             var name = fnCalls[fc].functionCall.name;
@@ -1560,8 +1623,20 @@ async function openaiCompatChat(provider){
 
 /* --- Main: kabhi rukne wala nahi --- */
 async function askAI(wasVoice){
+  var lu = null;
+  for (var ci = chatHist.length - 1; ci >= 0; ci--) if (chatHist[ci].role === "user") { lu = chatHist[ci].text; break; }
+  if (lu) {
+    var ck = cacheKey(lu);
+    var cv = replyCache[ck];
+    if (cv && Date.now() - cv.t < 21600000 && cv.text) {
+      pushLog("CACHE HIT (turant)");
+      reply(cv.text, wasVoice);
+      return;
+    }
+  }
   thinking = true; setOrb("thinking");
   geminiChat.keyErr = false;
+  geminiChat.toolsUsed = false;
   var out = null;
   try { out = await geminiChat(); } catch (e) {}
   var keyErr = geminiChat.keyErr;
@@ -1570,6 +1645,7 @@ async function askAI(wasVoice){
   if (out) {
     askAI._retried = false;
     thinking = false; setOrb("idle");
+    if (lu && !geminiChat.toolsUsed && out.length < 400) cachePut(cacheKey(lu), out);
     reply(out, wasVoice);
     return;
   }
@@ -1595,6 +1671,55 @@ async function askAI(wasVoice){
 }
 
 function openURL(u){ var w = window.open(u, "_blank"); if (!w) { try { location.href = u; } catch(e){} } }
+
+/* ---------- WEB SHARK (Phase 8): search + wiki ---------- */
+async function nativeGet(url){
+  if (NATIVE && window.MayaBridge.httpGet) {
+    try { var r = JSON.parse(window.MayaBridge.httpGet(url, "")); return { status: r.status, body: r.body || "" }; } catch(e){ return { status: 0, body: "" }; }
+  }
+  try { var f = await fetch(url); return { status: f.status, body: f.ok ? await f.text() : "" }; } catch(e){ return { status: 0, body: "" }; }
+}
+async function webSearch(q){
+  var res = await nativeGet("https://html.duckduckgo.com/html/?q=" + encodeURIComponent(q));
+  var html = res.body || "";
+  var results = [];
+  var re = /<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
+  var m;
+  while ((m = re.exec(html)) && results.length < 5) {
+    var link = m[1];
+    var dm = /[?&]uddg=([^&]+)/.exec(link);
+    if (dm) { try { link = decodeURIComponent(dm[1]); } catch(e){} }
+    var title = htmlToText(m[2]).slice(0, 120);
+    if (title && link.indexOf("http") === 0) results.push({ title: title, url: link });
+  }
+  return results.length ? { results: results } : { error: "kuch nahi mila" };
+}
+async function wikiLookup(q){
+  var lang = /[\u0600-\u06FF]/.test(q) ? "ur" : "en";
+  var res = await nativeGet("https://" + lang + ".wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(q.trim().replace(/\s+/g, "_")));
+  if (res.status !== 200 || !res.body) return { error: "page nahi mila" };
+  try {
+    var j = JSON.parse(res.body);
+    return { title: j.title, extract: String(j.extract || "").slice(0, 1200) };
+  } catch(e){ return { error: "parse" }; }
+}
+
+/* ---------- FILE MANAGER helpers (Phase 8) ---------- */
+function fileFind(name){
+  name = String(name || "").toLowerCase().trim();
+  for (var i = 0; i < _fileIndex.length; i++) if (_fileIndex[i].name.toLowerCase().indexOf(name) >= 0) return _fileIndex[i];
+  return null;
+}
+async function listFilesAction(folder){
+  if (!NATIVE) return { error: "sirf APK mein" };
+  try { window.MayaBridge.requestFilesPerms(); } catch(e){}
+  try {
+    var r = JSON.parse(window.MayaBridge.listFiles(folder));
+    if (r.error) return r;
+    _fileIndex = r.files || [];
+    return r;
+  } catch(e){ return { error: "list fail" }; }
+}
 
 /* ---------- AGENT MODE: JS Sandbox (safe cage — no DOM, no data access) ---------- */
 function sandboxRun(code, input){
@@ -1905,6 +2030,37 @@ function renderArtists(){
   });
 }
 
+async function consolidateMemory(){
+  try {
+    if (!settings.apikey || chatHist.length < 40) return;
+    var last = parseInt(localStorage.getItem("maya_consol_ts") || "0", 10);
+    if (Date.now() - last < 72000000) return;
+    localStorage.setItem("maya_consol_ts", String(Date.now()));
+    var convo = chatHist.slice(-60).map(function(h){ return (h.role === "user" ? "User: " : "Maya: ") + h.text.slice(0, 200); }).join("\n").slice(0, 6000);
+    var prompt = "Neeche conversation ka PERMANENT MEMORY SUMMARY banao — sirf durable cheezein: facts, preferences, naam, dates, plans, aadatein. Max 80 words. Wahi language jaisi original conversation:" + convo;
+    var models = await resolveModels();
+    for (var i = 0; i < models.length; i++) {
+      try {
+        var res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + models[i] + ":generateContent?key=" + encodeURIComponent(settings.apikey), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.3, maxOutputTokens: 200 } })
+        });
+        if (!res.ok) continue;
+        var data = await res.json();
+        var parts = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
+        var txt = parts.map(function(p){ return p.text || ""; }).join("").trim();
+        if (txt) {
+          memorySummary = txt.slice(0, 800);
+          localStorage.setItem("maya_summary", memorySummary);
+          pushLog("MEMORY CONSOLIDATED");
+          return;
+        }
+      } catch(e){}
+    }
+  } catch(e){}
+}
+
 async function testKey(kind, key){
   try {
     if (kind === "gemini") {
@@ -1987,7 +2143,7 @@ $("#testVoice").addEventListener("click", function(){
 /* ---------- DIAGNOSTICS ---------- */
 $("#diagBtn").addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.6.0 — DOCTOR REPORT");
+  out.push("MAYA v2.7.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));
@@ -2054,6 +2210,7 @@ fillWeatherChip();
 setInterval(fillWeatherChip, 1800000);
 populateVoiceSelect();
 renderArtists();
+setTimeout(consolidateMemory, 4000);
 if (NATIVE && settings.wakeWord) setTimeout(function(){ try { setWakeService(true); } catch(e){} }, 1500);
 setTimeout(refreshHandsFreeStatus, 800);
 setInterval(refreshHandsFreeStatus, 10000);

@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.provider.ContactsContract
+import android.provider.MediaStore
 import android.provider.Settings
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
@@ -586,6 +587,83 @@ class MainActivity : AppCompatActivity() {
         fun openAccessibilitySettings(): Boolean {
             return try {
                 startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                true
+            } catch (e: Exception) { false }
+        }
+
+        /** FILE MANAGER (Phase 8) — list/open/share */
+        @JavascriptInterface
+        fun listFiles(folder: String): String {
+            return try {
+                val f = folder.lowercase().trim()
+                val uri: Uri = when (f) {
+                    "pictures", "photos" -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    "music", "audio" -> MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+                    "videos", "movies" -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                    else -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                        MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL)
+                    else MediaStore.Files.getContentUri("external")
+                }
+                val arr = JSONArray()
+                val proj = arrayOf(
+                    MediaStore.MediaColumns._ID,
+                    MediaStore.MediaColumns.DISPLAY_NAME,
+                    MediaStore.MediaColumns.MIME_TYPE,
+                    MediaStore.MediaColumns.SIZE
+                )
+                val cur = contentResolver.query(uri, proj, null, null, MediaStore.MediaColumns.DATE_MODIFIED + " DESC")
+                cur?.use { c ->
+                    var i = 0
+                    while (c.moveToNext() && i < 40) {
+                        val id = c.getLong(0)
+                        val name = c.getString(1) ?: continue
+                        val mime = c.getString(2) ?: ""
+                        val size = c.getLong(3)
+                        val itemUri = Uri.withAppendedPath(uri, id.toString())
+                        arr.put(JSONObject()
+                            .put("name", name)
+                            .put("type", mime)
+                            .put("size", size)
+                            .put("uri", itemUri.toString()))
+                        i++
+                    }
+                }
+                JSONObject().put("files", arr).put("folder", f).toString()
+            } catch (e: Exception) { JSONObject().put("error", e.message ?: "x").toString() }
+        }
+
+        @JavascriptInterface
+        fun openFile(uriStr: String, mime: String): Boolean {
+            return try {
+                val i = Intent(Intent.ACTION_VIEW, Uri.parse(uriStr)).apply {
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    if (mime.isNotEmpty()) setDataAndType(Uri.parse(uriStr), mime)
+                }
+                startActivity(i)
+                true
+            } catch (e: Exception) { false }
+        }
+
+        @JavascriptInterface
+        fun shareFile(uriStr: String, mime: String): Boolean {
+            return try {
+                val i = Intent(Intent.ACTION_SEND).apply {
+                    type = mime.ifEmpty { "*/*" }
+                    putExtra(Intent.EXTRA_STREAM, Uri.parse(uriStr))
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                startActivity(Intent.createChooser(i, "MAYA share"))
+                true
+            } catch (e: Exception) { false }
+        }
+
+        @JavascriptInterface
+        fun requestFilesPerms(): Boolean {
+            return try {
+                val perms = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                    arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.READ_MEDIA_AUDIO)
+                else arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+                ActivityCompat.requestPermissions(this@MainActivity, perms, REQ_PERMS)
                 true
             } catch (e: Exception) { false }
         }
