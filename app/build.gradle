@@ -11,13 +11,26 @@ android {
         applicationId "com.maya.ai"
         minSdk 26          // Android 8.0+ — vector icon + modern APIs
         targetSdk 34
-        versionCode 37
-        versionName "2.10.2"
+        versionCode 38
+        versionName "2.10.3"
+    }
+
+    signingConfigs {
+        maya {
+            storeFile file("maya.keystore")
+            storePassword "maya2026adil"
+            keyAlias "maya"
+            keyPassword "maya2026adil"
+        }
     }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.maya
+        }
         release {
             minifyEnabled false
+            signingConfig signingConfigs.maya
         }
     }
     compileOptions {
