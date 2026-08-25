@@ -264,7 +264,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.10.1 — HOTFIX 🔧 • 0-BUDGET</div>
+  <div class="ver">VERSION 2.10.2 — HOTFIX2 🔧 • 0-BUDGET
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -324,7 +324,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.10.1</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.10.2</div></div>
       </div>
 
       <div class="qactions">
@@ -638,7 +638,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.10.1 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.10.2 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -2331,10 +2331,10 @@ function refreshHandsFreeStatus(){
   try { $("#batStatus").textContent = "Status: " + (window.MayaBridge.batteryUnrestricted() ? "✅ SHIELDED (unrestricted)" : "⚠️ NOT shielded — button dabao"); } catch(e){}
   try { $("#asStatus").textContent = "Status: " + (window.MayaBridge.accessibilityEnabled() ? "✅ AUTO-SEND ON" : "OFF — button dabao aur MAYA AutoSend ON karo"); } catch(e){}
 }
-$("#batShield").addEventListener("click", function(){
+(function(_b){ if (_b) _b.addEventListener("click", function(){
   if (!NATIVE) return toast("Sirf APK mein");
   try { window.MayaBridge.requestBatteryUnrestricted(); toast("Prompt aaya — Allow dabao"); setTimeout(refreshHandsFreeStatus, 1500); } catch(e){}
-});
+}); })($("#batShield"));
 var MAYA_BRAND = "";
 try { if (NATIVE && window.MayaBridge.deviceBrand) MAYA_BRAND = String(window.MayaBridge.deviceBrand()).toLowerCase(); } catch(e){}
 
@@ -2348,15 +2348,15 @@ function brandTips(){
   return tips;
 }
 
-$("#asStep1").addEventListener("click", function(){
+(function(_b){ if (_b) _b.addEventListener("click", function(){
   if (!NATIVE) return toast("Sirf APK mein");
   try { window.MayaBridge.openAppDetails(); toast("⋮ (3 dots) → 'Allow restricted settings' — phir STEP 2"); } catch(e){}
-});
-$("#asStep2").addEventListener("click", function(){
+}); })($("#asStep1"));
+(function(_b){ if (_b) _b.addEventListener("click", function(){
   if (!NATIVE) return toast("Sirf APK mein");
   try { window.MayaBridge.openAccessibilitySettings(); toast("MAYA AutoSend dhundo → ON karo"); } catch(e){}
-});
-$("#asStep3").addEventListener("click", function(){
+}); })($("#asStep2"));
+(function(_b){ if (_b) _b.addEventListener("click", function(){
   if (!NATIVE) return toast("Sirf APK mein");
   var ok3 = false;
   try { ok3 = window.MayaBridge.accessibilityEnabled() === true; } catch(e){}
@@ -2366,30 +2366,22 @@ $("#asStep3").addEventListener("click", function(){
     el3.textContent = "\u274C Abhi bhi ON nahi hua. Aap ka phone: " + (MAYA_BRAND ? MAYA_BRAND.toUpperCase() : "?") + ". " + brandTips() + " | ASLI JUGAAD (PC se ek dafa): PC par 'adb shell settings put secure enabled_accessibility_services com.maya.ai/.AutoSendService' chalao — hamesha ke liye ON! | Ya relax karo: AutoSend ke BINA bhi 95% features hain — message tak khud type hota hai, sirf SEND ka 1 tap aap ko.";
   }
   toast(ok3 ? "READY \u2705" : "Neeche tips dekho");
-});
+}); })($("#asStep3"));
 
-$("#asStep3OLD").addEventListener("click", function(){
-  if (!NATIVE) return toast("Sirf APK mein");
-  var ok = false;
-  try { ok = window.MayaBridge.accessibilityEnabled() === true; } catch(e){}
-  var el = $("#asWizardStatus");
-  el.textContent = ok ? "\u2705 AUTO-SEND READY! Ab bolo: 'bhai ko whatsapp karo...'" : "\u274C Abhi OFF — STEP 1 check karo (⋮ → Allow restricted settings)";
-  toast(ok ? "READY \u2705" : "STEP 1 phir karo");
-});
 
-$("#readerBtn").addEventListener("click", function(){
+(function(_b){ if (_b) _b.addEventListener("click", function(){
   if (!NATIVE) return toast("Sirf APK mein");
   try { window.MayaBridge.openNotifAccess(); toast("Notification Access \u2192 MAYA ON karo"); setTimeout(refreshHandsFreeStatus, 2500); } catch(e){}
-});
+}); })($("#readerBtn"));
 
-$("#autoSendBtn").addEventListener("click", function(){
+(function(_b){ if (_b) _b.addEventListener("click", function(){
   if (!NATIVE) return toast("Sirf APK mein");
   try {
     if (window.MayaBridge.accessibilityEnabled()) { toast("Already ON hai ✓"); }
     else { window.MayaBridge.openAccessibilitySettings(); toast("MAYA AutoSend dhoond kar ON karo"); }
     setTimeout(refreshHandsFreeStatus, 2500);
   } catch(e){}
-});
+}); })($("#autoSendBtn"));
 
 function renderArtists(){
   var host = $("#artistGrid"); if (!host) return;
@@ -2506,7 +2498,7 @@ function populateVoiceSelect(){
   settings._voiceCount = list.length;
 }
 $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = Number(this.value).toFixed(2); });
-$("#testVoice").addEventListener("click", function(){
+(function(_b){ if (_b) _b.addEventListener("click", function(){
   var sample = "Assalam-o-alaikum " + settings.name + "! Main Maya hoon — abhi aap meri nayi awaaz test kar rahe hain. Kaisi lag rahi hoon?";
   var vName = $("#sVoice").value, rate = parseFloat($("#sRate").value) || 1, pit = parseFloat($("#sPitch").value) || 1.05;
   if (NATIVE) {
@@ -2524,12 +2516,12 @@ $("#testVoice").addEventListener("click", function(){
       toast("Testing selected voice...");
     } catch(e){ toast("Is browser mein TTS nahi"); }
   } else toast("Awaz engine nahi mila");
-});
+}); })($("#testVoice"));
 
 /* ---------- DIAGNOSTICS ---------- */
-$("#diagBtn").addEventListener("click", function(){
+(function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.10.1 — DOCTOR REPORT");
+  out.push("MAYA v2.10.2 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));
@@ -2553,18 +2545,18 @@ $("#diagBtn").addEventListener("click", function(){
   el.style.display = "block";
   el.textContent = out.join("\n");
   toast("Diagnostics tayyar — screenshot kar lena");
-});
+}); })($("#diagBtn"));
 
 /* ---------- CHAT EVENTS ---------- */
 orb.addEventListener("click", startListening);
 micBtn.addEventListener("click", startListening);
-$("#camBtn").addEventListener("click", function(){
+(function(_b){ if (_b) _b.addEventListener("click", function(){
   if (!NATIVE) return toast("Vision sirf APK mein");
   pendingVisionPrompt = "Ye photo dekho aur mukhtasir Roman Urdu mein batado ye kya hai, kya likha hai.";
   var okc = false;
   try { okc = window.MayaBridge.takePhoto() === true; } catch(e){}
   if (okc) toast("Camera khol rahi hoon — khincho! 📸");
-});
+}); })($("#camBtn"));
 $("#send").addEventListener("click", sendText);
 txt.addEventListener("keydown", function(e){ if (e.key === "Enter") sendText(); });
 function sendText(){
