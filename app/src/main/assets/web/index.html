@@ -264,7 +264,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.10.0 — ALWAYS-ON 🔝 • 0-BUDGET</div>
+  <div class="ver">VERSION 2.10.1 — HOTFIX 🔧 • 0-BUDGET</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -324,7 +324,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.10.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.10.1</div></div>
       </div>
 
       <div class="qactions">
@@ -638,7 +638,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.10.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.10.1 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1654,6 +1654,7 @@ async function execTool(name, args){
 var aiState = { provider: "—" };
 var modelCooldowns = {};
 var lastRetryDelay = 45000;
+var geminiBadUntil = 0;
 
 function trySmalltalk(q){
   var t = String(q).toLowerCase().trim();
@@ -1703,6 +1704,7 @@ async function resolveModels(){
 /* --- Provider 1: Gemini pool (tools ke saath) --- */
 async function geminiChat(){
   if (!settings.apikey) return null;
+  if (Date.now() < geminiBadUntil) return null;   /* ghalat key — 10 min chhodo */
   var models = await resolveModels();
   var any404 = false;
   for (var i = 0; i < models.length; i++) {
@@ -1734,7 +1736,12 @@ async function geminiChat(){
         var data = await res.json();
         if (!res.ok) {
           var errStr = JSON.stringify(data.error || {});
-          if (res.status === 400 && /api key/i.test(errStr)) { geminiChat.keyErr = true; return null; }
+          if (res.status === 400 || res.status === 403 || /api key/i.test(errStr)) {
+            geminiChat.keyErr = true;
+            geminiBadUntil = Date.now() + 600000;
+            pushLog("GEMINI KEY/PERM MASLA (code " + res.status + ") — 10min Groq mode");
+            return null;
+          }
           break;
         }
         var cand = data.candidates && data.candidates[0];
@@ -1816,7 +1823,7 @@ async function askAI(wasVoice){
     }
   }
   /* TURBO: simple baat seedha GROQ (instant) */
-  if (settings.turbo && settings.groqKey && lu && !needsTools(lu)) {
+  if (settings.turbo && settings.groqKey && lu && (!needsTools(lu) || Date.now() < geminiBadUntil)) {
     try {
       var tg = await openaiCompatChat("groq");
       if (tg) {
@@ -1857,10 +1864,10 @@ async function askAI(wasVoice){
   }
   askAI._retried = false;
   aiState.provider = "—";
-  if (keyErr && !settings.groqKey && !settings.ghKey)
-    reply("Gemini key ghalat lag rahi hai aur koi backup brain nahi hai, " + settings.name + ". Settings mein BACKUP BRAINS (Groq key) daalo — phir ye masla kabhi nahi hoga!", wasVoice);
+  if (keyErr && (settings.groqKey || settings.ghKey))
+    reply("Ek khabar, " + settings.name + ": Gemini ki key masla kar rahi hai — aistudio.google.com se nayi key bana kar Settings mein daal dena. Filhaal Groq backup chal raha hai, lekin alarm ya call jaise smart tools is waqt nahi chalenge. Baat-cheet poori chalti hai!", wasVoice);
   else if (keyErr)
-    reply("Gemini key ghalat hai lekin backup brain ne kaam kar diya! Settings mein Gemini key theek kar lena.", wasVoice);
+    reply("Gemini key ghalat lag rahi hai, " + settings.name + ". aistudio.google.com se nayi key banao aur Settings mein paste karo. Local commands chal rahe hain!", wasVoice);
   else
     reply("Sab free brains is waqt busy hain, " + settings.name + ". Ek minute baad bolo — ya local commands use karo: waqt, battery, alarm, timer, open WhatsApp!", wasVoice);
 }
@@ -2298,6 +2305,7 @@ $("#saveSettings").addEventListener("click", function(){
   settings.voiceName = $("#sVoice").value;
   settings.model = $("#sModel").value;
   settings.voiceOn = $("#sVoice").checked; settings.autoListen = $("#sAuto").checked; settings.turbo = $("#sTurbo").checked !== false;
+  geminiBadUntil = 0;
   settings.notifSpeak = $("#sNotifOn").checked; settings.batteryAlert = $("#sBatAlert").checked;
   if (NATIVE) { try { window.MayaBridge.notifSpeak(settings.notifSpeak); } catch(e){} }
   var wakeOn = $("#sWake").checked;
@@ -2327,15 +2335,40 @@ $("#batShield").addEventListener("click", function(){
   if (!NATIVE) return toast("Sirf APK mein");
   try { window.MayaBridge.requestBatteryUnrestricted(); toast("Prompt aaya — Allow dabao"); setTimeout(refreshHandsFreeStatus, 1500); } catch(e){}
 });
+var MAYA_BRAND = "";
+try { if (NATIVE && window.MayaBridge.deviceBrand) MAYA_BRAND = String(window.MayaBridge.deviceBrand()).toLowerCase(); } catch(e){}
+
+function brandTips(){
+  var tips = "";
+  if (/infinix|tecno|itel|hios/.test(MAYA_BRAND)) tips = "Aap ka phone " + MAYA_BRAND.toUpperCase() + " hai — EXTRA step: Phone Settings → Apps → MAYA → Battery → 'Allow background' + Security app mein 'Auto-start' ON karo. Accessibility mein 'Downloaded services/\u{1F4E5}' section mein MAYA milega.";
+  else if (/xiaomi|redmi|poco/.test(MAYA_BRAND)) tips = "Xiaomi/Redmi: pehle Security app → Permissions → Autostart → MAYA ON. Phir Accessibility mein 'Downloaded apps' se MAYA kholo.";
+  else if (/samsung/.test(MAYA_BRAND)) tips = "Samsung: Settings → Accessibility → 'Installed services/Downloaded apps' → MAYA AutoSend.";
+  else if (/oppo|realme|vivo/.test(MAYA_BRAND)) tips = MAYA_BRAND.toUpperCase() + ": Settings → Accessibility → 'Downloaded apps' + Security Center mein MAYA ka 'Background/Autostart' allow karo.";
+  else tips = "Accessibility list mein 'Downloaded services/apps' section check karo — MAYA wahan milega.";
+  return tips;
+}
+
 $("#asStep1").addEventListener("click", function(){
   if (!NATIVE) return toast("Sirf APK mein");
-  try { window.MayaBridge.openAppDetails(); toast("⋮ dabao → Allow restricted settings → phir wapas aao STEP 2 par"); } catch(e){}
+  try { window.MayaBridge.openAppDetails(); toast("⋮ (3 dots) → 'Allow restricted settings' — phir STEP 2"); } catch(e){}
 });
 $("#asStep2").addEventListener("click", function(){
   if (!NATIVE) return toast("Sirf APK mein");
   try { window.MayaBridge.openAccessibilitySettings(); toast("MAYA AutoSend dhundo → ON karo"); } catch(e){}
 });
 $("#asStep3").addEventListener("click", function(){
+  if (!NATIVE) return toast("Sirf APK mein");
+  var ok3 = false;
+  try { ok3 = window.MayaBridge.accessibilityEnabled() === true; } catch(e){}
+  var el3 = $("#asWizardStatus");
+  if (ok3) { el3.textContent = "\u2705 AUTO-SEND READY! Ab bolo: 'bhai ko whatsapp karo...'"; }
+  else {
+    el3.textContent = "\u274C Abhi bhi ON nahi hua. Aap ka phone: " + (MAYA_BRAND ? MAYA_BRAND.toUpperCase() : "?") + ". " + brandTips() + " | ASLI JUGAAD (PC se ek dafa): PC par 'adb shell settings put secure enabled_accessibility_services com.maya.ai/.AutoSendService' chalao — hamesha ke liye ON! | Ya relax karo: AutoSend ke BINA bhi 95% features hain — message tak khud type hota hai, sirf SEND ka 1 tap aap ko.";
+  }
+  toast(ok3 ? "READY \u2705" : "Neeche tips dekho");
+});
+
+$("#asStep3OLD").addEventListener("click", function(){
   if (!NATIVE) return toast("Sirf APK mein");
   var ok = false;
   try { ok = window.MayaBridge.accessibilityEnabled() === true; } catch(e){}
@@ -2496,7 +2529,7 @@ $("#testVoice").addEventListener("click", function(){
 /* ---------- DIAGNOSTICS ---------- */
 $("#diagBtn").addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.10.0 — DOCTOR REPORT");
+  out.push("MAYA v2.10.1 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));

@@ -617,6 +617,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         @JavascriptInterface
+        fun deviceBrand(): String = Build.MANUFACTURER ?: "unknown"
+
+        @JavascriptInterface
         fun openAppDetails(): Boolean {
             return try {
                 startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
