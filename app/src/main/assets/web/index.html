@@ -323,7 +323,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v3.0 CLASSIC</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v3.1 PRO</div></div>
       </div>
 
       <div class="qactions">
@@ -1624,6 +1624,7 @@ async function execTool(name, args){
 var aiState = { provider: "—" };
 var modelCooldowns = {};
 var lastRetryDelay = 45000;
+var geminiBadUntil = 0;
 
 function trySmalltalk(q){
   var t = String(q).toLowerCase().trim();
@@ -1673,6 +1674,7 @@ async function resolveModels(){
 /* --- Provider 1: Gemini pool (tools ke saath) --- */
 async function geminiChat(){
   if (!settings.apikey) return null;
+  if (Date.now() < geminiBadUntil) return null;
   var models = await resolveModels();
   var any404 = false;
   for (var i = 0; i < models.length; i++) {
@@ -1704,7 +1706,7 @@ async function geminiChat(){
         var data = await res.json();
         if (!res.ok) {
           var errStr = JSON.stringify(data.error || {});
-          if (res.status === 400 && /api key/i.test(errStr)) { geminiChat.keyErr = true; return null; }
+          if (res.status === 400 || res.status === 403 || /api key/i.test(errStr)) { geminiChat.keyErr = true; geminiBadUntil = Date.now() + 600000; pushLog("GEMINI KEY MASLA (code " + res.status + ") — 10min Groq mode"); return null; }
           break;
         }
         var cand = data.candidates && data.candidates[0];
@@ -1786,7 +1788,7 @@ async function askAI(wasVoice){
     }
   }
   /* TURBO: simple baat seedha GROQ (instant) */
-  if (settings.turbo && settings.groqKey && lu && !needsTools(lu)) {
+  if (settings.turbo && settings.groqKey && lu && (!needsTools(lu) || Date.now() < geminiBadUntil)) {
     try {
       var tg = await openaiCompatChat("groq");
       if (tg) {
@@ -1827,10 +1829,10 @@ async function askAI(wasVoice){
   }
   askAI._retried = false;
   aiState.provider = "—";
-  if (keyErr && !settings.groqKey && !settings.ghKey)
-    reply("Gemini key ghalat lag rahi hai aur koi backup brain nahi hai, " + settings.name + ". Settings mein BACKUP BRAINS (Groq key) daalo — phir ye masla kabhi nahi hoga!", wasVoice);
+  if (keyErr && (settings.groqKey || settings.ghKey))
+    reply(settings.name + ", Gemini ki key masla kar rahi hai — aistudio.google.com se nayi key bana kar Settings mein daal do. Filhaal Groq backup chal raha hai, lekin smart tools is waqt nahi. Baat-cheet poori chalti hai!", wasVoice);
   else if (keyErr)
-    reply("Gemini key ghalat hai lekin backup brain ne kaam kar diya! Settings mein Gemini key theek kar lena.", wasVoice);
+    reply("Gemini key ghalat lag rahi hai, " + settings.name + ". aistudio.google.com se nayi key banao aur Settings mein paste karo. Local commands chal rahe hain!", wasVoice);
   else
     reply("Sab free brains is waqt busy hain, " + settings.name + ". Ek minute baad bolo — ya local commands use karo: waqt, battery, alarm, timer, open WhatsApp!", wasVoice);
 }
@@ -2268,6 +2270,7 @@ $("#saveSettings").addEventListener("click", function(){
   settings.voiceName = $("#sVoice").value;
   settings.model = $("#sModel").value;
   settings.voiceOn = $("#sVoice").checked; settings.autoListen = $("#sAuto").checked; settings.turbo = $("#sTurbo").checked !== false;
+  geminiBadUntil = 0;
   settings.notifSpeak = $("#sNotifOn").checked; settings.batteryAlert = $("#sBatAlert").checked;
   if (NATIVE) { try { window.MayaBridge.notifSpeak(settings.notifSpeak); } catch(e){} }
   var wakeOn = $("#sWake").checked;
@@ -2524,7 +2527,7 @@ if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
   var sver = document.querySelector("#splash .ver");
-  if (sver) sver.textContent = "VERSION 3.0 — CLASSIC (proven build)";
+  if (sver) sver.textContent = "VERSION 3.1 — CLASSIC PRO";
 }
 greetMiniRefresh();
 chatHist.slice(-40).forEach(function(h){ addBubble(h.role === "user" ? "user" : "ai", h.text); });
