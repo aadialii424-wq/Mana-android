@@ -264,7 +264,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.7.0 — WORKHORSE 🐎 • 0-BUDGET</div>
+  <div class="ver">VERSION 2.8.0 — TURBO ⚡ • 0-BUDGET</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -277,7 +277,7 @@
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
-    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.7 🐎</small></div>
+    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.8 ⚡</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -287,6 +287,7 @@
       <div class="chatHead">
         <span class="dot" id="dot"></span>
         <span class="t" id="chatState">MAYA READY</span>
+        <div style="width:80px;height:4px;background:rgba(56,189,248,.15);border-radius:3px;overflow:hidden;margin-left:8px"><div class="micbar" style="height:100%;width:4%;background:var(--cyan);transition:width .12s;border-radius:2px"></div></div>
         <span style="margin-left:auto; font-size:11px; color:var(--dim)" id="greetMini"></span>
       </div>
       <div id="log"></div>
@@ -310,6 +311,7 @@
         </span>
       </button>
       <div id="statusText">TAP TO SPEAK</div>
+      <div style="width:180px;height:5px;background:rgba(56,189,248,.15);border-radius:3px;overflow:hidden"><div class="micbar" style="height:100%;width:4%;background:var(--cyan);border-radius:3px;transition:width .12s;box-shadow:0 0 8px var(--cyan)"></div></div>
       <div id="interim"></div>
 
       <div class="chips">
@@ -321,7 +323,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.7.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.8.0</div></div>
       </div>
 
       <div class="qactions">
@@ -408,6 +410,8 @@
         <label class="f">GITHUB MODELS PAT (backup #2 — optional)</label>
         <input class="f" id="sGhKey" type="password" placeholder="github_pat_... (GitHub → Settings → Developer settings)">
         <button class="save" id="testKeys" style="background:#7c3aed">🧪 SAB KEYS TEST KARO</button>
+        <div class="switchrow"><span>\u26a1 TURBO REPLY (simple baat seedha Groq — instant)</span>
+          <label class="switch"><input type="checkbox" id="sTurbo"><i></i></label></div>
         <div class="note" id="keyTestOut" style="margin-top:8px; display:none; font-family:ui-monospace,Menlo,monospace; white-space:pre-wrap; color:#a5f3fc; background:rgba(2,8,16,.8); border:1px solid var(--line); border-radius:10px; padding:10px">—</div>
         <div class="note" style="margin-top:8px">Gemini ki limit khatam? Maya <b>khud</b> Groq → GitHub par switch karti hai. Aap ko mehsoos tak nahi hoga. Local commands to hamesha unlimited hain!</div>
       </div>
@@ -488,9 +492,10 @@
         <div class="phase"><span class="st">✅</span><span><b>Phase 5</b> — HANDS-FREE: naam se call, WhatsApp draft/auto-send, battery shield, boot start</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 6</b> — NEVER-STOP BRAIN: Gemini pool → Groq → GitHub → auto-queue</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 7</b> — TABAHI: 7 Voice Artists (neural Urdu/Hindi) + Agent Mode (code runner) + Web Fetch + Smart Diary</span></div>
-        <div class="phase"><span class="st">✅</span><span><b>Phase 8</b> — WORKHORSE: File Manager + Web Shark (search/wiki) + MEMORY X (summary+search) + Response Cache</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Phase 8</b> — WORKHORSE: File Manager + Web Shark + MEMORY X + Cache</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Phase 8b</b> — TURBO: thinking-off + Groq-instant + live mic meter + partial results</span></div>
       </div>
-      <div class="vtag">MAYA v2.7.0 — WORKHORSE EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v2.8.0 — TURBO EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -538,7 +543,7 @@ setTimeout(function(){
 window.__mayaJSOK = true;
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
-var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", groqModel:"llama-3.3-70b-versatile", ghKey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"auto", model:"auto", autoListen:false, voiceOn:true, wakeWord:false };
+var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", groqModel:"llama-3.3-70b-versatile", ghKey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"auto", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true };
 var settings = Object.assign({}, DEFAULTS);
 try {
   var s1 = JSON.parse(localStorage.getItem("maya_settings") || "null");
@@ -562,6 +567,9 @@ var _fileIndex = [];
 var replyCache = {};
 try { replyCache = JSON.parse(localStorage.getItem("maya_cache") || "{}"); } catch(e){}
 function cacheKey(t){ return String(t).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim(); }
+var ACTION_WORDS = /(alarm|timer|reminder|call|phone|whatsapp|message|sms|open|khol|chalao|play|baja|download|file|pdf|photo|screenshot|search|khojo|dhoond|wiki|wikipedia|fetch|yaad rakh|diary|battery|mausam|weather|share|youtube|google|average|nikalo|calculate|convert|kitna|kitne)/i;
+function needsTools(t){ return ACTION_WORDS.test(t); }
+
 function cachePut(k, v){ var ks = Object.keys(replyCache); if (ks.length > 60) { for (var i = 0; i < 15; i++) delete replyCache[ks[i]]; } replyCache[k] = { t: Date.now(), text: v }; try { localStorage.setItem("maya_cache", JSON.stringify(replyCache)); } catch(e){} }
 
 /* ---------- CHAT HISTORY ---------- */
@@ -612,7 +620,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.7.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.8.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -680,6 +688,13 @@ window.__nativeTtsDone = function(){ speaking = false; afterSpeak(lastWasVoice);
 window.__nativeSpeech = function(text){
   listening = false; setOrb("idle");
   if (text && text.trim()) handleUserText(text.trim(), true);
+};
+window.__nativePartial = function(t){ try { interimEl.textContent = t || ""; } catch(e){} };
+window.__nativeRms = function(db){
+  try {
+    var pct = Math.max(4, Math.min(100, Math.round(((db || 0) + 2) * 5)));
+    document.querySelectorAll(".micbar").forEach(function(el){ el.style.width = pct + "%"; });
+  } catch(e){}
 };
 window.__nativeSpeechErr = function(code){
   listening = false; setOrb("idle"); interimEl.textContent = "";
@@ -1530,14 +1545,15 @@ async function geminiChat(){
     if (Date.now() < (modelCooldowns[m] || 0)) continue;   // is model ka cooldown chal raha hai
     var url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + encodeURIComponent(settings.apikey);
     try {
-      var contents = chatHist.slice(-12).map(function(h){ return { role: h.role, parts: [{ text: h.text }] }; });
+      var contents = chatHist.slice(-8).map(function(h){ return { role: h.role, parts: [{ text: h.text }] }; });
       var out = "";
       for (var step = 0; step < 3; step++) {
         var body = {
           systemInstruction: { parts: [{ text: sysPrompt() }] },
           contents: contents,
-          generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
+          generationConfig: { temperature: 0.7, maxOutputTokens: 280 }
         };
+        if (/2\.5|gemini-3/.test(m)) body.generationConfig.thinkingConfig = { thinkingBudget: 0 };
         if (step < 2) body.tools = [{ functionDeclarations: TOOL_DECLS }];
         var res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
         if (res.status === 429) {
@@ -1598,7 +1614,7 @@ async function openaiCompatChat(provider){
   }
   try {
     var msgs = [{ role: "system", content: sysPrompt() + " NOTE: Ye backup mode hai — phone tools is waqt off hain. Phone ke kaam (open app, alarm, timer) app khud handle karta hai; aap sirf baat cheet aur knowledge ka jawab do, chhota aur doosra." }];
-    chatHist.slice(-10).forEach(function(h){ msgs.push({ role: h.role === "model" ? "assistant" : "user", content: h.text }); });
+    chatHist.slice(-8).forEach(function(h){ msgs.push({ role: h.role === "model" ? "assistant" : "user", content: h.text }); });
     var out = null;
     var payload = JSON.stringify({ model: model, messages: msgs, temperature: 0.7, max_tokens: 300 });
     if (NATIVE && window.MayaBridge.httpPost) {
@@ -1633,6 +1649,20 @@ async function askAI(wasVoice){
       reply(cv.text, wasVoice);
       return;
     }
+  }
+  /* TURBO: simple baat seedha GROQ (instant) */
+  if (settings.turbo && settings.groqKey && lu && !needsTools(lu)) {
+    try {
+      var tg = await openaiCompatChat("groq");
+      if (tg) {
+        thinking = false; setOrb("idle");
+        aiState.provider = "GROQ";
+        pushLog("TURBO (Groq instant)");
+        cachePut(cacheKey(lu), tg);
+        reply(tg, wasVoice);
+        return;
+      }
+    } catch (e) {}
   }
   thinking = true; setOrb("thinking");
   geminiChat.keyErr = false;
@@ -1938,7 +1968,7 @@ function loadSettingsForm(){
   $("#sPitch").value = settings.pitch || 1.05; $("#pitchVal").textContent = Number(settings.pitch || 1.05).toFixed(2);
   $("#sVoice").value = settings.voiceName || "";
   $("#sModel").value = settings.model;
-  $("#sVoice").checked = settings.voiceOn; $("#sAuto").checked = settings.autoListen; $("#sWake").checked = !!settings.wakeWord;
+  $("#sVoice").checked = settings.voiceOn; $("#sAuto").checked = settings.autoListen; $("#sWake").checked = !!settings.wakeWord; $("#sTurbo").checked = settings.turbo !== false;
 }
 $("#sRate").addEventListener("input", function(){ $("#rateVal").textContent = Number(this.value).toFixed(2); });
 $("#saveSettings").addEventListener("click", function(){
@@ -1969,7 +1999,7 @@ $("#saveSettings").addEventListener("click", function(){
   settings.pitch = parseFloat($("#sPitch").value) || 1.05;
   settings.voiceName = $("#sVoice").value;
   settings.model = $("#sModel").value;
-  settings.voiceOn = $("#sVoice").checked; settings.autoListen = $("#sAuto").checked;
+  settings.voiceOn = $("#sVoice").checked; settings.autoListen = $("#sAuto").checked; settings.turbo = $("#sTurbo").checked !== false;
   var wakeOn = $("#sWake").checked;
   if (wakeOn !== !!settings.wakeWord) { settings.wakeWord = wakeOn; setWakeService(wakeOn); } else settings.wakeWord = wakeOn;
   saveSettings(); loadSettingsForm(); setOrb("idle"); paintQuick(); greetMiniRefresh(); renderArtists();
@@ -2143,7 +2173,7 @@ $("#testVoice").addEventListener("click", function(){
 /* ---------- DIAGNOSTICS ---------- */
 $("#diagBtn").addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.7.0 — DOCTOR REPORT");
+  out.push("MAYA v2.8.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));

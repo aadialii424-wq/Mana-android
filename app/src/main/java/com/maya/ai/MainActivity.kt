@@ -256,14 +256,20 @@ class MainActivity : AppCompatActivity() {
                     putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang)
                     putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
                     putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+                    putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+                    putExtra("android.speech.extra.SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS", 700)
                 }
                 recognizer = SpeechRecognizer.createSpeechRecognizer(this@MainActivity).apply {
                     setRecognitionListener(object : RecognitionListener {
                         override fun onReadyForSpeech(params: Bundle?) {}
                         override fun onBeginningOfSpeech() {}
-                        override fun onRmsChanged(rmsdB: Float) {}
+                        private var rmsTick = 0
+                        override fun onRmsChanged(rmsdB: Float) {
+                            rmsTick++
+                            if (rmsTick % 4 == 0) evalAsync("window.__nativeRms && window.__nativeRms(" + rmsdB + ")")
+                        }
                         override fun onBufferReceived(buffer: ByteArray?) {}
-                        override fun onEndOfSpeech() {}
+                        override fun onEndOfSpeech() { evalAsync("window.__nativePartial && window.__nativePartial('')") }
                         override fun onError(error: Int) {
                             evalAsync("window.__nativeSpeechErr && window.__nativeSpeechErr($error)")
                         }
@@ -273,7 +279,11 @@ class MainActivity : AppCompatActivity() {
                                 ?.firstOrNull() ?: ""
                             evalAsync("window.__nativeSpeech && window.__nativeSpeech('" + jsEscape(text) + "')")
                         }
-                        override fun onPartialResults(partialResults: Bundle?) {}
+                        override fun onPartialResults(partialResults: Bundle?) {
+                            val pt = partialResults
+                                ?.getStringArrayList("android.speech.extra.RESULTS")?.firstOrNull() ?: ""
+                            if (pt.isNotBlank()) evalAsync("window.__nativePartial && window.__nativePartial('" + jsEscape(pt) + "')")
+                        }
                         override fun onEvent(eventType: Int, params: Bundle?) {}
                     })
                     startListening(intent)
@@ -675,8 +685,8 @@ class MainActivity : AppCompatActivity() {
                 val conn = URL(url).openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.doOutput = true
-                conn.connectTimeout = 15000
-                conn.readTimeout = 25000
+                conn.connectTimeout = 6000
+                conn.readTimeout = 15000
                 conn.setRequestProperty("Content-Type", "application/json")
                 if (authHeader.isNotEmpty()) conn.setRequestProperty("Authorization", authHeader)
                 conn.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
@@ -694,8 +704,8 @@ class MainActivity : AppCompatActivity() {
         fun httpGet(url: String, authHeader: String): String {
             return try {
                 val conn = URL(url).openConnection() as HttpURLConnection
-                conn.connectTimeout = 10000
-                conn.readTimeout = 15000
+                conn.connectTimeout = 5000
+                conn.readTimeout = 8000
                 if (authHeader.isNotEmpty()) conn.setRequestProperty("Authorization", authHeader)
                 val code = conn.responseCode
                 val txt = (if (code in 200..399) conn.inputStream else conn.errorStream)
