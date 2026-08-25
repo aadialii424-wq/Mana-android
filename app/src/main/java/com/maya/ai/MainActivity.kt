@@ -33,6 +33,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewClientCompat
+import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Locale
 
@@ -152,9 +153,9 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface
         fun appVersion(): String = "2.1.0-native"
 
-        /** Native TTS — proper Urdu voice support, onDone callback JS ko milta hai */
+        /** Native TTS v2 — voice picker + pitch (crispy awaaz) */
         @JavascriptInterface
-        fun speak(text: String, lang: String, rate: Double) {
+        fun speak(text: String, lang: String, rate: Double, pitch: Double, voiceName: String) {
             runOnUiThread {
                 if (!ttsReady) {
                     evalAsync("window.__nativeTtsDone && window.__nativeTtsDone()")
@@ -162,17 +163,41 @@ class MainActivity : AppCompatActivity() {
                 }
                 try {
                     val engine = tts ?: return@runOnUiThread
-                    val loc = Locale.forLanguageTag(lang.replace('_', '-'))
-                    val res = engine.setLanguage(loc)
-                    if (res == TextToSpeech.LANG_MISSING_DATA || res == TextToSpeech.LANG_NOT_SUPPORTED) {
-                        engine.language = Locale.getDefault()
-                    }
-                    engine.setSpeechRate(rate.toFloat())
+                    try {
+                        if (voiceName.isNotEmpty()) {
+                            engine.voices?.firstOrNull { it.name == voiceName }?.let { engine.setVoice(it) }
+                        } else {
+                            val loc = Locale.forLanguageTag(lang.replace('_', '-'))
+                            val res = engine.setLanguage(loc)
+                            if (res == TextToSpeech.LANG_MISSING_DATA || res == TextToSpeech.LANG_NOT_SUPPORTED) {
+                                engine.language = Locale.getDefault()
+                            }
+                        }
+                    } catch (e: Exception) {}
+                    engine.setSpeechRate(rate.toFloat().coerceIn(0.5f, 2f))
+                    engine.setPitch(pitch.toFloat().coerceIn(0.5f, 2f))
                     engine.speak(text, TextToSpeech.QUEUE_FLUSH, null, "maya")
                 } catch (e: Exception) {
                     evalAsync("window.__nativeTtsDone && window.__nativeTtsDone()")
                 }
             }
+        }
+
+        /** Phone ki saari TTS voices ki list (JS ke liye JSON) */
+        @JavascriptInterface
+        fun ttsVoices(): String {
+            return try {
+                val arr = JSONArray()
+                tts?.voices?.forEach { v ->
+                    arr.put(
+                        JSONObject()
+                            .put("name", v.name)
+                            .put("locale", v.locale.toLanguageTag())
+                            .put("network", v.isNetworkConnectionRequired)
+                    )
+                }
+                arr.toString()
+            } catch (e: Exception) { "[]" }
         }
 
         @JavascriptInterface

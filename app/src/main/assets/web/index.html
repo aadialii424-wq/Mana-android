@@ -264,7 +264,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.2.0 — SMART BRAIN • 0-BUDGET</div>
+  <div class="ver">VERSION 2.2.1 — VOICE STUDIO • 0-BUDGET</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -277,7 +277,7 @@
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
-    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.2</small></div>
+    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.2.1</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -410,6 +410,13 @@
           <option value="en-IN">English-India (en-IN)</option>
           <option value="en-US">English-US (en-US)</option>
         </select>
+
+        <label class="f">🎙️ AWAAZ CHUNO (sab available voices — network/online sab se natural)</label>
+        <select class="f" id="sVoice"><option value="">Auto (engine default)</option></select>
+        <button class="save" id="testVoice" style="background:#0891b2">🎧 TEST AWAAZ SUNO</button>
+        <label class="f">🎵 AWAAZ KI PITCH: <span id="pitchVal">1.05</span></label>
+        <input type="range" id="sPitch" min="0.7" max="1.4" step="0.05" value="1.05">
+        <div class="note">Tip: "network" wali awaazein (internet se) sab se crispy hoti hain. Behtareen ke liye: Play Store → Google Speech Services update + apni boli ki voice data install karo.</div>
         <label class="f">AWAAZ KI RAFTAR: <span id="rateVal">1.00</span>x</label>
         <input type="range" id="sRate" min="0.7" max="1.4" step="0.05" value="1">
         <div class="switchrow"><span>🔊 Maya bol kar jawab de</span>
@@ -495,7 +502,7 @@ setTimeout(function(){
 window.__mayaJSOK = true;
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
-var DEFAULTS = { name:"Sir", apikey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, model:"auto", autoListen:false, voiceOn:true };
+var DEFAULTS = { name:"Sir", apikey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", model:"auto", autoListen:false, voiceOn:true };
 var settings = Object.assign({}, DEFAULTS);
 try {
   var s1 = JSON.parse(localStorage.getItem("maya_settings") || "null");
@@ -557,7 +564,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.2.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.2.1 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -654,7 +661,7 @@ function speak(text, wasVoice){
     var cN = text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, "").trim();
     if (!settings.voiceOn || !cN) { afterSpeak(wasVoice); return; }
     speaking = true; setOrb("speaking");
-    try { window.MayaBridge.speak(cN, settings.tts, settings.rate); }
+    try { window.MayaBridge.speak(cN, settings.tts, settings.rate, settings.pitch || 1, settings.voiceName || ""); }
     catch(e){ speaking = false; afterSpeak(wasVoice); }
     return;
   }
@@ -664,8 +671,10 @@ function speak(text, wasVoice){
   if (!clean) { afterSpeak(wasVoice); return; }
   var u = new SpeechSynthesisUtterance(clean);
   u.lang = settings.tts;
-  var v = pickVoice(settings.tts); if (v) u.voice = v;
-  u.rate = settings.rate; u.pitch = 1.05;
+  if (settings.voiceName) {
+    for (var vi = 0; vi < voices.length; vi++) if (voices[vi].name === settings.voiceName) { u.voice = voices[vi]; u.lang = voices[vi].lang; break; }
+  } else { var v = pickVoice(settings.tts); if (v) u.voice = v; }
+  u.rate = settings.rate; u.pitch = settings.pitch || 1.05;
   speaking = true; setOrb("speaking");
   u.onend = function(){ speaking = false; afterSpeak(wasVoice); };
   u.onerror = function(){ speaking = false; afterSpeak(wasVoice); };
@@ -1141,10 +1150,43 @@ async function execTool(name, args){
   return out;
 }
 
-/* ---------- GEMINI BRAIN (function-calling loop) ---------- */
+/* ---------- GEMINI BRAIN v2 (self-repairing models + tools) ---------- */
+var MODEL_CACHE = null;
+try { MODEL_CACHE = JSON.parse(localStorage.getItem("maya_models") || "null"); } catch(e){}
+function saveModelCache(){ try { localStorage.setItem("maya_models", JSON.stringify(MODEL_CACHE)); } catch(e){} }
+function modelScore(n){
+  var m = n.match(/gemini-(\d+)(?:[.-](\d+))?/);
+  if (!m) return -900;
+  var s = parseInt(m[1] || "0", 10) * 100 + parseFloat(m[2] || "0");
+  if (/flash-lite/.test(n)) s -= 40;
+  if (/flash/.test(n)) s += 60;
+  if (/pro/.test(n)) s -= 15;
+  if (/preview|exp|thinking|8b|live|image|audio|native|tts|embedding|aqa|imagen|veo|gemma|robotics/.test(n)) s -= 800;
+  return s;
+}
+async function resolveModels(){
+  if (settings.model !== "auto") return [settings.model];
+  var now = Date.now();
+  if (MODEL_CACHE && MODEL_CACHE.names && MODEL_CACHE.names.length && now - MODEL_CACHE.ts < 86400000) return MODEL_CACHE.names;
+  try {
+    var j = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=100&key=" + encodeURIComponent(settings.apikey)).then(function(x){ return x.json(); });
+    var names = (j.models || [])
+      .filter(function(m){ return (m.supportedGenerationMethods || []).indexOf("generateContent") >= 0; })
+      .map(function(m){ return String(m.name || "").replace(/^models\//, ""); })
+      .filter(function(n){ return modelScore(n) > -500; });
+    names.sort(function(a, b){ return modelScore(b) - modelScore(a); });
+    if (!names.length) throw new Error("khali");
+    MODEL_CACHE = { names: names.slice(0, 5), ts: now };
+    saveModelCache();
+    pushLog("MODELS RESOLVED: " + MODEL_CACHE.names[0] + " (+" + (MODEL_CACHE.names.length - 1) + " backup)");
+    return MODEL_CACHE.names;
+  } catch(e) {
+    return MODELS;
+  }
+}
 async function askGemini(wasVoice){
   thinking = true; setOrb("thinking");
-  var models = settings.model === "auto" ? MODELS.slice(modelIdx) : [settings.model];
+  var models = await resolveModels();
   var lastErr = "";
   for (var mi2 = 0; mi2 < models.length; mi2++) {
     var url = "https://generativelanguage.googleapis.com/v1beta/models/" + models[mi2] + ":generateContent?key=" + encodeURIComponent(settings.apikey);
@@ -1157,7 +1199,7 @@ async function askGemini(wasVoice){
           contents: contents,
           generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
         };
-        if (step < 2) body.tools = [{ function_declarations: TOOL_DECLS }];
+        if (step < 2) body.tools = [{ functionDeclarations: TOOL_DECLS }];
         var res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1195,20 +1237,29 @@ async function askGemini(wasVoice){
         lastErr = "empty"; break;
       }
       if (out) {
-        modelIdx = MODELS.indexOf(models[mi2]) >= 0 ? MODELS.indexOf(models[mi2]) : modelIdx;
+        modelIdx = 0;
         thinking = false; setOrb("idle");
         pushLog("GEMINI OK (" + models[mi2] + ")");
         reply(out, wasVoice);
         return;
       }
-      if (lastErr === "404") continue;
-      if (lastErr && lastErr !== "empty") continue;
-      if (lastErr === "empty") continue;
+      if (lastErr === "404" || lastErr === "empty") continue;
+      if (lastErr) continue;
     } catch (err) { lastErr = "network"; }
   }
+  /* Self-repair: sab 404 hue → model list refresh kar ke ek aur koshish */
+  if (lastErr === "404" && !askGemini._retried) {
+    askGemini._retried = true;
+    MODEL_CACHE = null; saveModelCache();
+    thinking = false; setOrb("idle");
+    pushLog("MODEL LIST REFRESH — retry");
+    return askGemini(wasVoice);
+  }
+  askGemini._retried = false;
   thinking = false; setOrb("idle");
   if (lastErr === "network") reply("Internet se raabta nahi ho pa raha, " + settings.name + " — connection check karo. Local commands phir bhi chalte hain!", wasVoice);
-  else reply("Technical masla aa gaya (" + lastErr + "). Thodi der baad try karo ya Settings mein doosra model chunko.", wasVoice);
+  else if (lastErr === "404") reply("Koi model available nahi mila, " + settings.name + ". Settings mein model 'Auto' par hai? AI Studio se key ki models check karo.", wasVoice);
+  else reply("Technical masla aa gaya (" + lastErr + "). Thodi der baad try karo ya Settings mein model Auto rakho.", wasVoice);
 }
 
 function openURL(u){ var w = window.open(u, "_blank"); if (!w) { try { location.href = u; } catch(e){} } }
@@ -1338,6 +1389,8 @@ function loadSettingsForm(){
   $("#sName").value = settings.name; $("#sCity").value = settings.city || "Hyderabad"; $("#sKey").value = settings.apikey;
   $("#sStt").value = settings.stt; $("#sTts").value = settings.tts;
   $("#sRate").value = settings.rate; $("#rateVal").textContent = Number(settings.rate).toFixed(2);
+  $("#sPitch").value = settings.pitch || 1.05; $("#pitchVal").textContent = Number(settings.pitch || 1.05).toFixed(2);
+  $("#sVoice").value = settings.voiceName || "";
   $("#sModel").value = settings.model;
   $("#sVoice").checked = settings.voiceOn; $("#sAuto").checked = settings.autoListen;
 }
@@ -1348,6 +1401,8 @@ $("#saveSettings").addEventListener("click", function(){
   settings.apikey = $("#sKey").value.trim();
   settings.stt = $("#sStt").value; settings.tts = $("#sTts").value;
   settings.rate = parseFloat($("#sRate").value) || 1;
+  settings.pitch = parseFloat($("#sPitch").value) || 1.05;
+  settings.voiceName = $("#sVoice").value;
   settings.model = $("#sModel").value;
   settings.voiceOn = $("#sVoice").checked; settings.autoListen = $("#sAuto").checked;
   saveSettings(); loadSettingsForm(); setOrb("idle"); paintQuick(); greetMiniRefresh();
@@ -1365,10 +1420,49 @@ $("#clearChat").addEventListener("click", function(){
   toast("Chat history clear"); hudRefresh();
 });
 
+/* ---------- VOICE STUDIO (Phase 3.5) ---------- */
+function populateVoiceSelect(){
+  var sel = $("#sVoice"); if (!sel) return;
+  var list = [];
+  try {
+    if (NATIVE) {
+      var arr = JSON.parse(window.MayaBridge.ttsVoices() || "[]");
+      arr.forEach(function(v){ list.push({ name: v.name, label: v.name + " [" + v.locale + (v.network ? " • ONLINE-NATURAL" : "") + "]" }); });
+    } else if (synth) {
+      loadVoices();
+      voices.forEach(function(v){ list.push({ name: v.name, label: v.name + " [" + v.lang + "]" }); });
+    }
+  } catch(e){}
+  sel.innerHTML = '<option value="">Auto (engine default)</option>' +
+    list.map(function(v){ return '<option value="' + esc(v.name) + '">' + esc(v.label) + "</option>"; }).join("");
+  sel.value = settings.voiceName || "";
+  settings._voiceCount = list.length;
+}
+$("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = Number(this.value).toFixed(2); });
+$("#testVoice").addEventListener("click", function(){
+  var sample = "Assalam-o-alaikum " + settings.name + "! Main Maya hoon — abhi aap meri nayi awaaz test kar rahe hain. Kaisi lag rahi hoon?";
+  var vName = $("#sVoice").value, rate = parseFloat($("#sRate").value) || 1, pit = parseFloat($("#sPitch").value) || 1.05;
+  if (NATIVE) {
+    try { window.MayaBridge.speak(sample, settings.tts, rate, pit, vName); toast("Testing selected voice..."); return; } catch(e){}
+  }
+  if (synth) {
+    try {
+      synth.cancel();
+      var u = new SpeechSynthesisUtterance(sample);
+      u.lang = settings.tts; u.rate = rate; u.pitch = pit;
+      loadVoices();
+      if (vName) for (var i = 0; i < voices.length; i++) if (voices[i].name === vName) { u.voice = voices[i]; break; }
+      else { var pv = pickVoice(settings.tts); if (pv) u.voice = pv; }
+      synth.speak(u);
+      toast("Testing selected voice...");
+    } catch(e){ toast("Is browser mein TTS nahi"); }
+  } else toast("Awaz engine nahi mila");
+});
+
 /* ---------- DIAGNOSTICS ---------- */
 $("#diagBtn").addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.2.0 — DOCTOR REPORT");
+  out.push("MAYA v2.2.1 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));
@@ -1385,6 +1479,7 @@ $("#diagBtn").addEventListener("click", function(){
     try { out.push("NATIVE BATTERY: " + window.MayaBridge.battery()); } catch (e) { out.push("NATIVE BATTERY: FAIL ❌"); }
     try { window.MayaBridge.speak("Diagnostic test complete, " + settings.name + ".", settings.tts, settings.rate); out.push("NATIVE TTS: TEST BOLA ✅"); } catch (e) { out.push("NATIVE TTS: FAIL ❌"); }
   }
+  out.push("TTS VOICES: " + (settings._voiceCount != null ? settings._voiceCount : "0") + " available");
   out.push("LAST ERROR: " + (window.__mayaErr || "koi nahi ✅"));
   var el = $("#diagOut");
   el.style.display = "block";
@@ -1430,6 +1525,7 @@ function paintQuick(){
 renderCmds(""); renderFacts(); loadSettingsForm(); paintQuick(); setOrb("idle");
 fillWeatherChip();
 setInterval(fillWeatherChip, 1800000);
+populateVoiceSelect();
 if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
