@@ -426,7 +426,7 @@ class MainActivity : AppCompatActivity() {
                 conn.readTimeout = 8000
                 conn.setRequestProperty("Content-Type", "application/json")
                 conn.setRequestProperty("User-Agent", "com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip")
-                val esc = query.replace("\\", "\\\\").replace("\"", '\\"')
+                val esc = query.replace("\\", "\\\\").replace("\"", "\\\"")
                 val body = "{\"context\":{\"client\":{\"clientName\":\"ANDROID\",\"clientVersion\":\"20.10.38\",\"androidSdkVersion\":30,\"hl\":\"en\",\"gl\":\"US\"}},\"query\":\"" + esc + "\"}"
                 conn.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
                 val txt = conn.inputStream.bufferedReader().use { it.readText() }
