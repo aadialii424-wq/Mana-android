@@ -9,6 +9,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
+import android.provider.ContactsContract
+import android.provider.Settings
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.BatteryManager
 import android.os.Build
@@ -282,19 +285,30 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread { stopRecognizer() }
         }
 
-        /** REAL system alarm — phone ke clock app mein set hota hai */
+        /** REAL alarm v2 — 3-layer: silent set > prefilled UI > fail */
         @JavascriptInterface
-        fun setAlarm(hour: Int, minute: Int, message: String): Boolean {
-            return try {
+        fun setAlarm(hour: Int, minute: Int, message: String): Int {
+            val msg = message.ifEmpty { "MAYA Alarm" }
+            try {
                 val i = Intent(AlarmClock.ACTION_SET_ALARM).apply {
                     putExtra(AlarmClock.EXTRA_HOUR, hour)
                     putExtra(AlarmClock.EXTRA_MINUTES, minute)
-                    putExtra(AlarmClock.EXTRA_MESSAGE, message.ifEmpty { "MAYA Alarm" })
+                    putExtra(AlarmClock.EXTRA_MESSAGE, msg)
                     putExtra(AlarmClock.EXTRA_SKIP_UI, true)
                 }
                 startActivity(i)
-                true
-            } catch (e: Exception) { false }
+                return 2
+            } catch (e: Exception) {}
+            try {
+                val i = Intent(AlarmClock.ACTION_SET_ALARM).apply {
+                    putExtra(AlarmClock.EXTRA_HOUR, hour)
+                    putExtra(AlarmClock.EXTRA_MINUTES, minute)
+                    putExtra(AlarmClock.EXTRA_MESSAGE, msg)
+                }
+                startActivity(i)
+                return 1
+            } catch (e: Exception) {}
+            return 0
         }
 
         /** REAL system timer — screen band ho to bhi bajta hai */
@@ -389,31 +403,199 @@ class MainActivity : AppCompatActivity() {
                         return false
                     }
                     WakeWordService.start(this@MainActivity)
+                    prefs().edit().putBoolean("wake", true).apply()
                     true
                 } else {
                     WakeWordService.stop(this@MainActivity)
+                    prefs().edit().putBoolean("wake", false).apply()
                     true
                 }
             } catch (e: Exception) { false }
         }
 
-        /** YouTube: pehle result ka videoId (auto-play ke liye) — native HTTP, no key */
+        /** YouTube v2 — innertube JSON + consent cookie fallback (pakka videoId) */
         @JavascriptInterface
         fun ytSearch(query: String): String {
-            return try {
-                val url = URL("https://www.youtube.com/results?search_query=" + URLEncoder.encode(query, "UTF-8"))
-                val conn = url.openConnection() as HttpURLConnection
+            // 1) Innertube ANDROID client — JSON, reliable
+            try {
+                val conn = URL("https://www.youtube.com/youtubei/v1/search?prettyPrint=false")
+                    .openConnection() as HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.doOutput = true
+                conn.connectTimeout = 8000
+                conn.readTimeout = 8000
+                conn.setRequestProperty("Content-Type", "application/json")
+                conn.setRequestProperty("User-Agent", "com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip")
+                val esc = query.replace("\\", "\\\\").replace("\"", '\\"')
+                val body = "{\"context\":{\"client\":{\"clientName\":\"ANDROID\",\"clientVersion\":\"20.10.38\",\"androidSdkVersion\":30,\"hl\":\"en\",\"gl\":\"US\"}},\"query\":\"" + esc + "\"}"
+                conn.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+                val txt = conn.inputStream.bufferedReader().use { it.readText() }
+                conn.disconnect()
+                val m = Regex("\"videoId\":\"([a-zA-Z0-9_-]{11})\"").find(txt)
+                if (m != null) return m.groupValues[1]
+            } catch (e: Exception) {}
+            // 2) HTML + CONSENT cookie
+            try {
+                val conn = URL("https://www.youtube.com/results?search_query=" + URLEncoder.encode(query, "UTF-8"))
+                    .openConnection() as HttpURLConnection
                 conn.connectTimeout = 8000
                 conn.readTimeout = 8000
                 conn.instanceFollowRedirects = true
                 conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36")
+                conn.setRequestProperty("Cookie", "CONSENT=YES+cb.20240101-01-p0.en+FX+000; SOCS=CAI")
                 conn.setRequestProperty("Accept-Language", "en-US,en;q=0.9")
                 val html = conn.inputStream.bufferedReader().use { it.readText() }
                 conn.disconnect()
                 val m = Regex("\"videoId\":\"([a-zA-Z0-9_-]{11})\"").find(html)
-                m?.groupValues?.get(1) ?: ""
-            } catch (e: Exception) { "" }
+                if (m != null) return m.groupValues[1]
+            } catch (e: Exception) {}
+            return ""
         }
+
+        /** CONTACTS ENGINE (Phase 5) */
+        @JavascriptInterface
+        fun contactsSearch(query: String): String {
+            return try {
+                if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.READ_CONTACTS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.READ_CONTACTS), REQ_PERMS)
+                    return "{\"error\":\"permission\"}"
+                }
+                val q = query.trim()
+                if (q.isEmpty()) return "{\"matches\":[]}"
+                val arr = JSONArray()
+                val seen = HashSet<String>()
+                // naam se contact
+                val cur = contentResolver.query(
+                    ContactsContract.Contacts.CONTENT_FILTER_URI.buildUpon().appendPath(q).build(),
+                    arrayOf(ContactsContract.Contacts._ID, ContactsContract.Contacts.DISPLAY_NAME),
+                    null, null, null
+                )
+                cur?.use { c ->
+                    while (c.moveToNext() && arr.length() < 6) {
+                        val id = c.getString(0) ?: continue
+                        val name = c.getString(1) ?: continue
+                        val pcur = contentResolver.query(
+                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                            arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER),
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=?",
+                            arrayOf(id), null
+                        )
+                        pcur?.use { p ->
+                            while (p.moveToNext() && arr.length() < 6) {
+                                val num = p.getString(0) ?: continue
+                                if (seen.add(name + "|" + num)) {
+                                    arr.put(JSONObject().put("name", name).put("number", num))
+                                }
+                            }
+                        }
+                    }
+                }
+                // dialpad/number se bhi
+                if (arr.length() == 0) {
+                    val pcur = contentResolver.query(
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_FILTER_URI.buildUpon().appendPath(q).build(),
+                        arrayOf(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                                ContactsContract.CommonDataKinds.Phone.NUMBER),
+                        null, null, null
+                    )
+                    pcur?.use { p ->
+                        while (p.moveToNext() && arr.length() < 6) {
+                            val name = p.getString(0) ?: continue
+                            val num = p.getString(1) ?: continue
+                            if (seen.add(name + "|" + num)) {
+                                arr.put(JSONObject().put("name", name).put("number", num))
+                            }
+                        }
+                    }
+                }
+                JSONObject().put("matches", arr).toString()
+            } catch (e: Exception) { "{\"error\":\"" + (e.message ?: "x") + "\"}" }
+        }
+
+        /** Naam se seedha CALL (bina tap — ACTION_CALL) */
+        @JavascriptInterface
+        fun autoCall(number: String): Boolean {
+            return try {
+                if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.CALL_PHONE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.CALL_PHONE), REQ_PERMS)
+                    return false
+                }
+                startActivity(Intent(Intent.ACTION_CALL, Uri.parse("tel:" + number)))
+                true
+            } catch (e: Exception) { false }
+            }
+
+        /** WhatsApp: number + message draft (PK normalization + auto-send flag) */
+        @JavascriptInterface
+        fun openWhatsAppDraft(number: String, text: String, autoSend: Boolean): Boolean {
+            return try {
+                var n = number.replace(Regex("[^\\d]"), "")
+                if (n.startsWith("00")) n = n.substring(2)
+                if (n.startsWith("0") && n.length in 10..11) n = "92" + n.substring(1)
+                if (autoSend) prefs().edit().putLong("autosend_at", System.currentTimeMillis()).apply()
+                val u = "https://wa.me/" + n + "?text=" + URLEncoder.encode(text, "UTF-8")
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(u)))
+                true
+            } catch (e: Exception) { false }
+        }
+
+        /** SMS draft (number + text) */
+        @JavascriptInterface
+        fun smsDraft(number: String, text: String): Boolean {
+            return try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(
+                    "sms:" + number + "?body=" + URLEncoder.encode(text, "UTF-8"))))
+                true
+            } catch (e: Exception) { false }
+        }
+
+        /** Battery shield — unrestricted (background mic kill se bachao) */
+        @SuppressLint("BatteryLife")
+        @JavascriptInterface
+        fun requestBatteryUnrestricted(): Boolean {
+            return try {
+                val pm = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+                if (pm.isIgnoringBatteryOptimizations(packageName)) return true
+                startActivity(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    Uri.parse("package:" + packageName)))
+                true
+            } catch (e: Exception) { false }
+        }
+
+        @JavascriptInterface
+        fun batteryUnrestricted(): Boolean {
+            return try {
+                val pm = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+                pm.isIgnoringBatteryOptimizations(packageName)
+            } catch (e: Exception) { false }
+        }
+
+        /** AutoSend accessibility status + settings kholna */
+        @JavascriptInterface
+        fun accessibilityEnabled(): Boolean {
+            return try {
+                val s = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
+                    ?: return false
+                s.contains(".AutoSendService")
+            } catch (e: Exception) { false }
+        }
+
+        @JavascriptInterface
+        fun openAccessibilitySettings(): Boolean {
+            return try {
+                startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                true
+            } catch (e: Exception) { false }
+        }
+
+        /** Persistent prefs (boot autostart wake) */
+        @JavascriptInterface
+        fun setPref(k: String, v: Boolean) { try { prefs().edit().putBoolean(k, v).apply() } catch (e: Exception) {} }
+
+        @JavascriptInterface
+        fun getPref(k: String): Boolean = try { prefs().getBoolean(k, false) } catch (e: Exception) { false }
 
         /** Auto-listen mode — screen jagti rahe */
         @JavascriptInterface
@@ -428,6 +610,8 @@ class MainActivity : AppCompatActivity() {
     /* ================= HELPERS ================= */
 
     fun evalAsyncPublic(js: String) { evalAsync(js) }
+
+    private fun prefs() = getSharedPreferences("maya", Context.MODE_PRIVATE)
 
     private fun evalAsync(js: String) {
         webView.post { webView.evaluateJavascript(js, null) }
@@ -454,7 +638,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestNeededPermissions() {
-        val wanted = mutableListOf(Manifest.permission.RECORD_AUDIO)
+        val wanted = mutableListOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_CONTACTS, Manifest.permission.CALL_PHONE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             wanted.add(Manifest.permission.POST_NOTIFICATIONS)
         val need = wanted.filter {

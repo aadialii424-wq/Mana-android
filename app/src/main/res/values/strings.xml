@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MAYA</string>
+    <string name="autosend_desc">MAYA AutoSend: jab Maya WhatsApp message draft kare to khud send dabati hai. Sirf WhatsApp ke send button tak limited.</string>
 </resources>

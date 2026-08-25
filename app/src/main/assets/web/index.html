@@ -264,7 +264,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.3.0 — WAKE WORD • 0-BUDGET</div>
+  <div class="ver">VERSION 2.4.0 — HANDS-FREE ☠️ • 0-BUDGET</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -277,7 +277,7 @@
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
-    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.3</small></div>
+    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.4 ☠️</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -321,6 +321,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.4.0</div></div>
       </div>
 
       <div class="qactions">
@@ -368,7 +369,7 @@
         <summary>⚠️ HONEST LIMITS — jo Maya <i>nahi</i> kar sakti (abhi)</summary>
         <div class="body">
           • PWA/browser version mein system alarm jaise controls nahi — <b>APK version</b> mein real alarm + system timer milta hai<br>
-          • Wake word "Hey Maya" background mein nahi sun sakti — <b>Phase 4</b><br>
+          • Wake word background service ab available — Settings se ON karo<br>
           • AI ke jawab ke liye internet chahiye; local commands offline bhi chalte hain<br>
           • Mic sirf HTTPS ya local file par chalta hai
         </div>
@@ -452,13 +453,23 @@
       </div>
 
       <div class="card">
+        <h3>☠️ HANDS-FREE + AUTO-SEND (Phase 5)</h3>
+        <button class="save" id="batShield" style="background:#0891b2">🔋 BATTERY SHIELD (zaroori — 1 dafa)</button>
+        <div class="note" id="batStatus" style="margin-top:6px">Status: checking...</div>
+        <button class="save" id="autoSendBtn">☠️ WHATSAPP AUTO-SEND ENABLE KARO</button>
+        <div class="note" style="margin-top:6px">Auto-send = Maya WhatsApp mein message <b>khud bhej</b> degi. Enable: Phone Settings → Accessibility → <b>MAYA AutoSend</b> → ON. (Beta — WhatsApp update par badal sakta hai)</div>
+        <div class="note" id="asStatus" style="margin-top:4px">Status: checking...</div>
+      </div>
+
+      <div class="card">
         <h3>🚀 ROADMAP — Project MAYA</h3>
         <div class="phase"><span class="st">✅</span><span><b>Phase 1</b> — PWA Pro (multi-tab, HUD, memory, offline)</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 2</b> — Asli APK (native: alarm, timer, notifications, battery)</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 3</b> — Smart Brain (13 AI tools, weather, routines, reminders)</span></div>
-        <div class="phase"><span class="st">✅</span><span><b>Phase 4</b> — Wake Word ("Maya"/"Boss") + YouTube auto-play • offline AI ⏳</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Phase 4</b> — Wake Word ("Maya"/"Boss") + YouTube auto-play</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Phase 5</b> — HANDS-FREE: naam se call, WhatsApp draft/auto-send, battery shield, boot start</span></div>
       </div>
-      <div class="vtag">MAYA v2.0.0 • 0-BUDGET BUILD • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v2.4.0 — HANDS-FREE EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -568,7 +579,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.3.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.4.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -686,7 +697,7 @@ function speak(text, wasVoice){
 }
 function afterSpeak(wasVoice){
   setOrb("idle");
-  if (settings.autoListen && wasVoice) setTimeout(startListening, 350);
+  if ((settings.autoListen || settings.wakeWord) && wasVoice) setTimeout(startListening, 350);
 }
 function reply(text, wasVoice, link){
   addBubble("ai", text, link);
@@ -908,8 +919,9 @@ function tryLocal(t, wasVoice){
       var hh = (hr < 10 ? "0" : "") + hr, mm = (mi < 10 ? "0" : "") + mi;
       if (NATIVE) {
         try {
-          if (window.MayaBridge.setAlarm(hr, mi, "MAYA Alarm"))
-            return { reply:"Real alarm set: " + hh + ":" + mm + ", " + settings.name + " — phone ke clock app mein nazar aayega. Neend achi aaye! 😄" };
+          var arL = parseInt(window.MayaBridge.setAlarm(hr, mi, "MAYA Alarm"), 10) || 0;
+          if (arL === 2) return { reply:"Alarm set: " + hh + ":" + mm + ", " + settings.name + " — neend achi aaye!" };
+          if (arL === 1) return { reply:"Clock app khula " + hh + ":" + mm + " ke saath — bas save dabana, " + settings.name + "." };
         } catch(e){}
       }
       return { reply:"Browser se system alarm nahi laga sakti — " + hh + ":" + mm + " ka khud alarm lagalo. APK version mein ye real alarm ban jata hai!" };
@@ -935,6 +947,16 @@ function tryLocal(t, wasVoice){
     return { reply:"Timer kitne ka, " + settings.name + "? Bolo: 'paanch minute ka timer lagao'." };
   }
 
+  /* NAAM se call (fast path) */
+  m = q.match(/([a-z\u0600-\u06FF][a-z\u0600-\u06FF .]{1,24}?)\s*ko\s*(?:call|phone|missed call|phone call)/);
+  if (m && NATIVE && !/\d/.test(m[1])) {
+    execTool("call_contact", { name: m[1].trim() }).then(function(r){
+      if (r && r.done) reply("Laga rahi hoon call " + r.who + " ko, " + settings.name + ".", wasVoice);
+      else if (r && r.matches) reply("Ek se zyada " + m[1].trim() + " mile — poora naam bolo.", wasVoice);
+      else reply(r && r.note ? r.note : "Ye naam contact list mein nahi mila, " + settings.name + ".", wasVoice);
+    });
+    return { reply: "" };
+  }
   m = q.match(/(?:call|phone|phone call)\s*(?:karo|karna|kar do)?\s*(?:on|to|par|pe)?\s*(\+?\d[\d\s-]{6,})/);
   if (m) return { reply:"Number dial kar rahi hoon.", url:"tel:" + m[1].replace(/[\s-]/g,""), link:"tel:" + m[1].replace(/[\s-]/g,"") };
   m = q.match(/(?:message|msg|sms)\s*(?:karo|send|bhejo)?\s*(?:on|to|par|pe)?\s*(\+?\d[\d\s-]{6,})/);
@@ -1002,7 +1024,7 @@ function sysPrompt(){
     "- Alarm ('jaga dena', 'waqt par uthana', 'alarm lagao') -> set_alarm\n" +
     "- Timer/reminders -> set_timer ya set_reminder\n" +
     "- Apps kholna -> open_app; gaana/video -> play_youtube; search -> search_web\n" +
-    "- Call/SMS -> call_number / send_sms (number na ho to pooch laina)\n" +
+    "- Naam se call/message -> call_contact / message_contact (contact list se khud dhoondo; ek se zyada mile to user se poocho). Number pata ho to call_number / send_sms\n" +
     "- Mausam -> get_weather (default sheher: " + settings.city + ")\n" +
     "- Battery -> battery_status\n" +
     "- Zaroori cheez (birthday, appointment, pasand, kisi ka naam, kaam) -> khud save_memory use karo, 'yaad rakhna' bole na bole\n" +
@@ -1079,7 +1101,11 @@ var TOOL_DECLS = [
     parameters: { type: "OBJECT", properties: { query: { type: "STRING" } }, required: ["query"] } },
   { name: "search_web", description: "Google search kholta hai.",
     parameters: { type: "OBJECT", properties: { query: { type: "STRING" } }, required: ["query"] } },
-  { name: "call_number", description: "Phone dial karta hai.",
+  { name: "call_contact", description: "Contact list se NAAM dhoond kar seedha CALL lagata hai (bina tap). Jaise: 'Ali ko call lagao'",
+    parameters: { type: "OBJECT", properties: { name: { type: "STRING", description: "Contact ka naam" } }, required: ["name"] } },
+  { name: "message_contact", description: "Contact ko WhatsApp/SMS message: naam se number dhoond kar chat kholti hai message type ho chuka hota hai. Jaise: 'bhai ko whatsapp karo main aa raha hoon'",
+    parameters: { type: "OBJECT", properties: { name: { type: "STRING" }, text: { type: "STRING", description: "Message" }, app: { type: "STRING", description: "whatsapp ya sms (default whatsapp)" } }, required: ["name", "text"] } },
+  { name: "call_number", description: "Phone dial karta hai (number se).",
     parameters: { type: "OBJECT", properties: { number: { type: "STRING" } }, required: ["number"] } },
   { name: "send_sms", description: "SMS screen kholta hai number ke saath.",
     parameters: { type: "OBJECT", properties: { number: { type: "STRING" }, text: { type: "STRING" } }, required: ["number"] } },
@@ -1099,10 +1125,11 @@ async function execTool(name, args){
     if (name === "set_alarm") {
       var hr = Math.max(0, Math.min(23, parseInt(args.hour, 10) || 0));
       var mi = Math.max(0, Math.min(59, parseInt(args.minute, 10) || 0));
-      var okA = false;
-      if (NATIVE) { try { okA = window.MayaBridge.setAlarm(hr, mi, String(args.message || "MAYA Alarm")) === true; } catch(e){} }
-      out = okA ? { done: true, how: "system alarm", time: pad2(hr) + ":" + pad2(mi) }
-                : { done: false, note: "Browser mode mein system alarm nahi lag sakta" };
+      var ar = 0;
+      if (NATIVE) { try { ar = parseInt(window.MayaBridge.setAlarm(hr, mi, String(args.message || "MAYA Alarm")), 10) || 0; } catch(e){} }
+      out = ar === 2 ? { done: true, how: "silent system alarm", time: pad2(hr) + ":" + pad2(mi) }
+           : ar === 1 ? { done: true, how: "clock app prefilled khula — save dabana hai", time: pad2(hr) + ":" + pad2(mi) }
+           : { done: false, note: "alarm app nahi mila (browser mode)" };
     } else if (name === "set_timer") {
       var sec = Math.max(5, Math.min(86400, parseInt(args.seconds, 10) || 60));
       var lbl = String(args.label || (sec + " sec timer"));
@@ -1133,6 +1160,45 @@ async function execTool(name, args){
     } else if (name === "send_sms") {
       var n2 = String(args.number || "").replace(/[^\d+]/g, "");
       if (n2.length >= 4) { openURL("sms:" + n2); out = { done: true }; } else out = { done: false };
+    } else if (name === "call_contact") {
+      if (!NATIVE) { out = { done: false, note: "sirf APK mein" }; }
+      else {
+        try {
+          var cr = JSON.parse(window.MayaBridge.contactsSearch(String(args.name || "")));
+          if (cr.error === "permission") out = { done: false, note: "contacts permission ka dialog aaya hai — allow kar ke dobara bolo" };
+          else if (!cr.matches || !cr.matches.length) out = { done: false, note: "is naam ka contact nahi mila" };
+          else if (cr.matches.length > 1) out = { done: false, note: "ek se zyada matches mile — user se poocho kaunsa (number bhi batao)", matches: cr.matches.slice(0, 4) };
+          else {
+            var cc = cr.matches[0];
+            var okc = false;
+            try { okc = window.MayaBridge.autoCall(cc.number) === true; } catch(e){}
+            out = okc ? { done: true, who: cc.name, number: cc.number, how: "call lag gayi (auto)" }
+                      : { done: false, who: cc.name, note: "phone/call permission ka dialog aaya — allow kar ke dobara bolo" };
+          }
+        } catch(e){ out = { error: String(e && e.message || e) }; }
+      }
+    } else if (name === "message_contact") {
+      if (!NATIVE) { out = { done: false, note: "sirf APK mein" }; }
+      else {
+        try {
+          var mr = JSON.parse(window.MayaBridge.contactsSearch(String(args.name || "")));
+          if (mr.error === "permission") out = { done: false, note: "contacts permission ka dialog aaya hai — allow kar ke dobara bolo" };
+          else if (!mr.matches || !mr.matches.length) out = { done: false, note: "contact nahi mila" };
+          else if (mr.matches.length > 1) out = { done: false, note: "ek se zyada matches — user se poocho kaunsa", matches: mr.matches.slice(0, 4) };
+          else {
+            var mc = mr.matches[0];
+            var txt = String(args.text || "");
+            var okm = false;
+            if (String(args.app || "whatsapp") === "sms") { try { okm = window.MayaBridge.smsDraft(mc.number, txt) === true; } catch(e){} }
+            else {
+              var as1 = false;
+              try { as1 = window.MayaBridge.accessibilityEnabled() === true; } catch(e){}
+              try { okm = window.MayaBridge.openWhatsAppDraft(mc.number, txt, as1) === true; } catch(e){}
+            }
+            out = okm ? { done: true, who: mc.name, how: "chat khul gaya message type ho chuka" } : { done: false };
+          }
+        } catch(e){ out = { error: String(e && e.message || e) }; }
+      }
     } else if (name === "get_weather") {
       out = await fetchWeather(args.city);
     } else if (name === "battery_status") {
@@ -1476,11 +1542,30 @@ $("#clearChat").addEventListener("click", function(){
   toast("Chat history clear"); hudRefresh();
 });
 
+function refreshHandsFreeStatus(){
+  if (!NATIVE) { var b1 = $("#batStatus"), a1 = $("#asStatus"); if (b1) b1.textContent = "Status: sirf APK mein"; if (a1) a1.textContent = "Status: sirf APK mein"; return; }
+  try { $("#batStatus").textContent = "Status: " + (window.MayaBridge.batteryUnrestricted() ? "✅ SHIELDED (unrestricted)" : "⚠️ NOT shielded — button dabao"); } catch(e){}
+  try { $("#asStatus").textContent = "Status: " + (window.MayaBridge.accessibilityEnabled() ? "✅ AUTO-SEND ON" : "OFF — button dabao aur MAYA AutoSend ON karo"); } catch(e){}
+}
+$("#batShield").addEventListener("click", function(){
+  if (!NATIVE) return toast("Sirf APK mein");
+  try { window.MayaBridge.requestBatteryUnrestricted(); toast("Prompt aaya — Allow dabao"); setTimeout(refreshHandsFreeStatus, 1500); } catch(e){}
+});
+$("#autoSendBtn").addEventListener("click", function(){
+  if (!NATIVE) return toast("Sirf APK mein");
+  try {
+    if (window.MayaBridge.accessibilityEnabled()) { toast("Already ON hai ✓"); }
+    else { window.MayaBridge.openAccessibilitySettings(); toast("MAYA AutoSend dhoond kar ON karo"); }
+    setTimeout(refreshHandsFreeStatus, 2500);
+  } catch(e){}
+});
+
 /* ---------- WAKE WORD SERVICE ---------- */
 function setWakeService(on){
   if (!NATIVE) { toast("Wake word sirf APK version mein hai"); return; }
   try {
     window.MayaBridge.wakeService(on);
+    if (on) { try { if (!window.MayaBridge.batteryUnrestricted()) window.MayaBridge.requestBatteryUnrestricted(); } catch(e){} }
     toast(on ? "\u{1F442} Wake word ON — ab 'Maya' ya 'Boss' bolo" : "Wake word OFF");
     pushLog("WAKE WORD: " + (on ? "ON" : "OFF"));
   } catch(e){ toast("Wake service start nahi hui"); }
@@ -1529,7 +1614,7 @@ $("#testVoice").addEventListener("click", function(){
 /* ---------- DIAGNOSTICS ---------- */
 $("#diagBtn").addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.3.0 — DOCTOR REPORT");
+  out.push("MAYA v2.4.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));
@@ -1595,6 +1680,8 @@ fillWeatherChip();
 setInterval(fillWeatherChip, 1800000);
 populateVoiceSelect();
 if (NATIVE && settings.wakeWord) setTimeout(function(){ try { setWakeService(true); } catch(e){} }, 1500);
+setTimeout(refreshHandsFreeStatus, 800);
+setInterval(refreshHandsFreeStatus, 10000);
 if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
