@@ -264,7 +264,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 2.5.1 — KEY DOCTOR 🧪 • 0-BUDGET</div>
+  <div class="ver">VERSION 2.6.0 — TABAHI + VOICES 🎭 • 0-BUDGET</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -277,7 +277,7 @@
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
-    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.5.1 🧪</small></div>
+    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v2.6 🎭</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -321,7 +321,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.5.1</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v2.6.0</div></div>
       </div>
 
       <div class="qactions">
@@ -429,7 +429,9 @@
           <option value="en-US">English-US (en-US)</option>
         </select>
 
-        <label class="f">🎙️ AWAAZ CHUNO (sab available voices — network/online sab se natural)</label>
+                <label class="f">🎭 VOICE ARTIST CHUNO (premium neural — Urdu/Hindi/English)</label>
+        <div id="artistGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:2px"></div>
+        <label class="f">🎙️ OFFLINE VOICE (koi artist kaam na kare to — phone wali)</label>
         <select class="f" id="sVoice"><option value="">Auto (engine default)</option></select>
         <button class="save" id="testVoice" style="background:#0891b2">🎧 TEST AWAAZ SUNO</button>
         <label class="f">🎵 AWAAZ KI PITCH: <span id="pitchVal">1.05</span></label>
@@ -485,8 +487,9 @@
         <div class="phase"><span class="st">✅</span><span><b>Phase 4</b> — Wake Word ("Maya"/"Boss") + YouTube auto-play</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 5</b> — HANDS-FREE: naam se call, WhatsApp draft/auto-send, battery shield, boot start</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Phase 6</b> — NEVER-STOP BRAIN: Gemini pool → Groq → GitHub → auto-queue</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Phase 7</b> — TABAHI: 7 Voice Artists (neural Urdu/Hindi) + Agent Mode (code runner) + Web Fetch + Smart Diary</span></div>
       </div>
-      <div class="vtag">MAYA v2.5.1 — KEY DOCTOR EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v2.6.0 — TABAHI EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -534,7 +537,7 @@ setTimeout(function(){
 window.__mayaJSOK = true;
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
-var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", groqModel:"llama-3.3-70b-versatile", ghKey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", model:"auto", autoListen:false, voiceOn:true, wakeWord:false };
+var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", groqModel:"llama-3.3-70b-versatile", ghKey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"auto", model:"auto", autoListen:false, voiceOn:true, wakeWord:false };
 var settings = Object.assign({}, DEFAULTS);
 try {
   var s1 = JSON.parse(localStorage.getItem("maya_settings") || "null");
@@ -547,6 +550,11 @@ function saveSettings(){ localStorage.setItem("maya_settings", JSON.stringify(se
 var facts = [];
 try { facts = JSON.parse(localStorage.getItem("maya_facts") || "[]"); } catch(e){}
 function saveFacts(){ localStorage.setItem("maya_facts", JSON.stringify(facts.slice(0, 30))); renderFacts(); hudRefresh(); }
+
+/* ---------- SMART DIARY (Phase 7) ---------- */
+var diary = [];
+try { diary = JSON.parse(localStorage.getItem("maya_diary") || "[]"); } catch(e){}
+function saveDiary(){ try { localStorage.setItem("maya_diary", JSON.stringify(diary.slice(-200))); } catch(e){} }
 
 /* ---------- CHAT HISTORY ---------- */
 var chatHist = [];
@@ -596,7 +604,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.5.1 — SYSTEMS ONLINE");
+    pushLog("MAYA v2.6.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -687,20 +695,117 @@ function pickVoice(lang){
   if (base === "en") for (var j = 0; j < voices.length; j++) if ((voices[j].lang||"").toLowerCase().indexOf("en") === 0) return voices[j];
   return null;
 }
+/* =========== VOICE ARTISTS (Edge Neural TTS jugaad — premium, free) =========== */
+var VOICE_ARTISTS = {
+  auto:   { name: "AUTO — script detect", auto: true },
+  maya:   { name: "\u{1F9D1}\u{200D}\u{1F4BB} MAYA — dost (Urdu)", voice: "ur-PK-UzmaNeural",   rate: "+0%",  pitch: "+0Hz",  lang: "ur-PK", sample: "Assalam-o-alaikum! Main Maya hoon, aap ki personal AI." },
+  jarvis: { name: "\u{1F3E2} JARVIS — bade sahab (Urdu)", voice: "ur-PK-AsadNeural", rate: "-4%", pitch: "-2Hz", lang: "ur-PK", sample: "Janaab, aap ke hukum ka intezar tha. Kya karne ka irada hai?" },
+  swara:  { name: "\u{1F3A4} SWARA — hindi heroine", voice: "hi-IN-SwaraNeural",  rate: "+0%",  pitch: "+2Hz",  lang: "hi-IN", sample: "Namaste! Main Swara hoon, bataiye kya madad karun?" },
+  madhur: { name: "\u{1F3AD} MADHUR — hindi hero", voice: "hi-IN-MadhurNeural", rate: "+0%",  pitch: "-2Hz",  lang: "hi-IN", sample: "Haan bhai, bolo. Main Madhur hoon." },
+  chintu: { name: "\u{1F476} CHINTU — funny bacha", voice: "en-US-AnaNeural",     rate: "+9%",  pitch: "+26Hz", lang: "en-US", sample: "Hello hello! Main Chintu bol raha hoon, hahaha!" },
+  neerja: { name: "\u{1F4D1} NEERJA — English mem", voice: "en-IN-NeerjaNeural", rate: "+0%",  pitch: "+0Hz",  lang: "en-IN", sample: "Hello! I am Neerja. How may I help you today?" },
+  guy:    { name: "\u{1F3AC} GUY — narrator", voice: "en-US-GuyNeural",          rate: "-4%",  pitch: "-3Hz",  lang: "en-US", sample: "In a world of ordinary voices... one assistant stands alone." }
+};
+function currentArtist(text){
+  var id = settings.voiceArtist || "auto";
+  if (id !== "auto" && VOICE_ARTISTS[id] && VOICE_ARTISTS[id].voice) return VOICE_ARTISTS[id];
+  if (/[\u0600-\u06FF]/.test(text)) return VOICE_ARTISTS.maya;
+  if (/[\u0900-\u097F]/.test(text)) return VOICE_ARTISTS.swara;
+  return VOICE_ARTISTS.neerja;
+}
+var EDGE = {
+  token: "6A5AA1D4EAFF4E9FB37E23D68491D6F4",
+  wss: "wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1",
+  ver: "1-130.0.2849.68",
+  audio: null, ws: null
+};
+function uuid4(){
+  try { return crypto.randomUUID(); } catch(e){}
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c){ var r = Math.random() * 16 | 0; return (c === "x" ? r : (r & 3 | 8)).toString(16); });
+}
+function escXml(s){ return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;"); }
+async function edgeSecGec(){
+  var sec = Math.floor(Date.now() / 1000);
+  var ticks = ((sec - (sec % 300)) + 11644473600) * 10000000;
+  var buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(ticks) + EDGE.token));
+  var arr = new Uint8Array(buf), hex = "";
+  for (var i = 0; i < arr.length; i++) hex += (arr[i] < 16 ? "0" : "") + arr[i].toString(16);
+  return hex.toUpperCase();
+}
+function edgeStop(){
+  try { if (EDGE.audio) { EDGE.audio.pause(); if (EDGE.audio.src && EDGE.audio.src.indexOf("blob:") === 0) URL.revokeObjectURL(EDGE.audio.src); EDGE.audio = null; } } catch(e){}
+  try { if (EDGE.ws) { EDGE.ws.onmessage = null; EDGE.ws.close(); EDGE.ws = null; } } catch(e){}
+}
+async function edgeSpeak(text, artist, onDone, onFail){
+  try {
+    var gec = await edgeSecGec();
+    var url = EDGE.wss + "?TrustedClientToken=" + EDGE.token + "&Sec-MS-GEC=" + gec + "&Sec-MS-GEC-Version=" + EDGE.ver + "&ConnectionId=" + uuid4().replace(/-/g, "");
+    var ws = new WebSocket(url);
+    EDGE.ws = ws;
+    var chunks = [], done = false;
+    var to = setTimeout(function(){ if (!done) { done = true; try { ws.close(); } catch(e){} onFail(); } }, 15000);
+    ws.onopen = function(){
+      var ts = new Date().toISOString();
+      ws.send("X-Timestamp:" + ts + "\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n" + JSON.stringify({
+        context: { synthesis: { audio: { metadataoptions: { sentenceBoundaryEnabled: "false", wordBoundaryEnabled: "false" }, outputFormat: "audio-24khz-48kbitrate-mono-mp3" } } }
+      }));
+      var ssml = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='" + artist.lang + "'><voice name='" + artist.voice + "'><prosody pitch='" + artist.pitch + "' rate='" + artist.rate + "' volume='+0%'>" + escXml(text) + "</prosody></voice></speak>";
+      ws.send("X-RequestId:" + uuid4().replace(/-/g, "") + "\r\nContent-Type:application/ssml+xml\r\nX-Timestamp:" + ts + "Z\r\nPath:ssml\r\n\r\n" + ssml);
+    };
+    ws.onmessage = function(ev){
+      if (done) return;
+      if (typeof ev.data === "string") {
+        if (ev.data.indexOf("Path:turn.end") >= 0) {
+          done = true; clearTimeout(to);
+          try { ws.close(); } catch(e){}
+          if (!chunks.length) { onFail(); return; }
+          var blob = new Blob(chunks, { type: "audio/mpeg" });
+          var a = new Audio(URL.createObjectURL(blob));
+          EDGE.audio = a;
+          a.onended = function(){ edgeStop(); onDone(); };
+          a.onerror = function(){ edgeStop(); onFail(); };
+          a.play().catch(function(){ edgeStop(); onFail(); });
+        }
+      } else if (ev.data && ev.data.arrayBuffer) {
+        ev.data.arrayBuffer().then(function(ab){
+          var dv = new DataView(ab);
+          if (ab.byteLength > 4) {
+            var hlen = dv.getUint16(0);
+            if (ab.byteLength > hlen + 2) chunks.push(ab.slice(hlen + 2));
+          }
+        });
+      }
+    };
+    ws.onerror = function(){ if (!done) { done = true; clearTimeout(to); onFail(); } };
+    ws.onclose = function(){ if (!done) { done = true; clearTimeout(to); onFail(); } };
+  } catch (e) { onFail(); }
+}
+function cleanSpeech(t){ return String(t).replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, "").trim(); }
+
 function speak(text, wasVoice){
   lastWasVoice = wasVoice;
-  if (NATIVE) {
-    var cN = text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, "").trim();
-    if (!settings.voiceOn || !cN) { afterSpeak(wasVoice); return; }
+  var clean = cleanSpeech(text);
+  if (!settings.voiceOn || !clean) { afterSpeak(wasVoice); return; }
+  var artist = currentArtist(clean);
+  if (artist && artist.voice && typeof WebSocket !== "undefined" && navigator.onLine !== false) {
     speaking = true; setOrb("speaking");
-    try { window.MayaBridge.speak(cN, settings.tts, settings.rate, settings.pitch || 1, settings.voiceName || ""); }
+    pushLog("VOICE: " + artist.voice);
+    edgeSpeak(clean, artist,
+      function(){ speaking = false; afterSpeak(wasVoice); },
+      function(){ nativeSpeak(clean, wasVoice); });
+    return;
+  }
+  nativeSpeak(clean, wasVoice);
+}
+function nativeSpeak(clean, wasVoice){
+  if (NATIVE) {
+    speaking = true; setOrb("speaking");
+    try { window.MayaBridge.speak(clean, settings.tts, settings.rate, settings.pitch || 1, settings.voiceName || ""); }
     catch(e){ speaking = false; afterSpeak(wasVoice); }
     return;
   }
-  if (!settings.voiceOn || !synth) { afterSpeak(wasVoice); return; }
+  if (!synth) { afterSpeak(wasVoice); return; }
   try { synth.cancel(); } catch(e){}
-  var clean = text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, "").trim();
-  if (!clean) { afterSpeak(wasVoice); return; }
   var u = new SpeechSynthesisUtterance(clean);
   u.lang = settings.tts;
   if (settings.voiceName) {
@@ -966,6 +1071,20 @@ function tryLocal(t, wasVoice){
     return { reply:"Timer kitne ka, " + settings.name + "? Bolo: 'paanch minute ka timer lagao'." };
   }
 
+  /* DIARY fast path */
+  if (/(diary|roznamcha|dairy)/.test(q)) {
+    var dm = q.match(/(?:diary|roznamcha|dairy)(?:\s*mein)?\s*(?:likho|likh do|entry karo|note)\s*[:]?\s*(.+)/);
+    if (dm) {
+      diary.push({ t: Date.now(), text: dm[1].trim().slice(0, 400) });
+      saveDiary(); hudRefresh();
+      return { reply: "Diary mein likh diya, " + settings.name + " — ab tak " + diary.length + " entries." };
+    }
+    if (/(padho|kholo|dikhao|kya likha|suna)/.test(q)) {
+      var last = diary.slice(-5).map(function(d){ return new Date(d.t).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) + ": " + d.text; });
+      return { reply: last.length ? "Aap ki diary ke aakhri " + last.length + " entries: " + last.join("; ") + "." : "Diary abhi khali hai, " + settings.name + ". Bolo: diary mein likho... aur main likh dungi." };
+    }
+  }
+
   /* NAAM se call (fast path) */
   m = q.match(/([a-z\u0600-\u06FF][a-z\u0600-\u06FF .]{1,24}?)\s*ko\s*(?:call|phone|missed call|phone call)/);
   if (m && NATIVE && !/\d/.test(m[1])) {
@@ -1049,7 +1168,7 @@ function sysPrompt(){
     "- Zaroori cheez (birthday, appointment, pasand, kisi ka naam, kaam) -> khud save_memory use karo, 'yaad rakhna' bole na bole\n" +
     "- Yaad karna ho -> recall_memory\n" +
     "Tool use karne ke baad ek chhoti friendly line mein confirm karo. Jo tools se mumkin nahi, wo bRIEFLY bata do.\n" +
-    "RULES: (1) Reply SPOKEN ALOUD hoti hai — 1-3 jumlay, 60 words se kam (detail na maangi jaye to). (2) Plain spoken text: koi markdown, list, asterisk, emoji nahi. (3) User ki language aur script mein jawab: Urdu script -> Urdu script, Roman Urdu -> Roman Urdu, English -> English. (4) Kaam aksar tools se karo, sirf baat mat karo. (5) Kaun ho? MAYA, " + settings.name + " ki personal AI — mohabbat se 0 budget par bani.";
+    "RULES: (1) Reply SPOKEN ALOUD hoti hai — 1-3 jumlay, 60 words se kam (detail na maangi jaye to). (2) Plain spoken text: koi markdown, list, asterisk, emoji nahi. (3) User ki language aur script mein jawab: Urdu script -> Urdu script, Roman Urdu -> Roman Urdu, English -> English. (4) Kaam aksar tools se karo, sirf baat mat karo. (4b) Calculations, lists, data-parse, conversion -> run_javascript mein khud code likh kar chalao. (4c) Live info (rates, news, koi bhi site) -> web_fetch. (4d) Roznamcha: diary likhne/parhne ke liye diary_write/diary_search. (5) Kaun ho? MAYA, " + settings.name + " ki personal AI — mohabbat se 0 budget par bani.";
   if (facts.length) p += "\nKNOWN FACTS about " + settings.name + " (natural tor par use karo): " + facts.slice(0, 15).map(function(f){ return "- " + f; }).join(" ");
   return p;
 }
@@ -1128,6 +1247,14 @@ var TOOL_DECLS = [
     parameters: { type: "OBJECT", properties: { number: { type: "STRING" } }, required: ["number"] } },
   { name: "send_sms", description: "SMS screen kholta hai number ke saath.",
     parameters: { type: "OBJECT", properties: { number: { type: "STRING" }, text: { type: "STRING" } }, required: ["number"] } },
+  { name: "run_javascript", description: "Chhota JavaScript chala kar koi bhi calculation, list-process, ya data-parse karo. Input variable mein raw data milta hai. console.log() se debug. Return final value. (Termux-style code runner)",
+    parameters: { type: "OBJECT", properties: { code: { type: "STRING", description: "JS code — input variable available, return se jawab do" }, input: { type: "STRING", description: "Raw data/string jo code ko chahiye (optional)" } }, required: ["code"] } },
+  { name: "web_fetch", description: "Koi bhi public URL khol kar uska text padho (rates, news, wikipedia, koi bhi page). Sirf simple pages; apps/login wale nahi.",
+    parameters: { type: "OBJECT", properties: { url: { type: "STRING" } }, required: ["url"] } },
+  { name: "diary_write", description: "User ki diary (roznamcha) mein entry likho — 'aaj ye hua', events, kharcha, kuch bhi.",
+    parameters: { type: "OBJECT", properties: { entry: { type: "STRING" } }, required: ["entry"] } },
+  { name: "diary_search", description: "Diary mein talash karo — date, keyword, ya pichle hafte ki entries.",
+    parameters: { type: "OBJECT", properties: { query: { type: "STRING", description: "keyword ya 'kal' 'pichle hafte' jaisa lafz" } }, required: ["query"] } },
   { name: "get_weather", description: "Current mausam lauta deta hai (default sheher settings wala).",
     parameters: { type: "OBJECT", properties: { city: { type: "STRING" } } } },
   { name: "battery_status", description: "Phone battery ka status.", parameters: { type: "OBJECT", properties: {} } },
@@ -1179,6 +1306,43 @@ async function execTool(name, args){
     } else if (name === "send_sms") {
       var n2 = String(args.number || "").replace(/[^\d+]/g, "");
       if (n2.length >= 4) { openURL("sms:" + n2); out = { done: true }; } else out = { done: false };
+    } else if (name === "run_javascript") {
+      out = await sandboxRun(String(args.code || ""), String(args.input || ""));
+    } else if (name === "web_fetch") {
+      var wurl = String(args.url || "");
+      if (!/^https?:\/\//.test(wurl)) { out = { error: "poora URL do (https://...)" }; }
+      else {
+        var wtxt = "";
+        if (NATIVE && window.MayaBridge.httpGet) {
+          var wr = JSON.parse(window.MayaBridge.httpGet(wurl, ""));
+          if (wr.status >= 200 && wr.status < 300) wtxt = htmlToText(wr.body).slice(0, 3000);
+        } else {
+          try {
+            var wf = await fetch(wurl);
+            if (wf.ok) wtxt = htmlToText(await wf.text()).slice(0, 3000);
+          } catch (e) {}
+        }
+        out = wtxt ? { ok: true, text: wtxt } : { error: "page nahi khul saka (site block ya JS-only page ho sakta hai)" };
+      }
+    } else if (name === "diary_write") {
+      var de = String(args.entry || "").trim().slice(0, 400);
+      if (de) {
+        diary.push({ t: Date.now(), text: de });
+        saveDiary(); hudRefresh();
+        out = { written: true, total: diary.length };
+      } else out = { written: false };
+    } else if (name === "diary_search") {
+      var dq = String(args.query || "").toLowerCase().trim();
+      var cutoff = 0;
+      if (/kal|yesterday/.test(dq)) cutoff = Date.now() - 172800000;
+      if (/hafte|week/.test(dq)) cutoff = Date.now() - 604800000;
+      var hits = diary.filter(function(d){
+        if (d.t < cutoff && cutoff) return false;
+        return !dq || d.text.toLowerCase().indexOf(dq) >= 0 || new Date(d.t).toLocaleDateString().toLowerCase().indexOf(dq) >= 0;
+      }).slice(-8).map(function(d){
+        return new Date(d.t).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) + ": " + d.text;
+      });
+      out = { entries: hits, total: diary.length };
     } else if (name === "call_contact") {
       if (!NATIVE) { out = { done: false, note: "sirf APK mein" }; }
       else {
@@ -1432,6 +1596,49 @@ async function askAI(wasVoice){
 
 function openURL(u){ var w = window.open(u, "_blank"); if (!w) { try { location.href = u; } catch(e){} } }
 
+/* ---------- AGENT MODE: JS Sandbox (safe cage — no DOM, no data access) ---------- */
+function sandboxRun(code, input){
+  return new Promise(function(resolve){
+    var workerSrc = 'self.onmessage=function(e){var logs=[];var console={log:function(){for(var i=0;i<arguments.length;i++)logs.push(String(arguments[i]))}};' +
+      'Promise.resolve().then(function(){var AF=Object.getPrototypeOf(async function(){}).constructor;var fn=new AF("input","console","\"use strict\";"+e.data.code);return fn(e.data.input)})' +
+      '.then(function(r){var o;try{o=typeof r==="string"?r:JSON.stringify(r)}catch(x){o=String(r)}self.postMessage({ok:true,result:o,logs:logs.slice(0,5)})})' +
+      '.catch(function(err){self.postMessage({ok:false,error:String(err&&err.message||err),logs:logs.slice(0,5)})})};';
+    var finish = function(o){ resolve(o); };
+    try {
+      if (typeof Worker === "undefined") throw new Error("no-worker");
+      var w = new Worker(URL.createObjectURL(new Blob([workerSrc], { type: "application/javascript" })));
+      var to = setTimeout(function(){ try { w.terminate(); } catch(e){} finish({ error: "timeout (8s) — code atka" }); }, 8000);
+      w.onmessage = function(ev){
+        clearTimeout(to);
+        try { w.terminate(); } catch(e){}
+        finish(ev.data && ev.data.ok ? { result: ev.data.result, logs: ev.data.logs } : { error: ev.data ? ev.data.error : "fail", logs: ev.data && ev.data.logs });
+      };
+      w.onerror = function(){
+        clearTimeout(to);
+        try { w.terminate(); } catch(e){}
+        finish({ error: "code error" });
+      };
+      w.postMessage({ code: code, input: input });
+    } catch (e) {
+      /* Fallback: bina worker (old WebView) — try/catch cage */
+      try {
+        var AF2 = Object.getPrototypeOf(async function(){}).constructor;
+        var fn2 = new AF2("input", "console", '"use strict";' + code);
+        Promise.resolve().then(function(){ return fn2(input); }).then(function(r){
+          var o; try { o = typeof r === "string" ? r : JSON.stringify(r); } catch(x){ o = String(r); }
+          finish({ result: o });
+        }).catch(function(err){ finish({ error: String(err && err.message || err) }); });
+      } catch (err2){ finish({ error: String(err2 && err2.message || err2) }); }
+    }
+  });
+}
+function htmlToText(h){
+  return String(h).replace(/<script[\s\S]*?<\/script>/gi, " ").replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/\s+/g, " ").trim();
+}
+
 /* ---------- YOUTUBE AUTO-PLAY (pehla result seedha chalega) ---------- */
 async function ytPlay(query){
   var q = String(query || "").trim();
@@ -1474,7 +1681,7 @@ window.__wakeErr = function(code){
 function hudRefresh(){
   var wk = $("#hudWake"); if (wk) wk.textContent = settings.wakeWord ? "ON \u{1F442}" : "OFF";
   var ai = $("#hudAI"); if (ai) ai.textContent = (settings.apikey || settings.groqKey || settings.ghKey) ? aiState.provider : "NO KEY";
-  var mem = $("#hudMem"); if (mem) mem.textContent = facts.length + " facts • " + chatHist.length + " msgs";
+  var mem = $("#hudMem"); if (mem) mem.textContent = facts.length + "F • " + diary.length + "D • " + chatHist.length + "M";
   var tm = $("#hudTimers"); if (tm) tm.textContent = String(timers.length);
   var au = $("#hudAuto"); if (au) au.textContent = settings.autoListen ? "ON" : "OFF";
 }
@@ -1640,7 +1847,7 @@ $("#saveSettings").addEventListener("click", function(){
   settings.voiceOn = $("#sVoice").checked; settings.autoListen = $("#sAuto").checked;
   var wakeOn = $("#sWake").checked;
   if (wakeOn !== !!settings.wakeWord) { settings.wakeWord = wakeOn; setWakeService(wakeOn); } else settings.wakeWord = wakeOn;
-  saveSettings(); loadSettingsForm(); setOrb("idle"); paintQuick(); greetMiniRefresh();
+  saveSettings(); loadSettingsForm(); setOrb("idle"); paintQuick(); greetMiniRefresh(); renderArtists();
   if (NATIVE) { try { window.MayaBridge.keepScreenOn(settings.autoListen); } catch(e){} }
   if (settings.autoListen) requestWakeLock();
   toast("✅ Settings save ho gayin");
@@ -1672,6 +1879,31 @@ $("#autoSendBtn").addEventListener("click", function(){
     setTimeout(refreshHandsFreeStatus, 2500);
   } catch(e){}
 });
+
+function renderArtists(){
+  var host = $("#artistGrid"); if (!host) return;
+  var html = "";
+  Object.keys(VOICE_ARTISTS).forEach(function(id){
+    var a = VOICE_ARTISTS[id];
+    var sel = (settings.voiceArtist || "auto") === id;
+    html += "<button class=\"quick\" data-artist=\"" + id + "\" style=\"" + (sel ? "background:var(--cyan);color:#032330;font-weight:700;" : "") + "padding:9px 6px;font-size:11px;border-radius:10px;cursor:pointer;background:" + (sel ? "var(--cyan)" : "var(--panel)") + ";border:1px solid var(--line);color:" + (sel ? "#032330" : "var(--text)") + "\">" + a.name + "</button>";
+  });
+  host.innerHTML = html;
+  host.querySelectorAll("button[data-artist]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var id = b.dataset.artist;
+      settings.voiceArtist = id; saveSettings(); renderArtists();
+      var a = VOICE_ARTISTS[id];
+      if (a && a.voice) {
+        toast("Testing " + a.name.split(" ")[0] + "...");
+        edgeSpeak(a.sample, a, function(){ toast("Kaisi lagi? 😄"); }, function(){ toast("Offline/native awaz use hogi"); nativeSpeak(a.sample, false); });
+      } else {
+        toast("AUTO mode — script ke hisaab se khud chunegi");
+        nativeSpeak("Auto voice mode on. Urdu bolenge to Urdu artist, English to English.", false);
+      }
+    });
+  });
+}
 
 async function testKey(kind, key){
   try {
@@ -1755,7 +1987,7 @@ $("#testVoice").addEventListener("click", function(){
 /* ---------- DIAGNOSTICS ---------- */
 $("#diagBtn").addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v2.5.1 — DOCTOR REPORT");
+  out.push("MAYA v2.6.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));
@@ -1792,6 +2024,7 @@ function sendText(){
 }
 $("#qStop").addEventListener("click", function(){
   stopListening();
+  edgeStop();
   if (NATIVE) { try { window.MayaBridge.stopSpeak(); } catch(e){} }
   if (synth) try { synth.cancel(); } catch(e){}
   speaking = false; thinking = false; setOrb("idle");
@@ -1820,6 +2053,7 @@ renderCmds(""); renderFacts(); loadSettingsForm(); paintQuick(); setOrb("idle");
 fillWeatherChip();
 setInterval(fillWeatherChip, 1800000);
 populateVoiceSelect();
+renderArtists();
 if (NATIVE && settings.wakeWord) setTimeout(function(){ try { setWakeService(true); } catch(e){} }, 1500);
 setTimeout(refreshHandsFreeStatus, 800);
 setInterval(refreshHandsFreeStatus, 10000);
