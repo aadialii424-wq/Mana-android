@@ -19,6 +19,8 @@ class MayaNotifService : NotificationListenerService() {
 
     companion object {
         const val MAX = 20
+        @JvmStatic
+        var speakOn = false
         val buffer = Collections.synchronizedList(mutableListOf<JSONObject>())
 
         fun historyJson(): String {

@@ -16,7 +16,7 @@ import android.provider.Settings
 import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.MediaStore
-import android.provider.Settings
+
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.BatteryManager
@@ -98,6 +98,24 @@ class MainActivity : AppCompatActivity() {
         initTts()
         createNotificationChannel()
         requestNeededPermissions()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode != Activity.RESULT_OK) return
+        try {
+            var bytes: ByteArray? = null
+            if (requestCode == 5001) {
+                val f = java.io.File(cacheDir, "maya_photo.jpg")
+                if (f.exists()) bytes = f.readBytes()
+            } else if (requestCode == 5002 && data?.data != null) {
+                contentResolver.openInputStream(data.data!!)?.use { it.readBytes() }?.let { bytes = it }
+            }
+            if (bytes != null && bytes!!.size in 1..4_000_000) {
+                val b64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
+                evalAsync("window.__photoTaken && window.__photoTaken('" + b64 + "')")
+            }
+        } catch (e: Exception) {}
     }
 
     override fun onDestroy() {
@@ -834,24 +852,6 @@ class MainActivity : AppCompatActivity() {
                 startActivityForResult(Intent.createChooser(i, "Photo chunko"), 5002)
                 true
             } catch (e: Exception) { false }
-        }
-
-        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-            super.onActivityResult(requestCode, resultCode, data)
-            if (resultCode != Activity.RESULT_OK) return
-            try {
-                var bytes: ByteArray? = null
-                if (requestCode == 5001) {
-                    val f = java.io.File(cacheDir, "maya_photo.jpg")
-                    if (f.exists()) bytes = f.readBytes()
-                } else if (requestCode == 5002 && data?.data != null) {
-                    contentResolver.openInputStream(data.data!!)?.use { it.readBytes() }?.let { bytes = it }
-                }
-                if (bytes != null && bytes!!.size in 1..4_000_000) {
-                    val b64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
-                    evalAsync("window.__photoTaken && window.__photoTaken('" + b64 + "')")
-                }
-            } catch (e: Exception) {}
         }
 
         /** Universal HTTP (CORS-proof) — backup brains ke liye */
