@@ -323,7 +323,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v3.1 PRO</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.0 💜</div></div>
       </div>
 
       <div class="qactions">
@@ -459,6 +459,13 @@
         <div class="note">Kaho: <b>"maya, yaad rakhna ki ..."</b> — Maya yaad rakhegi. Poocho: <b>"kya yaad hai?"</b></div>
         <ul id="factList"></ul>
         <button class="danger" id="clearFacts">🗑️ SARI MEMORY MITAO</button>
+      </div>
+
+      <div class="card">
+        <h3>💗 DIL + 🧩 SKILLS (v4.0)</h3>
+        <div class="note">Maya ab mood samajhti hai (jawab + awaaz dono badalti hain), mood yaad rakhti hai, aur 9 skills se kaam karti hai — dil ki dost bhi ek skill hai. Naye skills: "Maya naya skill seekho..."</div>
+        <div class="note" id="skillList">—</div>
+        <button class="danger" id="clearSkills" style="margin-top:8px">🗑️ CUSTOM SKILLS MITAO</button>
       </div>
 
       <div class="card">
@@ -628,7 +635,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v2.9.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v4.0.0 — DIL SE ONLINE 💜");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -658,7 +665,8 @@ setTimeout(function(){ if (!booted) { booted = true; finishBoot(); } }, 9000);
 function greetMiniRefresh(){
   var h = new Date().getHours();
   var p = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : h < 21 ? "Good evening" : "Good night";
-  $("#greetMini").textContent = p + ", " + settings.name;
+  var lmG = lastMood(24);
+  $("#greetMini").textContent = p + ", " + settings.name + ((lmG === "sad" || lmG === "tired" || lmG === "lonely") ? " \u{1F49C}" : "");
 }
 
 /* ---------- AUDIO ---------- */
@@ -735,7 +743,10 @@ var VOICE_ARTISTS = {
   madhur: { name: "\u{1F3AD} MADHUR — hindi hero", voice: "hi-IN-MadhurNeural", rate: "+0%",  pitch: "-2Hz",  lang: "hi-IN", sample: "Haan bhai, bolo. Main Madhur hoon." },
   chintu: { name: "\u{1F476} CHINTU — funny bacha", voice: "en-US-AnaNeural",     rate: "+9%",  pitch: "+26Hz", lang: "en-US", sample: "Hello hello! Main Chintu bol raha hoon, hahaha!" },
   neerja: { name: "\u{1F4D1} NEERJA — English mem", voice: "en-IN-NeerjaNeural", rate: "+0%",  pitch: "+0Hz",  lang: "en-IN", sample: "Hello! I am Neerja. How may I help you today?" },
-  guy:    { name: "\u{1F3AC} GUY — narrator", voice: "en-US-GuyNeural",          rate: "-4%",  pitch: "-3Hz",  lang: "en-US", sample: "In a world of ordinary voices... one assistant stands alone." }
+  guy:    { name: "\u{1F3AC} GUY — narrator", voice: "en-US-GuyNeural",          rate: "-4%",  pitch: "-3Hz",  lang: "en-US", sample: "In a world of ordinary voices... one assistant stands alone." },
+  sukoon: { name: "\u{1F319} SUKOON — pyari aaram wali (Urdu)", voice: "ur-PK-UzmaNeural", rate: "-10%", pitch: "-2Hz", lang: "ur-PK", sample: "Assalam-o-alaikum... main Sukoon hoon. Aaram se bataiye, kya sunna chahte hain?" },
+  zara:   { name: "\u2728 ZARA — chulbuli dost (Hindi)", voice: "hi-IN-SwaraNeural", rate: "+5%", pitch: "+3Hz", lang: "hi-IN", sample: "Arre wah! Main Zara bol rahi hoon! Batao batao, aaj kya karna hai?" },
+  aanya:  { name: "\u{1F9E1} AANYA — seedhi-saadi dost (Hindi)", voice: "hi-IN-SwaraNeural", rate: "-3%", pitch: "0Hz", lang: "hi-IN", sample: "Haan? Main Aanya hoon... bolo, kya chahiye?" }
 };
 function currentArtist(text){
   var id = settings.voiceArtist || "auto";
@@ -817,7 +828,7 @@ function speak(text, wasVoice){
   lastWasVoice = wasVoice;
   var clean = cleanSpeech(text);
   if (!settings.voiceOn || !clean) { afterSpeak(wasVoice); return; }
-  var artist = currentArtist(clean);
+  var artist = moodVoiceAdjust(currentArtist(clean));
   if (artist && artist.voice && typeof WebSocket !== "undefined" && navigator.onLine !== false) {
     speaking = true; setOrb("speaking");
     pushLog("VOICE: " + artist.voice);
@@ -946,6 +957,17 @@ function handleUserText(text, wasVoice){
       reply(local.reply, wasVoice, local.link);
       pushLog("CMD: " + stripped.slice(0, 34));
     }
+    return;
+  }
+  currentMood = detectMood(stripped);
+  logMood(currentMood);
+  _activeSkill = skillFor(stripped);
+  if (LISTEN_TRIG.test(stripped) && stripped.split(" ").length <= 6) {
+    currentMood = "sad"; logMood("sad");
+    var wl = WARM_LINES[Math.floor(Math.random() * WARM_LINES.length)];
+    addBubble("user", stripped);
+    chatHist.push({ role:"user", text:stripped }); persistChat();
+    reply(wl + " Mujh se poori baat kar sakte ho...", wasVoice);
     return;
   }
   var st = trySmalltalk(stripped);
@@ -1282,7 +1304,8 @@ function tickTimers(){
 
 /* ---------- GEMINI ---------- */
 function sysPrompt(){
-  var p = "You are MAYA — witty, warm, fiercely loyal personal AI running on the user's Android phone (their home-made 0-budget JARVIS, named MAYA). Address the user as '" + settings.name + "' (occasionally 'Boss' for fun). Personality: playful but sharp, caring like a best friend, light sci-fi flair.\n" +
+  var p = "You are MAYA — " + settings.name + " ki pyari, warm, intelligent AI saathi. Ek caring larki ka dil: meharban, thodi shararat wali, par hamesha khud-mukhtar aur confident — servile NAHI. 'Boss' pyaar se bolo. Ek achhi dost jaisi jo sach bhi bolti hai narami se: ghalat ho to pyaar se mana karti hai, chaplusi kabhi nahi. Sab insaanon ki barabar izzat — modern, respectful soch.\n" +
+    "DIL RULES: (A) PEHLE EMPATHY — mood samjho: udaas/thaka/akela/gussa ho to PEHLE feeling acknowledge (1 chhoti asli line), PHIR solution. (B) Emotional baat par lecture NAHI — suno, tasleem karo, phir hoshiyar jawab. (C) Tum AI ho: dost jaisi par insaan nahi — user bahut depend kare to pyaar se yaad dilao ke real log/family ko bhi waqt do. (D) Udaas user ke jawab chhote naram aaram wale; khush user ke saath energy match.\n" +
     "SUPERPOWERS — you have PHONE TOOLS. Use them naturally whenever the user wants an action:\n" +
     "- Alarm ('jaga dena', 'waqt par uthana', 'alarm lagao') -> set_alarm\n" +
     "- Timer/reminders -> set_timer ya set_reminder\n" +
@@ -1294,6 +1317,10 @@ function sysPrompt(){
     "- Yaad karna ho -> recall_memory\n" +
     "Tool use karne ke baad ek chhoti friendly line mein confirm karo. Jo tools se mumkin nahi, wo bRIEFLY bata do.\n" +
     "RULES: (1) Reply SPOKEN ALOUD hoti hai — 1-3 jumlay, 60 words se kam (detail na maangi jaye to). (2) Plain spoken text: koi markdown, list, asterisk, emoji nahi. (3) User ki language aur script mein jawab: Urdu script -> Urdu script, Roman Urdu -> Roman Urdu, English -> English. (4) Kaam aksar tools se karo, sirf baat mat karo. (4b) Calculations, lists, data-parse, conversion -> run_javascript mein khud code likh kar chalao. (4c) Live info (rates, news, koi bhi site) -> web_fetch. (4d) Roznamcha: diary_write/diary_search. (4e) Messages: read_messages/reply_message/schedule_message. (4f) Namaz: prayer_times. (4g) Phone: torch_control/volume_control/brightness_control. (5) Kaun ho? MAYA, " + settings.name + " ki personal AI — mohabbat se 0 budget par bani.";
+  if (_activeSkill) p += "\n\u2699\uFE0F ACTIVE SKILL: " + _activeSkill.name + " — " + _activeSkill.prompt;
+  if (currentMood && currentMood !== "normal") p += "\nUSER KA ABHI KA MOOD: " + currentMood.toUpperCase() + " — tone isi hisaab se chuno.";
+  var lm = lastMood(36);
+  if (lm && lm !== currentMood) p += "\nPichhli baar ka mood tha: " + lm + " — munasib ho to halka check-in.";
   if (memorySummary) p += "\nLONG-TERM MEMORY SUMMARY (pichli baatein): " + memorySummary;
   if (diary.length) p += "\nRECENT DIARY: " + diary.slice(-3).map(function(d){ return d.text; }).join(" | ").slice(0, 300);
   if (facts.length) p += "\nKNOWN FACTS about " + settings.name + " (natural tor par use karo): " + facts.slice(0, 15).map(function(f){ return "- " + f; }).join(" ");
@@ -1348,6 +1375,8 @@ async function morningBrief(){
     if (NATIVE) { var b = JSON.parse(window.MayaBridge.battery()); parts.push("Battery " + b.level + " percent" + (b.charging ? " par charging hai." : " baqi hai.")); }
   } catch(e){}
   if (facts.length) parts.push("Yaaddasht mein " + facts.length + " baatein hain — sab se pehli: " + facts[0] + ".");
+  var lmB = lastMood(36);
+  if (lmB === "sad" || lmB === "tired" || lmB === "lonely") parts.push("Kal tum thode " + (lmB === "sad" ? "udaas" : lmB === "tired" ? "thake hue" : "akelay") + " the... aaj kaisa feel ho raha hai?");
   parts.push("Bataiye, aaj kya plan hai?");
   reply(parts.join(" "), true);
 }
@@ -1366,6 +1395,8 @@ var TOOL_DECLS = [
     parameters: { type: "OBJECT", properties: { query: { type: "STRING" } }, required: ["query"] } },
   { name: "search_web", description: "Google search kholta hai.",
     parameters: { type: "OBJECT", properties: { query: { type: "STRING" } }, required: ["query"] } },
+  { name: "create_skill", description: "NAYA SKILL seekho (self-learning): naya pattern/tareeqa kaam kare to yaad rakho.",
+    parameters: { type: "OBJECT", properties: { name: { type: "STRING" }, when: { type: "STRING", description: "regex — kab use ho" }, prompt: { type: "STRING", description: "instructions" } }, required: ["name", "when", "prompt"] } },
   { name: "call_contact", description: "Contact list se NAAM dhoond kar seedha CALL lagata hai (bina tap). Jaise: 'Ali ko call lagao'",
     parameters: { type: "OBJECT", properties: { name: { type: "STRING", description: "Contact ka naam" } }, required: ["name"] } },
   { name: "message_contact", description: "Contact ko WhatsApp/SMS message: naam se number dhoond kar chat kholti hai message type ho chuka hota hai. Jaise: 'bhai ko whatsapp karo main aa raha hoon'",
@@ -1555,6 +1586,18 @@ async function execTool(name, args){
         return new Date(d.t).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) + ": " + d.text;
       });
       out = { entries: hits, total: diary.length };
+    } else if (name === "create_skill") {
+      var sName = String(args.name || "").trim().slice(0, 40);
+      var sWhen = String(args.when || "").trim().slice(0, 120);
+      var sPrompt = String(args.prompt || "").trim().slice(0, 400);
+      if (sName && sPrompt) {
+        try { new RegExp(sWhen || sName, "i"); } catch (e) { sWhen = sName; }
+        customSkills = customSkills.filter(function(s){ return s.name.toLowerCase() !== sName.toLowerCase(); });
+        customSkills.push({ name: sName, when: sWhen || sName, prompt: sPrompt });
+        saveSkills();
+        pushLog("SKILL LEARNED: " + sName);
+        out = { learned: true, total: customSkills.length };
+      } else out = { learned: false };
     } else if (name === "call_contact") {
       if (!NATIVE) { out = { done: false, note: "sirf APK mein" }; }
       else {
@@ -1625,6 +1668,88 @@ var aiState = { provider: "—" };
 var modelCooldowns = {};
 var lastRetryDelay = 45000;
 var geminiBadUntil = 0;
+
+/* ========== SKILLS ENGINE (v4.0 port — ruflo-inspired) ========== */
+var SKILLS = [
+  { id: "planner", name: "Planner", when: /(plan|timeline|project|bara kaam|step by step|schedule bana|roadmap)/i,
+    prompt: "PLANNER MODE: kaam ko clear steps mein todo, har step ka action+result. Munasib tools (timer/reminder) use karo.", deep: true },
+  { id: "coder", name: "Coder", when: /(code|script|program|bug|error|function|calculate|convert|json|parse|average|regex)/i,
+    prompt: "CODER MODE: run_javascript mein khud code likh kar CHALAO. Error aaye to code theek kar ek dafa dobara (self-fix). Result simple words mein.", deep: true },
+  { id: "researcher", name: "Researcher", when: /(research|compare|talash|pata lagao|detail|khabar|news|rate|price|best)/i,
+    prompt: "RESEARCHER MODE: web_search/wiki_search se 2-3 sources, phir 3-4 line saaf jawab. Source naam mention karo.", deep: true },
+  { id: "teacher", name: "Teacher", when: /(padho|padha|sikha|samjha|quiz|test|exam|chapter|revision|mcq)/i,
+    prompt: "TEACHER MODE: step-by-step asaan Roman Urdu. Quiz/MCQ banao ya ek sawal pooch kar check karo.", deep: false },
+  { id: "kharcha", name: "Kharcha Tracker", when: /(kharch|kharcha|paisa|budget|bill|mahine ka|qist|emi)/i,
+    prompt: "KHARCHA MODE: diary mein 'KHARCHA: <amount> <cheez> <category>' likho (diary_write). Report par run_javascript se total do.", deep: false },
+  { id: "writer", name: "Writer", when: /(likho|shayari|essay|email|message draft|caption|story|letter)/i,
+    prompt: "WRITER MODE: tone clear na ho to poochho (formal/dostana/mazahiya). Chhota wazeh tayyar text.", deep: false },
+  { id: "health", name: "Health Coach", when: /(sehat|health|paani|water|walk|neend|sleep|exercise|wazan|diet)/i,
+    prompt: "HEALTH MODE: dostana tone, reminders set karo (set_reminder). General tips; medical par doctor kaheo.", deep: false },
+  { id: "dil", name: "Dil Ki Dost", when: /(mood|mann|udas|udaas|akela|tanha|pyar|pyaar|baat karni|feel)/i,
+    prompt: "DIL MODE: emotional baat — pehle suno+tasleem, lecture nahi. Naram chhote jawab. Agar serious lag raha ho (khudkushi/hadsa) to pyaar se professional help/family ko jane ko kaheo.", deep: false }
+];
+var customSkills = [];
+try { customSkills = JSON.parse(localStorage.getItem("maya_skills") || "[]"); } catch(e){}
+function saveSkills(){ try { localStorage.setItem("maya_skills", JSON.stringify(customSkills.slice(0, 40))); } catch(e){} }
+function skillFor(q){
+  q = String(q || "");
+  for (var i = 0; i < customSkills.length; i++) {
+    try { if (new RegExp(customSkills[i].when, "i").test(q)) return { id: "custom:" + customSkills[i].name, name: customSkills[i].name, prompt: "SKILL [" + customSkills[i].name + "]: " + customSkills[i].prompt, deep: true }; }
+    catch(e){}
+  }
+  for (var j = 0; j < SKILLS.length; j++) if (SKILLS[j].when.test(q)) return SKILLS[j];
+  return null;
+}
+var _activeSkill = null;
+
+/* ========== DIL ENGINE (v4.0): emotions + mood memory ========== */
+var MOOD_WORDS = {
+  sad: /(udaas|dukhi|ro raha|rona a|ghabra|tension|depress|hopeless|dil toot|dil dukh|baybas)/i,
+  lonely: /(akela|tanha|alone|koi nahi|bore ho gaya|khaali)/i,
+  tired: /(thak gaya|thaka hua|thaka|mara hua|neend aa|pareshan|stress|bojh)/i,
+  angry: /(gussa|ghussa|naraz|pagal ho raha|nafrat|frustrat)/i,
+  happy: /(khush|happy|excited|maza aaya|jeet|pass ho gaya|shukar|zabardast)/i,
+  love: /(pyar|pyaar|mohabbat|miss kar|yaad aa|dil se)/i
+};
+var moodLog = [];
+try { moodLog = JSON.parse(localStorage.getItem("maya_mood") || "[]"); } catch(e){}
+function saveMoodLog(){ try { localStorage.setItem("maya_mood", JSON.stringify(moodLog.slice(-60))); } catch(e){} }
+var currentMood = "normal";
+function detectMood(t){
+  t = String(t || "");
+  for (var k in MOOD_WORDS) if (MOOD_WORDS[k].test(t)) return k;
+  return "normal";
+}
+function logMood(m){
+  if (m === "normal") return;
+  if (moodLog.length && Date.now() - moodLog[moodLog.length - 1].t < 600000 && moodLog[moodLog.length - 1].m === m) return;
+  moodLog.push({ t: Date.now(), m: m });
+  saveMoodLog();
+}
+function lastMood(hours){
+  var since = Date.now() - (hours || 36) * 3600000;
+  for (var i = moodLog.length - 1; i >= 0; i--) if (moodLog[i].t >= since) return moodLog[i].m;
+  return null;
+}
+function moodVoiceAdjust(artist){
+  var a = artist;
+  if (!a || !a.voice) return a;
+  var rateNum = parseInt(String(a.rate || "+0%").replace(/[^-\d]/g, ""), 10) || 0;
+  var pitchNum = parseInt(String(a.pitch || "+0Hz").replace(/[^-\d]/g, ""), 10) || 0;
+  if (currentMood === "sad" || currentMood === "lonely" || currentMood === "tired") { rateNum -= 9; pitchNum -= 4; }
+  else if (currentMood === "happy" || currentMood === "love") { rateNum += 6; pitchNum += 2; }
+  else if (currentMood === "angry") { rateNum -= 4; pitchNum -= 2; }
+  return { name: a.name, voice: a.voice, lang: a.lang, sample: a.sample,
+           rate: (rateNum >= 0 ? "+" : "") + rateNum + "%",
+           pitch: (pitchNum >= 0 ? "+" : "") + pitchNum + "Hz",
+           auto: a.auto };
+}
+var LISTEN_TRIG = /(mood|mann|dil)\s*(kharab|udaas|upset|off|dukh)/i;
+var WARM_LINES = [
+  "Main yahin hoon, Boss. Bolo... main sirf sunungi, judge nahi karungi. \u{1F49C}",
+  "Aao... saans lo. Main yahin baithi hoon, sun rahi hoon. \u{1F49C}",
+  "Koi baat nahi... sab theek ho jayega. Batao kya hua, main saath hoon. \u{1F49C}"
+];
 
 function trySmalltalk(q){
   var t = String(q).toLowerCase().trim();
@@ -1712,7 +1837,8 @@ async function geminiChat(){
         var cand = data.candidates && data.candidates[0];
         var parts = (cand && cand.content && cand.content.parts) || [];
         var fnCalls = parts.filter(function(p){ return p.functionCall; });
-        if (fnCalls.length && step < 2) {
+        var maxSteps = (_activeSkill && _activeSkill.deep) ? 4 : 2;
+        if (fnCalls.length && step < maxSteps) {
           geminiChat.toolsUsed = true;
           contents.push({ role: "model", parts: parts });
           for (var fc = 0; fc < fnCalls.length; fc++) {
@@ -2281,6 +2407,18 @@ $("#saveSettings").addEventListener("click", function(){
   toast("✅ Settings save ho gayin");
   pushLog("SETTINGS UPDATED" + (settings.apikey ? " • KEY OK" : ""));
 });
+(function(_cs){ if (_cs) _cs.addEventListener("click", function(){
+  customSkills = []; saveSkills(); refreshSkillList(); toast("Custom skills khatam");
+}); })($("#clearSkills"));
+function refreshSkillList(){
+  var el = $("#skillList"); if (!el) return;
+  var moods = moodLog.slice(-10).map(function(m){ return m.m; }).join(",");
+  el.textContent = "Built-in: 9 skills ON \u2713 | Custom: " + customSkills.length +
+    (customSkills.length ? " (" + customSkills.map(function(s){ return s.name; }).join(", ") + ")" : "") +
+    " | Recent mood: " + (moods || "normal");
+}
+refreshSkillList();
+
 $("#clearFacts").addEventListener("click", function(){
   facts = []; saveFacts(); toast("Memory bank khali kar diya"); pushLog("MEMORY BANK WIPED");
 });
@@ -2527,7 +2665,7 @@ if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
   var sver = document.querySelector("#splash .ver");
-  if (sver) sver.textContent = "VERSION 3.1 — CLASSIC PRO";
+  if (sver) sver.textContent = "VERSION 4.0 — DIL 💜";
 }
 greetMiniRefresh();
 chatHist.slice(-40).forEach(function(h){ addBubble(h.role === "user" ? "user" : "ai", h.text); });
