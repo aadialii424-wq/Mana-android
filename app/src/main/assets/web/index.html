@@ -323,8 +323,9 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.0 🌍</div></div>
-        <div class="chip"><div class="k">◈ BUDGET AAJ (G/Q/P)</div><div class="v" id="hudBudget">0/0/0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.1 🌍</div></div>
+        <div class="chip"><div class="k">◈ BUDGET (G/Q/P)</div><div class="v" id="hudBudget">0/0/0</div></div>
+        <div class="chip"><div class="k">◈ GHOST (OFFLINE)</div><div class="v" id="hudGhost">—</div></div>
       </div>
 
       <div class="qactions">
@@ -469,6 +470,12 @@
         <div class="note">Maya ab mood samajhti hai (jawab + awaaz dono badalti hain), mood yaad rakhti hai, aur 9 skills se kaam karti hai — dil ki dost bhi ek skill hai. Naye skills: "Maya naya skill seekho..."</div>
         <div class="note" id="skillList">—</div>
         <button class="danger" id="clearSkills" style="margin-top:8px">🗑️ CUSTOM SKILLS MITAO</button>
+      </div>
+
+      <div class="card">
+        <h3>\u{1F47B} GHOST MODE \u2014 Offline Brain</h3>
+        <div class="note">Internet band ho to Maya GHOST MODE mein chalti hai: cached AI jawab + local knowledge + sab commands. Kabhi rukti nahi!</div>
+        <div class="note" id="ghostInfo">—</div>
       </div>
 
       <div class="card">
@@ -638,7 +645,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v5.0.0 — MAYA-OS ONLINE 🌍");
+    pushLog("MAYA v5.1.0 — GHOST ONLINE 🌍");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1923,6 +1930,48 @@ function packPick(kind){
   return arr[i];
 }
 
+/* ========== GHOST MODE (v5.1): Smart Offline Brain ========== */
+var ghostCache = {};
+try { ghostCache = JSON.parse(localStorage.getItem("maya_ghost") || "{}"); } catch(e){}
+function ghostSave(){ try { localStorage.setItem("maya_ghost", JSON.stringify(ghostCache)); } catch(e){} }
+function isOnline(){ return navigator.onLine !== false; }
+
+var GHOST_KB = {
+  "who are you": "Main MAYA hoon — aap ki personal AI saathi. Filhaal offline mode mein hoon, lekin aap ki baat samajh sakti hoon!",
+  "kya haal": "Main bilkul theek hoon, Boss! Aap kaise ho? (Offline mode — thoda simple jawab but dil se!)",
+  "help": "Main ye kar sakti hoon offline: waqt, tareekh, battery, alarm, timer, apps, shayari, joke, motivation, dua, diary. Online hone par poori AI power!",
+  "off kaise": "Internet band hai Boss — lekin main SO Nahi rahungi. Local commands chal rahe hain!",
+  "mayoos": "Boss, internet nahi hai lekin main yahin hoon. Koi local kaam karwa lo — alarm, shayari, waqt, battery. Aur jab internet aayega main poori AI ban jaungi!"
+};
+var GHOST_TEMPLATES = {
+  answer: [
+    "Boss, ye offline mode ka jawab hai: internet aane par main is par poori research karungi!",
+    "Interesting sawal! Abhi offline hoon — internet aane par detail mein batati hoon.",
+    "GHOST MODE mein hoon — ye sawal internet wala hai. Filhaal waqt, battery, alarm, shayari poochho!"
+  ]
+};
+
+function ghostRespond(text){
+  var t = String(text || "").toLowerCase().trim();
+  var cached = Object.keys(ghostCache).slice(-8);
+  for (var i = cached.length - 1; i >= 0; i--) {
+    var key = cached[i];
+    if (t.indexOf(key.split(" ").slice(0, 2).join(" ")) >= 0 && ghostCache[key]) {
+      return "CACHED: " + ghostCache[key].slice(0, 300);
+    }
+  }
+  for (var q in GHOST_KB) { if (t.indexOf(q) >= 0) return GHOST_KB[q]; }
+  return GHOST_TEMPLATES.answer[Math.floor(Math.random() * GHOST_TEMPLATES.answer.length)];
+}
+
+function ghostCachePut(q, a){
+  if (!q || !a || a.length < 10) return;
+  ghostCache[String(q).toLowerCase().slice(0, 50)] = String(a).slice(0, 500);
+  var keys = Object.keys(ghostCache);
+  if (keys.length > 30) delete ghostCache[keys[0]];
+  ghostSave();
+}
+
 var LISTEN_TRIG = /(mood|mann|dil)\s*(kharab|udaas|upset|off|dukh)/i;
 var WARM_LINES = [
   "Main yahin hoon, Boss. Bolo... main sirf sunungi, judge nahi karungi. \u{1F49C}",
@@ -2169,8 +2218,17 @@ async function askAI(wasVoice){
     return;
   }
   askAI._busy = true;
+  var _qTimer = setTimeout(function(){
+    if (askAI._busy) {
+      askAI._busy = false;
+      pushLog("QUEUE TIMEOUT (15s) — force release");
+      reply("Boss, request timeout ho gayi — dobara try karo.", false);
+      if (_askQueue) { var q2 = _askQueue; _askQueue = null; }
+    }
+  }, 15000);
   try { await _askAIInner(wasVoice); }
   finally {
+    clearTimeout(_qTimer);
     askAI._busy = false;
     if (_askQueue) {
       var q = _askQueue; _askQueue = null;
@@ -2224,6 +2282,10 @@ async function _askAIInner(wasVoice){
     if (!out) { try { out = await openaiCompatChat("github"); } catch (e) {} }
     if (!out) { try { out = await openRouterChat(lu); } catch (e) {} }
     if (!out) { try { out = await pollinationsChat(lu, wasVoice); } catch (e) {} }
+  if (!out && !isOnline()) {
+    var ghostAns = ghostRespond(lu || _lastQuery);
+    if (ghostAns) { aiState.provider = "GHOST"; pushLog("GHOST MODE (offline)"); reply(ghostAns, wasVoice); return; }
+  }
   } else if (!out && isToolish && geminiLim) {
     noteFail("gemini", 429);
     pushLog("TOOL-CMD: gemini cooldown — chain skip (quota bachat), retry-block chalega");
@@ -2232,6 +2294,7 @@ async function _askAIInner(wasVoice){
     askAI._retried = false;
     thinking = false; setOrb("idle");
     if (lu && !geminiChat.toolsUsed && out.length < 400) cachePut(cacheKey(lu), out);
+    ghostCachePut(lu || _lastQuery, out);
     reply(out, wasVoice);
     return;
   }
@@ -2267,7 +2330,7 @@ async function _askAIInner(wasVoice){
         setTimeout(function(){ askAI._r2 = false; askAI(wasVoice); }, 12000);
       }
     } else if (netHit) {
-      reply("Boss, internet ka raabta nazar nahi aa raha — WiFi/data check karo. Local commands hamesha chalte hain!", wasVoice);
+      reply("Boss, internet band hai — lekin GHOST MODE active hai! Local commands + cached jawab chal rahe hain. WiFi on karo to poori AI mil jayegi!", wasVoice);
     } else {
       reply("Boss, abhi sab brains bhar gayi hain — ek minute baad bolo. Local commands chal rahe hain!", wasVoice);
     }
@@ -2541,6 +2604,7 @@ window.__wakeErr = function(code){
 /* ---------- HUD ---------- */
 function hudRefresh(){
   var hb = $("#hudBudget"); if (hb) hb.textContent = budget.gemini + "/" + budget.groq + "/" + budget.poll;
+  var hg = $("#hudGhost"); if (hg) hg.textContent = isOnline() ? "NET OK" : "ACTIVE";
   var wk = $("#hudWake"); if (wk) wk.textContent = settings.wakeWord ? "ON \u{1F442}" : "OFF";
   var ai = $("#hudAI"); if (ai) ai.textContent = (settings.apikey || settings.groqKey || settings.ghKey) ? aiState.provider : "NO KEY";
   var mem = $("#hudMem"); if (mem) mem.textContent = facts.length + "F • " + diary.length + "D • " + chatHist.length + "M";
@@ -2720,7 +2784,8 @@ $("#saveSettings").addEventListener("click", function(){
   pushLog("SETTINGS UPDATED" + (settings.apikey ? " • KEY OK" : ""));
 });
 (function(_cs){ if (_cs) _cs.addEventListener("click", function(){
-  customSkills = []; saveSkills(); refreshSkillList(); toast("Custom skills khatam");
+  customSkills = []; saveSkills(); refreshSkillList();
+(function(){ var gi = $("#ghostInfo"); if (gi) gi.textContent = "Status: " + (isOnline() ? "Standby (internet hai)" : "ACTIVE (offline)") + " | Cached: " + Object.keys(ghostCache).length; })(); toast("Custom skills khatam");
 }); })($("#clearSkills"));
 async function checkForUpdate(){
   try {
@@ -2995,7 +3060,7 @@ if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
   var sver = document.querySelector("#splash .ver");
-  if (sver) sver.textContent = "VERSION 5.0 — MAYA-OS 🌍";
+  if (sver) sver.textContent = "VERSION 5.1 — GHOST 🌍";
 }
 greetMiniRefresh();
 chatHist.slice(-40).forEach(function(h){ addBubble(h.role === "user" ? "user" : "ai", h.text); });
