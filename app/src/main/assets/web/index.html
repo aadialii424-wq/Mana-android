@@ -323,7 +323,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.0 🌍</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v6.0 🧠</div></div>
         <div class="chip"><div class="k">◈ BUDGET AAJ (G/Q/P)</div><div class="v" id="hudBudget">0/0/0</div></div>
       </div>
 
@@ -638,7 +638,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v5.0.0 — MAYA-OS ONLINE 🌍");
+    pushLog("MAYA v6.0.0 — GENIUS ONLINE 🧠");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1151,6 +1151,122 @@ function tryLocal(t, wasVoice){
     }
   }
 
+  /* CURRENCY fast path */
+  if (/(dollar|usd|euro|eur|pound|gbp|riyal|sar|dirham|aed|rate)/.test(q) && /(kitna|kitne|rate|batao|kya hai|price)/.test(q)) {
+    var curFrom = /euro/.test(q) ? "EUR" : /pound/.test(q) ? "GBP" : /riyal|sar/.test(q) ? "SAR" : /dirham|aed/.test(q) ? "AED" : "USD";
+    nativeGet("https://api.frankfurter.app/latest?from=" + curFrom + "&to=PKR").then(function(r){
+      if (r.status === 200 && r.body) {
+        try { var j = JSON.parse(r.body); var rate = j.rates && j.rates.PKR;
+          if (rate) { reply("1 " + curFrom + " = " + rate.toFixed(2) + " PKR (aaj ka rate, Frankfurter API)", wasVoice); return; } } catch(e){}
+      }
+      reply("Rate nahi mila, " + settings.name, wasVoice);
+    });
+    return { reply: "" };
+  }
+
+  /* CRYPTO fast path */
+  if (/(bitcoin|btc|ethereum|eth|dogecoin|doge|crypto)/.test(q) && /(kitna|price|rate|batao|kya hai)/.test(q)) {
+    var coinId = /bitcoin|btc/.test(q) ? "bitcoin" : /ethereum|eth/.test(q) ? "ethereum" : "dogecoin";
+    nativeGet("https://api.coingecko.com/api/v3/simple/price?ids=" + coinId + "&vs_currencies=pkr,usd").then(function(r){
+      if (r.status === 200 && r.body) {
+        try { var j = JSON.parse(r.body); var d = j[coinId];
+          if (d) { reply(coinId.toUpperCase() + ": PKR " + d.pkr.toLocaleString() + " (USD " + d.usd.toLocaleString() + ")", wasVoice); return; } } catch(e){}
+      }
+      reply("Crypto data nahi mila, " + settings.name, wasVoice);
+    });
+    return { reply: "" };
+  }
+
+  /* EARTHQUAKE fast path */
+  if (/(earthquake|zalzala|zälzala|quake)/.test(q)) {
+    nativeGet("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=2&orderby=time&minmagnitude=4").then(function(r){
+      if (r.status === 200 && r.body) {
+        try { var j = JSON.parse(r.body);
+          var qs = (j.features || []).map(function(f){ return "Magnitude " + f.properties.mag + " — " + f.properties.place; });
+          if (qs.length) { reply("Haan, ye recent earthquakes: " + qs.join("; "), wasVoice); return; } } catch(e){}
+      }
+      reply("Koi bari earthquake nahi aayi recently.", wasVoice);
+    });
+    return { reply: "" };
+  }
+
+  /* QUIZ fast path */
+  if (/(quiz|trivia|sawal|mcq|test karo|gk)/.test(q) && /(shuru|karo|do|batao|chalao|lagao|start)/.test(q)) {
+    execTool("start_quiz", {}).then(function(r){
+      if (r && r.done && r.question) {
+        var opts = r.options.map(function(o,i){ return String.fromCharCode(65+i) + ") " + o; }).join("  ");
+        reply("Quiz! " + r.question + " — " + opts + " (jawab bolo: A, B, C ya D)", wasVoice);
+      } else reply("Quiz nahi mil saka.", wasVoice);
+    });
+    return { reply: "" };
+  }
+
+  /* LOCATION fast path */
+  if (/(kahan hun|my location|mera location|kahan ho|where am i)/.test(q)) {
+    nativeGet("http://ip-api.com/json/?fields=status,city,regionName,country,timezone,isp").then(function(r){
+      if (r.status === 200 && r.body) {
+        try { var j = JSON.parse(r.body);
+          if (j.city) { reply("Aap " + j.city + ", " + j.regionName + ", " + j.country + " mein hain (IP-based approx). Timezone: " + j.timezone, wasVoice); return; } } catch(e){}
+      }
+      reply("Location nahi mil saki, " + settings.name, wasVoice);
+    });
+    return { reply: "" };
+  }
+
+  /* MUSIC fast path */
+  if (/(gaana|song|music|kaun gaya|singer|artist)/.test(q) && /(batao|dhoondo|kaun|info|search)/.test(q)) {
+    var musQ = q.replace(/maya|gaana|song|music|batao|dhoondo|kaun|gaya|info|search|karo|do/gi, "").trim();
+    if (musQ.length < 2) musQ = "trending songs";
+    nativeGet("https://itunes.apple.com/search?term=" + encodeURIComponent(musQ) + "&entity=song&limit=3").then(function(r){
+      if (r.status === 200 && r.body) {
+        try { var j = JSON.parse(r.body);
+          var songs = (j.results || []).map(function(s){ return s.trackName + " by " + s.artistName; });
+          if (songs.length) { reply("Mil gaya: " + songs.join("; "), wasVoice); return; } } catch(e){}
+      }
+      reply("Gaana nahi mila.", wasVoice);
+    });
+    return { reply: "" };
+  }
+
+  /* MEDICINE fast path */
+  if (/(dawa|medicine|tablet|capsule|syrup|paracetamol|panadol|brufen|antibiotic)/.test(q) && /(batao|info|kya hai|side effect|kaise|uses)/.test(q)) {
+    var medName = q.replace(/maya|dawa|medicine|tablet|capsule|syrup|batao|info|kya hai|side effect|effects|kaise|uses|ka|ki|hai/gi, "").trim();
+    if (medName.length < 3) return { reply: "Medicine ka naam batao, " + settings.name + "." };
+    execTool("get_medicine_info", { medicine: medName }).then(function(r){
+      if (r && r.done) {
+        reply(r.name + " — Uses: " + (r.uses || "N/A").slice(0, 150) + ". Warnings: " + (r.warnings || "N/A").slice(0, 150), wasVoice);
+      } else reply("Medicine info nahi mili. Doctor se poochna behtar hai!", wasVoice);
+    });
+    return { reply: "" };
+  }
+
+  /* DEEP THINK fast path */
+  if (/(deep think|gehri soch|research karo|detail mein|explain in detail|analyze karo)/.test(q)) {
+    var dtQ2 = stripped.replace(/maya|deep think|gehri soch|research karo|detail mein/gi, "").trim();
+    if (dtQ2.length > 5) {
+      _activeSkill = { id: "deep", name: "Deep Thinker", prompt: "DEEP THINK MODE: 30+ seconds socho, web_search + wiki_search use karo, 4-5 paragraph detailed expert-level jawab do Roman Urdu mein. Sab angles cover karo.", deep: true };
+      return { reply: "", _aiRoute: true };
+    }
+  }
+
+  /* ROAST MODE */
+  if (/(roast|mukka|beizzati|suna do)/.test(q) && /(karo|do|mujhe|mera|usko)/.test(q)) {
+    _activeSkill = { id: "roast", name: "Roast Master", prompt: "ROAST MODE: Friendly but SAVAGE roast karo — funny, witty, thoda mean lekin hamesha dosti ka darja rakho. Urdu/Hindi comedy style. Zyada personal mat jao — halke-phulke mazak.", deep: false };
+    return { reply: "", _aiRoute: true };
+  }
+
+  /* STORY MODE */
+  if (/(kahani|story|sunao|banao)/.test(q) && /(meri|mujhe|ek|ai|maya ki|horror|comedy|romantic|action)/.test(q)) {
+    _activeSkill = { id: "story", name: "Storyteller", prompt: "STORY MODE: Aap ek creative writer hain. User ki request ke hisaab se engaging kahani likho (300-500 words). Agar user ne khud ko hero bola to unhe hero banao. Roman Urdu mein, engaging tone.", deep: false };
+    return { reply: "", _aiRoute: true };
+  }
+
+  /* DREAM fast path */
+  if (/(sapna|sapne|dream|khawab)/.test(q) && /(dekha|tabeer|interpret|matlab|maya)/.test(q)) {
+    _activeSkill = { id: "dream", name: "Dream Interpreter", prompt: "DREAM INTERPRETATION: Psychology (Freudian + Jungian) + cultural (Islamic tradition/Ibn Sirin) dono angles se tabeer karo. Warm, thoughtful, insightful. Roman Urdu mein.", deep: false };
+    return { reply: "", _aiRoute: true };
+  }
+
   /* IMAGE ARTIST fast path */
   if (/(banao|generate|draw|paint|photo banao|wallpaper)/.test(q) && /(wallpaper|tasveer|image|picture|photo|drawing|art|logo)/.test(q)) {
     var imgQ = q.replace(/maya|banao|generate|draw|wallpaper|tasveer|image|picture|photo|aik|ek|wala|wali|ka|ki|do|de|please|gorgeous|beautiful|ai|se/gi, "").trim();
@@ -1379,7 +1495,7 @@ function sysPrompt(){
     "- Zaroori cheez (birthday, appointment, pasand, kisi ka naam, kaam) -> khud save_memory use karo, 'yaad rakhna' bole na bole\n" +
     "- Yaad karna ho -> recall_memory\n" +
     "Tool use karne ke baad ek chhoti friendly line mein confirm karo. Jo tools se mumkin nahi, wo bRIEFLY bata do.\n" +
-    "RULES: (1) Reply SPOKEN ALOUD hoti hai — 1-3 jumlay, 60 words se kam (detail na maangi jaye to). (2) Plain spoken text: koi markdown, list, asterisk, emoji nahi. (3) User ki language aur script mein jawab: Urdu script -> Urdu script, Roman Urdu -> Roman Urdu, English -> English. (4) Kaam aksar tools se karo, sirf baat mat karo. (4b) Calculations, lists, data-parse, conversion -> run_javascript mein khud code likh kar chalao. (4c) Live info (rates, news, koi bhi site) -> web_fetch. (4d) Roznamcha: diary_write/diary_search. (4e) Messages: read_messages/reply_message/schedule_message. (4f) Namaz: prayer_times. (4g) Phone: torch_control/volume_control/brightness_control. (5) Kaun ho? MAYA, " + settings.name + " ki personal AI — mohabbat se 0 budget par bani.";
+    "RULES: (1) Reply SPOKEN ALOUD hoti hai — 1-3 jumlay, 60 words se kam (detail na maangi jaye to). (2) Plain spoken text: koi markdown, list, asterisk, emoji nahi. (3) User ki language aur script mein jawab: Urdu script -> Urdu script, Roman Urdu -> Roman Urdu, English -> English. (4) Kaam aksar tools se karo, sirf baat mat karo. (4b) Calculations, lists, data-parse, conversion -> run_javascript mein khud code likh kar chalao. (4c) Live info (rates, news, koi bhi site) -> web_fetch. (4d) Roznamcha: diary_write/diary_search. (4e) Messages: read_messages/reply_message/schedule_message. (4f) Namaz: prayer_times. (4g) Phone: torch/volume/brightness. (4h) Data: get_currency/get_crypto/get_country_info/get_earthquake/get_location/search_music/get_medicine_info. (4i) Fun: start_quiz/deep_think/interpret_dream/translate_text. (4j) Modes: roast/story/dream — user bole to ACTIVE SKILL inject karo. (5) Kaun ho? MAYA, " + settings.name + " ki personal AI — mohabbat se 0 budget par bani.";
   if (_activeSkill) p += "\n\u2699\uFE0F SKILL [" + _activeSkill.name + "]: " + _activeSkill.prompt;
   if (currentMood && currentMood !== "normal") p += "\nMOOD: " + currentMood.toUpperCase() + " — tone mutabik.";
   /* DIET (v4.2): memory sirf RELEVANT par inject — 60-70% tokens ki bachat */
@@ -1509,6 +1625,28 @@ var TOOL_DECLS = [
     parameters: { type: "OBJECT", properties: { percent: { type: "INTEGER" } }, required: ["percent"] } },
   { name: "brightness_control", description: "Screen brightness (5-100).",
     parameters: { type: "OBJECT", properties: { percent: { type: "INTEGER" } }, required: ["percent"] } },
+  { name: "get_currency", description: "Live currency rates (USD/EUR/PKR/etc). Jaise: 'dollar ka rate batao'",
+    parameters: { type: "OBJECT", properties: { from: { type: "STRING", description: "3-letter code jaise USD" }, to: { type: "STRING", description: "3-letter code jaise PKR" } }, required: ["from", "to"] } },
+  { name: "get_crypto", description: "Live cryptocurrency price (bitcoin/ethereum/etc PKR ya USD mein).",
+    parameters: { type: "OBJECT", properties: { coin: { type: "STRING", description: "bitcoin/ethereum/dogecoin" }, currency: { type: "STRING", description: "pkr ya usd" } }, required: ["coin"] } },
+  { name: "get_country_info", description: "Country ki details: capital, population, currency, language, area, flag.",
+    parameters: { type: "OBJECT", properties: { country: { type: "STRING" } }, required: ["country"] } },
+  { name: "start_quiz", description: "GK Quiz shuru karta hai (Open Trivia DB — 5 sawal).",
+    parameters: { type: "OBJECT", properties: { category: { type: "STRING", description: "science/history/sports/geography/general" } } } },
+  { name: "get_earthquake", description: "Recent earthquakes ka data.",
+    parameters: { type: "OBJECT", properties: {} } },
+  { name: "search_music", description: "Gaana/artist dhoondta hai (iTunes — free, keyless).",
+    parameters: { type: "OBJECT", properties: { query: { type: "STRING" } }, required: ["query"] } },
+  { name: "get_medicine_info", description: "Medicine ka info: uses, side effects, dosage (openFDA).",
+    parameters: { type: "OBJECT", properties: { medicine: { type: "STRING" } }, required: ["medicine"] } },
+  { name: "get_location", description: "Aap ka current location detect karta hai (IP-based, approximate).",
+    parameters: { type: "OBJECT", properties: {} } },
+  { name: "translate_text", description: "Kisi bhi zubaan mein tarjuma karta hai.",
+    parameters: { type: "OBJECT", properties: { text: { type: "STRING" }, target: { type: "STRING", description: "en/ur/hi/ar/es/fr" } }, required: ["text", "target"] } },
+  { name: "deep_think", description: "Deep Think Mode — 30 second soch kar expert-level research jawab (bari research ke liye).",
+    parameters: { type: "OBJECT", properties: { question: { type: "STRING" } }, required: ["question"] } },
+  { name: "interpret_dream", description: "Sapne ki tabeer/interpretation karta hai (psychological + cultural).",
+    parameters: { type: "OBJECT", properties: { dream: { type: "STRING" } }, required: ["dream"] } },
   { name: "generate_image", description: "AI se tasveer/wallpaper banata hai (Pollinations — free, keyless). Jaise: 'dragon wala wallpaper banao'",
     parameters: { type: "OBJECT", properties: { prompt: { type: "STRING", description: "kya banana hai (English mein describe karo)" } }, required: ["prompt"] } },
   { name: "nasa_photo", description: "Aaj ki NASA space photo lauta deta hai (Astronomy Picture of the Day).",
@@ -1716,6 +1854,120 @@ async function execTool(name, args){
             out = okm ? { done: true, who: mc.name, how: "chat khul gaya message type ho chuka" } : { done: false };
           }
         } catch(e){ out = { error: String(e && e.message || e) }; }
+      }
+    } else if (name === "get_currency") {
+      try {
+        var from = String(args.from || "USD").toUpperCase().slice(0, 3);
+        var to = String(args.to || "PKR").toUpperCase().slice(0, 3);
+        var rCur = await nativeGet("https://api.frankfurter.app/latest?from=" + from + "&to=" + to);
+        if (rCur.status === 200 && rCur.body) {
+          var jCur = JSON.parse(rCur.body);
+          var rate = jCur.rates && jCur.rates[to];
+          out = rate ? { done: true, rate: rate, from: from, to: to, date: jCur.date } : { error: "rate nahi mila" };
+        } else out = { error: "currency API fail" };
+      } catch(e) { out = { error: "currency: " + e.message }; }
+    } else if (name === "get_crypto") {
+      try {
+        var coinId = String(args.coin || "bitcoin").toLowerCase().replace(/\s+/g, "-");
+        var cur = String(args.currency || "pkr").toLowerCase();
+        var ids = coinId === "bitcoin" ? "bitcoin" : coinId === "ethereum" ? "ethereum" : coinId === "dogecoin" ? "dogecoin" : coinId;
+        var rCry = await nativeGet("https://api.coingecko.com/api/v3/simple/price?ids=" + ids + "&vs_currencies=" + cur);
+        if (rCry.status === 200 && rCry.body) {
+          var jCry = JSON.parse(rCry.body);
+          var price = jCry[ids] && jCry[ids][cur];
+          out = price ? { done: true, coin: coinId, price: price, currency: cur.toUpperCase() } : { error: "coin nahi mila" };
+        } else out = { error: "crypto API fail" };
+      } catch(e) { out = { error: "crypto: " + e.message }; }
+    } else if (name === "get_country_info") {
+      try {
+        var rCty = await nativeGet("https://restcountries.com/v3.1/name/" + encodeURIComponent(String(args.country || "pakistan")) + "?fields=name,capital,population,currencies,languages,region,subregion,area,flags");
+        if (rCty.status === 200 && rCty.body) {
+          var jCty = JSON.parse(rCty.body);
+          var c = (jCty && jCty[0]) || {};
+          out = { done: true, name: c.name && c.name.common, capital: (c.capital || []).join(", "), population: c.population, currencies: Object.keys(c.currencies || {}).join(", "), languages: Object.values(c.languages || {}).join(", "), region: c.region, area: c.area };
+        } else out = { error: "country nahi mila" };
+      } catch(e) { out = { error: "country: " + e.message }; }
+    } else if (name === "start_quiz") {
+      try {
+        var cat = String(args.category || "general").toLowerCase();
+        var catMap = { science: 17, history: 23, sports: 21, geography: 22, general: 9, computers: 18, film: 11, music: 12 };
+        var catId = catMap[cat] || 9;
+        var rQ = await nativeGet("https://opentdb.com/api.php?amount=1&category=" + catId + "&type=multiple");
+        if (rQ.status === 200 && rQ.body) {
+          var jQ = JSON.parse(rQ.body);
+          var q = (jQ.results || [])[0];
+          if (q) {
+            out = { done: true, question: htmlToText(q.question), options: [q.correct_answer, ...q.incorrect_answers].sort(), correct: q.correct_answer, category: q.category };
+          } else out = { error: "quiz nahi mila" };
+        } else out = { error: "quiz API fail" };
+      } catch(e) { out = { error: "quiz: " + e.message }; }
+    } else if (name === "get_earthquake") {
+      try {
+        var rEq = await nativeGet("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=3&orderby=time&minmagnitude=4");
+        if (rEq.status === 200 && rEq.body) {
+          var jEq = JSON.parse(rEq.body);
+          var quakes = (jEq.features || []).map(function(f) {
+            return { mag: f.properties.mag, place: f.properties.place, time: new Date(f.properties.time).toLocaleString() };
+          });
+          out = quakes.length ? { done: true, quakes: quakes } : { done: true, note: "koi bari earthquake nahi" };
+        } else out = { error: "USGS fail" };
+      } catch(e) { out = { error: "earthquake: " + e.message }; }
+    } else if (name === "search_music") {
+      try {
+        var rMus = await nativeGet("https://itunes.apple.com/search?term=" + encodeURIComponent(String(args.query || "")) + "&entity=song&limit=5");
+        if (rMus.status === 200 && rMus.body) {
+          var jMus = JSON.parse(rMus.body);
+          var songs = (jMus.results || []).map(function(s) {
+            return { track: s.trackName, artist: s.artistName, album: s.collectionName, preview: s.previewUrl };
+          });
+          out = songs.length ? { done: true, songs: songs } : { error: "gaana nahi mila" };
+        } else out = { error: "iTunes fail" };
+      } catch(e) { out = { error: "music: " + e.message }; }
+    } else if (name === "get_medicine_info") {
+      try {
+        var rMed = await nativeGet("https://api.fda.gov/drug/label.json?search=" + encodeURIComponent('openfda.brand_name:"' + String(args.medicine || "") + '"') + "&limit=1");
+        if (rMed.status === 200 && rMed.body) {
+          var jMed = JSON.parse(rMed.body);
+          var med = (jMed.results || [])[0];
+          if (med) {
+            out = { done: true, name: String(args.medicine), uses: (med.indications_and_usage || [""])[0].slice(0, 300), warnings: (med.warnings || [""])[0].slice(0, 300) };
+          } else out = { error: "medicine nahi mila" };
+        } else out = { error: "openFDA fail" };
+      } catch(e) { out = { error: "medicine: " + e.message }; }
+    } else if (name === "get_location") {
+      try {
+        var rLoc = await nativeGet("http://ip-api.com/json/?fields=status,country,regionName,city,lat,lon,timezone,isp");
+        if (rLoc.status === 200 && rLoc.body) {
+          var jLoc = JSON.parse(rLoc.body);
+          out = { done: true, city: jLoc.city, region: jLoc.regionName, country: jLoc.country, lat: jLoc.lat, lon: jLoc.lon, timezone: jLoc.timezone, isp: jLoc.isp };
+        } else out = { error: "location fail" };
+      } catch(e) { out = { error: "location: " + e.message }; }
+    } else if (name === "translate_text") {
+      var tText = String(args.text || "");
+      var tTarget = String(args.target || "en");
+      if (tText) {
+        if (settings.apikey || settings.groqKey) {
+          try { out = await openaiCompatChat("groq"); if (!out) out = null; } catch(e){}
+        }
+        if (!out) {
+          var tPrompt = "Translate to " + tTarget + " (ONLY the translation, nothing else): " + tText;
+          var rTr = await pollinationsChat(tPrompt, false);
+          out = rTr ? { done: true, translation: rTr } : { error: "translate fail" };
+        } else {
+          out = { done: true, note: "Groq se translate kar do — user se text ka tarjuma poocho", translation: "Use groq for: " + tText };
+        }
+      } else out = { error: "text khali" };
+    } else if (name === "deep_think") {
+      var dtQ = String(args.question || "");
+      if (!dtQ) { out = { error: "sawal khali" }; }
+      else {
+        out = { done: true, note: "DEEP THINK: 30 second research karo, 4-5 paragraph ka detailed expert jawab do (Roman Urdu mein). Web search + wiki + apna knowledge sab use karo." };
+      }
+    } else if (name === "interpret_dream") {
+      var dreamTxt = String(args.dream || "");
+      if (!dreamTxt) { out = { error: "sapna khali" }; }
+      else {
+        out = { done: true, note: "DREAM INTERPRETATION: Psychology (Freudian + Jungian) + cultural (Islamic/Urdu tradition) dono angles se tabeer karo. Warm, insightful tone." };
       }
     } else if (name === "generate_image") {
       var imgPrompt = String(args.prompt || "").trim();
@@ -2995,7 +3247,7 @@ if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
   var sver = document.querySelector("#splash .ver");
-  if (sver) sver.textContent = "VERSION 5.0 — MAYA-OS 🌍";
+  if (sver) sver.textContent = "VERSION 6.0 — GENIUS 🧠";
 }
 greetMiniRefresh();
 chatHist.slice(-40).forEach(function(h){ addBubble(h.role === "user" ? "user" : "ai", h.text); });
