@@ -323,7 +323,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.0 💜</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.1 🧠</div></div>
       </div>
 
       <div class="qactions">
@@ -407,6 +407,8 @@
           <option value="llama-3.3-70b-versatile">llama-3.3-70b (smart)</option>
           <option value="llama-3.1-8b-instant">llama-3.1-8b (turant)</option>
         </select>
+        <label class="f">OPENROUTER KEY (backup #3 — openrouter.ai, optional)</label>
+        <input class="f" id="sOrKey" type="password" placeholder="sk-or-v1... (openrouter.ai/keys)">
         <label class="f">GITHUB MODELS PAT (backup #2 — optional)</label>
         <input class="f" id="sGhKey" type="password" placeholder="github_pat_... (GitHub → Settings → Developer settings)">
         <button class="save" id="testKeys" style="background:#7c3aed">🧪 SAB KEYS TEST KARO</button>
@@ -558,7 +560,7 @@ setTimeout(function(){
 window.__mayaJSOK = true;
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
-var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", groqModel:"llama-3.3-70b-versatile", ghKey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"auto", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true };
+var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", groqModel:"llama-3.3-70b-versatile", ghKey:"", orKey:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"auto", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true };
 var settings = Object.assign({}, DEFAULTS);
 try {
   var s1 = JSON.parse(localStorage.getItem("maya_settings") || "null");
@@ -635,7 +637,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v4.0.0 — DIL SE ONLINE 💜");
+    pushLog("MAYA v4.1.0 — OMNI ONLINE 🧠");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -972,10 +974,7 @@ function handleUserText(text, wasVoice){
   }
   var st = trySmalltalk(stripped);
   if (st) { reply(st, wasVoice); return; }
-  if (!settings.apikey && !settings.groqKey && !settings.ghKey) {
-    reply("Ye sawal ke liye mujhe dimaag chahiye, " + settings.name + " — Settings (⚙️) mein FREE Gemini ya Groq key daalo (2 minute ka kaam). Local commands chal rahe hain!", wasVoice);
-    return;
-  }
+  /* OMNI v4.1: key na ho to bhi Pollinations (keyless) chalta hai — darwaza hata diya */
   askAI(wasVoice);
 }
 
@@ -1861,6 +1860,68 @@ async function geminiChat(){
 }
 geminiChat.keyErr = false;
 
+/* --- OMNI (v4.1): KEYLESS Pollinations — internet ho to jawab PAKKA --- */
+async function pollinationsChat(lu, wasVoice){
+  try {
+    var msgs = [{ role: "system", content: sysPrompt() + " NOTE: Backup keyless mode — phone tools off, sirf baat-cheet ka behtareen jawab (user ki zubaan mein)." }];
+    chatHist.slice(-6).forEach(function(h){ msgs.push({ role: h.role === "model" ? "assistant" : "user", content: h.text }); });
+    var payload = JSON.stringify({ model: "openai", messages: msgs, referrer: "mayaassistant" });
+    var body = "";
+    if (NATIVE && window.MayaBridge.httpPost) {
+      var pr = JSON.parse(window.MayaBridge.httpPost("https://text.pollinations.ai/openai", "", payload));
+      if (pr.status >= 200 && pr.status < 300) body = pr.body || "";
+    } else {
+      var pf = await fetch("https://text.pollinations.ai/openai", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload });
+      if (pf.ok) body = await pf.text();
+    }
+    if (body) {
+      try {
+        var j = JSON.parse(body);
+        var o1 = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+        if (o1 && String(o1).trim()) { aiState.provider = "FREE-KEYLESS"; return String(o1).trim(); }
+      } catch(e){}
+      if (String(body).trim().length > 2) { aiState.provider = "FREE-KEYLESS"; return String(body).trim().slice(0, 600); }
+    }
+  } catch (e) {}
+  try {
+    var url = "https://text.pollinations.ai/" + encodeURIComponent(String(lu || "salam") + " (Roman Urdu mein chhota jawab)") + "?referrer=mayaassistant";
+    var txt = "";
+    if (NATIVE && window.MayaBridge.httpGet) {
+      var gr = JSON.parse(window.MayaBridge.httpGet(url, ""));
+      if (gr.status >= 200 && gr.status < 300) txt = gr.body || "";
+    } else {
+      var gf = await fetch(url);
+      if (gf.ok) txt = await gf.text();
+    }
+    if (txt && txt.trim().length > 1) { aiState.provider = "FREE-KEYLESS"; return txt.trim().slice(0, 600); }
+  } catch (e2) {}
+  return null;
+}
+
+/* --- OMNI (v4.1): OpenRouter free models --- */
+var OR_FREE_MODELS = ["meta-llama/llama-3.3-70b-instruct:free", "deepseek/deepseek-chat-v3.1:free", "google/gemma-3-27b-it:free"];
+async function openRouterChat(lu){
+  if (!settings.orKey) return null;
+  try {
+    var msgs = [{ role: "system", content: sysPrompt() + " (Backup mode — tools off)" }];
+    chatHist.slice(-8).forEach(function(h){ msgs.push({ role: h.role === "model" ? "assistant" : "user", content: h.text }); });
+    var payload = JSON.stringify({ model: OR_FREE_MODELS[0], messages: msgs, max_tokens: 300 });
+    var body = "";
+    if (NATIVE && window.MayaBridge.httpPost) {
+      var orr = JSON.parse(window.MayaBridge.httpPost("https://openrouter.ai/api/v1/chat/completions", "Bearer " + settings.orKey, payload));
+      if (orr.status >= 200 && orr.status < 300) body = orr.body || "";
+    } else {
+      var orf = await fetch("https://openrouter.ai/api/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + settings.orKey }, body: payload });
+      if (orf.ok) body = await orf.text();
+    }
+    if (!body) return null;
+    var j2 = JSON.parse(body);
+    var o2 = j2.choices && j2.choices[0] && j2.choices[0].message && j2.choices[0].message.content;
+    if (o2 && String(o2).trim()) { aiState.provider = "OPENROUTER"; return String(o2).trim(); }
+  } catch (e) {}
+  return null;
+}
+
 /* --- Provider 2 & 3: OpenAI-compatible (Groq / GitHub Models) — plain chat --- */
 async function openaiCompatChat(provider){
   var url, key, model;
@@ -1914,6 +1975,10 @@ async function askAI(wasVoice){
     }
   }
   /* TURBO: simple baat seedha GROQ (instant) */
+  if (settings.turbo && lu && !needsTools(lu) && (Date.now() < geminiBadUntil || !settings.apikey) && (!settings.groqKey)) {
+    var pout = await pollinationsChat(lu, wasVoice);
+    if (pout) { thinking = false; setOrb("idle"); aiState.provider = "FREE-KEYLESS"; pushLog("OMNI KEYLESS (Pollinations)"); cachePut(cacheKey(lu), pout); reply(pout, wasVoice); return; }
+  }
   if (settings.turbo && settings.groqKey && lu && (!needsTools(lu) || Date.now() < geminiBadUntil)) {
     try {
       var tg = await openaiCompatChat("groq");
@@ -1935,6 +2000,8 @@ async function askAI(wasVoice){
   var keyErr = geminiChat.keyErr;
   if (!out) { try { out = await openaiCompatChat("groq"); } catch (e) {} }
   if (!out) { try { out = await openaiCompatChat("github"); } catch (e) {} }
+  if (!out) { try { out = await openRouterChat(lu); } catch (e) {} }
+  if (!out) { try { out = await pollinationsChat(lu, wasVoice); } catch (e) {} }
   if (out) {
     askAI._retried = false;
     thinking = false; setOrb("idle");
@@ -1960,7 +2027,7 @@ async function askAI(wasVoice){
   else if (keyErr)
     reply("Gemini key ghalat lag rahi hai, " + settings.name + ". aistudio.google.com se nayi key banao aur Settings mein paste karo. Local commands chal rahe hain!", wasVoice);
   else
-    reply("Sab free brains is waqt busy hain, " + settings.name + ". Ek minute baad bolo — ya local commands use karo: waqt, battery, alarm, timer, open WhatsApp!", wasVoice);
+    reply("Boss, internet ka raabta hi nahi ban pa raha shayad — kyunki backup brains (bina key wale bhi) try kar chuki. WiFi/data check kar ke dobara bolo. Local commands (waqt, battery, alarm, timer, apps) hamesha chalte hain!", wasVoice);
 }
 
 function openURL(u){ var w = window.open(u, "_blank"); if (!w) { try { location.href = u; } catch(e){} } }
@@ -2358,7 +2425,7 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 /* ---------- SETTINGS TAB ---------- */
 function loadSettingsForm(){
   $("#sName").value = settings.name; $("#sCity").value = settings.city || "Hyderabad"; $("#sKey").value = settings.apikey;
-  $("#sGqKey").value = settings.groqKey; $("#sGqModel").value = settings.groqModel || "llama-3.3-70b-versatile"; $("#sGhKey").value = settings.ghKey;
+  $("#sGqKey").value = settings.groqKey; $("#sGqModel").value = settings.groqModel || "llama-3.3-70b-versatile"; $("#sGhKey").value = settings.ghKey; $("#sOrKey").value = settings.orKey || "";
   $("#sStt").value = settings.stt; $("#sTts").value = settings.tts;
   $("#sRate").value = settings.rate; $("#rateVal").textContent = Number(settings.rate).toFixed(2);
   $("#sPitch").value = settings.pitch || 1.05; $("#pitchVal").textContent = Number(settings.pitch || 1.05).toFixed(2);
@@ -2390,6 +2457,7 @@ $("#saveSettings").addEventListener("click", function(){
   kGit = $("#sGhKey").value.trim().replace(/\s+/g, "");
   settings.apikey = kGem;
   settings.groqKey = kGrq; settings.groqModel = $("#sGqModel").value; settings.ghKey = kGit;
+  settings.orKey = ($("#sOrKey") ? $("#sOrKey").value : "").trim().replace(/\s+/g, "");
   settings.stt = $("#sStt").value; settings.tts = $("#sTts").value;
   settings.rate = parseFloat($("#sRate").value) || 1;
   settings.pitch = parseFloat($("#sPitch").value) || 1.05;
@@ -2665,7 +2733,7 @@ if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
   var sver = document.querySelector("#splash .ver");
-  if (sver) sver.textContent = "VERSION 4.0 — DIL 💜";
+  if (sver) sver.textContent = "VERSION 4.1 — OMNI 🧠";
 }
 greetMiniRefresh();
 chatHist.slice(-40).forEach(function(h){ addBubble(h.role === "user" ? "user" : "ai", h.text); });
