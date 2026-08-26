@@ -1934,7 +1934,13 @@ function packPick(kind){
 var ghostCache = {};
 try { ghostCache = JSON.parse(localStorage.getItem("maya_ghost") || "{}"); } catch(e){}
 function ghostSave(){ try { localStorage.setItem("maya_ghost", JSON.stringify(ghostCache)); } catch(e){} }
-function isOnline(){ return navigator.onLine !== false; }
+function isOnline(){
+  if (navigator.onLine === false) return false;
+  if (NATIVE && window.MayaBridge && window.MayaBridge.isNetworkAvailable) {
+    try { return window.MayaBridge.isNetworkAvailable() === true; } catch(e){}
+  }
+  return true;
+}
 
 var GHOST_KB = {
   "who are you": "Main MAYA hoon — aap ki personal AI saathi. Filhaal offline mode mein hoon, lekin aap ki baat samajh sakti hoon!",
@@ -2237,6 +2243,16 @@ async function askAI(wasVoice){
   }
 }
 async function _askAIInner(wasVoice){
+  /* GHOST MODE: internet OFF = seedha offline jawab, koi cloud try NAHI! */
+  if (!isOnline()) {
+    var ghostAns = ghostRespond(lu || _lastQuery || "help");
+    if (ghostAns) {
+      aiState.provider = "GHOST";
+      pushLog("GHOST MODE (offline) — cloud SKIP");
+      reply(ghostAns, wasVoice);
+      return;
+    }
+  }
   var lu = null;
   for (var ci = chatHist.length - 1; ci >= 0; ci--) if (chatHist[ci].role === "user") { lu = chatHist[ci].text; break; }
   if (lu) {

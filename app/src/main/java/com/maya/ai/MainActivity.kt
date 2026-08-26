@@ -782,6 +782,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         @JavascriptInterface
+        fun isNetworkAvailable(): Boolean {
+            return try {
+                val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
+                val ni = cm.activeNetworkInfo
+                ni != null && ni.isConnected
+            } catch (e: Exception) { true }
+        }
+
+        @JavascriptInterface
         fun scanQR(): Boolean {
             return try {
                 val i = Intent("com.google.zxing.client.android.SCAN")
