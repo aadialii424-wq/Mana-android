@@ -323,7 +323,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.2.0 🥗</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.0 🌍</div></div>
         <div class="chip"><div class="k">◈ BUDGET AAJ (G/Q/P)</div><div class="v" id="hudBudget">0/0/0</div></div>
       </div>
 
@@ -638,7 +638,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v4.2.0 — SAVER ONLINE 🥗");
+    pushLog("MAYA v5.0.0 — MAYA-OS ONLINE 🌍");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -707,6 +707,13 @@ window.__nativeTtsDone = function(){ speaking = false; afterSpeak(lastWasVoice);
 window.__nativeSpeech = function(text){
   listening = false; setOrb("idle");
   if (text && text.trim()) handleUserText(text.trim(), true);
+};
+window.__shakeHeard = function(){
+  if (!listening && !speaking && !thinking) {
+    chime(880, 0.1);
+    pushLog("SHAKE detected!");
+    startListening();
+  }
 };
 window.__nativePartial = function(t){ try { interimEl.textContent = t || ""; } catch(e){} };
 window.__nativeRms = function(db){
@@ -1133,6 +1140,53 @@ function tryLocal(t, wasVoice){
   if (/(motivat|himmat|hosla|inspire|uptight hoon|himmat do)/.test(q)) return { reply: packPick("motivation") };
   if (/(dua|prayer batao|islamic)/.test(q) && /(sunao|batao|suna do)/.test(q)) return { reply: packPick("dua") };
 
+  /* SELF-UPDATE fast path */
+  if (/(update|nayi version|upgrade)/.test(q) && /(karo|kar do|download|install|check)/.test(q)) {
+    if (window.__updateLink) {
+      openURL(window.__updateLink);
+      return { reply: "Nayi version ka link khol rahi hoon — download kar ke install karo!" };
+    } else {
+      checkForUpdate();
+      return { reply: "Abhi check kar rahi hoin..." };
+    }
+  }
+
+  /* IMAGE ARTIST fast path */
+  if (/(banao|generate|draw|paint|photo banao|wallpaper)/.test(q) && /(wallpaper|tasveer|image|picture|photo|drawing|art|logo)/.test(q)) {
+    var imgQ = q.replace(/maya|banao|generate|draw|wallpaper|tasveer|image|picture|photo|aik|ek|wala|wali|ka|ki|do|de|please|gorgeous|beautiful|ai|se/gi, "").trim();
+    if (imgQ.length < 3) imgQ = "beautiful nature landscape, high quality, 4k";
+    else imgQ = imgQ + ", high quality, detailed";
+    var imgU = "https://image.pollinations.ai/prompt/" + encodeURIComponent(imgQ) + "?width=1024&height=1024&nologo=true&referrer=mayaassistant";
+    openURL(imgU);
+    return { reply: "Tasveer bana rahi hoon — browser mein khul raha hai, 5-10 second lagenge! \u{1F3A8}" };
+  }
+
+  /* NASA APOD fast path */
+  if (/(nasa|space|aasman|galaxy|star|sitara|universe)/.test(q) && /(photo|pic|tasveer|image|dikhao|wallpaper|aaj)/.test(q)) {
+    nativeGet("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY").then(function(r){
+      if (r.status === 200 && r.body) {
+        try {
+          var j = JSON.parse(r.body);
+          if (j.url) { openURL(j.url); reply("NASA ki aaj ki space photo khol rahi hoon: " + (j.title || "Astronomy Picture of the Day") + ". " + (j.explanation || "").slice(0, 200), wasVoice); return; }
+        } catch(e){}
+      }
+      reply("NASA photo nahi mil saki, " + settings.name + ".", wasVoice);
+    });
+    return { reply: "" };
+  }
+
+  /* AUDIOBOOK fast path */
+  if (/(kitab|book|audiobook|sunao|padho)/.test(q) && /(sherlock|holmes|wuthering|heights|dracula|frankenstein|jane|eyre|pride|prejudice|alice|wonderland|gutenberg)/.test(q)) {
+    return { reply: "Kitab dhoond rahi hoon Gutenberg se... ek second." , _aiRoute: true };
+  }
+
+  /* QR Scanner fast path */
+  if (/(qr|barcode|scan)/.test(q) && /(kholo|scan karo|dikhao|padho|check)/.test(q) && NATIVE) {
+    var okQr2 = false;
+    try { okQr2 = window.MayaBridge.scanQR() === true; } catch(e){}
+    return { reply: okQr2 ? "Scanner khol rahi hoon!" : "QR scanner app nahi hai — Play Store se 'QR Code Scanner' install karo." };
+  }
+
   /* VISION fast path */
   if (/(ye|yeh|ye wali|is)\s*(dekho|chiz)/.test(q) || /(photo|tasveer)\s*(khincho|khich|lo|lena)/.test(q) || /camera khol/.test(q)) {
     if (NATIVE) {
@@ -1455,6 +1509,16 @@ var TOOL_DECLS = [
     parameters: { type: "OBJECT", properties: { percent: { type: "INTEGER" } }, required: ["percent"] } },
   { name: "brightness_control", description: "Screen brightness (5-100).",
     parameters: { type: "OBJECT", properties: { percent: { type: "INTEGER" } }, required: ["percent"] } },
+  { name: "generate_image", description: "AI se tasveer/wallpaper banata hai (Pollinations — free, keyless). Jaise: 'dragon wala wallpaper banao'",
+    parameters: { type: "OBJECT", properties: { prompt: { type: "STRING", description: "kya banana hai (English mein describe karo)" } }, required: ["prompt"] } },
+  { name: "nasa_photo", description: "Aaj ki NASA space photo lauta deta hai (Astronomy Picture of the Day).",
+    parameters: { type: "OBJECT", properties: {} } },
+  { name: "search_book", description: "Free audiobook kitab dhoondta hai (Gutenberg — 70,000+ purani kitabein).",
+    parameters: { type: "OBJECT", properties: { query: { type: "STRING" } }, required: ["query"] } },
+  { name: "read_book", description: "Kitab ka text lauta deta hai (Gutendex se ID ke zariye).",
+    parameters: { type: "OBJECT", properties: { bookId: { type: "INTEGER" } }, required: ["bookId"] } },
+  { name: "scan_qr", description: "QR/barcode scanner kholta hai.",
+    parameters: { type: "OBJECT", properties: {} } },
   { name: "get_weather", description: "Current mausam lauta deta hai (default sheher settings wala).",
     parameters: { type: "OBJECT", properties: { city: { type: "STRING" } } } },
   { name: "battery_status", description: "Phone battery ka status.", parameters: { type: "OBJECT", properties: {} } },
@@ -1652,6 +1716,53 @@ async function execTool(name, args){
             out = okm ? { done: true, who: mc.name, how: "chat khul gaya message type ho chuka" } : { done: false };
           }
         } catch(e){ out = { error: String(e && e.message || e) }; }
+      }
+    } else if (name === "generate_image") {
+      var imgPrompt = String(args.prompt || "").trim();
+      if (!imgPrompt) { out = { error: "prompt khali" }; }
+      else {
+        var imgUrl = "https://image.pollinations.ai/prompt/" + encodeURIComponent(imgPrompt) + "?width=1024&height=1024&nologo=true&referrer=mayaassistant";
+        openURL(imgUrl);
+        out = { done: true, note: "Browser mein khul raha hai — tasveer 5-10 second mein banti hai" };
+      }
+    } else if (name === "nasa_photo") {
+      try {
+        var rNasa = await nativeGet("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY");
+        if (rNasa.status === 200 && rNasa.body) {
+          var jN = JSON.parse(rNasa.body);
+          if (jN.url) { openURL(jN.url); out = { done: true, title: jN.title, explanation: (jN.explanation || "").slice(0, 300) }; }
+          else out = { error: "NASA data nahi mila" };
+        } else out = { error: "NASA API fail" };
+      } catch(e) { out = { error: "NASA: " + e.message }; }
+    } else if (name === "search_book") {
+      try {
+        var rBook = await nativeGet("https://gutendex.com/books?search=" + encodeURIComponent(String(args.query || "")));
+        if (rBook.status === 200 && rBook.body) {
+          var jB = JSON.parse(rBook.body);
+          var books = (jB.results || []).slice(0, 5).map(function(b){
+            return { id: b.id, title: b.title, author: (b.authors && b.authors[0] && b.authors[0].name) || "Unknown" };
+          });
+          out = books.length ? { books: books } : { error: "kitab nahi mili" };
+        } else out = { error: "Gutenberg fail" };
+      } catch(e) { out = { error: "book search: " + e.message }; }
+    } else if (name === "read_book") {
+      try {
+        var bid = parseInt(args.bookId, 10) || 1342;
+        var rTxt = await nativeGet("https://www.gutenberg.org/files/" + bid + "/" + bid + "-0.txt");
+        if (rTxt.status !== 200 || !rTxt.body || rTxt.body.length < 100) {
+          rTxt = await nativeGet("https://www.gutenberg.org/cache/epub/" + bid + "/pg" + bid + ".txt");
+        }
+        if (rTxt.status === 200 && rTxt.body) {
+          var clean = htmlToText(rTxt.body).slice(0, 1500);
+          out = { text: clean, note: "Pehla hissa — 'aage sunao' bologe to aage padhungi" };
+        } else out = { error: "text nahi mila" };
+      } catch(e) { out = { error: "book read: " + e.message }; }
+    } else if (name === "scan_qr") {
+      if (!NATIVE) { out = { error: "sirf APK" }; }
+      else {
+        var okQr = false;
+        try { okQr = window.MayaBridge.scanQR() === true; } catch(e){}
+        out = okQr ? { done: true, note: "Scanner khul raha hai" } : { done: false, note: "QR scanner app nahi mila" };
       }
     } else if (name === "get_weather") {
       out = await fetchWeather(args.city);
@@ -2611,6 +2722,23 @@ $("#saveSettings").addEventListener("click", function(){
 (function(_cs){ if (_cs) _cs.addEventListener("click", function(){
   customSkills = []; saveSkills(); refreshSkillList(); toast("Custom skills khatam");
 }); })($("#clearSkills"));
+async function checkForUpdate(){
+  try {
+    var r = await nativeGet("https://api.github.com/repos/aadialii424-wq/Mana-android/releases/latest");
+    if (r.status !== 200 || !r.body) return;
+    var j = JSON.parse(r.body);
+    var latest = String(j.tag_name || "").replace(/^v/, "");
+    var current = "4.2.0";
+    if (latest && latest !== current) {
+      var asset = (j.assets || [])[0];
+      var dl = asset ? asset.browser_download_url : j.html_url;
+      pushLog("UPDATE AVAILABLE: v" + latest + " (current v" + current + ")");
+      toast("Nayi version aayi hai! v" + latest + " — kholne ke liye bolo 'update karo'");
+      window.__updateLink = dl;
+    }
+  } catch(e){}
+}
+
 function refreshSkillList(){
   var el = $("#skillList"); if (!el) return;
   var moods = moodLog.slice(-10).map(function(m){ return m.m; }).join(",");
@@ -2858,6 +2986,7 @@ fillWeatherChip();
 setInterval(fillWeatherChip, 1800000);
 populateVoiceSelect();
 renderArtists();
+setTimeout(checkForUpdate, 6000);
 setTimeout(consolidateMemory, 4000);
 if (NATIVE && settings.wakeWord) setTimeout(function(){ try { setWakeService(true); } catch(e){} }, 1500);
 setTimeout(refreshHandsFreeStatus, 800);
@@ -2866,7 +2995,7 @@ if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
   var sver = document.querySelector("#splash .ver");
-  if (sver) sver.textContent = "VERSION 4.2 — SAVER 🥗";
+  if (sver) sver.textContent = "VERSION 5.0 — MAYA-OS 🌍";
 }
 greetMiniRefresh();
 chatHist.slice(-40).forEach(function(h){ addBubble(h.role === "user" ? "user" : "ai", h.text); });

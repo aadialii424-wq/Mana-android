@@ -100,6 +100,38 @@ class MainActivity : AppCompatActivity() {
         requestNeededPermissions()
     }
 
+    private var shakeSensor: android.hardware.Sensor? = null
+    private var shakeListener: android.hardware.SensorEventListener? = null
+    private var lastShake = 0L
+
+    override fun onResume() {
+        super.onResume()
+        try {
+            val sm = getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
+            shakeSensor = sm.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER)
+            shakeListener = object : android.hardware.SensorEventListener {
+                override fun onSensorChanged(event: android.hardware.SensorEvent) {
+                    val x = event.values[0]; val y = event.values[1]; val z = event.values[2]
+                    val mag = Math.sqrt((x*x + y*y + z*z).toDouble())
+                    if (mag > 25 && System.currentTimeMillis() - lastShake > 3000) {
+                        lastShake = System.currentTimeMillis()
+                        evalAsync("window.__shakeHeard && window.__shakeHeard()")
+                    }
+                }
+                override fun onAccuracyChanged(s: android.hardware.Sensor?, a: Int) {}
+            }
+            sm.registerListener(shakeListener, shakeSensor, android.hardware.SensorManager.SENSOR_DELAY_NORMAL)
+        } catch (e: Exception) {}
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try {
+            val sm = getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
+            if (shakeListener != null) sm.unregisterListener(shakeListener)
+        } catch (e: Exception) {}
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != Activity.RESULT_OK) return
@@ -747,6 +779,22 @@ class MainActivity : AppCompatActivity() {
                 val svc = com.maya.ai.AutoSendService.instance
                 svc?.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN) == true
             } catch (e: Exception) { false }
+        }
+
+        @JavascriptInterface
+        fun scanQR(): Boolean {
+            return try {
+                val i = Intent("com.google.zxing.client.android.SCAN")
+                i.putExtra("SCAN_MODE", "QR_CODE_MODE")
+                startActivity(i)
+                true
+            } catch (e: Exception) {
+                try {
+                    startActivity(Intent(Intent.ACTION_VIEW,
+                        android.net.Uri.parse("market://details?id=com.google.zxing.client.android")))
+                    true
+                } catch (x: Exception) { false }
+            }
         }
 
         @JavascriptInterface
