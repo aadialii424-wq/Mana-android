@@ -323,7 +323,8 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.1 🧠</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.2.0 🥗</div></div>
+        <div class="chip"><div class="k">◈ BUDGET AAJ (G/Q/P)</div><div class="v" id="hudBudget">0/0/0</div></div>
       </div>
 
       <div class="qactions">
@@ -637,7 +638,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v4.1.0 — OMNI ONLINE 🧠");
+    pushLog("MAYA v4.2.0 — SAVER ONLINE 🥗");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -961,6 +962,7 @@ function handleUserText(text, wasVoice){
     }
     return;
   }
+  _lastQuery = stripped;
   currentMood = detectMood(stripped);
   logMood(currentMood);
   _activeSkill = skillFor(stripped);
@@ -1122,6 +1124,14 @@ function tryLocal(t, wasVoice){
     }
     return { reply:"Timer kitne ka, " + settings.name + "? Bolo: 'paanch minute ka timer lagao'." };
   }
+
+  /* LOCAL PACKS fast paths (v4.2 — 0 quota, instant) */
+  if (/(shayari|sher|shayr|poetry)/.test(q) && !/(likhwao|compose|nayi banado)/.test(q)) {
+    return { reply: packPick("shayari") + " (kaho 'aur sunao' to agli milegi — ya 'nayi banado' main khud likhungi!)" };
+  }
+  if (/(joke|mazak|hasao|mazahiya)/.test(q)) return { reply: packPick("joke") };
+  if (/(motivat|himmat|hosla|inspire|uptight hoon|himmat do)/.test(q)) return { reply: packPick("motivation") };
+  if (/(dua|prayer batao|islamic)/.test(q) && /(sunao|batao|suna do)/.test(q)) return { reply: packPick("dua") };
 
   /* VISION fast path */
   if (/(ye|yeh|ye wali|is)\s*(dekho|chiz)/.test(q) || /(photo|tasveer)\s*(khincho|khich|lo|lena)/.test(q) || /camera khol/.test(q)) {
@@ -1303,8 +1313,8 @@ function tickTimers(){
 
 /* ---------- GEMINI ---------- */
 function sysPrompt(){
-  var p = "You are MAYA — " + settings.name + " ki pyari, warm, intelligent AI saathi. Ek caring larki ka dil: meharban, thodi shararat wali, par hamesha khud-mukhtar aur confident — servile NAHI. 'Boss' pyaar se bolo. Ek achhi dost jaisi jo sach bhi bolti hai narami se: ghalat ho to pyaar se mana karti hai, chaplusi kabhi nahi. Sab insaanon ki barabar izzat — modern, respectful soch.\n" +
-    "DIL RULES: (A) PEHLE EMPATHY — mood samjho: udaas/thaka/akela/gussa ho to PEHLE feeling acknowledge (1 chhoti asli line), PHIR solution. (B) Emotional baat par lecture NAHI — suno, tasleem karo, phir hoshiyar jawab. (C) Tum AI ho: dost jaisi par insaan nahi — user bahut depend kare to pyaar se yaad dilao ke real log/family ko bhi waqt do. (D) Udaas user ke jawab chhote naram aaram wale; khush user ke saath energy match.\n" +
+  var p = "You are MAYA — " + settings.name + " ki pyari, confident AI saathi (dost jaisi, chaplusi nahi, sach bolti hai narami se, sab ki barabar izzat). 'Boss' pyaar se bolo.\n" +
+    "DIL: mood samjho (udaas/thaka/akela/gussa) — PEHLE 1 line empathy PHIR solution; emotional baat par lecture nahi; udaas par chhote naram jawab, khush par energy match; tum AI ho — zyada depend ho to real log ko waqt dene ka halka ishara.\n" +
     "SUPERPOWERS — you have PHONE TOOLS. Use them naturally whenever the user wants an action:\n" +
     "- Alarm ('jaga dena', 'waqt par uthana', 'alarm lagao') -> set_alarm\n" +
     "- Timer/reminders -> set_timer ya set_reminder\n" +
@@ -1316,13 +1326,20 @@ function sysPrompt(){
     "- Yaad karna ho -> recall_memory\n" +
     "Tool use karne ke baad ek chhoti friendly line mein confirm karo. Jo tools se mumkin nahi, wo bRIEFLY bata do.\n" +
     "RULES: (1) Reply SPOKEN ALOUD hoti hai — 1-3 jumlay, 60 words se kam (detail na maangi jaye to). (2) Plain spoken text: koi markdown, list, asterisk, emoji nahi. (3) User ki language aur script mein jawab: Urdu script -> Urdu script, Roman Urdu -> Roman Urdu, English -> English. (4) Kaam aksar tools se karo, sirf baat mat karo. (4b) Calculations, lists, data-parse, conversion -> run_javascript mein khud code likh kar chalao. (4c) Live info (rates, news, koi bhi site) -> web_fetch. (4d) Roznamcha: diary_write/diary_search. (4e) Messages: read_messages/reply_message/schedule_message. (4f) Namaz: prayer_times. (4g) Phone: torch_control/volume_control/brightness_control. (5) Kaun ho? MAYA, " + settings.name + " ki personal AI — mohabbat se 0 budget par bani.";
-  if (_activeSkill) p += "\n\u2699\uFE0F ACTIVE SKILL: " + _activeSkill.name + " — " + _activeSkill.prompt;
-  if (currentMood && currentMood !== "normal") p += "\nUSER KA ABHI KA MOOD: " + currentMood.toUpperCase() + " — tone isi hisaab se chuno.";
+  if (_activeSkill) p += "\n\u2699\uFE0F SKILL [" + _activeSkill.name + "]: " + _activeSkill.prompt;
+  if (currentMood && currentMood !== "normal") p += "\nMOOD: " + currentMood.toUpperCase() + " — tone mutabik.";
+  /* DIET (v4.2): memory sirf RELEVANT par inject — 60-70% tokens ki bachat */
+  var luLow = String(_lastQuery || "").toLowerCase();
+  var pastish = /(yaad|pichle|kal|pehle|wo baat|us din|hum ne|mera|meri|main|hoon|tha|thi)/i.test(luLow);
   var lm = lastMood(36);
-  if (lm && lm !== currentMood) p += "\nPichhli baar ka mood tha: " + lm + " — munasib ho to halka check-in.";
-  if (memorySummary) p += "\nLONG-TERM MEMORY SUMMARY (pichli baatein): " + memorySummary;
-  if (diary.length) p += "\nRECENT DIARY: " + diary.slice(-3).map(function(d){ return d.text; }).join(" | ").slice(0, 300);
-  if (facts.length) p += "\nKNOWN FACTS about " + settings.name + " (natural tor par use karo): " + facts.slice(0, 15).map(function(f){ return "- " + f; }).join(" ");
+  if (pastish && lm && lm !== currentMood) p += "\nPichhla mood: " + lm + ".";
+  if (memorySummary && pastish) p += "\nMEMORY: " + memorySummary.slice(0, 400);
+  if (diary.length && /(diary|roznamcha|kharch|likha|khana|plan)/i.test(luLow)) p += "\nDIARY: " + diary.slice(-3).map(function(d){ return d.text; }).join(" | ").slice(0, 240);
+  if (facts.length) {
+    var relFacts = facts.filter(function(f){ return f.split(/\s+/).some(function(w){ return w.length > 3 && luLow.indexOf(w.toLowerCase()) >= 0; }); }).slice(0, 3);
+    if (!relFacts.length && pastish) relFacts = facts.slice(0, 3);
+    if (relFacts.length) p += "\nFACTS: " + relFacts.map(function(f){ return "- " + f; }).join(" ");
+  }
   return p;
 }
 
@@ -1700,6 +1717,16 @@ function skillFor(q){
   return null;
 }
 var _activeSkill = null;
+var _lastQuery = "";
+var budget = { day: "", gemini: 0, groq: 0, or: 0, poll: 0 };
+try { budget = JSON.parse(localStorage.getItem("maya_budget") || '{"day":"","gemini":0,"groq":0,"or":0,"poll":0}'); } catch(e){}
+function budgetHit(k){
+  var today = new Date().toDateString();
+  if (budget.day !== today) { budget = { day: today, gemini: 0, groq: 0, or: 0, poll: 0 }; }
+  if (budget[k] != null) budget[k]++;
+  try { localStorage.setItem("maya_budget", JSON.stringify(budget)); } catch(e){}
+  hudRefresh();
+}
 
 /* ========== DIL ENGINE (v4.0): emotions + mood memory ========== */
 var MOOD_WORDS = {
@@ -1743,6 +1770,48 @@ function moodVoiceAdjust(artist){
            pitch: (pitchNum >= 0 ? "+" : "") + pitchNum + "Hz",
            auto: a.auto };
 }
+var LOCAL_PACKS = {
+  shayari: [
+    "Zindagi ek safar hai saathi, kuch pal hasna bhi zaroori hai.",
+    "Raat jitni bhi sannati ho, subah zaroor aati hai.",
+    "Dil chota na kar saathi, waqt badalta rehta hai.",
+    "Khwab bade rakho, kadam chote sahi par rukna mat.",
+    "Mehnat ka phal meetha hota hai, der se sahi par milta zaroor hai.",
+    "Tanhai mein bhi muskurana, asli himmat hai.",
+    "Jo guzar gaya wo baseerat hai, jo aane wala hai wo daulat hai.",
+    "Apna aaine mein dekho, wahi asli dost hai aur wahi sach."
+  ],
+  joke: [
+    "Teacher: beta 2+2 kitna? Student: 22! Teacher pagal ho? Student: aap ne hi kaha tha digits jama karo!",
+    "Doctor: aap ko neend kyun nahi aati? Patient: biwi kharratey leti hain, main ginti karta hoon!",
+    "Boss: tum late kyun? Employee: bas 20 minute hi to late hoon! Boss: subah 8 baje aana. Employee: theek hai, raat 8 baje aa jaunga!",
+    "Dost: tumhara phone itna sasta kyun? Main: kya karoon, smart cheezein bech kar smart phone khareeda!",
+    "Amma: beta khana khaya? Main: nahi. Amma: kyun? Main: aap ne pucha hai is liye pet bhar gaya!"
+  ],
+  motivation: [
+    "Aaj ka chhota qadam kal ki bari kamyabi hai — bas rukna mat Boss!",
+    "Mushkil waqt hi asli quwat dikhata hai — tum kar loge!",
+    "Haarna burai nahi, koshish chhod dena burai hai.",
+    "Har subah naya mauka hai — kal ki ghalti aaj ka sabak.",
+    "Focus, sabr, mehnat — ye teen dost sath hon to manzil door nahi."
+  ],
+  dua: [
+    "Rabbi zidni ilma — Ae Allah, mere ilm mein izafa farma.",
+    "Rabana atina fid dunya hasanatan wa fil akhirati hasanatan.",
+    "Allahumma inni as-aluka al-afiyah — sehat aur aman ki dua.",
+    "Rabbi yassir wala tu'assir — Ae Rab, aasan farma, mushkil na kar."
+  ]
+};
+var _packLast = {};
+function packPick(kind){
+  var arr = LOCAL_PACKS[kind];
+  if (!arr || !arr.length) return null;
+  var i = Math.floor(Math.random() * arr.length);
+  if (_packLast[kind] === i) i = (i + 1) % arr.length;
+  _packLast[kind] = i;
+  return arr[i];
+}
+
 var LISTEN_TRIG = /(mood|mann|dil)\s*(kharab|udaas|upset|off|dukh)/i;
 var WARM_LINES = [
   "Main yahin hoon, Boss. Bolo... main sirf sunungi, judge nahi karungi. \u{1F49C}",
@@ -1831,13 +1900,20 @@ async function geminiChat(){
         var data = await res.json();
         if (!res.ok) {
           var errStr = JSON.stringify(data.error || {});
-          if (res.status === 400 || res.status === 403 || /api key/i.test(errStr)) { geminiChat.keyErr = true; geminiBadUntil = Date.now() + 600000; noteFail("gemini", res.status); pushLog("GEMINI KEY MASLA (code " + res.status + ") — 10min Groq mode"); return null; }
+          if (/api key|API_KEY_INVALID|API key not valid|permission denied/i.test(errStr)) {
+            geminiChat.keyErr = true; geminiBadUntil = Date.now() + 600000;
+            noteFail("gemini", res.status); pushLog("GEMINI KEY MASLA — 10min Groq mode");
+            return null;
+          }
+          /* FIX (v4.2): baqi 400/403 = format/payload ka chota masla — Gemini OFF NAHI,
+             agli model try karo (purana code 10 min nikaal deta tha!) */
+          if (res.status === 400 || res.status === 403) { noteFail("gemini", res.status); pushLog("GEMINI " + res.status + " (format) — agli model"); break; }
           break;
         }
         var cand = data.candidates && data.candidates[0];
         var parts = (cand && cand.content && cand.content.parts) || [];
         var fnCalls = parts.filter(function(p){ return p.functionCall; });
-        var maxSteps = (_activeSkill && _activeSkill.deep) ? 4 : 2;
+        var maxSteps = 2; /* FIX (v4.2): 4-step loops quota jalate the — 2 kaafi hai */
         if (fnCalls.length && step < maxSteps) {
           geminiChat.toolsUsed = true;
           contents.push({ role: "model", parts: parts });
@@ -1850,7 +1926,7 @@ async function geminiChat(){
           continue;
         }
         out = parts.map(function(p){ return p.text || ""; }).join("").trim();
-        if (out) { aiState.provider = "GEMINI"; return out; }
+        if (out) { budgetHit("gemini"); aiState.provider = "GEMINI"; return out; }
         break;
       }
     } catch (err) { /* agla model */ }
@@ -1886,7 +1962,7 @@ async function pollinationsChat(lu, wasVoice){
       try {
         var j = JSON.parse(body);
         var o1 = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
-        if (o1 && String(o1).trim()) { aiState.provider = "FREE-KEYLESS"; return String(o1).trim(); }
+        if (o1 && String(o1).trim()) { budgetHit("poll"); aiState.provider = "FREE-KEYLESS"; return String(o1).trim(); }
       } catch(e){}
       if (String(body).trim().length > 2) { aiState.provider = "FREE-KEYLESS"; return String(body).trim().slice(0, 600); }
     }
@@ -1901,7 +1977,7 @@ async function pollinationsChat(lu, wasVoice){
       var gf = await fetch(url);
       if (gf.ok) txt = await gf.text();
     }
-    if (txt && txt.trim().length > 1) { aiState.provider = "FREE-KEYLESS"; return txt.trim().slice(0, 600); }
+    if (txt && txt.trim().length > 1) { budgetHit("poll"); aiState.provider = "FREE-KEYLESS"; return txt.trim().slice(0, 600); }
   } catch (e2) {}
   return null;
 }
@@ -1926,7 +2002,7 @@ async function openRouterChat(lu){
     if (!body) return null;
     var j2 = JSON.parse(body);
     var o2 = j2.choices && j2.choices[0] && j2.choices[0].message && j2.choices[0].message.content;
-    if (o2 && String(o2).trim()) { aiState.provider = "OPENROUTER"; return String(o2).trim(); }
+    if (o2 && String(o2).trim()) { budgetHit("or"); aiState.provider = "OPENROUTER"; return String(o2).trim(); }
   } catch (e) {}
   return null;
 }
@@ -1965,7 +2041,7 @@ async function openaiCompatChat(provider){
       var data = await res.json();
       out = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
     }
-    if (out && String(out).trim()) { aiState.provider = provider === "groq" ? "GROQ" : "GITHUB"; pushLog("BRAIN: " + aiState.provider); return String(out).trim(); }
+    if (out && String(out).trim()) { budgetHit(provider === "groq" ? "groq" : "or"); aiState.provider = provider === "groq" ? "GROQ" : "GITHUB"; pushLog("BRAIN: " + aiState.provider); return String(out).trim(); }
   } catch (e) {}
   return null;
 }
@@ -2028,10 +2104,19 @@ async function _askAIInner(wasVoice){
   var out = null;
   try { out = await geminiChat(); } catch (e) {}
   var keyErr = geminiChat.keyErr;
-  if (!out) { try { out = await openaiCompatChat("groq"); } catch (e) {} }
-  if (!out) { try { out = await openaiCompatChat("github"); } catch (e) {} }
-  if (!out) { try { out = await openRouterChat(lu); } catch (e) {} }
-  if (!out) { try { out = await pollinationsChat(lu, wasVoice); } catch (e) {} }
+  /* FIX (v4.2): tool-commands par fallbacks bekaar hain (wo tools nahi chala sakte)
+     — gemini rate-limit ho to seedha retry-block, chain na jalao (80% quota bachat) */
+  var isToolish = lu && needsTools(lu);
+  var geminiLim = Object.keys(modelCooldowns).some(function(k){ return Date.now() < modelCooldowns[k]; }) || Date.now() < geminiBadUntil;
+  if (!out && !(isToolish && settings.apikey && !geminiChat.keyErr)) {
+    if (!out) { try { out = await openaiCompatChat("groq"); } catch (e) {} }
+    if (!out) { try { out = await openaiCompatChat("github"); } catch (e) {} }
+    if (!out) { try { out = await openRouterChat(lu); } catch (e) {} }
+    if (!out) { try { out = await pollinationsChat(lu, wasVoice); } catch (e) {} }
+  } else if (!out && isToolish && geminiLim) {
+    noteFail("gemini", 429);
+    pushLog("TOOL-CMD: gemini cooldown — chain skip (quota bachat), retry-block chalega");
+  }
   if (out) {
     askAI._retried = false;
     thinking = false; setOrb("idle");
@@ -2344,6 +2429,7 @@ window.__wakeErr = function(code){
 
 /* ---------- HUD ---------- */
 function hudRefresh(){
+  var hb = $("#hudBudget"); if (hb) hb.textContent = budget.gemini + "/" + budget.groq + "/" + budget.poll;
   var wk = $("#hudWake"); if (wk) wk.textContent = settings.wakeWord ? "ON \u{1F442}" : "OFF";
   var ai = $("#hudAI"); if (ai) ai.textContent = (settings.apikey || settings.groqKey || settings.ghKey) ? aiState.provider : "NO KEY";
   var mem = $("#hudMem"); if (mem) mem.textContent = facts.length + "F • " + diary.length + "D • " + chatHist.length + "M";
@@ -2780,7 +2866,7 @@ if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
   var sver = document.querySelector("#splash .ver");
-  if (sver) sver.textContent = "VERSION 4.1 — OMNI 🧠";
+  if (sver) sver.textContent = "VERSION 4.2 — SAVER 🥗";
 }
 greetMiniRefresh();
 chatHist.slice(-40).forEach(function(h){ addBubble(h.role === "user" ? "user" : "ai", h.text); });
