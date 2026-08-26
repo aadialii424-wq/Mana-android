@@ -323,7 +323,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.2 🌍</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v6.0 🌍</div></div>
         <div class="chip"><div class="k">◈ BUDGET (G/Q/P)</div><div class="v" id="hudBudget">0/0/0</div></div>
         <div class="chip"><div class="k">◈ GHOST (OFFLINE)</div><div class="v" id="hudGhost">—</div></div>
       </div>
@@ -645,7 +645,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v5.2.0 — TABAHI ONLINE 🌍");
+    pushLog("MAYA v6.0.0 — WORK MODE ONLINE 🌍");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1185,6 +1185,40 @@ function tryLocal(t, wasVoice){
         reply(r.time + ", " + r.day + ". Battery: " + r.battery + "%. " + (r.weather || ""), wasVoice);
       } else reply("Context nahi mila.", wasVoice);
     });
+    return { reply: "" };
+  }
+
+  /* GOLD RATE fast path — Pakistan specific */
+  if (/(gold|sona|sona)/.test(q) && /(rate|kitna|batao|price|kya hai|tola)/.test(q)) {
+    webSearch("gold rate Pakistan today 24K 22K per tola PKR").then(function(r){
+      if (r && r.results && r.results.length) {
+        var top = r.results.slice(0, 2).map(function(x){ return x.title + " (" + x.url + ")"; }).join("; ");
+        reply("Gold rates Pakistan: " + top + ". (Browser mein khol kar exact rate dekh lo — live update hota hai)", wasVoice);
+        openURL("https://www.urdupoint.com/business/gold-rates.html");
+      } else {
+        reply("Gold rate nahi mil saka, " + settings.name + ". Website khol rahi hoon.", wasVoice);
+        openURL("https://www.urdupoint.com/business/gold-rates.html");
+      }
+    });
+    return { reply: "" };
+  }
+
+  /* INVOICE fast path */
+  if (/(invoice|bill banao|receipt)/.test(q)) {
+    return { reply: "", _aiRoute: true };
+  }
+
+  /* CV fast path */
+  if (/(cv|resume|biodata)/.test(q) && /(banao|likho|create|make|banana)/.test(q)) {
+    reply("CV banane ke liye mujhe ye batao: (1) Naam (2) Education (3) Skills (4) Experience (5) Phone/Email. Main professional CV bana dungi!", wasVoice);
+    return { reply: "", _aiRoute: true };
+  }
+
+  /* HABIT fast path — recurring reminder */
+  if (/(paani|water|dawa|medicine|habit)/.test(q) && /(yaad|reminder|dilana|hourly|daily)/.test(q)) {
+    var habName = /paani|water/.test(q) ? "paani peene" : /dawa|medicine/.test(q) ? "dawa lene" : "habit";
+    reply("Theek hai " + settings.name + "! Main har ghante yaad dilaungi: '" + habName + "' ke liye. (Timer 1 ghante ka — set kar diya hai)", wasVoice);
+    startTimer(3600, "1 hour: " + habName, habName + " ka waqt ho gaya " + settings.name + "!");
     return { reply: "" };
   }
 
@@ -1904,22 +1938,44 @@ var geminiBadUntil = 0;
 
 /* ========== SKILLS ENGINE (v4.0 port — ruflo-inspired) ========== */
 var SKILLS = [
-  { id: "planner", name: "Planner", when: /(plan|timeline|project|bara kaam|step by step|schedule bana|roadmap)/i,
-    prompt: "PLANNER MODE: kaam ko clear steps mein todo, har step ka action+result. Munasib tools (timer/reminder) use karo.", deep: true },
-  { id: "coder", name: "Coder", when: /(code|script|program|bug|error|function|calculate|convert|json|parse|average|regex)/i,
-    prompt: "CODER MODE: run_javascript mein khud code likh kar CHALAO. Error aaye to code theek kar ek dafa dobara (self-fix). Result simple words mein.", deep: true },
-  { id: "researcher", name: "Researcher", when: /(research|compare|talash|pata lagao|detail|khabar|news|rate|price|best)/i,
-    prompt: "RESEARCHER MODE: web_search/wiki_search se 2-3 sources, phir 3-4 line saaf jawab. Source naam mention karo.", deep: true },
-  { id: "teacher", name: "Teacher", when: /(padho|padha|sikha|samjha|quiz|test|exam|chapter|revision|mcq)/i,
-    prompt: "TEACHER MODE: step-by-step asaan Roman Urdu. Quiz/MCQ banao ya ek sawal pooch kar check karo.", deep: false },
-  { id: "kharcha", name: "Kharcha Tracker", when: /(kharch|kharcha|paisa|budget|bill|mahine ka|qist|emi)/i,
-    prompt: "KHARCHA MODE: diary mein 'KHARCHA: <amount> <cheez> <category>' likho (diary_write). Report par run_javascript se total do.", deep: false },
-  { id: "writer", name: "Writer", when: /(likho|shayari|essay|email|message draft|caption|story|letter)/i,
-    prompt: "WRITER MODE: tone clear na ho to poochho (formal/dostana/mazahiya). Chhota wazeh tayyar text.", deep: false },
-  { id: "health", name: "Health Coach", when: /(sehat|health|paani|water|walk|neend|sleep|exercise|wazan|diet)/i,
-    prompt: "HEALTH MODE: dostana tone, reminders set karo (set_reminder). General tips; medical par doctor kaheo.", deep: false },
-  { id: "dil", name: "Dil Ki Dost", when: /(mood|mann|udas|udaas|akela|tanha|pyar|pyaar|baat karni|feel)/i,
-    prompt: "DIL MODE: emotional baat — pehle suno+tasleem, lecture nahi. Naram chhote jawab. Agar serious lag raha ho (khudkushi/hadsa) to pyaar se professional help/family ko jane ko kaheo.", deep: false }
+  { id: "assignment", name: "Assignment Helper", when: /(assignment|homework|project report|thesis|case study)/i,
+    prompt: "ASSIGNMENT MODE: Step-by-step explanation in Roman Urdu. Pehle concept samjhao, phir solution do, phir 3 important points. Original content.", deep: false },
+  { id: "research", name: "Research Assistant", when: /(research karo|deep research|literature review|references|citation)/i,
+    prompt: "RESEARCH MODE: web_search + wiki_search use karo. 3-4 reliable sources, structured summary with source names.", deep: true },
+  { id: "exam", name: "Exam Prep", when: /(exam|test preparation|paper|revision|important questions|mcq)/i,
+    prompt: "EXAM MODE: Important questions + model answers + 5 tips. Previous year format. Roman Urdu clear answers.", deep: false },
+  { id: "english", name: "English Tutor", when: /(english theek|grammar|correct karo|proofread|improve|translation)/i,
+    prompt: "ENGLISH MODE: 3 versions: (1) Corrected (2) Professional improved (3) Changes explained in Roman Urdu.", deep: false },
+  { id: "gold", name: "Gold Rate", when: /(gold|sona|tola|sona)/i,
+    prompt: "GOLD RATE: web_search se 'gold rate Pakistan today 24K 22K tola' search karo. Latest PKR per tola + 10 gram. Source mention karo.", deep: false },
+  { id: "invoice", name: "Invoice Maker", when: /(invoice|bill banao|receipt|payment request)/i,
+    prompt: "INVOICE MODE: Professional invoice: Invoice #, Date, From, To, Description, Amount PKR, Payment terms. Clean copyable format.", deep: false },
+  { id: "budget", name: "Budget Planner", when: /(budget|savings plan|monthly plan|paise ka intezam)/i,
+    prompt: "BUDGET MODE: Monthly budget: Income, Fixed expenses, Variable, Savings target, Money-saving tips. Roman Urdu practical plan.", deep: false },
+  { id: "freelance", name: "Freelance Writer", when: /(fiverr|upwork|gig likho|proposal|freelance|client milega)/i,
+    prompt: "FREELANCE MODE: Winning gig/proposal: Catchy title, compelling description, pricing, timeline, FAQ. Professional English + tips.", deep: false },
+  { id: "email", name: "Email Writer", when: /(email likho|email draft|professional email|formal message|apply)/i,
+    prompt: "EMAIL MODE: Professional email: Subject, Greeting, Body (clear), CTA, Sign-off. Professional English tone.", deep: false },
+  { id: "social", name: "Social Media", when: /(caption|insta post|facebook post|tweet|hashtag|social media)/i,
+    prompt: "SOCIAL MODE: 3 caption options + 10 hashtags + best posting time. Roman Urdu/English mix.", deep: false },
+  { id: "cv", name: "CV Builder", when: /(cv banao|resume|biodata|curriculum)/i,
+    prompt: "CV MODE: Professional CV: Personal Info, Objective, Education, Skills, Experience, Projects, References. Ask for missing details. ATS-friendly.", deep: false },
+  { id: "interview", name: "Interview Prep", when: /(interview|mock interview|hr questions|job interview)/i,
+    prompt: "INTERVIEW MODE: 10 common questions + model answers + body language tips + what to ask. Roman Urdu + English.", deep: false },
+  { id: "content", name: "Content Writer", when: /(blog|article|script likho|seo|youtube|write for)/i,
+    prompt: "CONTENT MODE: SEO content: Title, Hook intro, Body with headings, CTA conclusion. 300-500 words with keywords.", deep: true },
+  { id: "summary", name: "Summarizer", when: /(summarize|chhota karo|brief do|key points|short karo)/i,
+    prompt: "SUMMARY MODE: 3 levels: (1) One-liner (2) Key points (3) Action items. Roman Urdu.", deep: false },
+  { id: "habit", name: "Habit Tracker", when: /(habit|paani yaad|dawa yaad|daily reminder|consistent)/i,
+    prompt: "HABIT MODE: Help build habits. Suggest set_reminder for recurring tasks. Positive encouraging tone.", deep: false },
+  { id: "planner", name: "Planner", when: /(plan|timeline|bara kaam|step by step|roadmap)/i,
+    prompt: "PLANNER MODE: Clear steps, action+result per step. Use timer/reminder tools.", deep: true },
+  { id: "coder", name: "Coder", when: /(code|script|bug|error|calculate|convert|json|regex)/i,
+    prompt: "CODER MODE: run_javascript mein code likh kar CHALAO. Error par self-fix. Result simple words.", deep: true },
+  { id: "kharcha", name: "Kharcha Tracker", when: /(kharch|paisa|bill|qist|emi)/i,
+    prompt: "KHARCHA MODE: diary_write se 'KHARCHA: <amount> <cheez> <category>' likho. Report par total do.", deep: false },
+  { id: "dil", name: "Dil Ki Dost", when: /(mood|mann|udas|udaas|akela|tanha|pyar|feel)/i,
+    prompt: "DIL MODE: Pehle suno+tasleem, lecture nahi. Narm chhote jawab. Serious ho to professional help suggest karo.", deep: false }
 ];
 var customSkills = [];
 try { customSkills = JSON.parse(localStorage.getItem("maya_skills") || "[]"); } catch(e){}
@@ -3175,7 +3231,7 @@ if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
   var sver = document.querySelector("#splash .ver");
-  if (sver) sver.textContent = "VERSION 5.2 — TABAHI 🌍";
+  if (sver) sver.textContent = "VERSION 6.0 — WORK MODE 🌍";
 }
 greetMiniRefresh();
 chatHist.slice(-40).forEach(function(h){ addBubble(h.role === "user" ? "user" : "ai", h.text); });
