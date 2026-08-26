@@ -1822,7 +1822,8 @@ async function geminiChat(){
           var dmatch = /"(\d+)s"/.exec(JSON.stringify(e429));
           var delay = (dmatch ? parseInt(dmatch[1], 10) : 50) * 1000;
           modelCooldowns[m] = Date.now() + delay;
-          lastRetryDelay = delay;
+          lastRetryDelay = Math.min(delay, 12000);
+          noteFail("gemini", 429);
           pushLog("COOLDOWN: " + m + " (" + (dmatch ? dmatch[1] : 50) + "s)");
           break;   // agla model try karo
         }
@@ -1830,7 +1831,7 @@ async function geminiChat(){
         var data = await res.json();
         if (!res.ok) {
           var errStr = JSON.stringify(data.error || {});
-          if (res.status === 400 || res.status === 403 || /api key/i.test(errStr)) { geminiChat.keyErr = true; geminiBadUntil = Date.now() + 600000; pushLog("GEMINI KEY MASLA (code " + res.status + ") — 10min Groq mode"); return null; }
+          if (res.status === 400 || res.status === 403 || /api key/i.test(errStr)) { geminiChat.keyErr = true; geminiBadUntil = Date.now() + 600000; noteFail("gemini", res.status); pushLog("GEMINI KEY MASLA (code " + res.status + ") — 10min Groq mode"); return null; }
           break;
         }
         var cand = data.candidates && data.candidates[0];
@@ -1865,14 +1866,21 @@ async function pollinationsChat(lu, wasVoice){
   try {
     var msgs = [{ role: "system", content: sysPrompt() + " NOTE: Backup keyless mode — phone tools off, sirf baat-cheet ka behtareen jawab (user ki zubaan mein)." }];
     chatHist.slice(-6).forEach(function(h){ msgs.push({ role: h.role === "model" ? "assistant" : "user", content: h.text }); });
-    var payload = JSON.stringify({ model: "openai", messages: msgs, referrer: "mayaassistant" });
     var body = "";
-    if (NATIVE && window.MayaBridge.httpPost) {
-      var pr = JSON.parse(window.MayaBridge.httpPost("https://text.pollinations.ai/openai", "", payload));
-      if (pr.status >= 200 && pr.status < 300) body = pr.body || "";
-    } else {
-      var pf = await fetch("https://text.pollinations.ai/openai", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload });
-      if (pf.ok) body = await pf.text();
+    var variants = ["openai", "openai-fast", "mistral"];
+    for (var vi2 = 0; vi2 < variants.length && !body; vi2++) {
+      var payload = JSON.stringify({ model: variants[vi2], messages: msgs, referrer: "mayaassistant" });
+      try {
+        if (NATIVE && window.MayaBridge.httpPost) {
+          var pr = JSON.parse(window.MayaBridge.httpPost("https://text.pollinations.ai/openai", "", payload));
+          if (pr.status >= 200 && pr.status < 300) body = pr.body || "";
+          else pushLog("POLL " + variants[vi2] + " (" + pr.status + ")");
+        } else {
+          var pf = await fetch("https://text.pollinations.ai/openai", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload });
+          if (pf.ok) body = await pf.text();
+          else pushLog("POLL " + variants[vi2] + " (" + pf.status + ")");
+        }
+      } catch (ep) { pushLog("POLL " + variants[vi2] + " net-err"); }
     }
     if (body) {
       try {
@@ -1910,6 +1918,7 @@ async function openRouterChat(lu){
     if (NATIVE && window.MayaBridge.httpPost) {
       var orr = JSON.parse(window.MayaBridge.httpPost("https://openrouter.ai/api/v1/chat/completions", "Bearer " + settings.orKey, payload));
       if (orr.status >= 200 && orr.status < 300) body = orr.body || "";
+      else noteFail("openrouter", orr.status);
     } else {
       var orf = await fetch("https://openrouter.ai/api/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + settings.orKey }, body: payload });
       if (orf.ok) body = await orf.text();
@@ -1943,7 +1952,7 @@ async function openaiCompatChat(provider){
     var payload = JSON.stringify({ model: model, messages: msgs, temperature: 0.7, max_tokens: 300 });
     if (NATIVE && window.MayaBridge.httpPost) {
       var nr = JSON.parse(window.MayaBridge.httpPost(url, "Bearer " + key, payload));
-      if (nr.status < 200 || nr.status >= 300) { pushLog(provider.toUpperCase() + " FAIL (" + nr.status + ")"); return null; }
+      if (nr.status < 200 || nr.status >= 300) { pushLog(provider.toUpperCase() + " FAIL (" + nr.status + ")"); noteFail(provider, nr.status); return null; }
       var nd = JSON.parse(nr.body || "{}");
       out = nd.choices && nd.choices[0] && nd.choices[0].message && nd.choices[0].message.content;
     } else {
@@ -1952,7 +1961,7 @@ async function openaiCompatChat(provider){
         headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
         body: payload
       });
-      if (!res.ok) { pushLog(provider.toUpperCase() + " FAIL (" + res.status + ")"); return null; }
+      if (!res.ok) { pushLog(provider.toUpperCase() + " FAIL (" + res.status + ")"); noteFail(provider, res.status); return null; }
       var data = await res.json();
       out = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
     }
@@ -1962,7 +1971,27 @@ async function openaiCompatChat(provider){
 }
 
 /* --- Main: kabhi rukne wala nahi --- */
+var _failReasons = [];
+function noteFail(who, code){ _failReasons.push(who + ":" + code); }
+var _askQueue = null;
 async function askAI(wasVoice){
+  /* QUEUE: ek waqt mein ek sawal — burst rate-limit ka asli ilaaj */
+  if (askAI._busy) {
+    _askQueue = { wasVoice: wasVoice, lu: (function(){ for (var c2 = chatHist.length - 1; c2 >= 0; c2--) if (chatHist[c2].role === "user") return chatHist[c2].text; return null; })() };
+    toast("Ek second — pechay wala kaam kar rahi hoon...");
+    return;
+  }
+  askAI._busy = true;
+  try { await _askAIInner(wasVoice); }
+  finally {
+    askAI._busy = false;
+    if (_askQueue) {
+      var q = _askQueue; _askQueue = null;
+      setTimeout(function(){ askAI(q.wasVoice); }, 300);
+    }
+  }
+}
+async function _askAIInner(wasVoice){
   var lu = null;
   for (var ci = chatHist.length - 1; ci >= 0; ci--) if (chatHist[ci].role === "user") { lu = chatHist[ci].text; break; }
   if (lu) {
@@ -1992,6 +2021,7 @@ async function askAI(wasVoice){
       }
     } catch (e) {}
   }
+  _failReasons = [];
   thinking = true; setOrb("thinking");
   geminiChat.keyErr = false;
   geminiChat.toolsUsed = false;
@@ -2016,7 +2046,11 @@ async function askAI(wasVoice){
     var wait = lastRetryDelay || 45000;
     aiState.provider = "COOLDOWN";
     toast("Sab brains thake hue — " + Math.round(wait / 1000) + "s baad KHUD dobara try");
-    pushLog("ALL BRAINS BUSY — auto retry " + Math.round(wait / 1000) + "s");
+    wait = Math.min(wait, 12000);
+    var rh = _failReasons.some(function(f){ return /:(429|402|406)$/.test(f); });
+    reply(rh ? "Boss, free limits thak gayi hain — 12 second baad main KHUD dobara try karungi, aap kuch na karo." :
+          "Boss, sab brains busy hain — " + Math.round(wait / 1000) + " second baad khud dobara try karungi.", wasVoice);
+    pushLog("AUTO-RETRY " + Math.round(wait / 1000) + "s (jawab diya, phir retry)");
     setTimeout(function(){ askAI(wasVoice); }, wait);
     return;
   }
@@ -2027,7 +2061,20 @@ async function askAI(wasVoice){
   else if (keyErr)
     reply("Gemini key ghalat lag rahi hai, " + settings.name + ". aistudio.google.com se nayi key banao aur Settings mein paste karo. Local commands chal rahe hain!", wasVoice);
   else
-    reply("Boss, internet ka raabta hi nahi ban pa raha shayad — kyunki backup brains (bina key wale bhi) try kar chuki. WiFi/data check kar ke dobara bolo. Local commands (waqt, battery, alarm, timer, apps) hamesha chalte hain!", wasVoice);
+    var rateHit = _failReasons.some(function(f){ return /:(429|402|406)$/.test(f); });
+    var netHit = _failReasons.some(function(f){ return /net-err|:0$/.test(f); });
+    pushLog("FAILS: " + (_failReasons.join(", ") || "none"));
+    if (rateHit) {
+      reply("Boss, free limits is waqt thak gayi hain. Main 12 second baad KHUD dobara try karungi — aap kuch na karo.", wasVoice);
+      if (!askAI._r2) {
+        askAI._r2 = true;
+        setTimeout(function(){ askAI._r2 = false; askAI(wasVoice); }, 12000);
+      }
+    } else if (netHit) {
+      reply("Boss, internet ka raabta nazar nahi aa raha — WiFi/data check karo. Local commands hamesha chalte hain!", wasVoice);
+    } else {
+      reply("Boss, abhi sab brains bhar gayi hain — ek minute baad bolo. Local commands chal rahe hain!", wasVoice);
+    }
 }
 
 function openURL(u){ var w = window.open(u, "_blank"); if (!w) { try { location.href = u; } catch(e){} } }
