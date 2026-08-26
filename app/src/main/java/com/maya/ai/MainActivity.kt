@@ -791,6 +791,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         @JavascriptInterface
+        fun readFileText(uriStr: String): String {
+            return try {
+                val is2 = contentResolver.openInputStream(android.net.Uri.parse(uriStr))
+                val text = is2?.bufferedReader()?.use { it.readText() } ?: ""
+                is2?.close()
+                text.take(5000)
+            } catch (e: Exception) { "" }
+        }
+
+        @JavascriptInterface
         fun scanQR(): Boolean {
             return try {
                 val i = Intent("com.google.zxing.client.android.SCAN")

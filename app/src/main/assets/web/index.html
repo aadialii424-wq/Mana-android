@@ -323,7 +323,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.1 🌍</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.2 🌍</div></div>
         <div class="chip"><div class="k">◈ BUDGET (G/Q/P)</div><div class="v" id="hudBudget">0/0/0</div></div>
         <div class="chip"><div class="k">◈ GHOST (OFFLINE)</div><div class="v" id="hudGhost">—</div></div>
       </div>
@@ -645,7 +645,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v5.1.0 — GHOST ONLINE 🌍");
+    pushLog("MAYA v5.2.0 — TABAHI ONLINE 🌍");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1158,6 +1158,36 @@ function tryLocal(t, wasVoice){
     }
   }
 
+  /* FILE INTELLIGENCE fast path */
+  if (/(file|pdf|document|doc|notes?)/.test(q) && /(padho|read|summar|samjha|analyze|kya hai)/.test(q)) {
+    return { reply: "", _aiRoute: true };
+  }
+
+  /* MEMORY CONNECTIONS fast path */
+  if (/(connection|link|relate|kisko|kaun jaanta|graph)/.test(q)) {
+    var memQ2 = q.replace(/maya|connection|link|relate|kisko|kaun|jaanta|graph|karo|do/gi, "").trim();
+    if (memQ2.length > 2) {
+      execTool("memory_connections", { query: memQ2 }).then(function(r){
+        if (r && r.connections && r.connections.length) {
+          reply("Connections: " + r.connections.slice(0, 5).join("; "), wasVoice);
+        } else {
+          reply("Koi connection nahi mili.", wasVoice);
+        }
+      });
+      return { reply: "" };
+    }
+  }
+
+  /* CONTEXT fast path */
+  if (/(context|abhi kya|time kya|kaun sa din|battery kitni)/.test(q) && /(batao|kya hai|sab)/.test(q)) {
+    execTool("get_context", {}).then(function(r){
+      if (r && r.time) {
+        reply(r.time + ", " + r.day + ". Battery: " + r.battery + "%. " + (r.weather || ""), wasVoice);
+      } else reply("Context nahi mila.", wasVoice);
+    });
+    return { reply: "" };
+  }
+
   /* IMAGE ARTIST fast path */
   if (/(banao|generate|draw|paint|photo banao|wallpaper)/.test(q) && /(wallpaper|tasveer|image|picture|photo|drawing|art|logo)/.test(q)) {
     var imgQ = q.replace(/maya|banao|generate|draw|wallpaper|tasveer|image|picture|photo|aik|ek|wala|wali|ka|ki|do|de|please|gorgeous|beautiful|ai|se/gi, "").trim();
@@ -1394,6 +1424,13 @@ function sysPrompt(){
   var pastish = /(yaad|pichle|kal|pehle|wo baat|us din|hum ne|mera|meri|main|hoon|tha|thi)/i.test(luLow);
   var lm = lastMood(36);
   if (pastish && lm && lm !== currentMood) p += "\nPichhla mood: " + lm + ".";
+  /* SMART CONTEXT: Maya khud jaanti hai kya chal raha hai */
+  var nowCtx = new Date();
+  var ctxH = nowCtx.getHours();
+  var ctxPart = ctxH < 6 ? "raat" : ctxH < 12 ? "subah" : ctxH < 17 ? "dupahar" : ctxH < 21 ? "shaam" : "raat";
+  var ctxDay = nowCtx.toLocaleDateString("en-GB", { weekday: "long" });
+  p += "\nCONTEXT: " + ctxPart + " hai, " + ctxDay + ". Sheher: " + settings.city + ". Mood: " + currentMood + ".";
+  p += "\nPROACTIVE: Context ke hisaab se khud suggest karo — subah motivational, raat neend ka mashwara, battery low par charging!";
   if (memorySummary && pastish) p += "\nMEMORY: " + memorySummary.slice(0, 400);
   if (diary.length && /(diary|roznamcha|kharch|likha|khana|plan)/i.test(luLow)) p += "\nDIARY: " + diary.slice(-3).map(function(d){ return d.text; }).join(" | ").slice(0, 240);
   if (facts.length) {
@@ -1516,6 +1553,14 @@ var TOOL_DECLS = [
     parameters: { type: "OBJECT", properties: { percent: { type: "INTEGER" } }, required: ["percent"] } },
   { name: "brightness_control", description: "Screen brightness (5-100).",
     parameters: { type: "OBJECT", properties: { percent: { type: "INTEGER" } }, required: ["percent"] } },
+  { name: "read_file_text", description: "Phone ki file ka text padhta hai (TXT, log, code). Pehle list_files se list lo.",
+    parameters: { type: "OBJECT", properties: { name: { type: "STRING", description: "file ka naam" } }, required: ["name"] } },
+  { name: "analyze_file", description: "File ko AI se analyze karta hai — summary, key points, sentiment, entities. Pehle read_file_text se content lo.",
+    parameters: { type: "OBJECT", properties: { content: { type: "STRING", description: "file ka text content" }, question: { type: "STRING", description: "kya poochna hai is file ke baare mein" } }, required: ["content"] } },
+  { name: "get_context", description: "Current context lauta deta hai: time, day, battery, weather, mood — Maya ko ye pata hona chahiye proactive banne ke liye.",
+    parameters: { type: "OBJECT", properties: {} } },
+  { name: "memory_connections", description: "Memory graph se connections nikalta hai — kaun kise jaanta hai, kya kab hua, sab linked.",
+    parameters: { type: "OBJECT", properties: { query: { type: "STRING", description: "kis ke baare mein connections chahiye" } }, required: ["query"] } },
   { name: "generate_image", description: "AI se tasveer/wallpaper banata hai (Pollinations — free, keyless). Jaise: 'dragon wala wallpaper banao'",
     parameters: { type: "OBJECT", properties: { prompt: { type: "STRING", description: "kya banana hai (English mein describe karo)" } }, required: ["prompt"] } },
   { name: "nasa_photo", description: "Aaj ki NASA space photo lauta deta hai (Astronomy Picture of the Day).",
@@ -1724,6 +1769,60 @@ async function execTool(name, args){
           }
         } catch(e){ out = { error: String(e && e.message || e) }; }
       }
+    } else if (name === "read_file_text") {
+      if (!NATIVE) { out = { error: "sirf APK" }; }
+      else {
+        var fo2 = fileFind(String(args.name || ""));
+        if (!fo2) { await listFilesAction("downloads"); fo2 = fileFind(String(args.name || "")); }
+        if (fo2) {
+          var fileContent = "";
+          try { fileContent = window.MayaBridge.readFileText(fo2.uri); } catch(e) { fileContent = ""; }
+          if (fileContent && fileContent.length > 10) {
+            out = { done: true, fileName: fo2.name, content: fileContent.slice(0, 3000), size: fileContent.length };
+          } else {
+            out = { done: false, note: "file text nahi padh saki (binary ya PDF ho sakti hai — vision use karo)" };
+          }
+        } else out = { done: false, note: "file nahi mili" };
+      }
+    } else if (name === "analyze_file") {
+      var fileTxt = String(args.content || "").slice(0, 2000);
+      var fileQ = String(args.question || "summary do");
+      if (!fileTxt || fileTxt.length < 20) { out = { error: "content khali" }; }
+      else {
+        var analyzePrompt = "Analyze this file content and answer: " + fileQ + "\\n\\nContent:\\n" + fileTxt + "\\n\\n(Roman Urdu mein jawab do)";
+        var fileAnalysis = null;
+        if (settings.apikey) { try { fileAnalysis = await pollinationsChat(analyzePrompt, false); } catch(e){} }
+        if (!fileAnalysis && settings.groqKey) { try { fileAnalysis = await openaiCompatChat("groq"); } catch(e){} }
+        out = fileAnalysis ? { done: true, analysis: fileAnalysis.slice(0, 500) } : { done: false, note: "AI analysis fail — internet check karo" };
+      }
+    } else if (name === "get_context") {
+      var ctx = {};
+      var now2 = new Date();
+      ctx.time = now2.toLocaleTimeString([], {hour: "numeric", minute: "2-digit"});
+      ctx.day = now2.toLocaleDateString("en-GB", { weekday: "long" });
+      ctx.date = now2.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+      try { if (NATIVE) { var bInfo = JSON.parse(window.MayaBridge.battery()); ctx.battery = bInfo.level; ctx.charging = bInfo.charging; } } catch(e){}
+      ctx.mood = currentMood;
+      ctx.city = settings.city;
+      try { var w = await fetchWeather(); if (w && w.temp != null) { ctx.weather = w.temp + "C " + w.desc; } } catch(e){}
+      out = ctx;
+    } else if (name === "memory_connections") {
+      var mq = String(args.query || "").toLowerCase().trim();
+      var connections = [];
+      facts.forEach(function(f){
+        if (!mq || f.toLowerCase().indexOf(mq) >= 0) connections.push("FACT: " + f);
+      });
+      diary.forEach(function(d){
+        if (!mq || d.text.toLowerCase().indexOf(mq) >= 0) connections.push("DIARY: " + d.text);
+      });
+      moodLog.slice(-10).forEach(function(m){
+        if (!mq || m.m.indexOf(mq) >= 0) connections.push("MOOD: " + m.m + " at " + new Date(m.t).toLocaleDateString());
+      });
+      var relatedFacts = facts.filter(function(f){
+        return f.toLowerCase().split(" ").some(function(w){ return w.length > 3 && mq.indexOf(w) >= 0; });
+      });
+      relatedFacts.forEach(function(f){ if (connections.indexOf("FACT: " + f) < 0) connections.push("RELATED: " + f); });
+      out = { connections: connections.slice(0, 10), total: connections.length };
     } else if (name === "generate_image") {
       var imgPrompt = String(args.prompt || "").trim();
       if (!imgPrompt) { out = { error: "prompt khali" }; }
@@ -3076,7 +3175,7 @@ if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
   var sver = document.querySelector("#splash .ver");
-  if (sver) sver.textContent = "VERSION 5.1 — GHOST 🌍";
+  if (sver) sver.textContent = "VERSION 5.2 — TABAHI 🌍";
 }
 greetMiniRefresh();
 chatHist.slice(-40).forEach(function(h){ addBubble(h.role === "user" ? "user" : "ai", h.text); });
