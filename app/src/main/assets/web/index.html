@@ -286,7 +286,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">VERSION 7.0 — PRO UI</div>
+  <div class="ver">VERSION 7.3 — FREEBUFF</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -465,7 +465,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v7.0 🌍</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v7.3 🌍</div></div>
         <div class="chip"><div class="k">◈ BUDGET (G/Q/P)</div><div class="v" id="hudBudget">0/0/0</div></div>
         <div class="chip"><div class="k">◈ GHOST (OFFLINE)</div><div class="v" id="hudGhost">—</div></div>
       </div>
@@ -794,7 +794,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v7.0.0 — PRO UI MODE ONLINE 🌍");
+    pushLog("MAYA v7.3.0 — FREEBUFF MODE ONLINE 🌍");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -966,7 +966,8 @@ var TOOLS_CATALOG = [
     { icon: "\u{1F9E0}", label: "Deep Think", cmd: "deep think karo AI ka future" },
     { icon: "\u{1F310}", label: "Translate", cmd: "translate karo" },
     { icon: "\u{1F4BB}", label: "Code", cmd: "ye code chalao" },
-    { icon: "\u{1F680}", label: "NASA", cmd: "space photo dikhao" }
+    { icon: "\u{1F680}", label: "NASA", cmd: "space photo dikhao" },
+    { icon: "\u{1F193}", label: "Freebuff", cmd: "freebuff kholo" }
   ]},
   { cat: "INFO", items: [
     { icon: "\u{1F30D}", label: "My Loc", cmd: "main kahan hun" },
@@ -1000,6 +1001,7 @@ function refreshBrains(){
     { name: "Groq", has: !!settings.groqKey, note: "Fastest" },
     { name: "OpenRouter", has: !!settings.orKey, note: "Free models" },
     { name: "Pollinations", has: true, note: "Keyless backup" },
+    { name: "Freebuff Web", has: true, note: "5hr/day FREE (browser)" },
     { name: "Ghost (Offline)", has: true, note: "No internet needed" }
   ];
   var html = "";
@@ -1515,6 +1517,12 @@ function tryLocal(t, wasVoice){
   if (/(joke|mazak|hasao|mazahiya)/.test(q)) return { reply: packPick("joke") };
   if (/(motivat|himmat|hosla|inspire|uptight hoon|himmat do)/.test(q)) return { reply: packPick("motivation") };
   if (/(dua|prayer batao|islamic)/.test(q) && /(sunao|batao|suna do)/.test(q)) return { reply: packPick("dua") };
+
+  /* FREEBUFF fast path — 5hr FREE AI daily */
+  if (/(freebuff|free ai|bina key)/.test(q) && /(kholo|khol|open|chalu|use)/.test(q)) {
+    openURL("https://freebuff.com/chat");
+    return { reply: "Freebuff khol rahi hoon — 5 ghante FREE AI roz, bina key! DeepSeek V4 Flash wahan milta hai." };
+  }
 
   /* SELF-UPDATE fast path */
   if (/(update|nayi version|upgrade)/.test(q) && /(karo|kar do|download|install|check)/.test(q)) {
@@ -2872,7 +2880,7 @@ async function _askAIInner(wasVoice){
     } else if (netHit) {
       reply("Boss, internet band hai — lekin GHOST MODE active hai! Local commands + cached jawab chal rahe hain. WiFi on karo to poori AI mil jayegi!", wasVoice);
     } else {
-      reply("Boss, abhi sab brains bhar gayi hain — ek minute baad bolo. Local commands chal rahe hain!", wasVoice);
+      reply("Boss, sab free brains thak gayi hain. EK JUGAAD: bolo FREEBUFF KHOLO — 5 ghante FREE AI roz milta hai wahan! Ya ek minute ruk kar dobara try karo.", wasVoice);
     }
 }
 
