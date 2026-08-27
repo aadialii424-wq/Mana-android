@@ -248,6 +248,28 @@
   .phase .st{flex:none; width:22px; text-align:center}
   .vtag{font-size:10.5px; color:var(--dim); letter-spacing:1px; text-align:center; padding:8px 0 2px}
 
+  /* ===== v7 UI COMPONENTS ===== */
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px}
+  .wbtn{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 8px; text-align:center; cursor:pointer; transition:.15s}
+  .wbtn:active{background:rgba(34,211,238,.2); transform:scale(.96)}
+  .wbtn .wicon{font-size:26px; display:block; margin-bottom:6px}
+  .wbtn .wlabel{font-size:11px; color:var(--text); display:block}
+  .sect{margin-top:14px}
+  .sect h3{margin:0 0 8px; font-size:12px; letter-spacing:2px; color:var(--cyan2); display:flex; align-items:center; gap:6px}
+  .sect h3::after{content:""; flex:1; height:1px; background:var(--line)}
+  .statcard{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px; text-align:center}
+  .statcard .num{font-size:24px; font-weight:800; color:var(--cyan2)}
+  .statcard .lbl{font-size:10px; color:var(--dim); letter-spacing:1px; margin-top:2px}
+  .brainrow{display:flex; align-items:center; gap:10px; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:10px 12px; margin-bottom:8px}
+  .brainrow .dot2{width:10px; height:10px; border-radius:50%; flex:none}
+  .brainrow .dot2.ok{background:#34d399; box-shadow:0 0 6px #34d399}
+  .brainrow .dot2.warn{background:var(--amber); box-shadow:0 0 6px var(--amber)}
+  .brainrow .dot2.err{background:var(--red); box-shadow:0 0 6px var(--red)}
+  .brainrow .bname{flex:1; font-size:13px}
+  .brainrow .bstat{font-size:11px; color:var(--dim)}
+  .quickreply{display:inline-block; background:var(--panel); border:1px solid var(--line); border-radius:99px; padding:6px 14px; font-size:12px; margin:3px; cursor:pointer; color:var(--cyan2)}
+
   /* toast */
   #toast{
     position:fixed; left:50%; bottom:88px; transform:translateX(-50%) translateY(20px); z-index:60;
@@ -283,7 +305,127 @@
 
   <main>
     <!-- CHAT -->
-    <section class="tab active" id="tab-chat">
+    <section class="tab active" id="tab-home">
+      <div style="text-align:center; padding:16px 12px 6px">
+        <div style="font-size:28px; font-weight:800; color:var(--cyan2)" id="homeGreet">Good Morning!</div>
+        <div style="font-size:13px; color:var(--dim); margin-top:4px" id="homeSub">Boss, aaj kya plan hai?</div>
+      </div>
+      <div class="grid3" style="padding:8px 12px">
+        <div class="statcard"><div class="num" id="hTime">--:--</div><div class="lbl">TIME</div></div>
+        <div class="statcard"><div class="num" id="hBat">--%</div><div class="lbl">BATTERY</div></div>
+        <div class="statcard"><div class="num" id="hWeather">--</div><div class="lbl">WEATHER</div></div>
+      </div>
+      <div class="sect">
+        <h3>⚡ QUICK ACTIONS</h3>
+        <div class="grid3" style="padding:0 12px">
+          <div class="wbtn" onclick="showTab('tab-chat'); setTimeout(function(){startListening();},300)"><span class="wicon">🎤</span><span class="wlabel">Bolo</span></div>
+          <div class="wbtn" onclick="showTab('tab-chat'); setTimeout(function(){if(NATIVE){pendingVisionPrompt='Ye dekho';try{window.MayaBridge.takePhoto();}catch(e){}}},300)"><span class="wicon">📸</span><span class="wlabel">Dekho</span></div>
+          <div class="wbtn" onclick="showTab('tab-chat'); setTimeout(function(){handleUserText('naye messages sunao',false);},300)"><span class="wicon">🎧</span><span class="wlabel">Messages</span></div>
+          <div class="wbtn" onclick="showTab('tab-chat'); setTimeout(function(){handleUserText('gold ka rate batao',false);},300)"><span class="wicon">🥇</span><span class="wlabel">Gold</span></div>
+          <div class="wbtn" onclick="showTab('tab-chat'); setTimeout(function(){handleUserText('dollar ka rate batao',false);},300)"><span class="wicon">💵</span><span class="wlabel">Dollar</span></div>
+          <div class="wbtn" onclick="showTab('tab-chat'); setTimeout(function(){handleUserText('namaz ka waqt batao',false);},300)"><span class="wicon">🕌</span><span class="wlabel">Namaz</span></div>
+        </div>
+      </div>
+      <div class="sect">
+        <h3>💗 MOOD</h3>
+        <div style="padding:0 12px; text-align:center">
+          <div style="font-size:36px" id="homeMoodEmoji">😊</div>
+          <div style="font-size:12px; color:var(--dim)" id="homeMoodText">Normal</div>
+          <div style="margin-top:8px">
+            <span class="quickreply" onclick="showTab('tab-chat'); setTimeout(function(){handleUserText('maya mood kharab hai',true);},300)">😔 Mood kharab</span>
+            <span class="quickreply" onclick="showTab('tab-chat'); setTimeout(function(){handleUserText('shayari sunao',false);},300)">✨ Shayari</span>
+            <span class="quickreply" onclick="showTab('tab-chat'); setTimeout(function(){handleUserText('motivation do',false);},300)">💪 Motivate</span>
+          </div>
+        </div>
+      </div>
+      <div class="sect">
+        <h3>💭 MEMORY FLASH</h3>
+        <div style="padding:0 12px" id="homeMemory">—</div>
+      </div>
+      <div style="height:14px"></div>
+    </section>
+
+    <section class="tab" id="tab-tools">
+      <div style="padding:12px 12px 4px"><input id="toolSearch" placeholder="🔍 Tools search karo..." style="width:100%; background:var(--panel); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:10px 12px; font-size:14px; outline:none" oninput="renderTools(this.value)"></div>
+      <div id="toolsGrid" style="padding:8px 12px"></div>
+    </section>
+
+    <section class="tab" id="tab-brains">
+      <div style="padding:14px 12px 6px; text-align:center">
+        <div style="font-size:13px; color:var(--dim)">ACTIVE BRAIN</div>
+        <div style="font-size:22px; font-weight:800; color:var(--cyan2)" id="activeBrainName">AUTO</div>
+      </div>
+      <div class="sect">
+        <h3>🧠 BRAIN STATUS</h3>
+        <div id="brainList" style="padding:0 12px"></div>
+      </div>
+      <div class="sect">
+        <h3>⚡ TODAY'S USAGE</h3>
+        <div class="grid3" style="padding:0 12px">
+          <div class="statcard"><div class="num" id="uGem">0</div><div class="lbl">GEMINI</div></div>
+          <div class="statcard"><div class="num" id="uGroq">0</div><div class="lbl">GROQ</div></div>
+          <div class="statcard"><div class="num" id="uPoll">0</div><div class="lbl">FREE</div></div>
+        </div>
+        <div style="padding:10px 12px 0; font-size:11px; color:var(--dim)">Free limits: Gemini ~250/din, Groq ~14,400/din, Pollinations unlimited</div>
+      </div>
+      <div class="sect">
+        <h3>🎯 BRAIN SELECTOR</h3>
+        <div style="padding:0 12px" class="grid2">
+          <div class="wbtn" onclick="setBrainMode('auto')"><span class="wicon">🤖</span><span class="wlabel">Auto (Smart)</span></div>
+          <div class="wbtn" onclick="setBrainMode('gemini')"><span class="wicon">💎</span><span class="wlabel">Gemini</span></div>
+          <div class="wbtn" onclick="setBrainMode('groq')"><span class="wicon">⚡</span><span class="wlabel">Groq</span></div>
+          <div class="wbtn" onclick="setBrainMode('free')"><span class="wicon">🆓</span><span class="wlabel">Free Only</span></div>
+        </div>
+      </div>
+      <div style="height:14px"></div>
+    </section>
+
+    <section class="tab" id="tab-stats">
+      <div style="padding:14px 12px 6px; text-align:center">
+        <div style="font-size:16px; font-weight:700; color:var(--cyan2)">📊 MAYA STATS</div>
+      </div>
+      <div class="grid3" style="padding:8px 12px">
+        <div class="statcard"><div class="num" id="sQ">0</div><div class="lbl">SAWAAL AAJ</div></div>
+        <div class="statcard"><div class="num" id="sLocal">0</div><div class="lbl">LOCAL</div></div>
+        <div class="statcard"><div class="num" id="sCloud">0</div><div class="lbl">CLOUD</div></div>
+      </div>
+      <div class="sect">
+        <h3>🏆 TOP SKILLS</h3>
+        <div id="topSkills" style="padding:0 12px; font-size:13px">—</div>
+      </div>
+      <div class="sect">
+        <h3>📝 MEMORY BANK</h3>
+        <div class="grid3" style="padding:0 12px">
+          <div class="statcard"><div class="num" id="sFacts">0</div><div class="lbl">FACTS</div></div>
+          <div class="statcard"><div class="num" id="sDiary">0</div><div class="lbl">DIARY</div></div>
+          <div class="statcard"><div class="num" id="sMood">0</div><div class="lbl">MOODS</div></div>
+        </div>
+      </div>
+      <div class="sect">
+        <h3>💾 BACKUP</h3>
+        <div class="grid2" style="padding:0 12px">
+          <div class="wbtn" onclick="exportBackup()"><span class="wicon">📤</span><span class="wlabel">Export</span></div>
+          <div class="wbtn" onclick="document.getElementById('backupFile').click()"><span class="wicon">📥</span><span class="wlabel">Import</span></div>
+        </div>
+        <input type="file" id="backupFile" accept=".json" style="display:none" onchange="importBackup(this)">
+      </div>
+      <div style="height:14px"></div>
+    </section>
+
+    <section class="tab" id="tab-files">
+      <div style="padding:12px 12px 4px"><input id="fileSearch" placeholder="🔍 Files search..." style="width:100%; background:var(--panel); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:10px 12px; font-size:14px; outline:none" oninput="renderFiles(this.value)"></div>
+      <div id="filesList" style="padding:8px 12px">
+        <div style="text-align:center; color:var(--dim); padding:20px; font-size:13px">📂 Folder chunko niche se</div>
+      </div>
+      <div class="grid3" style="padding:0 12px 10px">
+        <div class="wbtn" onclick="loadFolder('downloads')"><span class="wicon">📥</span><span class="wlabel">Downloads</span></div>
+        <div class="wbtn" onclick="loadFolder('pictures')"><span class="wicon">🖼️</span><span class="wlabel">Pictures</span></div>
+        <div class="wbtn" onclick="loadFolder('music')"><span class="wicon">🎵</span><span class="wlabel">Music</span></div>
+      </div>
+      <div style="height:14px"></div>
+    </section>
+
+    <section class="tab" id="tab-chat">
       <div class="chatHead">
         <span class="dot" id="dot"></span>
         <span class="t" id="chatState">MAYA READY</span>
@@ -323,7 +465,7 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v6.0 🌍</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v7.0 🌍</div></div>
         <div class="chip"><div class="k">◈ BUDGET (G/Q/P)</div><div class="v" id="hudBudget">0/0/0</div></div>
         <div class="chip"><div class="k">◈ GHOST (OFFLINE)</div><div class="v" id="hudGhost">—</div></div>
       </div>
@@ -526,10 +668,13 @@
   </main>
 
   <nav>
-    <button data-tab="tab-chat" class="active"><span class="ic">💬</span>CHAT</button>
-    <button data-tab="tab-hud"><span class="ic">🎯</span>HUD</button>
-    <button data-tab="tab-cmds"><span class="ic">⚡</span>COMMANDS</button>
-    <button data-tab="tab-set"><span class="ic">⚙️</span>SETTINGS</button>
+    <button data-tab="tab-home" class="active"><span class="ic">🏠</span>HOME</button>
+    <button data-tab="tab-chat"><span class="ic">💬</span>CHAT</button>
+    <button data-tab="tab-tools"><span class="ic">🧰</span>TOOLS</button>
+    <button data-tab="tab-brains"><span class="ic">🧠</span>BRAINS</button>
+    <button data-tab="tab-stats"><span class="ic">📊</span>STATS</button>
+    <button data-tab="tab-files"><span class="ic">📁</span>FILES</button>
+    <button data-tab="tab-set"><span class="ic">⚙️</span>MENU</button>
   </nav>
 </div>
 
@@ -635,6 +780,10 @@ function pushLog(msg){
 function showTab(id){
   document.querySelectorAll(".tab").forEach(function(t){ t.classList.toggle("active", t.id === id); });
   document.querySelectorAll("nav button").forEach(function(b){ b.classList.toggle("active", b.dataset.tab === id); });
+  try { if (id === "tab-home") refreshHome(); } catch(e){}
+  try { if (id === "tab-brains") refreshBrains(); } catch(e){}
+  try { if (id === "tab-stats") refreshStats(); } catch(e){}
+  try { if (id === "tab-tools") renderTools(document.getElementById("toolSearch") ? document.getElementById("toolSearch").value : ""); } catch(e){}
 }
 document.querySelectorAll("nav button").forEach(function(b){
   b.addEventListener("click", function(){ showTab(b.dataset.tab); });
@@ -645,7 +794,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v6.0.0 — WORK MODE ONLINE 🌍");
+    pushLog("MAYA v7.0.0 — PRO UI MODE ONLINE 🌍");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -751,6 +900,225 @@ function pickVoice(lang){
   if (base === "en") for (var j = 0; j < voices.length; j++) if ((voices[j].lang||"").toLowerCase().indexOf("en") === 0) return voices[j];
   return null;
 }
+/* ===== v7: TOOLS GRID ===== */
+var TOOLS_CATALOG = [
+  { cat: "PHONE", items: [
+    { icon: "\u{1F4DE}", label: "Call", cmd: "Ali ko call lagao" },
+    { icon: "\u{1F4AC}", label: "WhatsApp", cmd: "Ali ko whatsapp karo hello" },
+    { icon: "\u{1F4F1}", label: "SMS", cmd: "message bhejo" },
+    { icon: "\u{1F4C7}", label: "Contacts", cmd: "mere contacts mein kaun hai" }
+  ]},
+  { cat: "FILES", items: [
+    { icon: "\u{1F4E5}", label: "Downloads", cmd: "downloads mein kya hai" },
+    { icon: "\u{1F5BC}\u{FE0F}", label: "Pictures", cmd: "latest photo kholo" },
+    { icon: "\u{1F3B5}", label: "Music", cmd: "music files dikhao" },
+    { icon: "\u{1F4E4}", label: "Share", cmd: "file share karo" }
+  ]},
+  { cat: "WEB", items: [
+    { icon: "\u{1F50D}", label: "Google", cmd: "search karo latest news" },
+    { icon: "\u{25B6}\u{FE0F}", label: "YouTube", cmd: "youtube pe lofi chalao" },
+    { icon: "\u{1F4DA}", label: "Wikipedia", cmd: "wikipedia se Quaid e Azam sunao" },
+    { icon: "\u{1F4F0}", label: "News", cmd: "aaj ki khabrein" }
+  ]},
+  { cat: "MONEY", items: [
+    { icon: "\u{1F947}", label: "Gold Rate", cmd: "gold ka rate batao" },
+    { icon: "\u{1F4B5}", label: "Dollar", cmd: "dollar ka rate batao" },
+    { icon: "\u{20BF}", label: "Crypto", cmd: "bitcoin kitna hai" },
+    { icon: "\u{1F9FE}", label: "Invoice", cmd: "invoice banao" }
+  ]},
+  { cat: "ISLAMIC", items: [
+    { icon: "\u{1F3D8}\u{FE0F}", label: "Namaz", cmd: "namaz ka waqt batao" },
+    { icon: "\u{1F4D6}", label: "Quran", cmd: "Surah Fatiha sunao" },
+    { icon: "\u{1F64B}", label: "Dua", cmd: "ek dua sunao" },
+    { icon: "\u{1F319}", label: "Hijri", cmd: "aaj hijri date kya hai" }
+  ]},
+  { cat: "STUDY", items: [
+    { icon: "\u{1F4DD}", label: "Assignment", cmd: "assignment samjhao" },
+    { icon: "\u{1F52C}", label: "Research", cmd: "research karo AI ke baare mein" },
+    { icon: "\u{1F393}", label: "Exam", cmd: "exam ki tayyari" },
+    { icon: "\u{1F4CB}", label: "Summarize", cmd: "summarize karo" }
+  ]},
+  { cat: "CREATIVE", items: [
+    { icon: "\u{1F3A8}", label: "Wallpaper", cmd: "wallpaper banao" },
+    { icon: "\u{1F4D6}", label: "Story", cmd: "kahani sunao" },
+    { icon: "\u2728", label: "Shayari", cmd: "shayari sunao" },
+    { icon: "\u{1F604}", label: "Joke", cmd: "joke sunao" }
+  ]},
+  { cat: "PHONE CTRL", items: [
+    { icon: "\u{1F526}", label: "Torch", cmd: "torch jala do" },
+    { icon: "\u{1F50A}", label: "Volume", cmd: "volume full karo" },
+    { icon: "\u{1F506}", label: "Brightness", cmd: "brightness kam karo" },
+    { icon: "\u{1F512}", label: "Lock", cmd: "phone lock karo" }
+  ]},
+  { cat: "TIME", items: [
+    { icon: "\u{23F0}", label: "Alarm", cmd: "subah 6 baje alarm lagao" },
+    { icon: "\u{23F1}\u{FE0F}", label: "Timer", cmd: "5 minute ka timer lagao" },
+    { icon: "\u{1F514}", label: "Reminder", cmd: "yaad dilana" },
+    { icon: "\u{1F550}", label: "Time", cmd: "waqt kya hua" }
+  ]},
+  { cat: "HEALTH", items: [
+    { icon: "\u{1F4A7}", label: "Paani", cmd: "paani yaad dilana" },
+    { icon: "\u{1F48A}", label: "Dawa", cmd: "dawa yaad dilana" },
+    { icon: "\u{1F497}", label: "Mood", cmd: "mood kharab hai" },
+    { icon: "\u{1F9D8}", label: "Calm", cmd: "mujhe shant karo" }
+  ]},
+  { cat: "AI POWER", items: [
+    { icon: "\u{1F9E0}", label: "Deep Think", cmd: "deep think karo AI ka future" },
+    { icon: "\u{1F310}", label: "Translate", cmd: "translate karo" },
+    { icon: "\u{1F4BB}", label: "Code", cmd: "ye code chalao" },
+    { icon: "\u{1F680}", label: "NASA", cmd: "space photo dikhao" }
+  ]},
+  { cat: "INFO", items: [
+    { icon: "\u{1F30D}", label: "My Loc", cmd: "main kahan hun" },
+    { icon: "\u{1F30B}", label: "Earthquake", cmd: "earthquake aaya kya" },
+    { icon: "\u{1F30F}", label: "Country", cmd: "Japan ke baare mein batao" },
+    { icon: "\u{1F3A7}", label: "Messages", cmd: "naye messages sunao" }
+  ]}
+];
+function refreshHome(){
+  var h = new Date().getHours();
+  var g = h < 12 ? "Good Morning" : h < 17 ? "Good Afternoon" : h < 21 ? "Good Evening" : "Good Night";
+  var ge = document.getElementById("homeGreet"); if (ge) ge.textContent = g + ", " + settings.name + "!";
+  var mo = { normal: ["\u{1F60A}","Normal"], happy: ["\u{1F604}","Happy"], sad: ["\u{1F614}","Sad"], tired: ["\u{1F62A}","Tired"], lonely: ["\u{1F614}","Lonely"], angry: ["\u{1F620}","Angry"], love: ["\u{1F60D}","Loving"] };
+  var mm = mo[currentMood] || mo.normal;
+  var me = document.getElementById("homeMoodEmoji"); if (me) me.textContent = mm[0];
+  var mt = document.getElementById("homeMoodText"); if (mt) mt.textContent = mm[1];
+  try {
+    if (NATIVE) { var b = JSON.parse(window.MayaBridge.battery()); var hb = document.getElementById("hBat"); if (hb) hb.textContent = b.level + "%"; }
+  } catch(e){}
+  var mem = document.getElementById("homeMemory");
+  if (mem) mem.textContent = facts.length ? ("\u{1F4AD} \"" + facts[Math.floor(Math.random() * facts.length)] + "\"") : "Abhi koi memory nahi — bolo: yaad rakhna...";
+}
+setInterval(function(){ var t = document.getElementById("hTime"); if (t) t.textContent = new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}); }, 30000);
+setTimeout(refreshHome, 500);
+setTimeout(function(){ var t = document.getElementById("hTime"); if (t) t.textContent = new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}); try { fillWeatherChip(); } catch(e){} }, 800);
+
+function refreshBrains(){
+  var list = document.getElementById("brainList"); if (!list) return;
+  var brains = [
+    { name: "Gemini", has: !!settings.apikey, note: "Smart + Tools" },
+    { name: "Groq", has: !!settings.groqKey, note: "Fastest" },
+    { name: "OpenRouter", has: !!settings.orKey, note: "Free models" },
+    { name: "Pollinations", has: true, note: "Keyless backup" },
+    { name: "Ghost (Offline)", has: true, note: "No internet needed" }
+  ];
+  var html = "";
+  brains.forEach(function(b){
+    var cls = b.has ? "ok" : "err";
+    var st = b.has ? "\u2705 Ready" : "\u274C No key";
+    html += '<div class="brainrow"><div class="dot2 ' + cls + '"></div><div class="bname">' + b.name + '</div><div class="bstat">' + b.note + ' | ' + st + '</div></div>';
+  });
+  list.innerHTML = html;
+  var ug = document.getElementById("uGem"); if (ug) ug.textContent = budget.gemini;
+  var uq = document.getElementById("uGroq"); if (uq) uq.textContent = budget.groq;
+  var up = document.getElementById("uPoll"); if (up) up.textContent = budget.poll;
+  var ab = document.getElementById("activeBrainName"); if (ab) ab.textContent = settings.brainMode ? settings.brainMode.toUpperCase() : "AUTO";
+}
+function setBrainMode(m){
+  settings.brainMode = m; saveSettings(); refreshBrains();
+  toast("Brain mode: " + m.toUpperCase());
+  pushLog("BRAIN MODE: " + m);
+}
+
+function refreshStats(){
+  var today = new Date().toDateString();
+  if (statsDay !== today) { statsDay = today; statsCount = { q: 0, local: 0, cloud: 0 }; skillsUsed = {}; }
+  var s1 = document.getElementById("sQ"); if (s1) s1.textContent = statsCount.q;
+  var s2 = document.getElementById("sLocal"); if (s2) s2.textContent = statsCount.local;
+  var s3 = document.getElementById("sCloud"); if (s3) s3.textContent = statsCount.cloud;
+  var f2 = document.getElementById("sFacts"); if (f2) f2.textContent = facts.length;
+  var d2 = document.getElementById("sDiary"); if (d2) d2.textContent = diary.length;
+  var m2 = document.getElementById("sMood"); if (m2) m2.textContent = moodLog.length;
+  var top = Object.keys(skillsUsed).sort(function(a,b){ return skillsUsed[b] - skillsUsed[a]; }).slice(0,5);
+  var ts = document.getElementById("topSkills");
+  if (ts) ts.innerHTML = top.length ? top.map(function(k,i){ return (i+1) + ". " + k + " (" + skillsUsed[k] + "x)"; }).join("<br>") : "Abhi data nahi";
+}
+var statsDay = "", statsCount = { q: 0, local: 0, cloud: 0 }, skillsUsed = {};
+try { var _sv = JSON.parse(localStorage.getItem("maya_stats") || "{}"); if (_sv.day) { statsDay = _sv.day; statsCount = _sv.count || statsCount; skillsUsed = _sv.skills || {}; } } catch(e){}
+function saveStats(){ try { localStorage.setItem("maya_stats", JSON.stringify({ day: statsDay, count: statsCount, skills: skillsUsed })); } catch(e){} }
+function statHit(type){ statsCount.q++; if (type === "local") statsCount.local++; else statsCount.cloud++; saveStats(); }
+function skillHit(name){ if (_activeSkill) { skillsUsed[name] = (skillsUsed[name] || 0) + 1; saveStats(); } }
+
+function exportBackup(){
+  var data = { facts: facts, diary: diary, moodLog: moodLog, memorySummary: memorySummary, skills: customSkills, chat: chatHist.slice(-50) };
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "maya_backup_" + new Date().toISOString().slice(0,10) + ".json";
+  a.click();
+  toast("Backup download ho raha hai!");
+}
+function importBackup(input){
+  var f = input.files[0]; if (!f) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      var d = JSON.parse(e.target.result);
+      if (d.facts) { facts = d.facts; saveFacts(); }
+      if (d.diary) { diary = d.diary; saveDiary(); }
+      if (d.moodLog) { moodLog = d.moodLog; saveMoodLog(); }
+      if (d.memorySummary) { memorySummary = d.memorySummary; localStorage.setItem("maya_summary", memorySummary); }
+      if (d.skills) { customSkills = d.skills; saveSkills(); }
+      if (d.chat) { chatHist = d.chat; persistChat(); }
+      toast("Backup import ho gaya! " + (d.facts ? d.facts.length + " facts" : ""));
+      refreshStats(); refreshHome();
+    } catch(err) { toast("Backup file ghalat hai"); }
+  };
+  reader.readAsText(f);
+}
+
+var _fileCache = [];
+function loadFolder(folder){
+  if (!NATIVE) return toast("Sirf APK mein");
+  try {
+    var r = JSON.parse(window.MayaBridge.listFiles(folder));
+    _fileCache = r.files || [];
+    renderFiles(document.getElementById("fileSearch") ? document.getElementById("fileSearch").value : "");
+  } catch(e) { toast("Files nahi mili"); }
+}
+function renderFiles(filter){
+  var host = document.getElementById("filesList"); if (!host) return;
+  var f = (filter || "").toLowerCase();
+  var items = _fileCache.filter(function(x){ return !f || x.name.toLowerCase().indexOf(f) >= 0; });
+  if (!_fileCache.length) { host.innerHTML = '<div style="text-align:center; color:var(--dim); padding:20px; font-size:13px">\u{1F4C2} Upar se folder chunko</div>'; return; }
+  var html = items.slice(0, 30).map(function(x){
+    var kb = x.size > 1048576 ? (x.size/1048576).toFixed(1) + " MB" : Math.round(x.size/1024) + " KB";
+    return '<div class="brainrow" data-uri="' + x.uri + '" data-mime="' + (x.type || "") + '" data-fname="' + x.name.replace(/"/g, "") + '"><div class="bname">' + x.name + '</div><div class="bstat">' + kb + '</div><div style="font-size:18px;cursor:pointer" data-open="1">\u{1F4C4}</div></div>';
+  }).join("");
+  host.innerHTML = html;
+}
+document.addEventListener("click", function(ev){
+  var row = ev.target.closest ? ev.target.closest(".brainrow[data-uri]") : null;
+  if (row && NATIVE) {
+    try { window.MayaBridge.openFile(row.getAttribute("data-uri"), row.getAttribute("data-mime")); } catch(e){ toast("Nahi khuli"); }
+  }
+});
+
+function renderTools(filter){
+  var host = document.getElementById("toolsGrid");
+  if (!host) return;
+  var f = (filter || "").toLowerCase();
+  var html = "";
+  TOOLS_CATALOG.forEach(function(cat){
+    var items = cat.items.filter(function(t){ return !f || t.label.toLowerCase().indexOf(f) >= 0 || t.cmd.toLowerCase().indexOf(f) >= 0 || cat.cat.toLowerCase().indexOf(f) >= 0; });
+    if (!items.length) return;
+    html += '<div class="sect"><h3>' + cat.cat + '</h3><div class="grid3">';
+    items.forEach(function(t){
+    html += '<div class="wbtn" data-cmd="' + encodeURIComponent(t.cmd) + '"><span class="wicon">' + t.icon + '</span><span class="wlabel">' + t.label + '</span></div>';
+    });
+    html += '</div></div>';
+  });
+  host.innerHTML = html || '<div style="text-align:center; color:var(--dim); padding:20px">Kuch nahi mila</div>';
+}
+function toolRun(cmd){
+  showTab("tab-chat");
+  setTimeout(function(){ handleUserText(cmd, false); }, 300);
+}
+document.addEventListener("click", function(ev){
+  var el = ev.target.closest ? ev.target.closest(".wbtn[data-cmd]") : null;
+  if (el) toolRun(decodeURIComponent(el.getAttribute("data-cmd")));
+});
+
 /* =========== VOICE ARTISTS (Edge Neural TTS jugaad — premium, free) =========== */
 var VOICE_ARTISTS = {
   auto:   { name: "AUTO — script detect", auto: true },
@@ -977,6 +1345,7 @@ function handleUserText(text, wasVoice){
     return;
   }
   _lastQuery = stripped;
+  try { statHit("cloud"); if (_activeSkill) skillHit(_activeSkill.name); } catch(e){}
   currentMood = detectMood(stripped);
   logMood(currentMood);
   _activeSkill = skillFor(stripped);
@@ -3217,7 +3586,7 @@ function paintQuick(){
 }
 
 /* ---------- INIT ---------- */
-renderCmds(""); renderFacts(); loadSettingsForm(); paintQuick(); setOrb("idle");
+renderCmds(""); renderFacts(); renderTools(""); loadSettingsForm(); paintQuick(); setOrb("idle");
 fillWeatherChip();
 setInterval(fillWeatherChip, 1800000);
 populateVoiceSelect();
@@ -3231,7 +3600,7 @@ if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
   var sver = document.querySelector("#splash .ver");
-  if (sver) sver.textContent = "VERSION 6.0 — WORK MODE 🌍";
+  if (sver) sver.textContent = "VERSION 7.0 — PRO UI 🌍";
 }
 greetMiniRefresh();
 chatHist.slice(-40).forEach(function(h){ addBubble(h.role === "user" ? "user" : "ai", h.text); });
