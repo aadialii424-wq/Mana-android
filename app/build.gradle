@@ -11,8 +11,8 @@ android {
         applicationId "com.maya.ai"
         minSdk 26          // Android 8.0+ — vector icon + modern APIs
         targetSdk 34
-        versionCode 44
-        versionName "2.12.1"
+        versionCode 45
+        versionName "3.1.0"
     }
 
     signingConfigs {

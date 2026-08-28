@@ -91,6 +91,8 @@ class MainActivity : AppCompatActivity() {
             javaScriptEnabled = true
             domStorageEnabled = true
             mediaPlaybackRequiresUserGesture = false
+            allowUniversalAccessFromFileURLs = true
+            allowFileAccessFromFileURLs = true
         }
         webView.addJavascriptInterface(MayaBridge(), "MayaBridge")
         webView.webChromeClient = object : android.webkit.WebChromeClient() {
