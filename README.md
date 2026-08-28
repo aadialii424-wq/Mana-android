@@ -1,6 +1,6 @@
-# 🤖 MAYA — Personal AI Assistant (Android APK)
+# 🤖 MAYA — Personal AI Assistant
 
-**Version 2.1.0 — Phase 2: Native APK • 0-Budget Build**
+**Version 2.12.1 — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
@@ -101,9 +101,36 @@ ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
 - AI sawal **direct Google Gemini** ko jata hai — koi doosra server nahi
 - Code 100% open — khud dekh lo! 😄
 
+## 🌐 Web Version (FREE Deploy)
+
+MAYA ka web version bhi hai — phone ke browser mein chalta hai!
+
+### GitHub Pages se deploy (FREE, 2 minute):
+1. Repository push karo (ye files automatically deploy ho jayengi: `public/` folder)
+2. GitHub par **Settings → Pages** kholo
+3. **Source** mein "GitHub Actions" select karo
+4. **Save** dabao — 1-2 minute mein live ho jayega!
+5. Link milega: `https://tumhara-username.github.io/maya-android/`
+
+### Phone mein install karo (PWA):
+1. Upar ka link phone ke Chrome mein kholo
+2. Menu (⋮) → **Add to Home screen** → **Install**
+3. MAYA ka icon phone pe aa jayega — app jaisa chalega!
+
+### Netlify se deploy (FREE, alternative):
+1. **app.netlify.com/drop** kholo (free account)
+2. `public/` folder drag & drop karo
+3. Live link mil jayega!
+
+> **Note:** Web version mein alarm, wake word, aur auto-send jaise native features nahi chalte.
+> Voice chat, AI brain, aur memory bank full kaam karte hain!
+
+---
+
 ## 🗺️ Roadmap
 
 - ✅ Phase 1 — PWA Pro (web app)
 - ✅ Phase 2 — Native APK (ye!)
 - ⏳ Phase 3 — Smart Brain (AI function calling, routines)
 - ⏳ Phase 4 — Boss Level (wake word, offline AI)
+
