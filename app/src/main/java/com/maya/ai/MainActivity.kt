@@ -1017,6 +1017,55 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        /**
+         * 🎙️ EDGE TTS — muft, be-hisaab neural awaaz (asli Urdu bhi).
+         *
+         * JS ye kaam khud kyun nahi kar sakta? Kyun ke Microsoft ka WebSocket
+         * Origin/User-Agent/Pragma headers maangta hai, aur browser ka
+         * `new WebSocket()` API custom headers bhejne hi nahi deta. Native side
+         * par ye pabandi nahi — is liye poora WebSocket neeche Kotlin mein hai.
+         *
+         * JS bas SSML banata hai; hum MP3 bytes base64 kar ke wapas dete hain:
+         *     window.__edgeDone(reqId, ok, base64Mp3OrError)
+         */
+        @JavascriptInterface
+        fun edgeTts(ssml: String, reqId: String, timeoutMs: Int) {
+            Thread {
+                var ok = false
+                var payload: String
+                try {
+                    val mp3 = EdgeTts.synth(ssml, if (timeoutMs > 0) timeoutMs else 20000)
+                    payload = Base64.encodeToString(mp3, Base64.NO_WRAP)
+                    ok = true
+                } catch (e: Exception) {
+                    payload = e.message ?: "edge tts nakaam"
+                }
+                evalAsync(
+                    "window.__edgeDone && window.__edgeDone('" + jsEscape(reqId) + "'," + ok +
+                    ",'" + jsEscape(payload) + "')"
+                )
+            }.start()
+        }
+
+        /** Edge TTS ki poori awaaz list (JSON) — key ki zaroorat nahi. */
+        @JavascriptInterface
+        fun edgeVoices(): String = try {
+            val u = "https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/voices/list" +
+                "?trustedclienttoken=6A5AA1D4EAFF4E9FB37E23D68491D6F4"
+            val conn = URL(u).openConnection() as HttpURLConnection
+            conn.connectTimeout = 8000
+            conn.readTimeout = 12000
+            conn.setRequestProperty("User-Agent", EdgeTts.userAgent())
+            conn.setRequestProperty("Accept", "*/*")
+            val code = conn.responseCode
+            val txt = (if (code in 200..399) conn.inputStream else conn.errorStream)
+                ?.bufferedReader()?.use { it.readText() } ?: ""
+            conn.disconnect()
+            JSONObject().put("status", code).put("body", txt).toString()
+        } catch (e: Exception) {
+            JSONObject().put("status", 0).put("body", e.message ?: "error").toString()
+        }
+
         /** Persistent prefs (boot autostart wake) */
         @JavascriptInterface
         fun setPref(k: String, v: Boolean) { try { prefs().edit().putBoolean(k, v).apply() } catch (e: Exception) {} }
@@ -1092,5 +1141,225 @@ class MainActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(
                 this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQ_PERMS
             )
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🎙️  EDGE TTS  —  MUFT, BE-HISAAB, ASLI NEURAL AWAAZ   (app v4.7.0)
+   ---------------------------------------------------------------------------
+   Ye wahi engine hai jo Microsoft Edge browser ke "Read aloud" ke peeche hai:
+   200+ Azure neural awaazein, 50+ zabanein — koi API key nahi, koi quota nahi.
+   MAYA ke liye sab se ahem: ASLI URDU awaazein (ur-PK-UzmaNeural / AsadNeural).
+
+   To phir pehle kyun nahi chalta tha?
+   -----------------------------------
+   Is service ka WebSocket handshake in headers ke bagair qubool nahi hota:
+       Origin: chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold
+       User-Agent: ...Edg/143.0.0.0
+       Pragma / Cache-Control / Sec-WebSocket-Version
+   Browser ka `new WebSocket(url)` in headers ko set KAR HI NAHI SAKTA — ye
+   JavaScript ki hadd hai, hamara bug nahi. Is liye app ka purana JS wala
+   edgeTTS_speak() hamesha khamoshi se nakaam hota tha (default OFF pada tha).
+
+   Ilaj: WebSocket ab KOTLIN mein hai. Yahan hum har header khud likh sakte
+   hain. Neeche RFC-6455 ka chhota client hai — koi nayi library nahi
+   (OkHttp bhi nahi), sirf SSLSocket. Is liye build ka koi khatra nahi.
+
+   Auth: Sec-MS-GEC = SHA-256( windows-filetime(5 min par gol kiya) + token ),
+   bilkul wesa hi jaisa rany2/edge-tts karta hai.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+private object EdgeTts {
+    private const val TOKEN = "6A5AA1D4EAFF4E9FB37E23D68491D6F4"
+    private const val CHROME_FULL = "143.0.3650.75"
+    private const val CHROME_MAJOR = "143"
+    private const val HOST = "speech.platform.bing.com"
+    private const val UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+        "(KHTML, like Gecko) Chrome/$CHROME_MAJOR.0.0.0 Safari/537.36 Edg/$CHROME_MAJOR.0.0.0"
+
+    fun userAgent(): String = UA
+
+    private class Frame(val opcode: Int, val payload: ByteArray)
+
+    /* Sec-MS-GEC — 5 minute ke block par SHA-256 */
+    private fun gec(): String {
+        var ticks = (System.currentTimeMillis() / 1000.0) + 11644473600.0
+        ticks -= ticks % 300.0
+        ticks *= 1.0e9 / 100.0
+        val toHash = String.format(java.util.Locale.US, "%.0f", ticks) + TOKEN
+        val dig = java.security.MessageDigest.getInstance("SHA-256")
+            .digest(toHash.toByteArray(Charsets.US_ASCII))
+        val sb = StringBuilder(64)
+        for (b in dig) sb.append(String.format(java.util.Locale.US, "%02X", b))
+        return sb.toString()
+    }
+
+    private fun hex32(): String {
+        val r = java.security.SecureRandom()
+        val b = ByteArray(16); r.nextBytes(b)
+        val sb = StringBuilder(32)
+        for (x in b) sb.append(String.format(java.util.Locale.US, "%02x", x))
+        return sb.toString()
+    }
+
+    /* Python ke date_to_string() ki hoo-ba-hoo naqal */
+    private fun stamp(): String {
+        val f = java.text.SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss", java.util.Locale.US)
+        f.timeZone = java.util.TimeZone.getTimeZone("UTC")
+        return f.format(java.util.Date()) + " GMT+0000 (Coordinated Universal Time)"
+    }
+
+    private fun readLine(ins: java.io.InputStream): String {
+        val bos = java.io.ByteArrayOutputStream()
+        var prev = -1
+        while (true) {
+            val c = ins.read()
+            if (c < 0) break
+            if (prev == 13 && c == 10) { val a = bos.toByteArray(); return String(a, 0, maxOf(0, a.size - 1), Charsets.ISO_8859_1) }
+            bos.write(c); prev = c
+        }
+        return String(bos.toByteArray(), Charsets.ISO_8859_1)
+    }
+
+    private fun readFully(ins: java.io.InputStream, n: Int): ByteArray {
+        val out = ByteArray(n); var got = 0
+        while (got < n) {
+            val r = ins.read(out, got, n - got)
+            if (r < 0) throw java.io.IOException("connection band ho gaya")
+            got += r
+        }
+        return out
+    }
+
+    /* client -> server frame (mask lagana LAZMI hai) */
+    private fun sendFrame(out: java.io.OutputStream, opcode: Int, data: ByteArray) {
+        val head = java.io.ByteArrayOutputStream()
+        head.write(0x80 or opcode)
+        val n = data.size
+        when {
+            n < 126 -> head.write(0x80 or n)
+            n < 65536 -> { head.write(0x80 or 126); head.write((n shr 8) and 255); head.write(n and 255) }
+            else -> {
+                head.write(0x80 or 127)
+                for (i in 7 downTo 0) head.write(((n.toLong() shr (8 * i)) and 255L).toInt())
+            }
+        }
+        val mask = ByteArray(4); java.security.SecureRandom().nextBytes(mask)
+        head.write(mask)
+        val masked = ByteArray(n)
+        for (i in 0 until n) masked[i] = (data[i].toInt() xor mask[i % 4].toInt()).toByte()
+        out.write(head.toByteArray()); out.write(masked); out.flush()
+    }
+
+    private fun sendText(out: java.io.OutputStream, s: String) =
+        sendFrame(out, 1, s.toByteArray(Charsets.UTF_8))
+
+    /* server -> client frame; tukron mein aaye to jor deta hai */
+    private fun readFrame(ins: java.io.InputStream): Frame {
+        var firstOp = -1
+        val acc = java.io.ByteArrayOutputStream()
+        while (true) {
+            val b0 = ins.read(); if (b0 < 0) throw java.io.IOException("stream khatam")
+            val fin = (b0 and 0x80) != 0
+            val op = b0 and 0x0F
+            val b1 = ins.read(); if (b1 < 0) throw java.io.IOException("stream khatam")
+            var len = (b1 and 0x7F).toLong()
+            if (len == 126L) { val e = readFully(ins, 2); len = (((e[0].toInt() and 255) shl 8) or (e[1].toInt() and 255)).toLong() }
+            else if (len == 127L) {
+                val e = readFully(ins, 8); var v = 0L
+                for (i in 0 until 8) v = (v shl 8) or (e[i].toLong() and 255L)
+                len = v
+            }
+            if (len > 8_000_000L) throw java.io.IOException("frame bohat bara")
+            val body = readFully(ins, len.toInt())
+            if (op != 0 && firstOp < 0) firstOp = op
+            acc.write(body)
+            if (fin) return Frame(if (firstOp < 0) op else firstOp, acc.toByteArray())
+        }
+    }
+
+    /* ═══ poora kaam: SSML andar, MP3 bytes bahar ═══ */
+    fun synth(ssml: String, timeoutMs: Int): ByteArray {
+        val path = "/consumer/speech/synthesize/readaloud/edge/v1" +
+            "?TrustedClientToken=$TOKEN&Sec-MS-GEC=${gec()}&Sec-MS-GEC-Version=1-$CHROME_FULL" +
+            "&ConnectionId=${hex32()}"
+
+        val sock = javax.net.ssl.SSLSocketFactory.getDefault().createSocket() as javax.net.ssl.SSLSocket
+        try {
+            sock.connect(java.net.InetSocketAddress(HOST, 443), timeoutMs)
+            sock.soTimeout = timeoutMs
+            /* Hostname ki tasdeeq LAZMI — bina is ke raw SSLSocket kisi bhi
+               sahih certificate ko qubool kar leta hai (MITM ka darwaza). */
+            sock.sslParameters = sock.sslParameters.also { it.endpointIdentificationAlgorithm = "HTTPS" }
+            sock.startHandshake()
+
+            val out = java.io.BufferedOutputStream(sock.outputStream)
+            val ins = java.io.BufferedInputStream(sock.inputStream)
+
+            val kb = ByteArray(16); java.security.SecureRandom().nextBytes(kb)
+            val wsKey = Base64.encodeToString(kb, Base64.NO_WRAP)
+
+            val req = StringBuilder()
+            req.append("GET ").append(path).append(" HTTP/1.1\r\n")
+            req.append("Host: ").append(HOST).append("\r\n")
+            req.append("Upgrade: websocket\r\n")
+            req.append("Connection: Upgrade\r\n")
+            req.append("Sec-WebSocket-Key: ").append(wsKey).append("\r\n")
+            req.append("Sec-WebSocket-Version: 13\r\n")
+            req.append("Pragma: no-cache\r\n")
+            req.append("Cache-Control: no-cache\r\n")
+            req.append("Origin: chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold\r\n")
+            req.append("User-Agent: ").append(UA).append("\r\n")
+            req.append("Accept-Language: en-US,en;q=0.9\r\n")
+            req.append("\r\n")
+            out.write(req.toString().toByteArray(Charsets.ISO_8859_1)); out.flush()
+
+            val status = readLine(ins)
+            if (!status.contains(" 101")) {
+                while (true) { val l = readLine(ins); if (l.isEmpty()) break }
+                throw java.io.IOException("Edge ne handshake mana kiya: $status")
+            }
+            while (true) { val l = readLine(ins); if (l.isEmpty()) break }
+
+            sendText(out,
+                "X-Timestamp:" + stamp() + "\r\n" +
+                "Content-Type:application/json; charset=utf-8\r\n" +
+                "Path:speech.config\r\n\r\n" +
+                "{\"context\":{\"synthesis\":{\"audio\":{\"metadataoptions\":{" +
+                "\"sentenceBoundaryEnabled\":\"false\",\"wordBoundaryEnabled\":\"false\"}," +
+                "\"outputFormat\":\"audio-24khz-48kbitrate-mono-mp3\"}}}}\r\n")
+
+            sendText(out,
+                "X-RequestId:" + hex32() + "\r\n" +
+                "Content-Type:application/ssml+xml\r\n" +
+                "X-Timestamp:" + stamp() + "Z\r\n" +
+                "Path:ssml\r\n\r\n" + ssml)
+
+            val audio = java.io.ByteArrayOutputStream()
+            val deadline = System.currentTimeMillis() + timeoutMs
+            while (System.currentTimeMillis() < deadline) {
+                val f = readFrame(ins)
+                when (f.opcode) {
+                    1 -> { if (String(f.payload, Charsets.UTF_8).contains("Path:turn.end")) return finish(audio) }
+                    2 -> {
+                        val p = f.payload
+                        if (p.size > 2) {
+                            val hlen = ((p[0].toInt() and 255) shl 8) or (p[1].toInt() and 255)
+                            if (p.size > hlen + 2) audio.write(p, hlen + 2, p.size - hlen - 2)
+                        }
+                    }
+                    8 -> return finish(audio)
+                    9 -> sendFrame(out, 10, f.payload)
+                }
+            }
+            return finish(audio)
+        } finally {
+            try { sock.close() } catch (e: Exception) {}
+        }
+    }
+
+    private fun finish(bos: java.io.ByteArrayOutputStream): ByteArray {
+        if (bos.size() == 0) throw java.io.IOException("Edge se koi audio nahi aayi")
+        return bos.toByteArray()
     }
 }

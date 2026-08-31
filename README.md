@@ -1,9 +1,36 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 4.6.0 "AWAAZ DOCTOR" — 0-Budget Build • Android APK + Web PWA**
+**Version 4.7.0 "EDGE TTS" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🌊 v4.7.0 — EDGE TTS ("koi aur free unlimited TTS dhoondo")
+
+**Mil gaya — aur wo pehle se app mein maujood tha, magar toota hua.**
+
+Microsoft Edge ka "Read aloud" engine = **Azure ki 300+ neural awaazein, koi API key
+nahi, koi signup nahi, koi rozana hadd nahi** — aur us mein **ASLI Pakistani Urdu**
+awaazein hain: `ur-PK-UzmaNeural` aur `ur-PK-AsadNeural`.
+
+**Ye pehle kyun nahi chalta tha?** Microsoft ka WebSocket `Origin` / `User-Agent` /
+`Pragma` headers ke bagair handshake qubool nahi karta — aur browser ka
+`new WebSocket()` API custom headers bhej **hi nahi sakta**. Ye JavaScript ki hadd hai.
+Chrome, Firefox, **Android WebView** — sab block. Is liye purana Edge code hamesha
+khamoshi se mar jata tha (switch default OFF pada tha).
+
+**Ilaj:** WebSocket ab **Kotlin** mein hai (`object EdgeTts` — apna RFC-6455 client,
+koi nayi library nahi). Native side par header ki koi pabandi nahi. JS sirf SSML
+banata hai, Kotlin MP3 wapas deta hai.
+
+- 🌊 **Nayi seerhi:** Gemini → **EDGE (be-hisaab)** → muft neural → phone
+- 🌊 **Naya mode "Sirf Edge TTS"** — Gemini ka roz ka quota bilkul nahi jalta
+- 🌊 **Edge awaaz ka picker** — Auto (zubaan + persona), ya 300+ live list mein se koi bhi
+- 🌊 **"EDGE AWAAZ SUNO" button** — bolta bhi hai, waqt bhi batata hai, nakami par asal wajah bhi
+- 🧪 **56 naye test** (kul 222) — protocol ka saboot naqli Edge server ke against: masking,
+  16-bit length, **fragmentation**, PING/PONG, 5350/5350 bytes sahih
+
+📖 Poori tafseel: [`docs/EDGE-TTS-ARCHITECTURE.md`](docs/EDGE-TTS-ARCHITECTURE.md)
 
 ## 🩺 v4.6.0 — AWAAZ DOCTOR ("3 nayi keys lagayin, ek bhi nahi chali")
 

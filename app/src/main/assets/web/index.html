@@ -534,7 +534,7 @@ nav{padding:8px 10px 10px}
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v4.6.0 — AWAAZ DOCTOR • ASAL WAJAH BATATA HAI</div>
+  <div class="ver">v4.7.0 — EDGE TTS • MUFT AWAAZ, KOI HADD NAHI</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid #c85050; background:#3c0a0f; border-radius:12px; padding:12px; text-align:left;">
@@ -559,14 +559,14 @@ nav{padding:8px 10px 10px}
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v4.6.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
+  <div class="dfoot">MAYA v4.7.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.6.0 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.7.0 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -727,7 +727,7 @@ nav{padding:8px 10px 10px}
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.6.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.7.0</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -875,6 +875,7 @@ nav{padding:8px 10px 10px}
             <select class="ui-input ui-select" id="sVoiceEngine">
               <option value="auto">🪄 Auto — neural, warna phone (behtareen)</option>
               <option value="neural">🎭 Sirf Neural — Gemini studio awaaz</option>
+              <option value="edge">🌊 Sirf Edge TTS — MUFT aur BE-HISAAB</option>
               <option value="device">📱 Sirf Phone — 0 data, foran</option>
               <option value="off">🔇 Band — Maya khamosh</option>
             </select>
@@ -893,8 +894,14 @@ nav{padding:8px 10px 10px}
             <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="sNeuralWifi"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
           </div>
           <div class="ui-row">
-            <div class="ui-row-txt">🌊 Edge TTS backup (muft, bina key)</div>
+            <div class="ui-row-txt">🌊 Edge TTS (muft, be-hisaab — Gemini khatam ho to yehi bolti hai)</div>
             <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="sEdgeTts"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
+          </div>
+          <div class="ui-field">
+            <div class="ui-label">🌊 EDGE AWAAZ (asli Urdu — koi key nahi)</div>
+            <select class="ui-input ui-select" id="sEdgeVoice"></select>
+            <div class="ui-hint" id="edgeHint">—</div>
+            <button class="ui-btn" id="edgeTest" type="button">🌊 EDGE AWAAZ SUNO</button>
           </div>
           <div class="ui-field">
             <div class="ui-label">SUNNE KI ZUBAAN (STT)</div>
@@ -1065,7 +1072,7 @@ nav{padding:8px 10px 10px}
       </div>
 
       <button type="button" class="ui-btn ui-btn-save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v4.6.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v4.7.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -1080,7 +1087,7 @@ nav{padding:8px 10px 10px}
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.6.0 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.7.0 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -1148,11 +1155,11 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v4.6.0 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v4.7.0 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
-var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", ghKey:"", cerebrasKey:"", mistralKey:"", orKey:"", nvidiaKey:"", zaiKey:"", llm7Key:"", ttsKey:"", voiceEngine:"auto", gVoice:"Kore", voiceMood:"auto", neuralWifiOnly:false, neuralMaxChars:1400, edgeTTS:false, ttsModel:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"maya", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true, gender:"male", phone:"", musicApp:"youtube", favSong:"", ytChannel:"", assistName:"Maya", gfMode:false, persona:"maya", remember:true, convoMode:false, lang:"roman-ur", proactive:false, theme:"obsidian", accent:"#FF7A1A", radius:18, fontScale:1, edgeGlow:false };
+var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", ghKey:"", cerebrasKey:"", mistralKey:"", orKey:"", nvidiaKey:"", zaiKey:"", llm7Key:"", ttsKey:"", voiceEngine:"auto", gVoice:"Kore", voiceMood:"auto", neuralWifiOnly:false, neuralMaxChars:1400, edgeTTS:true, edgeVoice:"", ttsModel:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"maya", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true, gender:"male", phone:"", musicApp:"youtube", favSong:"", ytChannel:"", assistName:"Maya", gfMode:false, persona:"maya", remember:true, convoMode:false, lang:"roman-ur", proactive:false, theme:"obsidian", accent:"#FF7A1A", radius:18, fontScale:1, edgeGlow:false };
 var settings = Object.assign({}, DEFAULTS);
 try {
   var s1 = JSON.parse(localStorage.getItem("maya_settings") || "null");
@@ -1229,7 +1236,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v4.6.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v4.7.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1457,6 +1464,8 @@ var AWAAZ = {
   err: "",             /* aakhri nakami ka code */
   errText: "",
   spoke: 0,            /* kitni dafa neural bola (Doctor ke liye) */
+  edgeSpoke: 0,        /* kitni dafa EDGE bola */
+  edgeVoiceUsed: "",   /* aakhri Edge awaaz jo asal mein chali */
   cacheHits: 0,
 
   /* ---------- settings ka ek hi tarjuma ---------- */
@@ -1466,14 +1475,14 @@ var AWAAZ = {
     if (s.voiceOn === false) mode = "off";
     return {
       on: s.voiceOn !== false,
-      mode: mode,                                        /* auto | neural | device | off */
+      mode: mode,                          /* auto | neural | edge | device | off */
       key: AWAAZ.keyAt(AWAAZ.ki),
       keys: AWAAZ.keyList(),
       voice: s.gVoice || "Kore",
       mood: s.voiceMood || "auto",
       wifiOnly: s.neuralWifiOnly === true,
       maxChars: +(s.neuralMaxChars || 1400),
-      edge: s.edgeTTS === true,
+      edge: (s.edgeTTS !== false) || mode === "edge",   /* ab default ON — kyunke ab sach much chalta hai */
       persona: s.persona || "maya"
     };
   },
@@ -1563,6 +1572,8 @@ var AWAAZ = {
     TIMEOUT: "Google ne waqt par jawab nahi diya",
     NETWORK: "Network reach nahi hua",
     MODEL: "Ye TTS model is key par nahi chalta",
+    BRIDGE: "App ka native pul jawab nahi de raha (app dobara kholo)",
+    EDGE_MODE: "Aap ne Edge TTS chuna hai — Gemini ka quota bach raha hai",
     NO_AUDIO: "Google ne audio nahi bheji",
     DECODE: "Audio kharab aayi",
     AUDIO_BLOCKED: "Phone ne audio bajane nahi di",
@@ -1913,15 +1924,29 @@ var AWAAZ = {
     step(0);
   },
 
-  /* ═══ TIER 2 — Edge TTS (muft, key nahi; default OFF) ═══ */
+  /* ═══ TIER 2 — EDGE TTS (muft, BE-HISAAB, asli Urdu awaaz) ═══
+     Gemini ka roz ka quota ~15 request hai. Edge ka koi quota hi nahi. Is liye
+     Edge ab Gemini ke foran baad bolta hai — muft-neural se pehle, robot se
+     bohat pehle. Sharat sirf ek: Kotlin ka bridge maujood ho, kyunke browser
+     mein Microsoft handshake rad kar deta hai aur wahan waqt zaya karna
+     bewaqoofi hai (deikho EDGE_TTS ka header comment). */
+  edgeReady: function () {
+    try {
+      if (typeof EDGE_TTS !== "object" || !EDGE_TTS) return false;
+      if (EDGE_TTS.native()) return true;
+      var s = (typeof settings === "object" && settings) ? settings : {};
+      return s.voiceEngine === "edge";     /* browser mein sirf jab user khud kahe */
+    } catch (e) { return false; }
+  },
   edge: function (text, onDone, onFail) {
     if (typeof edgeTTS_speak !== "function") { onFail("MODEL"); return; }
     var gen = AWAAZ.gen;
-    var lang = (typeof settings === "object" && settings && settings.tts) ? settings.tts : "ur-PK";
-    var v = /^ur/.test(lang) ? "ur-PK-UzmaNeural" : (/^hi/.test(lang) ? "hi-IN-SwaraNeural" : "en-US-AriaNeural");
-    edgeTTS_speak(text, v, lang, "+0%", "+0Hz",
-      function () { if (gen === AWAAZ.gen) onDone(); },
-      function () { if (gen === AWAAZ.gen) onFail("NETWORK"); });
+    var s = (typeof settings === "object" && settings) ? settings : {};
+    var v = EDGE_TTS.pick();
+    AWAAZ.edgeVoiceUsed = v;
+    edgeTTS_speak(text, v, EDGE_TTS.langOf(v), EDGE_TTS.rateStr(s.rate), EDGE_TTS.pitchStr(s.pitch),
+      function () { if (gen === AWAAZ.gen) { AWAAZ.edgeSpoke++; onDone(); } },
+      function (code) { if (gen === AWAAZ.gen) onFail(code || "NETWORK"); });
   },
 
   /* ═══ TIER 3 — phone ki apni awaaz (0 data, 0 latency, hamesha maujood) ═══ */
@@ -1989,26 +2014,34 @@ var AWAAZ = {
 
     if (!c.on || c.mode === "off") { AWAAZ.setEngine("off"); done(); return; }
 
-    /* TEH 2: keyless neural — Gemini na ho sake to bhi ASLI awaaz, robot nahi */
+    /* ─── SEERHI: 1) Gemini neural   2) EDGE (be-hisaab)   3) muft neural   4) phone ───
+       Har teh apni nakami agli teh ko de deti hai — khamoshi kabhi nahi hoti.
+       EDGE ab muft-neural se PEHLE hai: uska koi quota nahi, asli Urdu awaaz
+       deta hai, aur Pollinations ke muqable bohat kam nakaam hota hai. */
     function usePollen(why) {
       if (gen !== AWAAZ.gen) return;
-      if (Date.now() < AWAAZ.pollenBad || c.mode === "device") { useEdgeOrDevice(); return; }
+      if (Date.now() < AWAAZ.pollenBad || c.mode === "device") { useDevice(); return; }
       AWAAZ.setEngine("free");
       if (cb.onStart) cb.onStart("free");
-      AWAAZ.pollen(text, done, function () { useEdgeOrDevice(); });
+      AWAAZ.pollen(text, done, function () { useDevice(); });
     }
-    function useEdgeOrDevice() {
+    function useEdge(why) {
       if (gen !== AWAAZ.gen) return;
-      if (c.edge) { AWAAZ.setEngine("edge"); AWAAZ.edge(text, done, function () { useDevice(); }); }
-      else useDevice();
+      if (c.mode === "device" || !c.edge || !AWAAZ.edgeReady()) { usePollen(why); return; }
+      AWAAZ.setEngine("edge");
+      if (cb.onStart) cb.onStart("edge");
+      AWAAZ.edge(text, done, function () { usePollen(why); });
     }
+
+    /* Mode "edge" = Gemini ko haath hi mat lagao, uska roz ka quota bacha rahe */
+    if (c.mode === "edge") { AWAAZ.note(""); useEdge("EDGE_MODE"); return; }
 
     var block = AWAAZ.blockReason(text);
     if (block) {
       AWAAZ.note(block === "DEVICE_MODE" ? "" : block);
       /* sirf ye teen wajahen sach much neural rokti hain */
       if (block === "DEVICE_MODE" || block === "OFFLINE" || block === "MOBILE_DATA") { useDevice(); return; }
-      usePollen(block);          /* KEY_MISSING / KEY_BAD / QUOTA / TOO_LONG -> muft neural */
+      useEdge(block);            /* KEY_MISSING / KEY_BAD / QUOTA / TOO_LONG -> EDGE, phir muft */
       return;
     }
 
@@ -2018,7 +2051,7 @@ var AWAAZ = {
     AWAAZ.neural(text, done, function (code) {
       if (gen !== AWAAZ.gen) return;
       AWAAZ.note(code);
-      usePollen(code);
+      useEdge(code);
     });
   },
 
@@ -2054,6 +2087,11 @@ var AWAAZ = {
       keys: AWAAZ.keyList().length,
       liveKeys: AWAAZ.liveKeys(),
       keyless: Date.now() >= AWAAZ.pollenBad,
+      edgeOn: c.edge,
+      edgeReady: AWAAZ.edgeReady(),
+      edgeNative: (typeof EDGE_TTS === "object" && EDGE_TTS) ? EDGE_TTS.native() : false,
+      edgeVoice: (typeof EDGE_TTS === "object" && EDGE_TTS) ? EDGE_TTS.pick() : "",
+      edgeSpoke: AWAAZ.edgeSpoke,
       cooldown: Math.max(0, Math.round((AWAAZ.cooldownUntil - Date.now()) / 1000))
     };
   },
@@ -2303,6 +2341,17 @@ var AWAAZ = {
 };
 AWAAZ.restore();   /* pichhli dafa ka quota/cooldown yaad karo */
 
+/* Boot par Microsoft se poori live awaaz list — sirf APK mein, background mein */
+setTimeout(function () {
+  try {
+    if (typeof EDGE_TTS === "object" && EDGE_TTS && EDGE_TTS.native()) {
+      EDGE_TTS.refresh(function (L) {
+        if (L && typeof edgeFillVoices === "function") edgeFillVoices();
+      });
+    }
+  } catch (e) {}
+}, 2500);
+
 
 /* Kotlin ka TTS-done callback ab engine ko jata hai */
 window.__nativeTtsDone = function () { try { if (AWAAZ.deviceDone) AWAAZ.deviceDone(); } catch (e) {} };
@@ -2310,42 +2359,312 @@ window.__nativeTtsDone = function () { try { if (AWAAZ.deviceDone) AWAAZ.deviceD
 /* purane naam zinda rahen (baqi code inhen call karta hai) */
 function geminiTTS_stop() { AWAAZ.stop(); }
 
-/* ═══ EDGE TTS (Microsoft — final fallback) ═══ */
-var EDGE_TTS = { token: "6A5AA1D4EAFF4E9FB37E23D68491D6F4", wss: "wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1", ver: "1-143.0.3650.75", audio: null, ws: null };
-function edgeTTS_stop() { try { if (EDGE_TTS.audio) { EDGE_TTS.audio.pause(); EDGE_TTS.audio = null; } } catch(e) {} try { if (EDGE_TTS.ws) { EDGE_TTS.ws.onmessage = null; EDGE_TTS.ws.close(); EDGE_TTS.ws = null; } } catch(e) {} }
-async function edgeTTS_speak(text, voiceName, lang, rate, pitch, onDone, onFail) {
+/* ═══════════════════════════════════════════════════════════════════════════
+   🌊  EDGE TTS  —  MUFT · BE-HISAAB · ASLI NEURAL AWAAZ
+   ---------------------------------------------------------------------------
+   Ye wahi engine hai jo Microsoft Edge ke "Read aloud" ke peeche chalta hai:
+   Azure ki 300+ neural awaazein, 50+ zabanein — koi API key nahi, koi signup
+   nahi, koi rozana ki hadd nahi. Maya ke liye sab se ahem: ASLI URDU awaazein
+   (ur-PK-UzmaNeural / ur-PK-AsadNeural) — Microsoft ki apni live list se
+   lafz-ba-lafz tasdeeq shuda.
+
+   YE PEHLE KYUN NAHI CHALTA THA (asal wajah, andaza nahi)
+   -------------------------------------------------------
+   Microsoft ka WebSocket handshake in headers ke bagair qubool nahi karta:
+       Origin: chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold
+       User-Agent: ...Edg/143.0.0.0       Pragma / Cache-Control
+   Browser ka `new WebSocket(url)` API custom headers bhejne hi NAHI deta —
+   ye JavaScript ki apni hadd hai, hamara bug nahi. Is liye purana JS wala
+   Edge code WebView mein hamesha khamoshi se mar jata tha (default OFF pada tha).
+
+   ILAJ: WebSocket ab KOTLIN mein hai (MainActivity.kt -> object EdgeTts).
+   Native side par header ki koi pabandi nahi. JS sirf SSML banata hai, Kotlin
+   MP3 wapas deta hai. Browser mein (jahan bridge nahi) purana WS raasta
+   fallback ke taur par maujood hai — wo sirf Edge browser mein chalega.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var EDGE_TTS = {
+  token: "6A5AA1D4EAFF4E9FB37E23D68491D6F4",
+  wss: "wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1",
+  ver: "1-143.0.3650.75",
+  TIMEOUT: 20000,
+  audio: null,
+  ws: null,
+  pend: {},          /* reqId -> { done, fail, to } — native bridge ke chalte kaam */
+  seq: 0,
+  spoke: 0,          /* kitni dafa Edge ne sach much awaaz di */
+  lastErr: "",       /* aakhri asal ghalati ka matn (status yahi sach dikhata hai) */
+  live: null,        /* Microsoft se aayi live awaaz list (jab mil jaye) */
+
+  /* Maya ke liye chuni hui awaazein. ur-PK / ur-IN wale Microsoft ki
+     live voices/list se lafz-ba-lafz tasdeeq shuda hain. */
+  VOICES: [
+    { id: "ur-PK-UzmaNeural",               label: "🇵🇰 Uzma — Urdu (Pakistan)",    lang: "ur-PK", g: "f" },
+    { id: "ur-PK-AsadNeural",               label: "🇵🇰 Asad — Urdu (Pakistan)",    lang: "ur-PK", g: "m" },
+    { id: "ur-IN-GulNeural",                label: "🇮🇳 Gul — Urdu (India)",        lang: "ur-IN", g: "f" },
+    { id: "ur-IN-SalmanNeural",             label: "🇮🇳 Salman — Urdu (India)",     lang: "ur-IN", g: "m" },
+    { id: "hi-IN-SwaraNeural",              label: "🇮🇳 Swara — Hindi",             lang: "hi-IN", g: "f" },
+    { id: "hi-IN-MadhurNeural",             label: "🇮🇳 Madhur — Hindi",            lang: "hi-IN", g: "m" },
+    { id: "en-IN-NeerjaNeural",             label: "🇮🇳 Neerja — English (India)",  lang: "en-IN", g: "f" },
+    { id: "en-IN-PrabhatNeural",            label: "🇮🇳 Prabhat — English (India)", lang: "en-IN", g: "m" },
+    { id: "en-US-AvaMultilingualNeural",    label: "🌍 Ava — Multilingual",         lang: "en-US", g: "f" },
+    { id: "en-US-EmmaMultilingualNeural",   label: "🌍 Emma — Multilingual",        lang: "en-US", g: "f" },
+    { id: "en-US-AndrewMultilingualNeural", label: "🌍 Andrew — Multilingual",      lang: "en-US", g: "m" },
+    { id: "en-US-AriaNeural",               label: "🇺🇸 Aria — English (US)",       lang: "en-US", g: "f" },
+    { id: "en-GB-SoniaNeural",              label: "🇬🇧 Sonia — English (UK)",      lang: "en-GB", g: "f" }
+  ],
+
+  /* Kotlin ka bridge maujood hai? Sirf tab Edge sach much chal sakta hai. */
+  native: function () {
+    try { return !!(typeof NATIVE !== "undefined" && NATIVE && window.MayaBridge && window.MayaBridge.edgeTts); }
+    catch (e) { return false; }
+  },
+
+  xml: function (t) {
+    return String(t === null || t === undefined ? "" : t)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+  },
+
+  /* settings ka rate 1.0 -> "+0%" , 1.2 -> "+20%"  (Edge ki hadd ke andar) */
+  rateStr: function (r) {
+    var n = Math.round(((+r || 1) - 1) * 100);
+    if (n > 100) n = 100;
+    if (n < -50) n = -50;
+    return (n >= 0 ? "+" : "") + n + "%";
+  },
+  /* settings ka pitch 1.05 -> "+2Hz" , 1.5 -> "+25Hz" */
+  pitchStr: function (p) {
+    var n = Math.round(((+p || 1) - 1) * 50);
+    if (n > 50) n = 50;
+    if (n < -50) n = -50;
+    return (n >= 0 ? "+" : "") + n + "Hz";
+  },
+  langOf: function (v) {
+    var m = /^([a-z]{2}-[A-Za-z]{2,4})-/.exec(String(v || ""));
+    return m ? m[1] : "en-US";
+  },
+  has: function (id) {
+    var i, L = EDGE_TTS.live || EDGE_TTS.VOICES;
+    for (i = 0; i < L.length; i++) if (L[i].id === id) return true;
+    return false;
+  },
+
+  /* Kaunsi awaaz bolegi?   user ki pasand  >  zubaan + persona  >  Uzma
+     Maya larki hai — default zanana. Jarvis / Friday par mardana. */
+  pick: function () {
+    var s = (typeof settings === "object" && settings) ? settings : {};
+    var chosen = String(s.edgeVoice || "").trim();
+    if (chosen && EDGE_TTS.has(chosen)) return chosen;
+    if (chosen && /^[a-z]{2}-[A-Za-z]{2,4}-[A-Za-z]+Neural$/.test(chosen)) return chosen;
+
+    var per = String(s.persona || "maya");
+    var want = (per === "jarvis" || per === "friday") ? "m" : "f";
+    var lang = String(s.tts || "ur-PK");
+    var base = lang.split("-")[0];
+    var i, first = "", v;
+    for (i = 0; i < EDGE_TTS.VOICES.length; i++) {
+      v = EDGE_TTS.VOICES[i];
+      if (v.lang === lang) { if (v.g === want) return v.id; if (!first) first = v.id; }
+    }
+    for (i = 0; i < EDGE_TTS.VOICES.length; i++) {
+      v = EDGE_TTS.VOICES[i];
+      if (v.lang.split("-")[0] === base) { if (v.g === want) return v.id; if (!first) first = v.id; }
+    }
+    return first || "ur-PK-UzmaNeural";
+  },
+
+  ssml: function (text, voice, lang, rate, pitch) {
+    return "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='" +
+      EDGE_TTS.xml(lang || EDGE_TTS.langOf(voice)) + "'><voice name='" + EDGE_TTS.xml(voice) +
+      "'><prosody pitch='" + EDGE_TTS.xml(pitch || "+0Hz") + "' rate='" + EDGE_TTS.xml(rate || "+0%") +
+      "'>" + EDGE_TTS.xml(text) + "</prosody></voice></speak>";
+  },
+
+  /* base64 MP3 -> bajti hui awaaz. Blob na mile to data: URL par gir jao. */
+  playB64: function (b64, onDone, onFail) {
+    var url = "", revoke = false;
+    try {
+      if (typeof Blob === "function" && typeof URL !== "undefined" && URL.createObjectURL) {
+        url = URL.createObjectURL(new Blob([AWAAZ.b64(b64)], { type: "audio/mpeg" }));
+        revoke = true;
+      } else {
+        url = "data:audio/mpeg;base64," + String(b64 || "").replace(/\s+/g, "");
+      }
+    } catch (e) {
+      try { url = "data:audio/mpeg;base64," + String(b64 || "").replace(/\s+/g, ""); }
+      catch (e2) { onFail("DECODE"); return; }
+    }
+    if (!url) { onFail("DECODE"); return; }
+    var a;
+    try { a = new Audio(); } catch (e) { onFail("AUDIO_BLOCKED"); return; }
+    EDGE_TTS.audio = a;
+    function cleanup() {
+      if (revoke) { try { URL.revokeObjectURL(url); } catch (e) {} }
+      EDGE_TTS.audio = null;
+    }
+    a.onended = function () { cleanup(); onDone(); };
+    a.onerror = function () { cleanup(); onFail("AUDIO_BLOCKED"); };
+    a.src = url;
+    var pr;
+    try { pr = a.play(); } catch (e) { cleanup(); onFail("AUDIO_BLOCKED"); return; }
+    if (pr && pr["catch"]) pr["catch"](function () { onFail("AUDIO_BLOCKED"); });
+  },
+
+  /* Microsoft se poori live awaaz list (sirf native; koi key nahi lagti) */
+  refresh: function (cb) {
+    if (!EDGE_TTS.native() || !window.MayaBridge.edgeVoices) { if (cb) cb(null); return; }
+    var raw;
+    try { raw = window.MayaBridge.edgeVoices(); } catch (e) { if (cb) cb(null); return; }
+    try {
+      var r = JSON.parse(raw);
+      if (+r.status !== 200) { if (cb) cb(null); return; }
+      var arr = JSON.parse(r.body), out = [], i, v;
+      for (i = 0; i < arr.length; i++) {
+        v = arr[i];
+        if (!v || !v.ShortName) continue;
+        out.push({
+          id: v.ShortName,
+          label: String(v.FriendlyName || v.ShortName).replace(/^Microsoft\s+/, "").replace(/\s+Online \(Natural\)/, ""),
+          lang: v.Locale,
+          g: (String(v.Gender) === "Female" ? "f" : "m")
+        });
+      }
+      if (out.length) { EDGE_TTS.live = out; if (cb) cb(out); return; }
+    } catch (e) {}
+    if (cb) cb(null);
+  }
+};
+
+/* Kotlin ka jawab yahan girta hai: window.__edgeDone(reqId, ok, base64Mp3 | error) */
+window.__edgeDone = function (reqId, ok, payload) {
+  var p = EDGE_TTS.pend[reqId];
+  if (!p) return;                                   /* stop() ho chuka — chup raho */
+  delete EDGE_TTS.pend[reqId];
+  try { clearTimeout(p.to); } catch (e) {}
+  if (!ok) { EDGE_TTS.lastErr = String(payload || "edge nakaam"); p.fail("NETWORK"); return; }
+  EDGE_TTS.lastErr = "";
+  EDGE_TTS.playB64(payload, function () { EDGE_TTS.spoke++; p.done(); }, p.fail);
+};
+
+function edgeTTS_stop() {
+  var k;
+  for (k in EDGE_TTS.pend) {
+    if (Object.prototype.hasOwnProperty.call(EDGE_TTS.pend, k)) {
+      try { clearTimeout(EDGE_TTS.pend[k].to); } catch (e) {}
+    }
+  }
+  EDGE_TTS.pend = {};
   try {
+    if (EDGE_TTS.audio) {
+      EDGE_TTS.audio.pause();
+      EDGE_TTS.audio.onended = null; EDGE_TTS.audio.onerror = null;
+      EDGE_TTS.audio = null;
+    }
+  } catch (e) {}
+  try {
+    if (EDGE_TTS.ws) {
+      EDGE_TTS.ws.onmessage = null; EDGE_TTS.ws.onerror = null; EDGE_TTS.ws.onclose = null;
+      EDGE_TTS.ws.close(); EDGE_TTS.ws = null;
+    }
+  } catch (e) {}
+}
+
+/* ═══ WAHID DARWAZA: native pehle, browser WS sirf majboori mein ═══ */
+function edgeTTS_speak(text, voiceName, lang, rate, pitch, onDone, onFail) {
+  var voice = voiceName || EDGE_TTS.pick();
+  var ssml = EDGE_TTS.ssml(text, voice, lang || EDGE_TTS.langOf(voice), rate, pitch);
+  var fired = false;
+  function done() { if (!fired) { fired = true; onDone(); } }
+  function fail(c) { if (!fired) { fired = true; onFail(c || "NETWORK"); } }
+
+  if (EDGE_TTS.native()) {
+    EDGE_TTS.seq++;
+    var id = "e" + EDGE_TTS.seq + "_" + Date.now();
+    EDGE_TTS.pend[id] = {
+      done: done, fail: fail,
+      to: setTimeout(function () {
+        delete EDGE_TTS.pend[id];
+        EDGE_TTS.lastErr = "Edge ne waqt par jawab nahi diya";
+        fail("TIMEOUT");
+      }, EDGE_TTS.TIMEOUT)
+    };
+    try { window.MayaBridge.edgeTts(ssml, id, EDGE_TTS.TIMEOUT - 3000); }
+    catch (e) {
+      try { clearTimeout(EDGE_TTS.pend[id].to); } catch (e2) {}
+      delete EDGE_TTS.pend[id];
+      EDGE_TTS.lastErr = String(e && e.message ? e.message : e);
+      fail("BRIDGE");
+    }
+    return;
+  }
+  edgeTTS_ws(ssml, done, fail);
+}
+
+/* ─── BROWSER FALLBACK ───────────────────────────────────────────────────────
+   Sirf Microsoft Edge browser mein chalta hai. Chrome / Firefox / WebView mein
+   Microsoft handshake rad kar deta hai (custom header ja hi nahi sakta) — phir
+   bhi rakha hai taake app browser mein bhi poori koshish kare, aur nakami par
+   asal wajah EDGE_TTS.lastErr mein likh jaye. */
+async function edgeTTS_ws(ssml, onDone, onFail) {
+  try {
+    if (typeof WebSocket !== "function" || typeof crypto === "undefined" || !crypto.subtle) { onFail("MODEL"); return; }
     var sec = Math.floor(Date.now() / 1000);
     var ticks = ((sec - (sec % 300)) + 11644473600) * 1e7;
     var buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(ticks.toFixed(0) + EDGE_TTS.token));
-    var arr = new Uint8Array(buf), hex = "";
-    for (var i = 0; i < arr.length; i++) hex += (arr[i] < 16 ? "0" : "") + arr[i].toString(16);
-    var url = EDGE_TTS.wss + "?TrustedClientToken=" + EDGE_TTS.token + "&Sec-MS-GEC=" + hex.toUpperCase() + "&Sec-MS-GEC-Version=" + EDGE_TTS.ver + "&ConnectionId=" + (crypto.randomUUID ? crypto.randomUUID() : "xxxxxxxx").replace(/-/g, "");
-    var ws = new WebSocket(url); EDGE_TTS.ws = ws; var chunks = [], done = false;
-    var to = setTimeout(function() { if (!done) { done = true; try { ws.close(); } catch(e) {} onFail(); } }, 15000);
-    ws.onopen = function() {
-      var ts = new Date().toISOString();
-      ws.send("X-Timestamp:" + ts + "\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n" + JSON.stringify({context:{synthesis:{audio:{metadataoptions:{sentenceBoundaryEnabled:"false",wordBoundaryEnabled:"false"},outputFormat:"audio-24khz-48kbitrate-mono-mp3"}}}}));
-      var ssml = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='" + (lang || "en-US") + "'><voice name='" + voiceName + "'><prosody pitch='" + (pitch || "+0Hz") + "' rate='" + (rate || "+0%") + "'>" + text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;") + "</prosody></voice></speak>";
-      ws.send("X-RequestId:" + (crypto.randomUUID ? crypto.randomUUID() : "xxx").replace(/-/g, "") + "\r\nContent-Type:application/ssml+xml\r\nX-Timestamp:" + ts + "Z\r\nPath:ssml\r\n\r\n" + ssml);
+    var arr = new Uint8Array(buf), hex = "", i;
+    for (i = 0; i < arr.length; i++) hex += (arr[i] < 16 ? "0" : "") + arr[i].toString(16);
+    var cid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()) + String(Math.random())).replace(/[^a-f0-9]/g, "");
+    var url = EDGE_TTS.wss + "?TrustedClientToken=" + EDGE_TTS.token + "&Sec-MS-GEC=" + hex.toUpperCase() +
+              "&Sec-MS-GEC-Version=" + EDGE_TTS.ver + "&ConnectionId=" + cid;
+    var ws = new WebSocket(url);
+    EDGE_TTS.ws = ws;
+    var chunks = [], done = false;
+    var to = setTimeout(function () {
+      if (!done) { done = true; try { ws.close(); } catch (e) {} onFail("TIMEOUT"); }
+    }, 12000);
+    ws.onopen = function () {
+      /* Timestamp ki wahi shakl jo edge-tts bhejta hai. ssml message ke
+         timestamp par aakhir mein ek fazool "Z" lagta hai — ye Microsoft ki
+         apni aadat hai, ise hataao to server chup ho jata hai. */
+      var ts = new Date().toUTCString().replace("GMT", "GMT+0000 (Coordinated Universal Time)");
+      ws.send("X-Timestamp:" + ts + "\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n" +
+        "{\"context\":{\"synthesis\":{\"audio\":{\"metadataoptions\":{\"sentenceBoundaryEnabled\":\"false\",\"wordBoundaryEnabled\":\"false\"},\"outputFormat\":\"audio-24khz-48kbitrate-mono-mp3\"}}}}\r\n");
+      ws.send("X-RequestId:" + cid + "\r\nContent-Type:application/ssml+xml\r\nX-Timestamp:" + ts + "Z\r\nPath:ssml\r\n\r\n" + ssml);
     };
-    ws.onmessage = function(ev) {
+    ws.onmessage = function (ev) {
       if (done) return;
-      if (typeof ev.data === "string" && ev.data.indexOf("Path:turn.end") >= 0) {
-        done = true; clearTimeout(to); try { ws.close(); } catch(e) {}
-        if (!chunks.length) { onFail(); return; }
-        var blob = new Blob(chunks, {type:"audio/mpeg"});
-        var a = new Audio(URL.createObjectURL(blob)); EDGE_TTS.audio = a;
-        a.onended = function() { edgeTTS_stop(); onDone(); };
-        a.onerror = function() { edgeTTS_stop(); onFail(); };
-        a.play().catch(function() { edgeTTS_stop(); onFail(); });
+      if (typeof ev.data === "string") {
+        if (ev.data.indexOf("Path:turn.end") >= 0) {
+          done = true; clearTimeout(to);
+          try { ws.close(); } catch (e) {}
+          EDGE_TTS.ws = null;
+          if (!chunks.length) { onFail("NO_AUDIO"); return; }
+          var b, a2;
+          try { b = new Blob(chunks, { type: "audio/mpeg" }); a2 = new Audio(URL.createObjectURL(b)); }
+          catch (e) { onFail("DECODE"); return; }
+          EDGE_TTS.audio = a2;
+          a2.onended = function () { EDGE_TTS.audio = null; EDGE_TTS.spoke++; onDone(); };
+          a2.onerror = function () { EDGE_TTS.audio = null; onFail("AUDIO_BLOCKED"); };
+          var pp;
+          try { pp = a2.play(); } catch (e) { onFail("AUDIO_BLOCKED"); return; }
+          if (pp && pp["catch"]) pp["catch"](function () { onFail("AUDIO_BLOCKED"); });
+        }
       } else if (ev.data && ev.data.arrayBuffer) {
-        ev.data.arrayBuffer().then(function(ab) { if (ab.byteLength > 4) { var hlen = new DataView(ab).getUint16(0); if (ab.byteLength > hlen + 2) chunks.push(ab.slice(hlen + 2)); } });
+        ev.data.arrayBuffer().then(function (ab) {
+          if (ab.byteLength > 2) {
+            var hlen = new DataView(ab).getUint16(0);
+            if (ab.byteLength > hlen + 2) chunks.push(ab.slice(hlen + 2));
+          }
+        });
       }
     };
-    ws.onerror = function() { if (!done) { done = true; clearTimeout(to); onFail(); } };
-    ws.onclose = function() { if (!done) { done = true; clearTimeout(to); onFail(); } };
-  } catch(e) { onFail(); }
+    ws.onerror = function () {
+      if (!done) { done = true; clearTimeout(to); EDGE_TTS.lastErr = "browser ka WebSocket custom header nahi bhej sakta"; onFail("NETWORK"); }
+    };
+    ws.onclose = function () {
+      if (!done) { done = true; clearTimeout(to); EDGE_TTS.lastErr = "browser ka WebSocket custom header nahi bhej sakta"; onFail("NETWORK"); }
+    };
+  } catch (e) { onFail("NETWORK"); }
 }
 
 /* ---------- PUBLIC API: poori app sirf isi se bolti hai ---------- */
@@ -3280,9 +3599,9 @@ async function resolveModels(){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v4.6.0)
+   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v4.7.0)
    ---------------------------------------------------------------------------
-   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v4.6.0 se pehle Groq
+   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v4.7.0 se pehle Groq
    ne 16 August 2026 ko apne purane Llama 3.x models band kar diye the — hamara
    default wahi tha, is liye "backup brain bhi thak gaya" aata tha.
 
@@ -3580,7 +3899,7 @@ window.__httpDone = function (id, status, b64) {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v4.6.0)
+   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v4.7.0)
    ---------------------------------------------------------------------------
    Purane code ke 3 asli bugs jinki wajah se "Sab free brains busy" bar bar aata tha:
 
@@ -4412,7 +4731,7 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 
 /* ---------- SETTINGS TAB ---------- */
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v4.6.0)
+   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v4.7.0)
    ---------------------------------------------------------------------------
    Purana bug (user ne pakda): "girlfriend mode on karta hun, groq key lagata
    hun — thori der baad wo option khud band ho jata hai."
@@ -4462,7 +4781,8 @@ var SET_FIELDS = [
   { id: "sGVoice",      key: "gVoice",        t: "sel",   def: "Kore" },
   { id: "sVoiceMood",   key: "voiceMood",     t: "sel",   def: "auto" },
   { id: "sNeuralWifi",  key: "neuralWifiOnly", t: "check", def: false },
-  { id: "sEdgeTts",     key: "edgeTTS",       t: "check", def: false },
+  { id: "sEdgeTts",     key: "edgeTTS",       t: "check", def: true },
+  { id: "sEdgeVoice",   key: "edgeVoice",     t: "sel",   def: "" },
   { id: "sStt",         key: "stt",           t: "sel",   def: "ur-PK" },
   { id: "sTts",         key: "tts",           t: "sel",   def: "ur-PK" },
   { id: "sRate",        key: "rate",          t: "num",   def: 1,    out: "rateVal",  dp: 2 },
@@ -4638,6 +4958,51 @@ function refreshHandsFreeStatus(){
   try { $("#batStatus").textContent = "Status: " + (window.MayaBridge.batteryUnrestricted() ? "✅ SHIELDED (unrestricted)" : "⚠️ NOT shielded — button dabao"); } catch(e){}
   try { $("#asStatus").textContent = "Status: " + (window.MayaBridge.accessibilityEnabled() ? "✅ AUTO-SEND ON" : "OFF — button dabao aur MAYA AutoSend ON karo"); } catch(e){}
 }
+/* ═══ 🌊 EDGE AWAAZ SUNO — sunata bhi hai, sach bhi batata hai ═══ */
+(function(){
+  var eb = $("#edgeTest");
+  if (!eb) return;
+  eb.addEventListener("click", function () {
+    if (eb.disabled) return;
+    var h = $("#edgeHint");
+    var v = EDGE_TTS.pick();
+    if (!EDGE_TTS.native() && (!settings || settings.voiceEngine !== "edge")) {
+      if (h) { h.className = "ui-hint warn"; h.textContent = "⚠️ Edge TTS sirf APK mein chalti hai (browser custom WebSocket header nahi bhej sakta). Awaaz Engine ko '🌊 Sirf Edge TTS' karo to browser mein bhi koshish hogi."; }
+      toast("🌊 Edge TTS sirf APK mein");
+      return;
+    }
+    eb.disabled = true;
+    var old = eb.textContent;
+    eb.textContent = "🌊 AA RAHI HAI…";
+    if (h) { h.className = "ui-hint"; h.textContent = "🌊 " + v + " se awaaz mangwai ja rahi hai…"; }
+    var t0 = Date.now();
+    AWAAZ.stop(); AWAAZ.gen++;
+    var gen = AWAAZ.gen;
+    var sample = "Assalam-o-alaikum " + ((settings && settings.name) || "Boss") + "! Main " +
+                 ((settings && settings.assistName) || "Maya") +
+                 " hoon. Ye Edge TTS ki awaaz hai — bilkul muft, aur is ki koi rozana hadd nahi.";
+    speaking = true; setOrb("speaking");
+    edgeTTS_speak(sample, v, EDGE_TTS.langOf(v),
+      EDGE_TTS.rateStr(settings && settings.rate), EDGE_TTS.pitchStr(settings && settings.pitch),
+      function () {
+        speaking = false; setOrb("idle");
+        eb.disabled = false; eb.textContent = old;
+        if (gen !== AWAAZ.gen) return;
+        if (h) { h.className = "ui-hint ok"; h.textContent = "✅ Bol diya — " + v + "  •  " + ((Date.now() - t0) / 1000).toFixed(1) + " sec  •  koi key nahi lagi"; }
+        pushLog("EDGE TTS OK: " + v + " (" + (Date.now() - t0) + "ms)");
+        edgePaintHint();
+      },
+      function (code) {
+        speaking = false; setOrb("idle");
+        eb.disabled = false; eb.textContent = old;
+        if (gen !== AWAAZ.gen) return;
+        var why = AWAAZ.why(code) || code;
+        if (h) { h.className = "ui-hint warn"; h.textContent = "❌ " + code + " — " + why + (EDGE_TTS.lastErr ? ("\n↳ " + EDGE_TTS.lastErr) : ""); }
+        pushLog("EDGE TTS FAIL: " + code + " — " + (EDGE_TTS.lastErr || why));
+      });
+  });
+})();
+
 (function(){
   var db = $("#awaazDoctor");
   if (db) db.addEventListener("click", function(){
@@ -4790,7 +5155,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v4.6.0 — DOCTOR REPORT");
+  out.push("MAYA v4.7.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
@@ -4918,6 +5283,42 @@ function awaazFillSelects(){
       o.value = VOICE_MOODS[i].id; o.textContent = VOICE_MOODS[i].label;
       ms.appendChild(o);
     }
+  }
+  edgeFillVoices();
+}
+
+/* 🌊 EDGE ka awaaz-picker. "auto" pehle — zubaan/persona dekh kar khud chunta hai. */
+function edgeFillVoices(){
+  var es = $("#sEdgeVoice"), i, o, L;
+  if (!es || typeof EDGE_TTS !== "object" || !EDGE_TTS) return;
+  var keep = es.value || (typeof settings === "object" && settings ? (settings.edgeVoice || "") : "");
+  L = EDGE_TTS.live || EDGE_TTS.VOICES;
+  es.innerHTML = "";
+  o = document.createElement("option");
+  o.value = ""; o.textContent = "🪄 Auto — zubaan aur persona ke hisaab se";
+  es.appendChild(o);
+  for (i = 0; i < L.length; i++) {
+    o = document.createElement("option");
+    o.value = L[i].id;
+    o.textContent = L[i].label + "   (" + L[i].id + ")";
+    es.appendChild(o);
+  }
+  es.value = keep;
+  if (es.value !== keep) es.value = "";
+  edgePaintHint();
+}
+
+/* Sach bolne wala hint — jhoothi tasalli nahi */
+function edgePaintHint(){
+  var h = $("#edgeHint");
+  if (!h || typeof EDGE_TTS !== "object" || !EDGE_TTS) return;
+  var v = EDGE_TTS.pick();
+  if (EDGE_TTS.native()) {
+    h.className = "ui-hint ok";
+    h.textContent = "✅ Chalne ko tayyar — abhi: " + v + (EDGE_TTS.spoke ? ("  •  " + EDGE_TTS.spoke + " dafa bol chuki") : "") + "  •  koi key nahi, koi hadd nahi";
+  } else {
+    h.className = "ui-hint warn";
+    h.textContent = "⚠️ Sirf APK mein chalti hai — browser ka WebSocket Microsoft ke zaroori headers nahi bhej sakta. Abhi ki pasand: " + v;
   }
 }
 /* ---------- BRAIN POOL ka live naqsha ---------- */
@@ -5254,7 +5655,7 @@ document.querySelectorAll(".setgrp-head").forEach(function(h){
   h.addEventListener("click", function(){ h.parentElement.classList.toggle("open"); });
 });
 
-/* NOTE: loadV4Form / doosra saveSettings handler v4.6.0 mein khatam.
+/* NOTE: loadV4Form / doosra saveSettings handler v4.7.0 mein khatam.
    Ab SETFORM (upar) hi settings ka wahid darwaza hai — dekho SET_FIELDS.
    Sliders live update karte hain, baqi sab SAVE par ek hi tarteeb se. */
 try { $("#sRadius").addEventListener("input", function(){ $("#radiusVal").textContent = this.value; settings.radius = parseInt(this.value,10) || 18; saveSettings(); applyTheme(); }); } catch(e){}
@@ -5345,8 +5746,8 @@ function startProactive(){
 
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
-try { $("#hudBuild").textContent = "v4.6.0"; } catch(e){}
-try { pushLog("MAYA v4.6.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
+try { $("#hudBuild").textContent = "v4.7.0"; } catch(e){}
+try { pushLog("MAYA v4.7.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
 
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD" runtime   (v4.1.0)
@@ -5605,7 +6006,7 @@ var MayaUI = (function () {
     for (i = 0; i < reopen.length; i++) delCls(reopen[i], "is-open");
 
     var out = [];
-    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v4.6.0");
+    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v4.7.0");
     out.push("WEBVIEW: Chrome " + (window.__webviewMajor || "?") + (window.__oldWebview ? " (PURANA)" : ""));
     out.push("");
     out.push("VISIBLE: " + okc + "   INVISIBLE: " + bad + (bad ? "  \u274C" : "  \u2705"));

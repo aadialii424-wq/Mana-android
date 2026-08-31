@@ -210,7 +210,13 @@ setTimeout(function () {
   is(vm && vm.options.length >= 9, 'mood picker bhar gaya', vm ? vm.options.length + ' options' : 'select hi nahi');
   is(gv && gv.value === 'Kore', 'settings ki chuni hui awaaz select par lagi', gv && gv.value);
   var eng = doc.getElementById('sVoiceEngine');
-  is(eng && eng.options.length === 4, 'engine ke 4 mode', eng ? eng.options.length + '' : '-');
+  is(eng && eng.options.length === 5, 'engine ke 5 mode (auto/neural/edge/device/off)', eng ? eng.options.length + '' : '-');
+  var engVals = eng ? Array.prototype.map.call(eng.options, function (o) { return o.value; }).join(',') : '';
+  is(engVals === 'auto,neural,edge,device,off', 'edge mode picker mein maujood hai', engVals);
+  var ev = doc.getElementById('sEdgeVoice');
+  is(!!ev && ev.options.length > 5, 'Edge awaaz picker bhar gaya', ev ? ev.options.length + ' options' : 'nadarad');
+  is(!!ev && ev.options[0].value === '', 'Edge picker ka pehla option Auto hai', ev ? ev.options[0].textContent.slice(0, 24) : '-');
+  is(!!doc.getElementById('edgeTest'), 'EDGE AWAAZ SUNO button maujood', 'button');
   is(eng && eng.value === (win.settings.voiceEngine || 'auto'), 'engine mode form par load hua', eng && eng.value);
   try { win.loadSettingsForm(); } catch (e) {}
   is(gv && gv.options.length === 30, 'dobara load par options duplicate nahi hote', gv ? gv.options.length + '' : '-');

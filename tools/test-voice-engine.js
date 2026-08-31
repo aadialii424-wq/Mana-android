@@ -29,6 +29,12 @@ const B = HTML.indexOf('function geminiTTS_stop()');
 if (A < 0 || B < 0 || B < A) { console.error('AWAAZ engine source nahi mila — index.html badal gaya?'); process.exit(1); }
 const ENGINE = HTML.slice(A, B);
 
+/* 🌊 EDGE TTS ka hissa alag hai (geminiTTS_stop ke baad shuru hota hai) */
+const EA = HTML.indexOf('var EDGE_TTS = {');
+const EB = HTML.indexOf('/* ---------- PUBLIC API: poori app sirf isi se bolti hai ---------- */');
+if (EA < 0 || EB < 0 || EB < EA) { console.error('EDGE TTS source nahi mila — index.html badal gaya?'); process.exit(1); }
+const EDGE = HTML.slice(EA, EB);
+
 /* ─────────────── naqli duniya ─────────────── */
 function makeWorld(opts = {}) {
   const dom = new JSDOM('<!doctype html><body></body>', { runScripts: 'dangerously', url: 'https://appassets.androidplatform.net/' });
@@ -52,7 +58,8 @@ function makeWorld(opts = {}) {
     tts: 'ur-PK', rate: 1, pitch: 1.05, voiceName: '', name: 'Boss'
   }, opts.settings || {});
 
-  w.NATIVE = false;
+  w.NATIVE = !!opts.native;
+  if (opts.bridge) w.MayaBridge = opts.bridge;
   w.pushLog = (m) => state.logs.push(m);
   w.paintAwaaz = () => {};
   w.pickVoice = () => null;
@@ -117,7 +124,8 @@ function makeWorld(opts = {}) {
   };
 
   w.eval(ENGINE);
-  return { w, state, AWAAZ: w.AWAAZ };
+  w.eval(EDGE);          /* 🌊 Edge TTS — asli app jaisa, alag se nahi */
+  return { w, state, AWAAZ: w.AWAAZ, EDGE_TTS: w.EDGE_TTS };
 }
 
 /* 24 kHz mono s16le ke 100 samples */
@@ -560,6 +568,247 @@ const u16 = (b, o) => b[o] | (b[o + 1] << 8);
     is(/window\.__nativeTtsDone = function \(\) \{ try \{ if \(AWAAZ\.deviceDone\)/.test(src), 'Kotlin ka TTS-done callback engine se juda hai');
     is(/if \(e\.cancelable && e\.preventDefault\)/.test(src), 'touchmove par cancelable guard laga (console warning fix)');
     is(/data-say/.test(src) && /say-btn/.test(src), 'har jawab par 🔊 replay button maujood');
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     17. 🌊 EDGE TTS — MUFT, BE-HISAAB, ASLI URDU AWAAZ  (v4.7.0)
+     -----------------------------------------------------------------------
+     Purana Edge code JS ke `new WebSocket()` par khara tha, aur wo API
+     custom headers (Origin / User-Agent / Pragma) bhej hi nahi sakti —
+     is liye Microsoft handshake rad kar deta tha aur Edge kabhi nahi bola.
+     Ab WebSocket Kotlin mein hai. Ye section us naye raaste ka saboot hai.
+     ═══════════════════════════════════════════════════════════════════════ */
+  head('17. 🌊 EDGE TTS — muft, be-hisaab (Kotlin bridge)');
+  {
+    /* naqli MP3 (asli bytes ka header) */
+    const MP3 = Buffer.from([0xFF, 0xFB, 0x90, 0x64, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66]);
+    const MP3B64 = MP3.toString('base64');
+
+    function edgeWorld(opts = {}) {
+      const bridge = { calls: [], fail: opts.bridgeFail || null, delay: opts.delay == null ? 1 : opts.delay };
+      const world = makeWorld({
+        native: opts.native !== false,
+        respond: opts.respond,
+        bridge,
+        settings: Object.assign({ edgeTTS: true }, opts.settings || {})
+      });
+      const w = world.w;
+      bridge.edgeTts = function (ssml, reqId, timeoutMs) {
+        bridge.calls.push({ ssml, reqId, timeoutMs });
+        if (opts.silent) return;                       /* jawab hi na aaye (timeout ka test) */
+        setTimeout(function () {
+          if (bridge.fail) w.__edgeDone(reqId, false, bridge.fail);
+          else w.__edgeDone(reqId, true, opts.mp3 === undefined ? MP3B64 : opts.mp3);
+        }, bridge.delay);
+      };
+      bridge.edgeVoices = function () { return opts.voicesJson || ''; };
+      return Object.assign(world, { bridge, MP3, MP3B64 });
+    }
+
+    /* ── 17a. Awaaz ki fehrist ── */
+    {
+      const { EDGE_TTS } = edgeWorld();
+      const ids = EDGE_TTS.VOICES.map(v => v.id);
+      is(ids.indexOf('ur-PK-UzmaNeural') >= 0 && ids.indexOf('ur-PK-AsadNeural') >= 0,
+        'ASLI Pakistani Urdu awaazein maujood (Uzma + Asad)', ids.length + ' awaazein');
+      is(EDGE_TTS.VOICES.every(v => /^[a-z]{2}-[A-Za-z]{2,4}-[A-Za-z]+Neural$/.test(v.id)),
+        'har voice id ka format Microsoft wala hai');
+      is(EDGE_TTS.VOICES.every(v => v.lang && (v.g === 'f' || v.g === 'm') && v.label),
+        'har awaaz ke sath zubaan, gender aur naam hai');
+      is(EDGE_TTS.langOf('ur-PK-UzmaNeural') === 'ur-PK' && EDGE_TTS.langOf('hi-IN-SwaraNeural') === 'hi-IN',
+        'voice id se zubaan nikal aati hai');
+    }
+
+    /* ── 17b. Kaunsi awaaz chuni jaye ── */
+    {
+      is(edgeWorld().EDGE_TTS.pick() === 'ur-PK-UzmaNeural',
+        'default: Urdu (Pakistan) ki zanana awaaz — Maya larki hai');
+      is(edgeWorld({ settings: { persona: 'jarvis' } }).EDGE_TTS.pick() === 'ur-PK-AsadNeural',
+        'Jarvis persona par mardana Urdu awaaz');
+      is(edgeWorld({ settings: { tts: 'hi-IN' } }).EDGE_TTS.pick() === 'hi-IN-SwaraNeural',
+        'Hindi chuni to Hindi awaaz');
+      is(edgeWorld({ settings: { tts: 'en-IN' } }).EDGE_TTS.pick() === 'en-IN-NeerjaNeural',
+        'English (India) chuni to Neerja');
+      is(edgeWorld({ settings: { edgeVoice: 'ur-IN-GulNeural', tts: 'hi-IN' } }).EDGE_TTS.pick() === 'ur-IN-GulNeural',
+        'user ki apni pasand sab par bhaari hai');
+      is(edgeWorld({ settings: { tts: 'fr-FR' } }).EDGE_TTS.pick() === 'ur-PK-UzmaNeural',
+        'anjaan zubaan par bhi khamoshi nahi — Uzma par gir jata hai');
+      is(edgeWorld({ settings: { edgeVoice: 'nonsense-value' } }).EDGE_TTS.pick() === 'ur-PK-UzmaNeural',
+        'bekaar voice setting rad ho kar sahi awaaz par jati hai');
+    }
+
+    /* ── 17c. Raftaar aur sur ── */
+    {
+      const { EDGE_TTS } = edgeWorld();
+      is(EDGE_TTS.rateStr(1) === '+0%' && EDGE_TTS.rateStr(1.2) === '+20%' && EDGE_TTS.rateStr(0.8) === '-20%',
+        'rate settings se Edge ki shakl mein badla', EDGE_TTS.rateStr(1.2));
+      is(EDGE_TTS.rateStr(9) === '+100%' && EDGE_TTS.rateStr(0) === '+0%',
+        'rate Edge ki hadd se bahar nahi ja sakta', EDGE_TTS.rateStr(9));
+      is(EDGE_TTS.pitchStr(1.05) === '+3Hz' && EDGE_TTS.pitchStr(1) === '+0Hz' && EDGE_TTS.pitchStr(0.9) === '-5Hz',
+        'pitch bhi sahi shakl mein (Maya ka default 1.05 = +3Hz)', EDGE_TTS.pitchStr(1.05));
+      is(EDGE_TTS.pitchStr(5) === '+50Hz' && EDGE_TTS.pitchStr(0) === '+0Hz',
+        'pitch bhi hadd ke andar rehta hai', EDGE_TTS.pitchStr(5));
+    }
+
+    /* ── 17d. SSML — aur injection ka darwaza band ── */
+    {
+      const { EDGE_TTS } = edgeWorld();
+      const x = EDGE_TTS.ssml('Salam', 'ur-PK-UzmaNeural', 'ur-PK', '+8%', '+2Hz');
+      is(x.indexOf("<voice name='ur-PK-UzmaNeural'>") > 0, 'SSML mein sahi awaaz ka naam');
+      is(x.indexOf("xml:lang='ur-PK'") > 0, 'SSML mein sahi zubaan');
+      is(x.indexOf("pitch='+2Hz' rate='+8%'") > 0, 'SSML mein prosody', 'pitch+rate');
+      const bad = EDGE_TTS.ssml("5 < 6 & Ali's \"kaam\" > sab", 'ur-PK-UzmaNeural');
+      is(bad.indexOf('&lt;') > 0 && bad.indexOf('&amp;') > 0 && bad.indexOf('&apos;') > 0 && bad.indexOf('&quot;') > 0,
+        'matn ka har khatarnak nishan escape hua (XML injection band)');
+      is((bad.match(/<voice/g) || []).length === 1 && (bad.match(/<\/speak>/g) || []).length === 1,
+        'matn SSML ka dhancha nahi tor sakta');
+      is(EDGE_TTS.ssml('hi', 'ur-PK-UzmaNeural').indexOf("xml:lang='ur-PK'") > 0,
+        'zubaan na di jaye to voice se khud nikal aati hai');
+    }
+
+    /* ── 17e. NATIVE BRIDGE — asal fix ── */
+    {
+      const { w, bridge, state, EDGE_TTS } = edgeWorld();
+      let ok = 0, bad = 0;
+      w.edgeTTS_speak('Assalam o alaikum', 'ur-PK-UzmaNeural', 'ur-PK', '+0%', '+0Hz',
+        () => ok++, () => bad++);
+      is(bridge.calls.length === 1, 'native maujood ho to KOTLIN bridge chala (browser WebSocket nahi)');
+      is(/^<speak /.test(bridge.calls[0].ssml) && bridge.calls[0].ssml.indexOf('Assalam o alaikum') > 0,
+        'bridge ko poora tayyar SSML gaya');
+      is(typeof bridge.calls[0].reqId === 'string' && bridge.calls[0].reqId.length > 3,
+        'har request ka apna id (jawab ghalat jagah na gire)', bridge.calls[0].reqId);
+      is(bridge.calls[0].timeoutMs > 0 && bridge.calls[0].timeoutMs < EDGE_TTS.TIMEOUT,
+        'native ka timeout JS se chhota hai (JS aakhri pehredaar rahe)', bridge.calls[0].timeoutMs + 'ms');
+      await wait(20);
+      is(ok === 1 && bad === 0, 'awaaz aa gayi aur onDone chala', 'ok=' + ok);
+      is(state.played.length === 1, 'audio sach much baji', state.played[0]);
+      const b = state.blobs[state.blobs.length - 1];
+      is(b && b.type === 'audio/mpeg', 'blob MP3 hai (Gemini wali raw PCM nahi)', b ? b.type : '-');
+      const bytes = await bytesOf(b.blob);
+      is(bytes.length === 10 && bytes[0] === 0xFF && bytes[1] === 0xFB,
+        'Kotlin ke bheje hue thek wohi bytes baje', bytes.length + ' bytes');
+      is(EDGE_TTS.spoke === 1, 'Edge ka counter barha (status sach bole)');
+    }
+
+    /* ── 17f. Nakami par sach ── */
+    {
+      const { w, EDGE_TTS } = edgeWorld({ bridgeFail: 'Edge ne handshake mana kiya: HTTP/1.1 403 Forbidden' });
+      let code = '';
+      w.edgeTTS_speak('test', 'ur-PK-UzmaNeural', 'ur-PK', '+0%', '+0Hz', () => {}, (c) => { code = c; });
+      await wait(20);
+      is(code === 'NETWORK', 'nakami chup-chaap nahi — code aaya', code);
+      is(EDGE_TTS.lastErr.indexOf('403') > 0,
+        'Microsoft ki ASAL ghalati mehfooz hai (andaza nahi)', EDGE_TTS.lastErr);
+    }
+
+    /* ── 17g. Do dafa jawab / stop ke baad jawab ── */
+    {
+      const { w } = edgeWorld();
+      let ok = 0;
+      w.edgeTTS_speak('test', 'ur-PK-UzmaNeural', 'ur-PK', '+0%', '+0Hz', () => ok++, () => {});
+      await wait(20);
+      const id = Object.keys(w.EDGE_TTS.pend);
+      w.__edgeDone('e1_' + Date.now(), true, 'AAAA');   /* anjaan id */
+      await wait(10);
+      is(ok === 1 && id.length === 0, 'ek request = ek jawab (dohra callback nahi)', 'ok=' + ok);
+    }
+    {
+      const { w, state, bridge } = edgeWorld({ delay: 30 });
+      let ok = 0, bad = 0;
+      w.edgeTTS_speak('test', 'ur-PK-UzmaNeural', 'ur-PK', '+0%', '+0Hz', () => ok++, () => bad++);
+      w.edgeTTS_stop();                                  /* user ne rok diya */
+      await wait(60);
+      is(ok === 0 && bad === 0 && state.played.length === 0,
+        'stop() ke baad aayi hui awaaz chup rehti hai', 'played=' + state.played.length);
+    }
+
+    /* ── 17h. Browser mein Edge sach bolta hai (jhooti koshish nahi) ── */
+    {
+      const world = makeWorld({ native: false, settings: { edgeTTS: true } });
+      is(world.AWAAZ.edgeReady() === false,
+        'bridge na ho to Edge khud ko tayyar nahi kehta (waqt zaya nahi hota)');
+      const w2 = makeWorld({ native: false, settings: { edgeTTS: true, voiceEngine: 'edge' } });
+      is(w2.AWAAZ.edgeReady() === true,
+        'browser mein bhi jab user khud "Sirf Edge" chune to koshish hoti hai');
+      delete w2.w.WebSocket;
+      let code = '';
+      w2.w.edgeTTS_speak('t', 'ur-PK-UzmaNeural', 'ur-PK', '+0%', '+0Hz', () => {}, (c) => { code = c; });
+      await wait(10);
+      is(code === 'MODEL', 'WebSocket hi na ho to foran sach bata deta hai', code);
+    }
+
+    /* ── 17i. SEERHI — Edge ab muft-neural se PEHLE ── */
+    {
+      const { AWAAZ, bridge, state } = edgeWorld({ settings: { apikey: '', ttsKey: '' } });
+      const seen = [];
+      AWAAZ.speak('Gemini key hi nahi hai', { onStart: (e) => seen.push(e) });
+      await wait(30);
+      is(seen[0] === 'edge', 'Gemini na ho to seedha EDGE bolta hai (robot nahi)', seen.join('>'));
+      is(bridge.calls.length === 1, 'Edge ko sach much bheja gaya');
+      is(state.freecalls.length === 0, 'Edge chal gaya to Pollinations ko takleef nahi di');
+    }
+    {
+      const { AWAAZ, bridge, state } = edgeWorld({
+        settings: { voiceEngine: 'edge', apikey: 'KEY-123' }
+      });
+      const seen = [];
+      AWAAZ.speak('sirf edge', { onStart: (e) => seen.push(e) });
+      await wait(30);
+      is(seen.join('>') === 'edge', 'mode "edge" par sirf Edge bola', seen.join('>'));
+      is(state.gcalls.length === 0, 'mode "edge" par Gemini ka quota bilkul nahi jala', state.gcalls.length + ' Google calls');
+      is(bridge.calls.length === 1, 'Edge ne kaam kiya');
+    }
+    {
+      const { AWAAZ, bridge, state } = edgeWorld({
+        bridgeFail: 'net down', settings: { apikey: '', ttsKey: '' }
+      });
+      const seen = [];
+      AWAAZ.speak('edge bhi mar gaya', { onStart: (e) => seen.push(e) });
+      await wait(40);
+      is(seen[0] === 'edge' && seen[1] === 'free',
+        'Edge nakaam ho to muft neural par jata hai (khamoshi kabhi nahi)', seen.join('>'));
+      is(bridge.calls.length === 1 && state.freecalls.length === 1, 'dono tehon ne apna kaam kiya');
+    }
+    {
+      const { AWAAZ, bridge } = edgeWorld({
+        settings: { edgeTTS: false, apikey: '', ttsKey: '' }
+      });
+      const seen = [];
+      AWAAZ.speak('edge band hai', { onStart: (e) => seen.push(e) });
+      await wait(30);
+      is(seen[0] === 'free' && bridge.calls.length === 0,
+        'switch OFF ho to Edge ko chhua bhi nahi jata', seen.join('>'));
+    }
+
+    /* ── 17j. STATUS — Doctor ke liye sach ── */
+    {
+      const st = edgeWorld().AWAAZ.status();
+      is(st.edgeOn === true && st.edgeReady === true && st.edgeNative === true,
+        'status Edge ka sach bolta hai (on / tayyar / native)');
+      is(st.edgeVoice === 'ur-PK-UzmaNeural', 'status batata hai kaunsi Edge awaaz chalegi', st.edgeVoice);
+      const st2 = makeWorld({ native: false }).AWAAZ.status();
+      is(st2.edgeReady === false && st2.edgeNative === false,
+        'browser mein status jhooti tasalli nahi deta');
+    }
+
+    /* ── 17k. Purana toota hua raasta wapas na aaye ── */
+    {
+      const src = HTML;
+      is(/if \(EDGE_TTS\.native\(\)\)[\s\S]{0,400}MayaBridge\.edgeTts\(/.test(src),
+        'edgeTTS_speak ab BRIDGE-FIRST hai (yehi asal fix hai)');
+      is(src.indexOf('window.__edgeDone') > 0, 'Kotlin ka jawab lene wala darwaza maujood');
+      is(/fun edgeTts\(/.test(fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8')),
+        'Kotlin side par edgeTts bridge sach much likha hai');
+      const KT = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8');
+      is(KT.indexOf('chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold') > 0,
+        'Kotlin wahi Origin header bhejta hai jo Microsoft maangta hai');
+      is(/Sec-WebSocket-Version: 13/.test(KT) && /Sec-MS-GEC=/.test(KT),
+        'handshake ke dono zaroori tukre maujood (yehi browser nahi bhej sakta)');
+      is(/ticks -= ticks % 300\.0/.test(KT) && /11644473600/.test(KT) && /SHA-256/.test(KT),
+        'DRM token ka hisab edge-tts wala hi hai (5 min block + windows epoch)');
+      is(/0x80 or opcode/.test(KT) && /mask\[i % 4\]/.test(KT),
+        'client frames par mask lagta hai (RFC-6455 ki lazmi shart)');
+    }
   }
 
   console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');
