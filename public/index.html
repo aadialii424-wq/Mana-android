@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icons/icon-192.svg">
 <title>MAYA — Personal AI v4</title>
 <style>
-/* ================= MAYA v4.0 — DESIGN SYSTEM (video-matched) =================
+/* ================= MAYA v4.0.1 — DESIGN SYSTEM (video-matched + old-WebView compat) =================
    Midnight Obsidian default • orange accent • theme engine • radius/font sliders */
 :root{
   /* new tokens */
@@ -44,6 +44,7 @@ html{font-size:calc(16px * var(--fs))}
 html,body{height:100%}
 body{
   margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background-color:var(--bg); /* v4.0.1: old WebView — color-mix fail ho to bhi dark bg (blank-screen fix) */
   background:
     radial-gradient(900px 420px at 50% -8%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 62%),
     var(--bg);
@@ -63,7 +64,9 @@ button{font-family:inherit}
 
 /* ============ SPLASH ============ */
 #splash{
-  position:fixed; inset:0; z-index:60; background:
+  position:fixed; inset:0; z-index:60;
+  background-color:var(--bg); /* v4.0.1: old WebView fallback — color-mix fail ho to dark splash */
+  background:
     radial-gradient(700px 400px at 50% 35%, color-mix(in srgb,var(--accent) 14%,transparent), transparent 70%),
     var(--bg);
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
@@ -313,6 +316,26 @@ nav button.active{color:var(--accent2);background:color-mix(in srgb,var(--accent
   background:var(--panel2);border:1px solid var(--line);color:var(--text0);border-radius:999px;
   padding:10px 18px;font-size:12px;opacity:0;pointer-events:none;transition:.3s;max-width:86vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ================= v4.0.1 — OLD-WEBVIEW COMPAT (Chrome < 87) =================
+   `inset` property purane Android System WebView par ignore hoti hai -> splash
+   screen cover nahi karta, tabs ka size zero, drawer ghalat -> "blank app".
+   Neeche explicit top/right/bottom/left equivalents (modern WebView par bhi
+   same value, is liye harmless). */
+#edgeGlow{top:0;left:0;right:0;bottom:0}
+#edgeGlow::before{top:-35vmax;right:-35vmax;bottom:-35vmax;left:-35vmax}
+#edgeGlow::after{top:0;left:0;right:0;bottom:0}
+#splash{top:0;left:0;right:0;bottom:0;width:100%;height:100%}
+.sring div{top:0;left:0;right:0;bottom:0}
+.sring .r2{top:14px;right:14px;bottom:14px;left:14px}
+.sring .r3{top:28px;right:28px;bottom:28px;left:28px}
+.tab{top:0;left:0;right:0;bottom:0}
+#orb::before{top:-8px;right:-8px;bottom:-8px;left:-8px}
+#orb::after{top:-2px;right:-2px;bottom:-2px;left:-2px}
+.switch i{top:0;left:0;right:0;bottom:0}
+.char-glow{top:-16px;right:-16px;bottom:-16px;left:-16px}
+#drawer{top:0;bottom:0;left:0;right:auto;width:78vw;max-width:300px}
+#drawerScrim{top:0;left:0;right:0;bottom:0}
 </style>
 </head>
 <body>
@@ -322,7 +345,7 @@ nav button.active{color:var(--accent2);background:color-mix(in srgb,var(--accent
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v4.0.0 — OBSIDIAN — PERSONAS • THEMES • MEMORY</div>
+  <div class="ver">v4.0.1 — OBSIDIAN — WEBVIEW COMPAT • PERSONAS • THEMES</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -347,14 +370,14 @@ nav button.active{color:var(--accent2);background:color-mix(in srgb,var(--accent
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v4.0.0 • 0-BUDGET • FREE</div>
+  <div class="dfoot">MAYA v4.0.1 • 0-BUDGET • WEBVIEW COMPAT</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.0 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.0.1 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -515,7 +538,7 @@ nav button.active{color:var(--accent2);background:color-mix(in srgb,var(--accent
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.0.1</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -717,7 +740,7 @@ nav button.active{color:var(--accent2);background:color-mix(in srgb,var(--accent
       </div>
 
       <button class="save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v4.0.0 — OBSIDIAN EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v4.0.1 — OBSIDIAN EDITION • WEBVIEW COMPAT • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -732,7 +755,7 @@ nav button.active{color:var(--accent2);background:color-mix(in srgb,var(--accent
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.0 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.0.1 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -746,6 +769,12 @@ window.__consoleErr = function(m){
    Agar main app script crash ho jaye to error screen par dikhta hai + FORCE ENTRY milti hai */
 window.__mayaErr = null;
 window.__mayaJSOK = false;
+/* v4.0.1: WebView ke Chrome major version ka detect — old WebView = inset/color-mix support nahi */
+window.__webviewMajor = (function(){
+  var m = String(navigator.userAgent || "").match(/Chrome\/(\d+)\./);
+  return m ? parseInt(m[1], 10) : 0;
+})();
+window.__oldWebview = window.__webviewMajor > 0 && window.__webviewMajor < 87;
 window.onerror = function(m, s, l, c, e){
   window.__mayaErr = (m || "unknown error") + " (line " + (l || "?") + ")";
   try {
@@ -773,7 +802,7 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v4.0 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v4.0.1 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
@@ -854,11 +883,16 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v4.0.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v4.0.1 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
+    if (window.__oldWebview) pushLog("OLD WEBVIEW: Chrome " + window.__webviewMajor + " — update karo!");
   } catch(e){}
+  /* v4.0.1: purana WebView par non-blocking warning (2.5s baad) */
+  if (window.__oldWebview) setTimeout(function(){
+    try { toast("⚠ Purana WebView (Chrome " + window.__webviewMajor + ") — Play Store se 'Android System WebView' update karo"); } catch(e){}
+  }, 2500);
   try { if (settings.voiceOn) speak("Maya online. Sab systems ready, " + settings.name + ".", false); } catch(e){}
   try { greetMiniRefresh(); } catch(e){}
   /* SAFE MODE (v3.0): v2.9 jaisi stability — boot par auto-listening/pending_wake band.
@@ -2930,9 +2964,11 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v4.0.0 — DOCTOR REPORT");
+  out.push("MAYA v4.0.1 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
+  out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
+  out.push("NATIVE WEBVIEW PKG: " + (window.MayaBridge && window.MayaBridge.webViewVersion ? window.MayaBridge.webViewVersion() : "n/a (web mode)"));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));
   try { localStorage.setItem("_mayaT", "1"); localStorage.removeItem("_mayaT"); out.push("STORAGE: OK ✅"); }
   catch (e) { out.push("STORAGE: FAIL ❌ — " + e.message); }
@@ -3022,7 +3058,7 @@ if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
   var sver = document.querySelector("#splash .ver");
-  if (sver) sver.textContent = "VERSION 4.0.0 — OBSIDIAN EDITION";
+  if (sver) sver.textContent = "VERSION 4.0.1 — WEBVIEW COMPAT EDITION";
 }
 greetMiniRefresh();
 chatHist.slice(-40).forEach(function(h){ addBubble(h.role === "user" ? "user" : "ai", h.text); });
@@ -3389,8 +3425,8 @@ function startProactive(){
 
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
-try { $("#hudBuild").textContent = "v4.0.0"; } catch(e){}
-try { pushLog("MAYA v4.0 — OBSIDIAN MODULE ONLINE (personas+themes)"); } catch(e){}
+try { $("#hudBuild").textContent = "v4.0.1"; } catch(e){}
+try { pushLog("MAYA v4.0.1 — OBSIDIAN MODULE ONLINE (compat patch)"); } catch(e){}
 </script>
 </body>
 </html>
