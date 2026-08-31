@@ -269,3 +269,207 @@ aur **ek bhi purana test laal nahi hua**.
 
 Farq sirf itna hai ke ab hum ne use **likh kar qanoon bana diya hai** — taake 6 phase ke
 bare kaam mein bhi ek bhi cheez ittefaq par na chhoray.
+
+---
+
+# HISSA J — 🔍 PLAN KA APNA AUDIT (imaandari se: abhi perfect nahi)
+
+Aap ne poocha "sab perfectly correctly accurately hai ya aur behtar ho sakta hai?"
+Maine apne hi plan par wohi forensic chalaya jo screenshot par chalaya tha.
+**8 chhed mile.** Sab se bara sab se sharmnaak hai.
+
+---
+
+## 🕳️ CHHED 1 — Hum ne NAAPNE KA AALA hi nahi banaya *(sab se bara)*
+
+Poora plan kehta hai "teiz hoga", "behtar hoga", "next level hoga".
+**Magar aaj ke number hamare paas hain hi nahi.**
+
+```
+$ grep -c "performance.now" public/index.html
+6        ← poori 6730 line ki app mein 6 jagah
+```
+
+Yani P4 (BIJLI) ke baad hum kaise sabit karenge ke wo sach much teiz hua?
+"Mehsoos ho raha hai teiz" **saboot nahi** — aur is poore kaam ka usool hi "andaza nahi, saboot" hai.
+
+**Naapna kya chahiye (aaj, badalne se PEHLE):**
+| Paimana | Aaj kitna? |
+|---|---|
+| Aap ke bolne se le kar **tool chalne** tak | ??? |
+| Aap ke bolne se le kar **pehli awaaz** tak | ??? |
+| 100 hukm mein se kitne **sahih tool** par gaye | ??? |
+| 100 jawab mein se kitno mein **soch leak** hui | ??? |
+| Kaunsa dimaag **kitni dafa** jawab deta hai | ??? |
+
+---
+
+## 🕳️ CHHED 2 — Golden set main bana raha tha… magar khazana AAP ke phone mein hai
+
+Maine likha tha: "60 golden commands". Wo **meri banai hui** misalein hoteen.
+Magar:
+```js
+localStorage "maya_chat"  →  aakhri 300 turn mehfooz hain
+```
+
+**Aap ki apni zubaan, aap ke apne alfaz, aap ke apne 300 hukm — pehle se mehfooz hain.**
+Golden set unse banna chahiye, meri tasavvur se nahi. "britness" jaise lafz main
+soch bhi nahi sakta tha — aap ki history mein wo maujood hai.
+
+---
+
+## 🕳️ CHHED 3 — Diagnostic bahar bhejne ka koi tareeqa hi nahi
+
+```
+$ grep -n "copyLog|exportLog|clipboard" public/index.html
+(kuch nahi)
+```
+
+**Poori session mein aap ne mujhe screenshot bhej bhej kar bug batae.**
+Ek button — **📋 DIAGNOSTIC COPY** — jo ek tap par ye sab clipboard par daal de:
+```
+app 4.8.0 · WebView 121 · Android 13 · brand Xiaomi
+engine: fish OFF(no key) · gemini QUOTA · edge READY · pool 6/10 zinda
+aakhri 60 log · aakhri 3 ghalti · settings (SAARI KEYS CHHUPI HUI 🔒)
+```
+Aap paste kar do — mujhe **poori tasveer** mil jaye. Har agli bug 10 guna jaldi hal.
+
+> Ye chhota sa button poore mansoobe ka sab se ziyada faida dene wala hissa hai.
+
+---
+
+## 🕳️ CHHED 4 — 12 localStorage keys, aur koi VERSION nahi
+
+```
+maya_awaaz  maya_brainpool  maya_cache  maya_chat  maya_consol_ts  maya_diary
+maya_facts  maya_fish  maya_models  maya_sched  maya_settings  maya_skills
+```
+
+Aur P3 `maya_ledger` layega, P6 `maya_rules`, P2 `maya_learn`, P0 `maya_metrics`…
+**16+ keys, aur koi migration ka raasta nahi.**
+
+Kal shakl badalni pari to purana data ya to tootega ya chhoot jayega.
+`maya_schema = 1` **abhi** rakhna chahiye — jab keys 12 hain, 20 hone se pehle.
+
+---
+
+## 🕳️ CHHED 5 — Hamare test "shareef" hain — ASAL DUNIYA gandi hai
+
+Ye sab se ahem sabaq hai:
+
+> **293 AWAAZ test pass the. 155 DIMAAG test pass the.
+> Phir bhi `<think>` wala bug aap ke phone tak pohanch gaya.**
+
+Kyun? Kyunke hamara harness hamesha **saaf-suthra** jawab naqli banata hai:
+```js
+state.respond = () => ({ status: 200, body: okBody() })   // hamesha shareef
+```
+
+Asal duniya mein jawab aise aate hain:
+```
+"<think>The user wants…"                    ← band hi nahi hua
+"<|channel|>analysis…<|message|>Salam"      ← gpt-oss harmony
+"brightness_control(level=100)"             ← tool ka natak
+"```json\n{...}\n```"                       ← markdown mein lipta
+"चमक सेट कर दी"                              ← ghalat zubaan
+HTTP 200 magar body mein {"error":…}        ← jhoota 200
+""                                          ← bilkul khali
+```
+
+**Chahiye: BADTAMEEZ FIXTURE LIBRARY** — asli models ke asli kachre ka zakheera,
+jo har naye engine par chalaya jaye. Ye ek bug ka ilaj nahi, **poori qism** ka ilaj hai.
+
+---
+
+## 🕳️ CHHED 6 — Zubaan ka faisla maine CHUPKE se kar liya tha *(meri ghalti)*
+
+BUG 6 par maine likha "do mutazad hukm hain, theek karenge". Magar **kaise** theek
+karenge — wo product ka faisla hai, mera nahi. Aur ghaur se dekha to:
+
+```js
+LR["hindi"] = "Reply in Hindi (Devanagari script)."
+```
+Aap ke phone par `settings.lang = "hindi"` **hai**. Yani model ne jo kiya, wo
+technically **hukm ki tameel** thi!
+
+**Asal sawal jo mujhe AAP se poochna chahiye tha:**
+> Jab aap Roman Urdu mein bolo magar setting "Hindi" ho — **kaun jeete?**
+
+Teen mumkin jawab, teeno jaiz:
+| | Tareeqa | Kis ke liye behtar |
+|---|---|---|
+| **A** | **Jo aap bolo, wohi script** — setting sirf tab jab pata na chale | Roz-marra, sab se qudrati |
+| **B** | **Setting hamesha jeete** — jo chuna hai wohi milega | Jab aap qasdan Hindi chahte ho |
+| **C** | **Likha Roman Urdu · Bola Urdu** — screen aur awaaz alag | Parhne mein aasan + sunne mein khoobsurat |
+
+*(Mera mashwara: **A** — magar faisla aap ka.)*
+
+---
+
+## 🕳️ CHHED 7 — "Kamyabi" ka koi NUMBER nahi
+
+"Perfect" ek ehsaas hai. Ehsaas se release nahi hota. Har phase ke liye **number** chahiye:
+
+| P | Kamyabi ka paimana (P0 ke baseline se muqabla) |
+|---|---|
+| P1 | 200 jawab mein **0** soch-leak · khali bubble **0** |
+| P2 | Golden set par sahih tool **≥95%** · tool chalane wale dimaag **1 → ≥6** |
+| P3 | Bina ijazat 🔴 tool **0 dafa** · har amal ka ⟲ **100%** |
+| P4 | 🟢 amal **≤150ms** · airplane mode mein **kaam kare** |
+| P6 | Trigger ka jhoota amal **0** · rate limit **kabhi na toote** |
+| P5 | Pehli awaaz tak **p50 ≤1.2s** (aaj ~4s) |
+
+Ye number **P0 ke bagair naap hi nahi sakte** — Chhed 1 par wapas.
+
+---
+
+## 🕳️ CHHED 8 — Battery aur data ka koi budget nahi
+
+P4 (BIJLI) aur P6 (TRIGGERS) background mein kaam karenge. Phone par ye **muft nahi**.
+Saaf pabandiyan chahiye:
+- Koi `setInterval` polling **nahi** — sirf `scheduleTask()` (jo pehle se hai)
+- Trigger jaanchne ka kaam sirf tab jab phone waise bhi jaag raha ho
+- Rozana wake budget mehdood
+- "Sirf WiFi par" wali pabandi bhi maujood ho *(AWAAZ mein ye pattern pehle se hai)*
+
+---
+
+# 🆕 IS AUDIT KA NATIJA: **P0 — NAAP-TOL**
+
+Chhed 1,2,3,4,5 sab ek hi baat kehte hain:
+> **Badalne se pehle, naapne aur dekhne ka aala banao.**
+
+**P0 — v4.8.1 · NAAP-TOL** *(P1 se bhi PEHLE)*
+
+| # | Kya | Kis chhed ka ilaj |
+|---|---|---|
+| 1 | 📋 **DIAGNOSTIC COPY** button (keys chhupi hui) | 3 |
+| 2 | ⏱️ **NAAP** — har turn ka waqt: sunna → dimaag → tool → awaaz | 1, 7 |
+| 3 | 📊 **BASELINE** panel — aaj ke number, kal ke muqable ke liye | 1, 7 |
+| 4 | 🗃️ **GOLDEN HARVEST** — aap ki `maya_chat` se asli hukm nikal kar test set | 2 |
+| 5 | 👹 **BADTAMEEZ FIXTURES** — asli kachre ki library | 5 |
+| 6 | 🔖 `maya_schema = 1` + migration ka dhancha | 4 |
+| 7 | 🔋 Battery/data budget ke usool likhe jayen | 8 |
+
+**Khatra: 🟢 sab se kam jo mumkin hai.**
+Kyunke P0 mein **Maya ka koi rawaiya badalta hi nahi** — sirf naapa aur dikhaya jata hai.
+Kotlin ko haath nahi. Purana raasta chhua tak nahi. Sirf **jorna**.
+
+**Aur is ka faida:** P1 se P6 tak har phase ab **sabit** ho sakega —
+*"pehle itna tha, ab itna hai"* — bajaye *"lag raha hai behtar hai"*.
+
+---
+
+## 🔄 Nazr-e-sani shuda tarteeb
+
+```
+P0 ── P1 ── P2 ── P3 ── P4 ── P6 ── P5
+🟢    🟢    🟡    🟢    🟢    🟡    🔴
+naap  saaf  amal  lagaam bijli khud  zinda
+      zubaan engine       aankhein mukhtar
+```
+
+Test ka safar: `520 → P0 +30 → 550 → … → 887`
+
+> **Bina P0 ke baqi sab "shayad behtar hua" rahega.
+> P0 ke sath har phase ka SABOOT hoga.**
