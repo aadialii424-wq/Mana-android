@@ -1,9 +1,26 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 4.8.0 "FISH AUDIO" — 0-Budget Build • Android APK + Web PWA**
+**Version 4.9.0 "SAAF ZUBAAN" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🧪 v4.9.0 — SAAF ZUBAAN · NAAP-TOL · 👑 MALIK
+
+**Pehla release AMAL-WORKFLOW ke qanoon ke tehat — sab kuch switch ke peeche.**
+
+- 🧹 **SAAF ZUBAAN** — `<think>`, `<|channel|>analysis`, **kata hua** `<think>`,
+  "Check constraints:", `brightness_control(level=100)` — **10 shaklein**, bubble
+  **aur** awaaz dono se pehle. Kuch na bache → **agla dimaag** (khali bubble kabhi nahi)
+- 🪙 **Token budget** — reasoning models ko **1400** (pehle sab ko 320 — soch usi mein khatam)
+- 🗣️ **Zubaan ka tazad khatam** — ab **MIRROR pehle**: jo aap bolo wohi script
+- 📊 **NAAP-TOL** — har turn ka waqt (p50/p90), **BASELINE** panel, **📋 DIAGNOSTIC COPY**
+  (keys/number/email khud chhup jate hain), **🗃️ HARVEST** (aap ki apni baaton se test set)
+- 👑 **MALIK** — Maya ko apne banane wale ka pata: chhota · poora · **flex** (jab Adil khud puche) · English. **Sirf sach**
+- 🔒 **Qanoon 2** — LAB gayab ho jaye to bhi Maya chalti rahe (6 test)
+- 🧪 **92 naye test** (kul **612**) — SAAF ke test **asli screenshot ke matn** par
+
+📖 [`docs/RELEASE-v4.9.0.md`](docs/RELEASE-v4.9.0.md) · plan: [`docs/AMAL-ENGINE-PLAN.md`](docs/AMAL-ENGINE-PLAN.md) · tareeqa: [`docs/AMAL-WORKFLOW.md`](docs/AMAL-WORKFLOW.md)
 
 ## 🐟 v4.8.0 — FISH AUDIO ("Edge mein wohi awaaz hogi?")
 

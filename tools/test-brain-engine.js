@@ -33,6 +33,12 @@ const B = HTML.indexOf('function openURL(u){');
 if (A < 0 || B < 0 || B < A) { console.error('BRAIN POOL / DIMAAG source nahi mila'); process.exit(1); }
 const ENGINE = HTML.slice(A, B);
 
+/* 🧪 MAYA LAB (FLAGS/SAAF/NAAP/MALIK) — engine ab isay bhi chhoota hai */
+const LA = HTML.indexOf('var SCHEMA = {');
+const LB = HTML.indexOf('var AWAAZ = {');
+if (LA < 0 || LB < 0 || LB < LA) { console.error('MAYA LAB source nahi mila'); process.exit(1); }
+const LAB = HTML.slice(LA, LB);
+
 /* ── naqli duniya ── */
 function makeWorld(opts = {}) {
   const dom = new JSDOM('<!doctype html><body></body>', { runScripts: 'dangerously', url: 'https://appassets.androidplatform.net/' });
@@ -103,6 +109,8 @@ function makeWorld(opts = {}) {
     };
   };
   try { w.localStorage.clear(); } catch (e) {}
+
+  w.eval(LAB);
 
   w.eval(ENGINE);
   return { w, state, D: w.DIMAAG, B: w.BRAIN };

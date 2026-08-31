@@ -534,7 +534,7 @@ nav{padding:8px 10px 10px}
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v4.8.0 — FISH AUDIO • BE-HISAAB AWAAZ + ANDAAZ</div>
+  <div class="ver">v4.9.0 — SAAF ZUBAAN • NAAP-TOL • 👑 MALIK</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid #c85050; background:#3c0a0f; border-radius:12px; padding:12px; text-align:left;">
@@ -559,14 +559,14 @@ nav{padding:8px 10px 10px}
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v4.8.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
+  <div class="dfoot">MAYA v4.9.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.8.0 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.9.0 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -727,7 +727,7 @@ nav{padding:8px 10px 10px}
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.8.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.9.0</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -1084,6 +1084,32 @@ nav{padding:8px 10px 10px}
       </div>
 
       <div class="ui-card">
+        <div class="ui-card-h">🧪 MAYA LAB — naye hisse (switch se chalu karo)</div>
+        <div class="ui-note">Har naya hissa yahan se ON/OFF hota hai. Kuch bura lage to OFF kar do — Maya foran purane tareeqe par aa jayegi. Nayi APK ka intezar nahi.</div>
+
+        <div class="ui-row">
+          <div class="ui-row-txt">📊 NAAP — har turn ka waqt naapo <small>(rawaiya nahi badalta)</small></div>
+          <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labNaap"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
+        </div>
+        <div class="ui-row">
+          <div class="ui-row-txt">🧹 SAAF ZUBAAN — andar ki soch (&lt;think&gt;) chhupao <small>(dikhe bhi na, boli bhi na jaye)</small></div>
+          <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labSaaf"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
+        </div>
+        <div class="ui-row">
+          <div class="ui-row-txt">👑 MALIK — Maya ko apne banane wale ka pata ho</div>
+          <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labMalik"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
+        </div>
+        <div class="ui-hint" id="labHint">—</div>
+
+        <button type="button" class="ui-btn ui-btn-ghost" id="labBaseline">📊 BASELINE DEKHO — aaj ke asli number</button>
+        <button type="button" class="ui-btn ui-btn-ghost" id="labHarvest">🗃️ MERI BAATON SE TEST SET (naam/number chhupa kar)</button>
+        <button type="button" class="ui-btn ui-btn-ghost" id="labDiag">📋 DIAGNOSTIC COPY KARO — sab kuch clipboard par</button>
+        <div class="ui-hint">Diagnostic mein saari API keys, phone number aur email <b>khud-ba-khud chhup</b> jate hain. Bug ho to bas ye copy kar ke bhej dena.</div>
+        <pre class="ui-pre" id="labOut">—</pre>
+        <button type="button" class="ui-btn danger" id="labClear">🗑️ NAAP KA DATA MITAO</button>
+      </div>
+
+      <div class="ui-card">
         <div class="ui-card-h">🚀 MAYA v4.1 — KYA NAYA HAI</div>
         <div class="phase"><span class="st">✅</span><span><b>IRONCLAD Settings UI</b> — custom sliders/switches, har purane WebView par visible</span></div>
         <div class="phase"><span class="st">✅</span><span><b>Measured layout</b> — scroll ab JS se naapi gayi height par (kabhi clip nahi hota)</span></div>
@@ -1094,7 +1120,7 @@ nav{padding:8px 10px 10px}
       </div>
 
       <button type="button" class="ui-btn ui-btn-save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v4.8.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v4.9.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -1109,7 +1135,7 @@ nav{padding:8px 10px 10px}
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.8.0 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.9.0 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -1177,7 +1203,7 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v4.8.0 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v4.9.0 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
@@ -1258,7 +1284,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v4.8.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v4.9.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1449,6 +1475,460 @@ var VOICE_MOODS = [
 
 /* Persona -> default mood (jab mood = auto ho) */
 var PERSONA_MOOD = { maya:"warm", friday:"pro", jarvis:"pro", venom:"funny", gf:"warm", coach:"hype", teacher:"calm" };
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🧪  MAYA LAB  —  P0 (NAAP-TOL) + P1 (SAAF ZUBAAN) + 👑 MALIK    (app v4.9.0)
+   ---------------------------------------------------------------------------
+   Ye block 3 kaam karta hai, aur teeno ALAG SWITCH ke peeche hain:
+
+     FLAGS.naap   📊  sirf NAAPTA hai — Maya ka rawaiya bilkul nahi badalta
+     FLAGS.saaf   🧹  andar ki soch (<think>) bubble aur AWAAZ dono se hatata hai
+     FLAGS.malik  👑  Maya ko apne banane wale ka pata deta hai
+
+   Switch OFF = code maujood hai magar chalta hi nahi -> purana raasta jyun ka tyun.
+   (AMAL-WORKFLOW.md · Qanoon 1 aur 2)
+
+   ⚠️  ES5 PABANDI: is app ka WebView purana hai (~Chrome 55-79 — saboot:
+       docs/FIX-v4.0.1-webview-compat.md mein '?.' parse fail hua tha).
+       Is liye yahan arrow function, const/let, optional chaining, template
+       literal KUCH NAHI. test-settings-ui.js is par taala lagata hai.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────── 🔖 SCHEMA — localStorage ki version ───────────────
+   12 keys pehle se hain aur 4 aur aa rahi hain. Version ab rakh rahe hain,
+   20 hone se pehle — taake kal shakl badle to purana data na toote.
+   (CHHED 4) */
+var SCHEMA = {
+  KEY: "maya_schema",
+  NOW: 1,
+  at: 0,
+  init: function () {
+    try { SCHEMA.at = parseInt(localStorage.getItem(SCHEMA.KEY), 10) || 0; } catch (e) { SCHEMA.at = 0; }
+    if (SCHEMA.at === SCHEMA.NOW) return SCHEMA.at;
+    var from = SCHEMA.at;
+    /* aaindah migrations yahan: if (SCHEMA.at < 2) { …; SCHEMA.at = 2; } */
+    SCHEMA.at = SCHEMA.NOW;
+    try { localStorage.setItem(SCHEMA.KEY, String(SCHEMA.NOW)); } catch (e) {}
+    if (from && from !== SCHEMA.NOW && typeof pushLog === "function") pushLog("SCHEMA: " + from + " -> " + SCHEMA.NOW);
+    return SCHEMA.at;
+  }
+};
+
+/* ───────────────────────── 🧪 FLAGS — har nayi cheez ek switch ke peeche ───── */
+var FLAGS = {
+  KEY: "maya_flags",
+  DEF: { naap: true, saaf: false, malik: false },   /* naap default ON (bay-zarar) */
+  v: null,
+  load: function () {
+    if (FLAGS.v) return FLAGS.v;
+    var out = {}, k;
+    for (k in FLAGS.DEF) if (Object.prototype.hasOwnProperty.call(FLAGS.DEF, k)) out[k] = FLAGS.DEF[k];
+    try {
+      var raw = JSON.parse(localStorage.getItem(FLAGS.KEY) || "{}");
+      for (k in out) if (Object.prototype.hasOwnProperty.call(out, k) && typeof raw[k] === "boolean") out[k] = raw[k];
+    } catch (e) {}
+    FLAGS.v = out;
+    return out;
+  },
+  on: function (k) { return FLAGS.load()[k] === true; },
+  set: function (k, val) {
+    var f = FLAGS.load();
+    f[k] = val === true;
+    try { localStorage.setItem(FLAGS.KEY, JSON.stringify(f)); } catch (e) {}
+    if (typeof pushLog === "function") pushLog("LAB: " + k + " = " + (val ? "ON" : "OFF"));
+    return f[k];
+  },
+  reset: function () {
+    FLAGS.v = null;
+    try { localStorage.removeItem(FLAGS.KEY); } catch (e) {}
+    return FLAGS.load();
+  }
+};
+
+/* ───────────────────────── 📊 NAAP — har turn ka waqt ───────────────────────
+   Bina is ke "teiz ho gaya" sirf ehsaas hai. Ab number honge.
+   Marks: heard(STT khatam) · brain(dimaag ka jawab) · tool(pehla amal) ·
+          voice(pehli awaaz) · done
+   (CHHED 1 aur 7) */
+var NAAP = {
+  KEY: "maya_naap",
+  MAX: 120,
+  cur: null,
+  hist: [],
+  loaded: false,
+
+  load: function () {
+    if (NAAP.loaded) return;
+    NAAP.loaded = true;
+    try {
+      var d = JSON.parse(localStorage.getItem(NAAP.KEY) || "[]");
+      if (d && d.length) NAAP.hist = d.slice(-NAAP.MAX);
+    } catch (e) {}
+  },
+  save: function () {
+    try { localStorage.setItem(NAAP.KEY, JSON.stringify(NAAP.hist.slice(-NAAP.MAX))); } catch (e) {}
+  },
+
+  start: function (src) {
+    if (!FLAGS.on("naap")) return;
+    NAAP.cur = { t0: (new Date()).getTime(), src: src || "text", m: {} };
+  },
+  mark: function (name) {
+    if (!NAAP.cur) return;
+    if (NAAP.cur.m[name] === undefined) NAAP.cur.m[name] = (new Date()).getTime() - NAAP.cur.t0;
+  },
+  end: function (info) {
+    if (!NAAP.cur) return;
+    NAAP.load();
+    var c = NAAP.cur;
+    NAAP.cur = null;
+    c.m.done = (new Date()).getTime() - c.t0;
+    c.at = (new Date()).getTime();
+    if (info) {
+      if (info.brain) c.brain = String(info.brain).slice(0, 24);
+      if (info.engine) c.engine = String(info.engine).slice(0, 12);
+      if (info.tool) c.tool = String(info.tool).slice(0, 24);
+      if (info.err) c.err = String(info.err).slice(0, 24);
+      if (info.saaf) c.saaf = info.saaf | 0;          /* kitne harf soch ke kate */
+    }
+    NAAP.hist.push(c);
+    if (NAAP.hist.length > NAAP.MAX) NAAP.hist = NAAP.hist.slice(-NAAP.MAX);
+    NAAP.save();
+  },
+
+  /* aadhe se (p50) aur 90% (p90) — aisi cheezon mein औsat jhoot bolta hai */
+  pct: function (arr, p) {
+    if (!arr.length) return 0;
+    var a = arr.slice(0).sort(function (x, y) { return x - y; });
+    var i = Math.min(a.length - 1, Math.max(0, Math.round((p / 100) * (a.length - 1))));
+    return a[i];
+  },
+  col: function (key) {
+    var out = [], i;
+    for (i = 0; i < NAAP.hist.length; i++) if (typeof NAAP.hist[i].m[key] === "number") out.push(NAAP.hist[i].m[key]);
+    return out;
+  },
+  stats: function () {
+    NAAP.load();
+    var brains = {}, engines = {}, i, h, saafHits = 0, toolTurns = 0, errs = 0;
+    for (i = 0; i < NAAP.hist.length; i++) {
+      h = NAAP.hist[i];
+      if (h.brain) brains[h.brain] = (brains[h.brain] || 0) + 1;
+      if (h.engine) engines[h.engine] = (engines[h.engine] || 0) + 1;
+      if (h.saaf) saafHits++;
+      if (h.tool) toolTurns++;
+      if (h.err) errs++;
+    }
+    return {
+      turns: NAAP.hist.length,
+      brain: { p50: NAAP.pct(NAAP.col("brain"), 50), p90: NAAP.pct(NAAP.col("brain"), 90) },
+      tool:  { p50: NAAP.pct(NAAP.col("tool"), 50),  p90: NAAP.pct(NAAP.col("tool"), 90) },
+      voice: { p50: NAAP.pct(NAAP.col("voice"), 50), p90: NAAP.pct(NAAP.col("voice"), 90) },
+      done:  { p50: NAAP.pct(NAAP.col("done"), 50),  p90: NAAP.pct(NAAP.col("done"), 90) },
+      brains: brains, engines: engines,
+      saafHits: saafHits, toolTurns: toolTurns, errs: errs
+    };
+  },
+  clear: function () { NAAP.hist = []; NAAP.loaded = true; NAAP.save(); },
+
+  /* Settings mein dikhane ke liye */
+  report: function () {
+    var s = NAAP.stats(), out = [], k;
+    out.push("📊 BASELINE — aakhri " + s.turns + " turn");
+    if (!s.turns) { out.push(""); out.push("Abhi koi naap nahi. Maya se kuch baatein karo,"); out.push("phir yahan asli number aa jayenge."); return out.join("\n"); }
+    out.push("");
+    out.push("               p50        p90");
+    out.push("  dimaag    " + NAAP.ms(s.brain.p50) + "  " + NAAP.ms(s.brain.p90));
+    if (s.tool.p50)  out.push("  tool      " + NAAP.ms(s.tool.p50) + "  " + NAAP.ms(s.tool.p90));
+    if (s.voice.p50) out.push("  awaaz     " + NAAP.ms(s.voice.p50) + "  " + NAAP.ms(s.voice.p90));
+    out.push("  kul       " + NAAP.ms(s.done.p50) + "  " + NAAP.ms(s.done.p90));
+    out.push("");
+    out.push("  tool wale turn : " + s.toolTurns + " / " + s.turns);
+    out.push("  soch kaati gayi: " + s.saafHits + " / " + s.turns + (FLAGS.on("saaf") ? "" : "   (saaf OFF hai)"));
+    out.push("  nakaam turn    : " + s.errs);
+    out.push("");
+    out.push("  DIMAAG:");
+    for (k in s.brains) if (Object.prototype.hasOwnProperty.call(s.brains, k)) out.push("    " + k + " × " + s.brains[k]);
+    out.push("  AWAAZ:");
+    for (k in s.engines) if (Object.prototype.hasOwnProperty.call(s.engines, k)) out.push("    " + k + " × " + s.engines[k]);
+    return out.join("\n");
+  },
+  ms: function (n) {
+    var s = (n >= 1000) ? ((n / 1000).toFixed(1) + "s") : (n + "ms");
+    while (s.length < 8) s = " " + s;
+    return s;
+  }
+};
+
+/* ───────────────────────── 🧹 SAAF — andar ki soch bahar na aaye ────────────
+   Aap ne screenshot mein poora <think> dekha AUR suna. Ye us ka ilaj hai.
+   10 shaklein — sab asli models se dekhi hui.  (P1 · CHHED 5) */
+function SAAF(text) {
+  var t = String(text === null || text === undefined ? "" : text);
+  var before = t.length;
+  SAAF.hit = "";
+
+  function cut(re, tag) {
+    var n = t.replace(re, " ");
+    if (n !== t) { t = n; if (SAAF.hit.indexOf(tag) < 0) SAAF.hit += (SAAF.hit ? "," : "") + tag; }
+  }
+
+  /* 1. band shuda soch ke tag */
+  cut(/<\s*(think|thinking|reasoning|scratchpad|reflection|analysis)\s*>[\s\S]*?<\s*\/\s*\1\s*>/gi, "think");
+  /* 2. gpt-oss "harmony": <|channel|>analysis … <|message|> */
+  cut(/<\|channel\|>[\s\S]*?<\|message\|>/gi, "harmony");
+  cut(/<\|[a-zA-Z_]{2,20}\|>/g, "harmony");
+  /* 3. BAND NA HUA soch ka tag (token khatam ho gaya) — aakhir tak kaat do */
+  cut(/<\s*(think|thinking|reasoning|scratchpad|analysis)\s*>[\s\S]*$/i, "cut-think");
+  /* 4. akela band hone wala tag */
+  cut(/<\s*\/\s*(think|thinking|reasoning|scratchpad|analysis)\s*>/gi, "think");
+  /* 5. hamara apna AMAL protocol (P2 mein chalega, dikhega kabhi nahi) */
+  cut(/\u2039AMAL\u203A[\s\S]*?\u2039\/AMAL\u203A/g, "amal");
+  /* 6. XML-shakl tool call jo kuch models likh dete hain */
+  cut(/<(tool_call|function_call|tool_use)>[\s\S]*?<\/\1>/gi, "toolxml");
+  /* 7. markdown code fence jismein sirf soch/json ho — fence ke nishaan hatao */
+  cut(/^\s*```[a-zA-Z]*\s*$/gm, "fence");
+
+  /* 8-10. saada matn wali soch — line ba line chhanto */
+  var lines = t.split("\n"), keep = [], i, L, dropped = 0;
+  var HEAD = /^\s*(here'?s (a|my) (thinking|thought) process|thinking process|let me think|my thinking|reasoning:|analysis:|draft( construction)?|response draft|check (the )?constraints|refine against constraints|constraint check|final (answer|response)\s*:?\s*$)/i;
+  var STEP = /^\s*(\d+[\.\)]\s*)?\*\*[A-Z][^*]{2,40}\*\*\s*:?\s*$/;                 /* **Analyze User Input:** */
+  var META = /^\s*[-*\u2022]?\s*(language|constraint|persona|tool|context|check|draft|spoken aloud style|plain text|no markdown|user says|the user (wants|asked|spoke))\b.{0,120}$/i;
+  var LONE = /^\s*[a-z_][a-z0-9_]{3,30}\s*\([^)]*\)\s*$/i;                          /* brightness_control(level=100) */
+
+  for (i = 0; i < lines.length; i++) {
+    L = lines[i];
+    if (HEAD.test(L) || STEP.test(L) || LONE.test(L) || (META.test(L) && L.length < 140)) { dropped++; continue; }
+    keep.push(L);
+  }
+  if (dropped) { t = keep.join("\n"); if (SAAF.hit.indexOf("plain") < 0) SAAF.hit += (SAAF.hit ? "," : "") + "plain"; }
+
+  t = t.replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+  SAAF.cut = Math.max(0, before - t.length);
+  return t;
+}
+SAAF.hit = "";
+SAAF.cut = 0;
+
+/* Jawab kaam ka hai? (soch nikalne ke baad kuch bacha bhi ya nahi)
+   Kuch na bache -> jawab EMPTY -> AGLA DIMAAG. Khali bubble kabhi nahi. */
+SAAF.usable = function (text) {
+  if (!FLAGS.on("saaf")) return String(text === null || text === undefined ? "" : text);
+  var out = SAAF(text);
+  if (out.replace(/[^a-zA-Z\u0600-\u06FF\u0900-\u097F0-9]/g, "").length < 2) return "";
+  return out;
+};
+
+/* ───────────────────────── 👑 MALIK — Maya ko apne banane wale ka pata ─────
+   Har jumla SACH hai: ya naapa gaya, ya code mein maujood.
+   Jhooti tareef MANA — wohi qanoon jo tools par lagta hai.  (CHHED 16-18) */
+var MALIK = {
+  name: "Adil Chandio",
+  city: "Hyderabad, Sindh, Pakistan",
+  brand: "Monarch",
+  tagline: "summoning the empire",
+  field: "YouTube Automation \u00D7 AI",
+  portfolio: "adilchandio.freebuff.app",
+  github: "adil-chandio",
+
+  proof: [
+    "MAYA banayi: 6,700+ line JavaScript + 1,400+ line Kotlin, 520+ khud-kar test — sab pass",
+    "10 AI dimaag jo ek doosre ko sambhalte hain, 5 awaaz engine, 33 tools",
+    "9 version ~2 hafton mein · kul kharcha ZERO rupay",
+    "Microsoft ka Edge TTS reverse-engineer kiya: Kotlin mein HAATH SE poora RFC-6455 WebSocket, bina kisi library ke",
+    "AWAAZ DOCTOR banaya — 'keys kyun nahi chaltin' ka jawab andaze se nahi, Google se KHUD poochh kar"
+  ],
+
+  /* ta'aruf — mauqe ke mutabiq */
+  intro: {
+    short:
+      "Adil Chandio. Hyderabad, Sindh se. Jis ne mujhe banaya \u2014 ek rupya kharch kiye baghair. " +
+      "Uska brand Monarch hai: YouTube automation aur AI. Aur main uska pehla taj hoon.",
+    full:
+      "Adil Chandio \u2014 Hyderabad, Sindh. GitHub par sirf saat mahine purana, aur is arse mein wo bana diya " +
+      "jo log paise le kar banate hain. Main us ki misaal hoon: das dimaag jo ek doosre ko sambhalte hain, " +
+      "paanch awaazein, teis tools, paanch sau bees test \u2014 aur poora kharcha sifar. " +
+      "Jab Microsoft ki awaaz browser se nahi chali, us ne poora WebSocket protocol haath se likh diya. " +
+      "Uska brand Monarch hai. Naara: summoning the empire.",
+    flex:
+      "Aap? Aap wo insaan hain jis ne do hafton mein nau version ship kiye. " +
+      "Jis ne Google ki awaaz khatam hone par haar nahi maani \u2014 Microsoft ka engine khol kar dekha, " +
+      "uska DRM token khud hisab kiya, aur Kotlin mein bina kisi library ke poora WebSocket likh diya. " +
+      "Jis ne 'keys kaam nahi kar rahin' ka jawab andaze se nahi diya, ek Doctor bana diya jo Google se khud poochhta hai. " +
+      "Chhe hazaar sat sau line. Ek adhi paisa kharch nahi hua. " +
+      "Main aap ki banai hui hoon \u2014 aur mujhe is par fakhr hai, Monarch.",
+    en:
+      "Adil Chandio \u2014 from Hyderabad, Sindh, Pakistan. Founder of Monarch: YouTube automation meets AI. " +
+      "He built me on a zero-rupee budget \u2014 ten AI brains with automatic failover, five voice engines, " +
+      "thirty-three tools, over five hundred passing tests. When Microsoft's voice engine refused to run in a " +
+      "browser, he hand-wrote the entire WebSocket protocol in Kotlin \u2014 no libraries."
+  },
+
+  /* prompt mein ~90 token ka chhota block — facts ki tarah KATTA NAHI (CHHED 17) */
+  block: function () {
+    if (!FLAGS.on("malik")) return "";
+    var p = "\n\u265B MALIK (tumhe kis ne banaya) \u2014 ye kabhi mat bhoolna:\n";
+    p += "  " + MALIK.name + " \u2014 " + MALIK.city + ". Brand: " + MALIK.brand +
+         " (\"" + MALIK.tagline + "\"), maidan: " + MALIK.field + ".\n";
+    p += "  Saboot: " + MALIK.proof[0] + "; " + MALIK.proof[2] + ".\n";
+    p += "  Koi tumhare banane wale ka poochhe to fakhr se batao, MAGAR SIRF SACH \u2014 " +
+         "jo upar likha hai usi mein se. Kuch apni taraf se mat joro.\n";
+    p += "  Adil KHUD poochhe to zyada garmjoshi se, aur 'Monarch' keh kar bulao.";
+    return p;
+  },
+
+  /* app khud pehchane ke liye (dimaag ki zaroorat nahi) */
+  ASK: /(tumhe|tumhein|tujhe|aapko|apko)\s+kis\s*ne\s+banaya|kis\s*ne\s+banaya|tumhara\s+(malik|creator|banane\s*wala|developer|maker)|who\s+(made|created|built)\s+you|your\s+(creator|owner|maker|developer)|maya\s+kis\s*ki\s+hai|kaun\s+hai\s+tumhara\s+malik/i,
+  pick: function (q, byOwner) {
+    if (byOwner) return MALIK.intro.flex;
+    var s = String(q || "");
+    if (/[a-zA-Z]/.test(s) && !/[\u0600-\u06FF\u0900-\u097F]/.test(s) && /who|creator|owner|made|built|developer/i.test(s)) return MALIK.intro.en;
+    if (/tafseel|detail|poora|batao\s+sab|zyada/i.test(s)) return MALIK.intro.full;
+    return MALIK.intro.short;
+  }
+};
+
+/* ───────────────────────── 📋 DIAG — ek tap par poori tasveer ───────────────
+   Aaj tak aap screenshot bhejte rahe. Ab ye button sab kuch copy kar dega —
+   aur SAARI keys, number aur naam CHHUPA kar.  (CHHED 3 aur 14) */
+var DIAG = {
+  redact: function (s) {
+    var t = String(s === null || s === undefined ? "" : s);
+    t = t.replace(/AIza[0-9A-Za-z_\-]{10,}/g, "AIza\u2026<key>");
+    t = t.replace(/\b(gsk|sk|xai|nvapi|csk|fk)[-_][0-9A-Za-z_\-]{10,}/gi, "$1_\u2026<key>");
+    t = t.replace(/\bBearer\s+[0-9A-Za-z._\-]{8,}/gi, "Bearer <key>");
+    t = t.replace(/\bgh[pousr]_[0-9A-Za-z]{10,}/g, "gh?_\u2026<key>");
+    t = t.replace(/(\+92|0092|0)?3\d{2}[\s-]?\d{7}\b/g, "<number>");
+    t = t.replace(/\b\d{11,}\b/g, "<number>");
+    t = t.replace(/[0-9A-Za-z._%+\-]+@[0-9A-Za-z.\-]+\.[A-Za-z]{2,}/g, "<email>");
+    return t;
+  },
+
+  build: function () {
+    var L = [], i, s, k;
+    function add(x) { L.push(x); }
+    function safe(fn, dflt) { try { return fn(); } catch (e) { return dflt; } }
+
+    add("\u2554\u2550 MAYA DIAGNOSTIC \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550");
+    add("waqt      : " + (new Date()).toString().slice(0, 24));
+    add("app       : " + safe(function () { return $(".ver").textContent; }, "?"));
+    add("native    : " + (typeof NATIVE !== "undefined" && NATIVE ? "APK" : "browser"));
+    add("device    : " + safe(function () { return window.MayaBridge.deviceBrand(); }, "-"));
+    add("webview   : " + safe(function () { return window.MayaBridge.webViewVersion(); }, "-"));
+    add("ua        : " + String(navigator.userAgent || "").slice(0, 110));
+    add("online    : " + (navigator.onLine === false ? "NAHI" : "haan"));
+    add("schema    : " + SCHEMA.at);
+    add("");
+
+    add("\u2500\u2500 \ud83e\uddea LAB \u2500\u2500");
+    var f = FLAGS.load();
+    for (k in f) if (Object.prototype.hasOwnProperty.call(f, k)) add("  " + k + " : " + (f[k] ? "ON" : "OFF"));
+    add("");
+
+    add("\u2500\u2500 \ud83d\udde3\ufe0f AWAAZ \u2500\u2500");
+    s = safe(function () { return AWAAZ.status(); }, null);
+    if (s) {
+      add("  engine   : " + s.engine + "   mode: " + s.mode);
+      add("  gemini   : " + s.liveKeys + "/" + s.keys + " key zinda" + (s.block ? ("   block: " + s.block) : ""));
+      add("  edge     : " + (s.edgeReady ? "tayyar" : "nahi") + " (" + (s.edgeVoice || "-") + ")   bola: " + s.edgeSpoke);
+      if (s.fish) add("  fish     : " + (s.fish.ready ? "tayyar" : ("nahi \u2014 " + s.fish.block)) +
+                      "   http:" + s.fish.http + "   bola: " + s.fish.spoke + (s.fish.err ? ("   err: " + s.fish.err) : ""));
+      add("  keyless  : " + (s.keyless ? "haan" : "cooldown"));
+    }
+    add("");
+
+    add("\u2500\u2500 \ud83e\udde0 DIMAAG \u2500\u2500");
+    s = safe(function () { return BRAIN.status(); }, null);
+    if (s) for (i = 0; i < s.length; i++) add("  " + (s[i].keyless ? "\u25CB" : "\u25CF") + " " + s[i].name + " \u2014 " + (s[i].keys || 0) + " key" + (s[i].free ? ("  [" + s[i].free + "]") : ""));
+    add("  aakhri code: " + safe(function () { return DIMAAG.lastCode || "-"; }, "-"));
+    add("");
+
+    if (FLAGS.on("naap")) { add("\u2500\u2500 \ud83d\udcca NAAP \u2500\u2500"); add(NAAP.report()); add(""); }
+
+    add("\u2500\u2500 \u2699\ufe0f SETTINGS (keys chhupi hui) \u2500\u2500");
+    s = safe(function () { return settings; }, {});
+    var SHOW = ["lang", "tts", "stt", "persona", "voiceEngine", "gVoice", "voiceMood", "rate", "pitch",
+                "gender", "gfMode", "convoMode", "turbo", "autoListen", "wakeWord", "proactive",
+                "remember", "edgeTTS", "edgeVoice", "fishOn", "fishVoice", "city", "theme", "model"];
+    for (i = 0; i < SHOW.length; i++) if (s[SHOW[i]] !== undefined) add("  " + SHOW[i] + " : " + String(s[SHOW[i]]));
+    var keyed = [];
+    for (k in s) if (Object.prototype.hasOwnProperty.call(s, k) && /key$/i.test(k)) keyed.push(k + (String(s[k] || "").trim() ? "\u2713" : "\u2717"));
+    add("  keys : " + keyed.join("  "));
+    add("");
+
+    add("\u2500\u2500 \ud83d\udcdc LOG (aakhri " + (typeof sysLogs !== "undefined" ? sysLogs.length : 0) + ") \u2500\u2500");
+    s = safe(function () { return sysLogs; }, []);
+    for (i = 0; i < s.length; i++) add("  [" + s[i].t + "] " + s[i].m);
+    add("\u255A\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550");
+
+    return DIAG.redact(L.join("\n"));
+  },
+
+  copy: function (txt) {
+    var t = String(txt || "");
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t); return true; }
+    } catch (e) {}
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = t; ta.setAttribute("readonly", "");
+      ta.style.position = "fixed"; ta.style.top = "-1000px";
+      document.body.appendChild(ta); ta.select();
+      var ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return !!ok;
+    } catch (e) { return false; }
+  }
+};
+
+/* ───────────────────────── 🗃️ HARVEST — aap ki apni zubaan se test set ──────
+   "britness" jaisa lafz main soch bhi nahi sakta tha. Aap ki history mein hai.
+   Sab kuch PHONE PAR hi rehta hai — sirf hisab dikhta hai.  (CHHED 2 + 14) */
+var HARVEST = {
+  scan: function () {
+    var hist = [];
+    try { hist = JSON.parse(localStorage.getItem("maya_chat") || "[]"); } catch (e) { hist = []; }
+    var out = [], i, h, txt;
+    for (i = 0; i < hist.length; i++) {
+      h = hist[i];
+      if (!h || h.role !== "user") continue;
+      txt = String(h.text || "").trim();
+      if (txt.length < 3 || txt.length > 160) continue;
+      out.push(DIAG.redact(txt));
+    }
+    return out;
+  },
+  report: function () {
+    var all = HARVEST.scan(), i, hit = 0, miss = [], seen = {};
+    var re = (typeof ACTION_WORDS !== "undefined") ? ACTION_WORDS : null;
+    for (i = 0; i < all.length; i++) {
+      if (seen[all[i].toLowerCase()]) continue;
+      seen[all[i].toLowerCase()] = 1;
+      if (re && re.test(all[i])) hit++;
+      else if (miss.length < 25) miss.push(all[i]);
+    }
+    var uniq = 0, k;
+    for (k in seen) if (Object.prototype.hasOwnProperty.call(seen, k)) uniq++;
+    var L = [];
+    L.push("\ud83d\uddc3\ufe0f GOLDEN HARVEST \u2014 aap ki apni baaton se");
+    L.push("");
+    L.push("  kul user turn   : " + all.length);
+    L.push("  alag alag jumle : " + uniq);
+    L.push("  router ne pakre : " + hit + "   (" + (uniq ? Math.round(hit * 100 / uniq) : 0) + "%)");
+    L.push("  router se chhoote: " + (uniq - hit));
+    L.push("");
+    L.push("  \u2500\u2500 jo router NAHI samajh saka \u2500\u2500");
+    if (!miss.length) L.push("    (kuch nahi \u2014 ya history khali hai)");
+    for (i = 0; i < miss.length; i++) L.push("    \u2022 " + miss[i]);
+    L.push("");
+    L.push("  \ud83d\udd12 naam/number chhupa diye gaye. Ye sab aap ke phone par hi hai.");
+    return L.join("\n");
+  }
+};
+
+SCHEMA.init();
+FLAGS.load();
+NAAP.load();
 
 var AWAAZ = {
   VER: 7,
@@ -3168,8 +3648,15 @@ function speak(text, wasVoice) {
   lastWasVoice = wasVoice;
   if (!clean) { AWAAZ.stop(); afterSpeak(wasVoice); return; }
   AWAAZ.speak(clean, {
-    onStart: function () { speaking = true; setOrb("speaking"); },
-    onDone: function () { speaking = false; afterSpeak(wasVoice); }
+    onStart: function (eng) {
+      speaking = true; setOrb("speaking");
+      try { NAAP.mark("voice"); NAAP.cur && (NAAP.cur.engine = eng || AWAAZ.engine); } catch (e) {}   /* 📊 P0 */
+    },
+    onDone: function () {
+      speaking = false;
+      try { NAAP.end({ engine: AWAAZ.engine, saaf: (NAAP.cur && NAAP.cur.saafHit) || 0 }); } catch (e) {}  /* 📊 P0 */
+      afterSpeak(wasVoice);
+    }
   });
 }
 
@@ -3301,6 +3788,7 @@ function addBubble(who, text, link){
   row.className = "row " + (who === "user" ? "me" : "ai");
   var b = document.createElement("div"); b.className = "bubble";
   var label = who === "user" ? esc(settings.name).toUpperCase() : "MAYA";
+  if (who !== "user" && typeof SAAF !== "undefined") { var _s = SAAF.usable(text); if (_s) text = _s; }   /* 🧹 P1: soch kabhi DIKHE na */
   b.innerHTML = "<span class='who'>" + label + "</span>" + esc(text) +
     (link ? "<br><a href='" + esc(link) + "' target='_blank' rel='noopener'>🔗 Open karo</a>" : "");
   if (who !== "user") {
@@ -3344,6 +3832,16 @@ function handleUserText(text, wasVoice){
   var stripped = stripWake(text) || text;
   addBubble("user", stripped);
   chatHist.push({ role:"user", text:stripped }); persistChat();
+  if (typeof NAAP !== "undefined") NAAP.start(wasVoice ? "voice" : "text");   /* 📊 P0 */
+
+  /* 👑 MALIK — "tumhe kis ne banaya?" ka jawab dimaag se poochhne ki zaroorat nahi */
+  if (typeof MALIK !== "undefined" && FLAGS.on("malik") && MALIK.ASK.test(stripped)) {
+    NAAP.mark("brain");
+    reply(MALIK.pick(stripped, false), wasVoice);
+    pushLog("MALIK: ta'aruf diya");
+    return;
+  }
+
   var local = tryLocal(stripped, wasVoice);
   if (local) {
     if (local.reply !== "") {
@@ -4094,9 +4592,9 @@ async function resolveModels(){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v4.8.0)
+   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v4.9.0)
    ---------------------------------------------------------------------------
-   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v4.8.0 se pehle Groq
+   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v4.9.0 se pehle Groq
    ne 16 August 2026 ko apne purane Llama 3.x models band kar diye the — hamara
    default wahi tha, is liye "backup brain bhi thak gaya" aata tha.
 
@@ -4269,12 +4767,21 @@ var BRAIN = {
   },
 
   /* ---------- OpenAI-shakl provider se baat ---------- */
+  /* kaunsa model kitna sochta hai */
+  REASONER: /gpt-oss|qwen\s*3|qwen3|qwq|deepseek-?r1|r1-|reason|thinking|magistral|phi-?4-reason/i,
+  budget: function (model) {
+    return BRAIN.REASONER.test(String(model || "")) ? 1400 : 400;
+  },
+
   ask: function (p, ki, msgs, cb) {
     var keys = BRAIN.keys(p);
     var key = keys[ki] || "";
     var model = (BRAIN.models[p.id] && BRAIN.models[p.id][0]) || p.models[0];
+    /* 🪙 TOKEN BUDGET (P1): reasoning models pehle SOCHTE hain. 320 mein unki
+       soch hi khatam ho jati thi aur jawab kabhi aata hi nahi tha — screenshot
+       wala 'band na hua <think>' isi ka natija tha. */
     var payload = JSON.stringify({
-      model: model, messages: msgs, temperature: 0.7, max_tokens: 320, stream: false
+      model: model, messages: msgs, temperature: 0.7, max_tokens: BRAIN.budget(model), stream: false
     });
     var auth = key ? ("Bearer " + key) : "";
     DIMAAG.calls++;
@@ -4284,6 +4791,8 @@ var BRAIN = {
       if (status >= 200 && status < 300) {
         var out = null;
         try { out = data.choices[0].message.content; } catch (e) {}
+        /* 🧹 andar ki soch yahin kaat do — khali bacha to AGLA DIMAAG (P1) */
+        if (out && typeof SAAF !== "undefined") { var _c = SAAF.usable(out); if (SAAF.cut && FLAGS.on("saaf")) { try { NAAP.cur && (NAAP.cur.saafHit = SAAF.cut); } catch (e) {} } out = _c; }
         if (out && String(out).trim()) {
           BRAIN.free(p.id, ki);
           BRAIN.lastUsed = p.id;
@@ -4394,7 +4903,7 @@ window.__httpDone = function (id, status, b64) {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v4.8.0)
+   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v4.9.0)
    ---------------------------------------------------------------------------
    Purane code ke 3 asli bugs jinki wajah se "Sab free brains busy" bar bar aata tha:
 
@@ -4711,6 +5220,7 @@ async function geminiTry(m, plain){
       for (var fc = 0; fc < fnCalls.length; fc++) {
         var name = fnCalls[fc].functionCall.name;
         pushLog("AI TOOL: " + name);
+        try { NAAP.mark("tool"); NAAP.cur && (NAAP.cur.tool = name); } catch (e) {}   /* 📊 P0 */
         var result;
         try { result = await execTool(name, fnCalls[fc].functionCall.args || {}); }
         catch (e) { result = { error: String(e && e.message || e) }; }
@@ -4719,6 +5229,7 @@ async function geminiTry(m, plain){
       continue;
     }
     var out = parts.map(function (p) { return p.text || ""; }).join("").trim();
+    if (out && typeof SAAF !== "undefined") out = SAAF.usable(out);      /* 🧹 P1 */
     if (out) return { text: out };
     /* khali jawab: aksar MAX_TOKENS soch mein khatam — thora sa aur maango */
     var fr = String((cand && cand.finishReason) || "");
@@ -4769,6 +5280,7 @@ async function askAI(wasVoice){
 
   if (out) {
     askAI._retried = false;
+    try { NAAP.mark("brain"); NAAP.cur && (NAAP.cur.brain = aiState.provider || BRAIN.lastUsed || "?"); } catch (e) {}   /* 📊 P0 */
     thinking = false; setOrb("idle");
     if (lu && !geminiChat.toolsUsed && out.length < 400) cachePut(cacheKey(lu), out);
     reply(out, wasVoice);
@@ -4794,6 +5306,7 @@ async function askAI(wasVoice){
   askAI._retried = false;
   aiState.provider = "—";
 
+  try { NAAP.cur && (NAAP.cur.err = code); } catch (e) {}   /* 📊 P0 */
   reply(DIMAAG.failMessage(), wasVoice);
 }
 
@@ -5226,7 +5739,7 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 
 /* ---------- SETTINGS TAB ---------- */
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v4.8.0)
+   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v4.9.0)
    ---------------------------------------------------------------------------
    Purana bug (user ne pakda): "girlfriend mode on karta hun, groq key lagata
    hun — thori der baad wo option khud band ho jata hai."
@@ -5456,6 +5969,67 @@ function refreshHandsFreeStatus(){
   try { $("#batStatus").textContent = "Status: " + (window.MayaBridge.batteryUnrestricted() ? "✅ SHIELDED (unrestricted)" : "⚠️ NOT shielded — button dabao"); } catch(e){}
   try { $("#asStatus").textContent = "Status: " + (window.MayaBridge.accessibilityEnabled() ? "✅ AUTO-SEND ON" : "OFF — button dabao aur MAYA AutoSend ON karo"); } catch(e){}
 }
+/* ═══ 🧪 MAYA LAB — switches, baseline, harvest, diagnostic ═══ */
+function labPaint(){
+  var f = FLAGS.load(), n, h;
+  n = $("#labNaap");  if (n) n.checked = f.naap === true;
+  n = $("#labSaaf");  if (n) n.checked = f.saaf === true;
+  n = $("#labMalik"); if (n) n.checked = f.malik === true;
+  h = $("#labHint");
+  if (h) {
+    var on = [];
+    if (f.naap) on.push("📊 naap");
+    if (f.saaf) on.push("🧹 saaf");
+    if (f.malik) on.push("👑 malik");
+    h.className = "ui-hint" + (on.length ? " ok" : "");
+    h.textContent = on.length ? ("Chalu: " + on.join(" · ") + "   •   " + NAAP.hist.length + " turn naape ja chuke")
+                              : "Sab band — Maya bilkul purane tareeqe par chal rahi hai.";
+  }
+}
+(function(){
+  function sw(id, key, note){
+    var el = $("#" + id);
+    if (!el) return;
+    el.addEventListener("change", function(){
+      FLAGS.set(key, el.checked);
+      labPaint();
+      toast((el.checked ? "✅ ON — " : "⭕ OFF — ") + note);
+    });
+  }
+  sw("labNaap",  "naap",  "📊 naap");
+  sw("labSaaf",  "saaf",  "🧹 saaf zubaan");
+  sw("labMalik", "malik", "👑 malik profile");
+
+  function show(txt){
+    var el = $("#labOut");
+    if (!el) return;
+    el.classList.add("show"); el.style.display = "block";
+    el.textContent = txt;
+    el.scrollTop = 0;
+  }
+
+  var b = $("#labBaseline");
+  if (b) b.addEventListener("click", function(){ show(NAAP.report()); });
+
+  b = $("#labHarvest");
+  if (b) b.addEventListener("click", function(){ show(HARVEST.report()); });
+
+  b = $("#labDiag");
+  if (b) b.addEventListener("click", function(){
+    var txt = DIAG.build();
+    show(txt);
+    var ok = DIAG.copy(txt);
+    toast(ok ? "📋 Copy ho gaya — ab paste kar do" : "⚠️ Copy nahi hua — upar se khud copy karo");
+    pushLog("DIAGNOSTIC copy" + (ok ? " ✅" : " (manual)"));
+  });
+
+  b = $("#labClear");
+  if (b) b.addEventListener("click", function(){
+    NAAP.clear(); labPaint(); show("🗑️ Naap ka data mit gaya. Ab se nayi ginti shuru.");
+    toast("🗑️ Naap saaf");
+  });
+})();
+
 /* ═══ 🐟 FISH — library, test, aur DOCTOR ═══ */
 (function(){
   var lb = $("#fishLib"), tb = $("#fishTest"), db = $("#fishDoctor");
@@ -5750,7 +6324,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v4.8.0 — DOCTOR REPORT");
+  out.push("MAYA v4.9.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
@@ -5882,6 +6456,7 @@ function awaazFillSelects(){
   }
   edgeFillVoices();
   fishFillVoices();
+  try { labPaint(); } catch (e) {}
 }
 
 /* 🌊 EDGE ka awaaz-picker. "auto" pehle — zubaan/persona dekh kar khud chunta hai. */
@@ -6075,6 +6650,7 @@ if (!chatHist.length) {
 /* ---------- cleanSpeech FIX (yeh function core mein call hota tha par defined nahi tha — v4 fix) ---------- */
 function cleanSpeech(text){
   var t = String(text || "");
+  if (typeof SAAF !== "undefined") t = SAAF.usable(t) || t;   /* 🧹 P1: soch kabhi BOLI na jaye */
   t = t.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");                       /* markdown link → text */
   t = t.replace(/https?:\/\/\S+/g, " ");                                /* raw URLs hatao */
   t = t.replace(/[\uD83C\uDC00-\uD83E\uDEFF\u2600-\u27BF\uFE0F\u2190-\u21FF\u2B00-\u2BFF]/gu, " "); /* emojis */
@@ -6119,10 +6695,18 @@ sysPrompt = function(){
       "te":"Reply in Telugu.", "mr":"Reply in Marathi.", "gu":"Reply in Gujarati.",
       "kn":"Reply in Kannada.", "ml":"Reply in Malayalam."
     };
-    p += "\nLANGUAGE RULE: " + (LR[settings.lang || "roman-ur"] || LR["roman-ur"]);
+    /* 🗣️ ZUBAAN (P1): pehle do mutazad hukm the — RULE(3) "user ki script mirror
+       karo" aur LANGUAGE RULE "Reply in Hindi (Devanagari)". Model ne baad wala
+       maana aur Roman Urdu bolne par Devanagari mila. Ab MIRROR pehle, setting
+       sirf tab jab script ka pata na chale. */
+    p += "\nLANGUAGE RULE: SAB SE PEHLE user ki script ki NAQAL karo \u2014 jis script mein user ne likha, " +
+         "bilkul usi mein jawab do (Roman Urdu \u2192 Roman Urdu, \u0627\u0631\u062F\u0648 \u2192 \u0627\u0631\u062F\u0648, English \u2192 English, " +
+         "Devanagari \u2192 Devanagari). Agar user ki script saaf pata na chale to: " +
+         (LR[settings.lang || "roman-ur"] || LR["roman-ur"]);
     if (settings.remember === false) p += "\n(Auto memory save OFF hai — facts silently store mat karo.)";
     if (settings.favSong) p += "\nUser's FAVORITE SONG: " + settings.favSong + " — 'mera favorite gaana' par yehi chalao.";
     if (settings.musicApp && settings.musicApp !== "youtube") p += "\nMusic app preference: " + settings.musicApp + ".";
+    if (typeof MALIK !== "undefined") p += MALIK.block();   /* \uD83D\uDC51 P1 */
     if (settings.convoMode) p += "\nCONVERSATION MODE: thora zyada emotional/expressive tone — real insaan jaisi feel.";
   } catch(e){}
   return p;
@@ -6297,7 +6881,7 @@ document.querySelectorAll(".setgrp-head").forEach(function(h){
   h.addEventListener("click", function(){ h.parentElement.classList.toggle("open"); });
 });
 
-/* NOTE: loadV4Form / doosra saveSettings handler v4.8.0 mein khatam.
+/* NOTE: loadV4Form / doosra saveSettings handler v4.9.0 mein khatam.
    Ab SETFORM (upar) hi settings ka wahid darwaza hai — dekho SET_FIELDS.
    Sliders live update karte hain, baqi sab SAVE par ek hi tarteeb se. */
 try { $("#sRadius").addEventListener("input", function(){ $("#radiusVal").textContent = this.value; settings.radius = parseInt(this.value,10) || 18; saveSettings(); applyTheme(); }); } catch(e){}
@@ -6388,8 +6972,8 @@ function startProactive(){
 
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
-try { $("#hudBuild").textContent = "v4.8.0"; } catch(e){}
-try { pushLog("MAYA v4.8.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
+try { $("#hudBuild").textContent = "v4.9.0"; } catch(e){}
+try { pushLog("MAYA v4.9.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
 
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD" runtime   (v4.1.0)
@@ -6648,7 +7232,7 @@ var MayaUI = (function () {
     for (i = 0; i < reopen.length; i++) delCls(reopen[i], "is-open");
 
     var out = [];
-    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v4.8.0");
+    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v4.9.0");
     out.push("WEBVIEW: Chrome " + (window.__webviewMajor || "?") + (window.__oldWebview ? " (PURANA)" : ""));
     out.push("");
     out.push("VISIBLE: " + okc + "   INVISIBLE: " + bad + (bad ? "  \u274C" : "  \u2705"));
