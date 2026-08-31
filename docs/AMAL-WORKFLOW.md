@@ -473,3 +473,139 @@ Test ka safar: `520 → P0 +30 → 550 → … → 887`
 
 > **Bina P0 ke baqi sab "shayad behtar hua" rahega.
 > P0 ke sath har phase ka SABOOT hoga.**
+
+---
+
+# HISSA K — 🔍 DOOSRA AUDIT (round 2): 7 aur chhed
+
+Pehle round mein 8 mile the. Dobara dekha — **7 aur** mile. Ek to naap kar sabit hua.
+
+---
+
+## 🕳️ CHHED 9 — PROMPT KHUD PHOOL KAR PHAT JAYEGA *(naap kar sabit)*
+
+```
+sysPrompt ka sabit matn        ~ 2,842 harf   (~710 token)
+TOOL_DECLS ka JSON             ~ 7,958 harf   (~1,989 token)
+                                 ─────────────────────────
+P2 (text protocol) ke baad     ~ 2,700 token ka SYSTEM PROMPT
+```
+Aur is ke oopar **har turn** ye bhi jurta hai:
+`persona · active skill · custom skills · memory summary · diary · 15 facts ·
+language rule · favorite song · music app · gf mode`
+
+**Muft models par ye tabahi hai:**
+- Har request mein ~3,000 token — rate limit **3 guna jaldi** khatam
+- Model ahem qawaid ko **matn ke pahaar mein kho** deta hai
+- Chhote context wale models mein **jagah hi nahi bachegi**
+
+**Ilaj — TOP-K TOOLS:** poore 33 tools bhejne ki zaroorat hi nahi hai.
+Router pehle se jaanta hai ke hukm kis taraf ka hai:
+```
+"britness barhao"  →  sirf 4 tool bhejo:
+                      brightness_control · volume_control · torch_control · notify
+                      (~180 token, 1989 nahi)  =  10 guna kam
+```
+**Aur maze ki baat: ye teiz hone ke SATH SATH zyada SAHIH bhi hoga** — jab 33 ke bajaye
+4 hi samne hon to model ghalat tool chunega hi nahi.
+
+---
+
+## 🕳️ CHHED 10 — P1 aur P5 aapas mein LARTE hain
+
+- **P1 kehta hai:** `<think>…</think>` kaat do.
+- **P5 kehta hai:** jumla banta hi foran bol do.
+
+**Magar `<think>` ko kaatne ke liye `</think>` ka intezar karna parta hai!**
+Agar hum stream par seedha bolna shuru kar den, to Maya soch **bol degi** —
+bilkul wahi bug jo P1 theek karta hai.
+
+**Ilaj:** sanitizer ko **stream-aware** banana parega —
+matn ko tab tak rok kar rakho jab tak "mehfooz kinara" na aa jaye
+(`</think>` mile, ya pehla saaf jumla mukammal ho). Ye P5 ka **hissa** hai,
+baad ki soch nahi.
+
+---
+
+## 🕳️ CHHED 11 — 7 phase = 7 APK build? **Nahi. Ye behtar ho sakta hai** ✅
+
+Har phase par aap ko GitHub par release chalana, APK banwana, install karna parega.
+**7 dafa.** Ye sab se bara *waqt* ka kharcha hai.
+
+**Magar Qanoon 1 (feature flags) is ka hal khud hai:**
+```
+EK APK mein P0 + P1 + P2 ka poora code bhej do — P1/P2 ka switch OFF
+   ↓ aap ek dafa build karo
+LAB se switch ON karo, ek ek kar ke, BINA nayi APK ke
+```
+**7 build → 3 build.** Aur agar kuch bura lage, switch OFF — **foran**, build ka intezar nahi.
+
+> Ye maine pehle nahi socha tha. Flags sirf hifazat nahi — **waqt bhi bachate hain.**
+
+---
+
+## 🕳️ CHHED 12 — Sandbox is session mein DO DAFA reset hua
+
+Do dafa git history gayab hui (dono dafa GitHub se bahal ki). Agar ye kisi phase ke
+**beech** mein ho jata to kaam zaya ho sakta tha.
+
+**Qanoon 8 (naya):** har mukammal qadam par **commit + push** — phase ke aakhir mein nahi.
+GitHub hi asal mehfooz jagah hai, sandbox nahi.
+
+---
+
+## 🕳️ CHHED 13 — Aap ka phone kaunsa hai — **mujhe pata hi nahi**
+
+Poori app ek `check-oldwebview-css.js` test rakhti hai kyunke purane WebView pehle
+masla ban chuke hain. Magar main ye maan kar chal raha hoon ke:
+
+| Feature | Chahiye |
+|---|---|
+| Fish/Edge ka MP3 | `Blob` + `URL.createObjectURL` |
+| 👁️ AANKHEIN | Camera + bara base64 WebView ke aar paar |
+| 🗣️ STREAM | Naya WebView, chalta hua SSE |
+
+**Agar aap ka WebView purana hua to P4/P5 ka naqsha badalna parega.**
+Ye maloomat P0 ka diagnostic button de dega — magar **abhi** poochh lena behtar hai.
+
+---
+
+## 🕳️ CHHED 14 — Privacy: sirf KEYS chhupana kaafi nahi
+
+- **Golden harvest** aap ki `maya_chat` parhega → us mein **contact ke naam, phone
+  number, zaati baatein** hain.
+- **Diagnostic copy** mein bhi wohi khatra.
+
+**Qanoon:** dono jagah **naam aur number bhi chhupein** (`Ali` → `<naam>`,
+`03001234567` → `<number>`). Aur golden set **phone se bahar bheja hi na jaye** —
+sirf uska **hisab** (kitne sahih, kitne ghalat) dikhe.
+
+---
+
+## 🕳️ CHHED 15 — "Mukammal" ki koi tareef nahi
+
+Har phase kuch aur jorta hai. To **khatam kab hoga?** Bina is ke ye kaam kabhi na
+ruk-ne wala ban jayega.
+
+**MINIMUM MUKAMMAL MAYA (P0+P1+P2+P3):**
+> Soch kabhi bahar nahi · har dimaag tools chala sakta hai · jhoot nahi bolti ·
+> khatarnak kaam ijazat se · har amal wapas ho sakta hai · saboot naapa gaya hai.
+>
+> **Yahan ruk jayen to bhi Maya ek MUKAMMAL, mehfooz, bharosemand assistant hai.**
+
+P4/P5/P6 us ke baad **"tabahi"** hain — zaroori nahi, **mazedar** hain.
+Ye farq likha hona chahiye taake dabao na rahe.
+
+---
+
+# 📌 DOOSRE AUDIT KA NATIJA
+
+| | |
+|---|---|
+| **Naye chhed** | 7 (kul 15) |
+| **Sab se ahem** | CHHED 9 — prompt 2,700 token ho jata; ilaj **TOP-K tools** (10× kam, aur zyada sahih) |
+| **Sab se faidemand** | CHHED 11 — flags se **7 build → 3 build** |
+| **Sab se zaroori** | CHHED 14 — naam/number bhi chhupein, sirf keys nahi |
+| **Naya Qanoon 8** | Har qadam par commit + push (sandbox bharose ke laiq nahi) |
+
+Plan mein ye sab shamil kar diya gaya. **Ab naqsha mukammal hai.**
