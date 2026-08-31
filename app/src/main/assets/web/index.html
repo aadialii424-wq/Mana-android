@@ -544,7 +544,7 @@
         <label class="f">AWAAZ KI RAFTAR: <span id="rateVal">1.00</span>x</label>
         <input type="range" id="sRate" min="0.7" max="1.4" step="0.05" value="1">
         <div class="switchrow"><span>🔊 Maya bol kar jawab de</span>
-          <label class="switch"><input type="checkbox" id="sVoice"><i></i></label></div>
+          <label class="switch"><input type="checkbox" id="sVoiceOn"><i></i></label></div>
         <div class="switchrow"><span>🔁 Auto-listen (jawab ke baad khud sune)</span>
           <label class="switch"><input type="checkbox" id="sAuto"><i></i></label></div>
         <div class="switchrow"><span>👂 ALWAYS-ON Wake Word — "Maya"/"Boss" (bg + screen off try)</span>
@@ -2647,7 +2647,7 @@ function loadSettingsForm(){
   $("#sPitch").value = settings.pitch || 1.05; $("#pitchVal").textContent = Number(settings.pitch || 1.05).toFixed(2);
   $("#sVoice").value = settings.voiceName || "";
   $("#sModel").value = settings.model;
-  $("#sVoice").checked = settings.voiceOn; $("#sAuto").checked = settings.autoListen; $("#sWake").checked = !!settings.wakeWord; $("#sTurbo").checked = settings.turbo !== false; $("#sNotifOn").checked = settings.notifSpeak === true; $("#sBatAlert").checked = settings.batteryAlert !== false;
+  $("#sVoiceOn").checked = settings.voiceOn; $("#sAuto").checked = settings.autoListen; $("#sWake").checked = !!settings.wakeWord; $("#sTurbo").checked = settings.turbo !== false; $("#sNotifOn").checked = settings.notifSpeak === true; $("#sBatAlert").checked = settings.batteryAlert !== false;
 }
 $("#sRate").addEventListener("input", function(){ $("#rateVal").textContent = Number(this.value).toFixed(2); });
 $("#saveSettings").addEventListener("click", function(){
@@ -2678,7 +2678,7 @@ $("#saveSettings").addEventListener("click", function(){
   settings.pitch = parseFloat($("#sPitch").value) || 1.05;
   settings.voiceName = $("#sVoice").value;
   settings.model = $("#sModel").value;
-  settings.voiceOn = $("#sVoice").checked; settings.autoListen = $("#sAuto").checked; settings.turbo = $("#sTurbo").checked !== false;
+  settings.voiceOn = $("#sVoiceOn").checked; settings.autoListen = $("#sAuto").checked; settings.turbo = $("#sTurbo").checked !== false;
   geminiBadUntil = 0;
   settings.notifSpeak = $("#sNotifOn").checked; settings.batteryAlert = $("#sBatAlert").checked;
   if (NATIVE) { try { window.MayaBridge.notifSpeak(settings.notifSpeak); } catch(e){} }
