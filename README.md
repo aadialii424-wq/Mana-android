@@ -1,9 +1,27 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 4.1.0 "IRONCLAD" — 0-Budget Build • Android APK + Web PWA**
+**Version 4.2.0 "AWAAZ" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🎙️ v4.2.0 — AWAAZ ENGINE v6
+
+**Neural awaaz ab sach much bolti hai.** Pehle Gemini TTS ka raw PCM bina WAV header ke
+`<audio>` ko diya jata tha — is liye har dafa chup-chaap fail hota tha. Ab:
+
+- **44-byte WAV header** (sample rate mime se parhi jati hai) → Gemini ki studio awaaz chalti hai
+- **30 neural awaazein** + **9 mood** (warm / cheerful / calm / pro / hype / whisper / news / funny) + persona ka auto-mood
+- **3-tier fallback** — 🎭 Gemini → 🌊 Edge (optional) → 📱 phone. **Khamoshi kabhi nahi.**
+- **Har nakami ka naam** — key, quota, offline, WiFi-only, timeout… Settings aur Doctor dono mein saaf likha
+- **Data bachao** — 12 clips ka cache, in-flight de-dupe, 429 par 90s cooldown, WiFi-only switch, awaaz ke liye alag key
+- **Lambe jawab** ab tukron mein bolte hain (agla tukra pehle wale ke bajte waqt aa jata hai — beech mein khamoshi nahi)
+- **Har jawab par 🔊** — dobara suno / rok do
+- Hataya gaya: fish.audio (CORS red error) aur puter.js ka murda call
+- Theek kiya: slider `touchmove` ka console warning, aur raw error banner ab khamosh nishan hai
+
+Saboot: `npm test` → CSS check + 45 UI test + 118 voice-engine test.
+Tafseel: [`docs/AWAAZ-ENGINE-ARCHITECTURE.md`](docs/AWAAZ-ENGINE-ARCHITECTURE.md)
 
 ## 🆕 v4.1.0 "IRONCLAD" — Settings UI ground-up rebuild
 

@@ -266,7 +266,7 @@ class MainActivity : AppCompatActivity() {
     inner class MayaBridge {
 
         @JavascriptInterface
-        fun appVersion(): String = "4.1.0-native"
+        fun appVersion(): String = "4.2.0-native"
 
         /* v4.0.1: index.html boot-guard ye call karta hai — ab native alive flag true hota hai */
         @JavascriptInterface

@@ -199,6 +199,12 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative
 @supports(background:color-mix(in srgb,red 50%,blue)){.row.me .bubble{background:color-mix(in srgb,var(--accent) 16%,var(--bg1));border-color:color-mix(in srgb,var(--accent) 35%,transparent)}}
 .bubble .who{display:block;font-size:8px;letter-spacing:2px;font-weight:800;color:var(--accent);margin-bottom:4px}
 .bubble a{color:var(--accent2)}
+/* v4.2.0: har MAYA jawab par "dobara suno" */
+.say-btn{display:block;margin:7px 0 0;padding:3px 9px;font-size:11px;line-height:1.4;
+  background-color:var(--bg2,#171722);color:var(--accent2,#FFB347);
+  border:1px solid var(--line,#3a2a10);border-radius:999px;cursor:pointer;
+  -webkit-box-sizing:border-box;box-sizing:border-box}
+.say-btn[data-on="1"]{color:var(--accent,#FF7A1A);border-color:var(--accent,#FF7A1A)}
 .quickrow{display:flex;gap:8px;padding:8px 0;flex:none}
 .quick{background:var(--bg1);border:1px solid var(--line);color:var(--text1);border-radius:999px;
   padding:8px 13px;font-size:10.5px;font-weight:700;cursor:pointer;letter-spacing:.5px}
@@ -407,6 +413,13 @@ main{position:relative;min-height:0}
   background-color:var(--bg2,#171722);border:1px solid var(--line,#3a2a10);border-radius:9px;
   -webkit-box-sizing:border-box;box-sizing:border-box}
 .ui-label b{color:var(--accent2,#FFB347);font-size:12.5px;font-weight:800}
+.ui-hint{display:block;margin:-8px 0 12px;padding:7px 11px;
+  font-size:10.5px;line-height:1.55;letter-spacing:.3px;color:var(--text1,#A2A2B5);
+  background-color:var(--bg2,#171722);border:1px solid var(--line,#3a2a10);border-radius:8px;
+  -webkit-box-sizing:border-box;box-sizing:border-box}
+.ui-hint b{color:var(--accent2,#FFB347);font-weight:800}
+.ui-hint.ok{color:var(--ok,#39D98A)}
+.ui-hint.warn{color:var(--accent2,#FFB347)}
 .ui-label small{color:var(--text1,#A2A2B5);letter-spacing:0}
 .ui-input{display:block;width:100%;min-height:46px;margin:0;padding:12px 13px;
   font-family:inherit;font-size:13.5px;line-height:1.3;color:var(--text0,#F5F5FA);
@@ -521,7 +534,7 @@ nav{padding:8px 10px 10px}
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v4.1.0 — IRONCLAD — NAYA SETTINGS UI • PERSONAS • THEMES</div>
+  <div class="ver">v4.2.0 — AWAAZ ENGINE v6 • 30 NEURAL VOICES • 9 MOODS</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid #c85050; background:#3c0a0f; border-radius:12px; padding:12px; text-align:left;">
@@ -546,14 +559,14 @@ nav{padding:8px 10px 10px}
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v4.1.0 • 0-BUDGET • IRONCLAD UI</div>
+  <div class="dfoot">MAYA v4.2.0 • 0-BUDGET • AWAAZ ENGINE v6</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.1.0 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.2.0 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -714,7 +727,7 @@ nav{padding:8px 10px 10px}
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.1.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.2.0</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -858,6 +871,32 @@ nav{padding:8px 10px 10px}
         <div class="ui-head"><span class="ui-ic">🎧</span><span class="ui-ttl">AWAAZ — VOICE STUDIO</span><span class="ui-chev">▼</span></div>
         <div class="ui-body">
           <div class="ui-field">
+            <div class="ui-label">🎙️ AWAAZ ENGINE</div>
+            <select class="ui-input ui-select" id="sVoiceEngine">
+              <option value="auto">🪄 Auto — neural, warna phone (behtareen)</option>
+              <option value="neural">🎭 Sirf Neural — Gemini studio awaaz</option>
+              <option value="device">📱 Sirf Phone — 0 data, foran</option>
+              <option value="off">🔇 Band — Maya khamosh</option>
+            </select>
+            <div class="ui-hint" id="awaazStatus">—</div>
+          </div>
+          <div class="ui-field">
+            <div class="ui-label">🎭 NEURAL AWAAZ (30 mein se chuno)</div>
+            <select class="ui-input ui-select" id="sGVoice"></select>
+          </div>
+          <div class="ui-field">
+            <div class="ui-label">🎨 ANDAAZ / MOOD</div>
+            <select class="ui-input ui-select" id="sVoiceMood"></select>
+          </div>
+          <div class="ui-row">
+            <div class="ui-row-txt">📶 Neural sirf WiFi par</div>
+            <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="sNeuralWifi"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
+          </div>
+          <div class="ui-row">
+            <div class="ui-row-txt">🌊 Edge TTS backup (muft, bina key)</div>
+            <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="sEdgeTts"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
+          </div>
+          <div class="ui-field">
             <div class="ui-label">SUNNE KI ZUBAAN (STT)</div>
             <select class="ui-input ui-select" id="sStt">
               <option value="ur-PK">اردو Urdu (Pakistan)</option>
@@ -881,6 +920,7 @@ nav{padding:8px 10px 10px}
             <select class="ui-input ui-select" id="sVoice"><option value="">Auto (engine default)</option></select>
           </div>
           <button type="button" class="ui-btn ui-btn-ghost" id="testVoice">🎧 TEST AWAAZ SUNO</button>
+          <div class="ui-hint" id="awaazWhy">Test karo — niche likha aayega ke kis engine ne bola.</div>
 
           <div class="ui-field">
             <div class="ui-label">🎵 AWAAZ KI PITCH: <b id="pitchVal">1.05</b></div>
@@ -951,8 +991,9 @@ nav{padding:8px 10px 10px}
             <input class="ui-input" id="sGhKey" type="password" placeholder="github_pat_...">
           </div>
           <div class="ui-field">
-            <div class="ui-label">FISH AUDIO KEY (neural awaaz — optional)</div>
-            <input class="ui-input" id="sFishKey" type="password" placeholder="Free signup at fish.audio">
+            <div class="ui-label">AWAAZ KE LIYE ALAG GEMINI KEY (optional)</div>
+            <input class="ui-input" id="sTtsKey" type="password" placeholder="Khaali = upar wali key use hogi">
+            <div class="ui-hint">Alag key = alag quota. Neural awaaz baat-cheet ka quota nahi khaati.</div>
           </div>
           <div class="ui-row">
             <div class="ui-row-txt">⚡ TURBO MODE (fast responses)</div>
@@ -1000,7 +1041,7 @@ nav{padding:8px 10px 10px}
       </div>
 
       <button type="button" class="ui-btn ui-btn-save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v4.1.0 — IRONCLAD SETTINGS • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v4.2.0 — AWAAZ ENGINE • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -1015,14 +1056,20 @@ nav{padding:8px 10px 10px}
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.1.0 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.2.0 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
+window.__errLog = [];
 window.__consoleErr = function(m){
   try {
+    var t = String(m);
+    window.__errLog.push(t.slice(0, 300));
+    if (window.__errLog.length > 30) window.__errLog.shift();
+    /* v4.2.0: poora raw error user ke munh par nahi maarte — sirf chhota nishan.
+       Tafseel Settings -> DOCTOR mein milti hai (aur badge tap karne par). */
     var b = document.getElementById("dbgBadge");
-    if (b) { b.textContent = "E: " + String(m).slice(0, 60); b.style.color = "#f87171"; }
+    if (b) { b.textContent = "\u26A0 " + window.__errLog.length; b.style.color = "#FFC24B"; b.title = t.slice(0, 200); }
   } catch (x) {}
 };
 /* ===== MAYA BOOT-GUARD (Doctor Build) — ye script sab se pehle chalti hai =====
@@ -1077,11 +1124,11 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v4.1.0 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v4.2.0 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
-var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", groqModel:"llama-3.3-70b-versatile", ghKey:"", fishKey:"", fishVoice:"f1d76cc64392469ba74779e8031aa0cc", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"maya", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true, gender:"male", phone:"", musicApp:"youtube", favSong:"", ytChannel:"", assistName:"Maya", gfMode:false, persona:"maya", remember:true, convoMode:false, lang:"roman-ur", proactive:false, theme:"obsidian", accent:"#FF7A1A", radius:18, fontScale:1, edgeGlow:false };
+var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", groqModel:"llama-3.3-70b-versatile", ghKey:"", ttsKey:"", voiceEngine:"auto", gVoice:"Kore", voiceMood:"auto", neuralWifiOnly:false, neuralMaxChars:1400, edgeTTS:false, ttsModel:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"maya", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true, gender:"male", phone:"", musicApp:"youtube", favSong:"", ytChannel:"", assistName:"Maya", gfMode:false, persona:"maya", remember:true, convoMode:false, lang:"roman-ur", proactive:false, theme:"obsidian", accent:"#FF7A1A", radius:18, fontScale:1, edgeGlow:false };
 var settings = Object.assign({}, DEFAULTS);
 try {
   var s1 = JSON.parse(localStorage.getItem("maya_settings") || "null");
@@ -1158,7 +1205,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v4.1.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v4.2.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1288,103 +1335,531 @@ function currentArtist(text) {
   return VOICE_ARTISTS.maya;
 }
 
-/* ═══ FISH AUDIO TTS (S2.1 Pro Free — studio-grade, 83 langs) ═══ */
-var FISH_TTS = { audio: null, processing: false };
-var FISH_VOICES = {
-  maya:    { name: "✨ MAYA — pyari warm female", ref: "f1d76cc64392469ba74779e8031aa0cc" },
-  softie:  { name: "🌸 SOFTIE — gentle & sweet", ref: "91eac759963f43b996c558abd0ff5275" },
-  lovely:  { name: "💖 LOVELY — warm & caring", ref: "fc720bb8491244a58d17a6cc42fa3315" },
-  cozy:    { name: "🌙 COZY — soft bedtime", ref: "63f32cf9f10c42d9ae91153078485156" },
-  anime:   { name: "🎨 ANIME — cute expressive", ref: "c7dc9d331caa401e937d884667fc4bdd" },
-  whisper: { name: "🌌 WHISPER — soft & intimate", ref: "e744321b27354d2793ef40e9524f82f9" }
-};
-function fishTTS_stop() { try { if (FISH_TTS.audio) { FISH_TTS.audio.pause(); FISH_TTS.audio = null; } } catch(e) {} }
-async function fishTTS_speak(text, voiceRef, onDone, onFail) {
-  if (!settings.fishKey) { onFail(); return; }
-  FISH_TTS.processing = true;
-  try {
-    var res = await fetch("https://api.fish.audio/v1/tts", {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer " + settings.fishKey,
-        "Content-Type": "application/json",
-        "model": "s2.1-pro-free"
-      },
-      body: JSON.stringify({
-        text: text,
-        reference_id: voiceRef || "f1d76cc64392469ba74779e8031aa0cc",
-        format: "mp3"
-      })
-    });
-    if (!res.ok) {
-      var errText = "";
-      try { errText = await res.text(); } catch(e) {}
-      pushLog("Fish Audio HTTP " + res.status + ": " + errText.slice(0, 80));
-      FISH_TTS.processing = false; onFail(); return;
+/* ═══════════════════════════════════════════════════════════════════════════
+   🎙️  AWAAZ ENGINE v6  —  MAYA ki awaaz ka WAHID rasta   (app v4.2.0)
+   ---------------------------------------------------------------------------
+   Kyun bana: purana code 4 adhoore TTS raste chala raha tha, Gemini ka raw PCM
+   bina WAV header ke <audio> ko deta tha (isi liye neural awaaz kabhi bolti hi
+   nahi thi), ek third-party TTS CORS se red error deta tha, aur ek TTS function
+   call to hota tha magar kahin define hi nahi tha.
+   Ab: EK darwaza -> AWAAZ.speak(). Har nakami ka NAAM. Khamoshi kabhi nahi.
+   Tiers:  1) 🎭 Gemini TTS   2) 🌊 Edge TTS (optional)   3) 📱 Device TTS
+   Tafseel: docs/AWAAZ-ENGINE-ARCHITECTURE.md
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 30 Gemini prebuilt awaazein  (g: f = zanana, m = mardana) */
+var GEMINI_VOICES = [
+  { id:"Kore",         g:"f", label:"🌸 Kore — garam aur pyari" },
+  { id:"Zephyr",       g:"f", label:"☀️ Zephyr — roshan, khush-mizaj" },
+  { id:"Leda",         g:"f", label:"🌿 Leda — narm, jawan" },
+  { id:"Aoede",        g:"f", label:"🎶 Aoede — halki, behti hui" },
+  { id:"Autonoe",      g:"f", label:"💫 Autonoe — chamakdar" },
+  { id:"Callirrhoe",   g:"f", label:"🕊️ Callirrhoe — sukoon bhari" },
+  { id:"Despina",      g:"f", label:"🍃 Despina — hamwaar, aaram-deh" },
+  { id:"Erinome",      g:"f", label:"🔷 Erinome — saaf aur seedhi" },
+  { id:"Gacrux",       g:"f", label:"🎓 Gacrux — thehri, tajarba-kaar" },
+  { id:"Laomedeia",    g:"f", label:"🎉 Laomedeia — chulbuli" },
+  { id:"Pulcherrima",  g:"f", label:"💃 Pulcherrima — jazbaati" },
+  { id:"Sulafat",      g:"f", label:"🔥 Sulafat — garam-josh" },
+  { id:"Vindemiatrix", g:"f", label:"🤍 Vindemiatrix — meharban" },
+  { id:"Achernar",     g:"f", label:"🌙 Achernar — bohat narm" },
+  { id:"Puck",         g:"m", label:"🎭 Puck — shararti, upbeat" },
+  { id:"Charon",       g:"m", label:"📖 Charon — pur-sukoon, malumati" },
+  { id:"Fenrir",       g:"m", label:"⚡ Fenrir — josheela" },
+  { id:"Orus",         g:"m", label:"🏛️ Orus — mazboot, ba-raob" },
+  { id:"Enceladus",    g:"m", label:"🌬️ Enceladus — sargoshi jaisi" },
+  { id:"Iapetus",      g:"m", label:"💎 Iapetus — saaf, khanakti" },
+  { id:"Umbriel",      g:"m", label:"😌 Umbriel — bay-fikr" },
+  { id:"Algieba",      g:"m", label:"🎩 Algieba — hamwaar, shaista" },
+  { id:"Algenib",      g:"m", label:"🪨 Algenib — bhari, khurdri" },
+  { id:"Rasalgethi",   g:"m", label:"🧠 Rasalgethi — ilmi" },
+  { id:"Achird",       g:"m", label:"🤝 Achird — dostana" },
+  { id:"Schedar",      g:"m", label:"⚖️ Schedar — thehra hua" },
+  { id:"Alnilam",      g:"m", label:"🎯 Alnilam — pur-aetmaad" },
+  { id:"Sadaltager",   g:"m", label:"📚 Sadaltager — sanjeeda" },
+  { id:"Sadachbia",    g:"m", label:"✨ Sadachbia — zinda-dil" },
+  { id:"Zubenelgenubi",g:"m", label:"🗣️ Zubenelgenubi — aam bol-chaal" }
+];
+
+/* Mood = Gemini ko diya jane wala andaaz ka hukm (yahi "mazedar awaaz" ka raaz hai) */
+var VOICE_MOODS = [
+  { id:"auto",     label:"🪄 Auto — persona ke mutabiq", p:"" },
+  { id:"warm",     label:"🤗 Warm — pyar bhari",         p:"Say this warmly and affectionately, like a close friend who cares" },
+  { id:"cheerful", label:"😄 Cheerful — khush",          p:"Say this cheerfully, with a bright smile in your voice" },
+  { id:"calm",     label:"😌 Calm — pur-sukoon",         p:"Say this calmly and softly, at a relaxed pace" },
+  { id:"pro",      label:"💼 Pro — professional",        p:"Say this in a crisp, confident, professional tone" },
+  { id:"hype",     label:"🔥 Hype — josheela",           p:"Say this with high energy and excitement" },
+  { id:"whisper",  label:"🤫 Whisper — sargoshi",        p:"Whisper this softly and gently" },
+  { id:"news",     label:"📰 News — anchor",             p:"Read this clearly like a professional news anchor" },
+  { id:"funny",    label:"🎭 Funny — shararti",          p:"Say this playfully with a mischievous, teasing tone" }
+];
+
+/* Persona -> default mood (jab mood = auto ho) */
+var PERSONA_MOOD = { maya:"warm", friday:"pro", jarvis:"pro", venom:"funny", gf:"warm", coach:"hype", teacher:"calm" };
+
+var AWAAZ = {
+  VER: 6,
+  API: "https://generativelanguage.googleapis.com/v1beta/models/",
+  MODELS: ["gemini-2.5-flash-preview-tts", "gemini-3.1-flash-tts-preview", "gemini-2.5-pro-preview-tts"],
+  CHUNK: 420,          /* ek request mein zyada se zyada itne harf */
+  CACHE_MAX: 12,       /* aakhri itni clips yaad rakho */
+  TIMEOUT: 25000,
+  COOLDOWN: 90000,     /* 429 ke baad itni der Gemini ko haath na lagao */
+
+  audio: null,         /* abhi bajta hua <audio> */
+  gen: 0,              /* har naye speak par barhta hai -> purane callbacks mar jate hain */
+  xhrs: [],            /* chalte hue requests (stop par abort) */
+  flight: {},          /* key -> [callbacks]  (do dafa same clip na mangwao) */
+  cache: [],           /* [{ k, url }] LRU */
+  model: "",           /* jo model chal gaya wo yaad */
+  keyBad: false,
+  cooldownUntil: 0,
+  engine: "-",         /* aakhri engine jo asal mein bola: neural | edge | device | off */
+  err: "",             /* aakhri nakami ka code */
+  errText: "",
+  spoke: 0,            /* kitni dafa neural bola (Doctor ke liye) */
+  cacheHits: 0,
+
+  /* ---------- settings ka ek hi tarjuma ---------- */
+  cfg: function () {
+    var s = (typeof settings === "object" && settings) ? settings : {};
+    var mode = s.voiceEngine || "auto";
+    if (s.voiceOn === false) mode = "off";
+    return {
+      on: s.voiceOn !== false,
+      mode: mode,                                        /* auto | neural | device | off */
+      key: String(s.ttsKey || s.apikey || "").trim(),
+      voice: s.gVoice || "Kore",
+      mood: s.voiceMood || "auto",
+      wifiOnly: s.neuralWifiOnly === true,
+      maxChars: +(s.neuralMaxChars || 1400),
+      edge: s.edgeTTS === true,
+      persona: s.persona || "maya"
+    };
+  },
+
+  isWifi: function () {
+    try {
+      var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (!c || !c.type) return true;                    /* pata hi nahi to rok mat */
+      return c.type === "wifi" || c.type === "ethernet" || c.type === "unknown";
+    } catch (e) { return true; }
+  },
+
+  /* ---------- kyun neural nahi chal sakta? "" = chal sakta hai ---------- */
+  blockReason: function (text) {
+    var c = AWAAZ.cfg();
+    if (c.mode === "off") return "OFF";
+    if (c.mode === "device") return "DEVICE_MODE";
+    if (!c.key) return "KEY_MISSING";
+    if (AWAAZ.keyBad) return "KEY_BAD";
+    if (navigator.onLine === false) return "OFFLINE";
+    if (Date.now() < AWAAZ.cooldownUntil) return "QUOTA";
+    if (c.wifiOnly && !AWAAZ.isWifi()) return "MOBILE_DATA";
+    if (text && text.length > c.maxChars) return "TOO_LONG";
+    return "";
+  },
+
+  /* ---------- har code ka insani matlab ---------- */
+  WHY: {
+    OFF: "Awaaz band hai (Settings se on karo)",
+    DEVICE_MODE: "Aap ne sirf phone ki awaaz chuni hai",
+    KEY_MISSING: "Gemini key nahi hai — Settings mein daalo",
+    KEY_BAD: "Gemini key ghalat ya band hai",
+    OFFLINE: "Internet nahi hai",
+    QUOTA: "Google ka free quota abhi khatam — thori der baad",
+    MOBILE_DATA: "Mobile data par neural band hai (WiFi-only on hai)",
+    TOO_LONG: "Jawab bohat lamba tha",
+    TIMEOUT: "Google ne waqt par jawab nahi diya",
+    NETWORK: "Network reach nahi hua",
+    MODEL: "Ye TTS model is key par nahi chalta",
+    NO_AUDIO: "Google ne audio nahi bheji",
+    DECODE: "Audio kharab aayi",
+    AUDIO_BLOCKED: "Phone ne audio bajane nahi di",
+    SEND: "Request bheji nahi ja saki"
+  },
+  why: function (code) { return AWAAZ.WHY[code] || (code ? ("Error: " + code) : ""); },
+
+  /* ---------- base64 -> bytes ---------- */
+  b64: function (b64) {
+    var bin = atob(String(b64 || "").replace(/\s+/g, ""));
+    var n = bin.length, out = new Uint8Array(n);
+    for (var i = 0; i < n; i++) out[i] = bin.charCodeAt(i) & 255;
+    return out;
+  },
+
+  /* ---------- mime se sample rate (hard-code mat karo warna awaaz teez/dheemi) ---------- */
+  rateOf: function (mime) {
+    var m = /rate=(\d+)/i.exec(String(mime || ""));
+    return m ? parseInt(m[1], 10) : 24000;
+  },
+
+  /* ═══ YEHI ASAL FIX: raw PCM par 44-byte WAV header ═══
+     Gemini deta hai: audio/L16;codec=pcm;rate=24000  = s16le, mono, 24 kHz.
+     Bina header ke koi <audio> ise nahi bajata. */
+  wav: function (pcm, rate, channels, bits) {
+    rate = rate || 24000; channels = channels || 1; bits = bits || 16;
+    var blockAlign = channels * bits / 8;
+    var out = new Uint8Array(44 + pcm.length);
+    var dv = new DataView(out.buffer);
+    function s(off, str) { for (var i = 0; i < str.length; i++) dv.setUint8(off + i, str.charCodeAt(i)); }
+    s(0, "RIFF");
+    dv.setUint32(4, 36 + pcm.length, true);
+    s(8, "WAVE");
+    s(12, "fmt ");
+    dv.setUint32(16, 16, true);              /* fmt chunk size */
+    dv.setUint16(20, 1, true);               /* PCM */
+    dv.setUint16(22, channels, true);
+    dv.setUint32(24, rate, true);
+    dv.setUint32(28, rate * blockAlign, true);
+    dv.setUint16(32, blockAlign, true);
+    dv.setUint16(34, bits, true);
+    s(36, "data");
+    dv.setUint32(40, pcm.length, true);
+    out.set(pcm, 44);
+    return out;
+  },
+
+  /* ---------- jawab mein se audio part dhoondo ---------- */
+  pickAudio: function (data) {
+    try {
+      var parts = data.candidates[0].content.parts;
+      for (var i = 0; i < parts.length; i++) {
+        var d = parts[i].inlineData || parts[i].inline_data;
+        if (d && d.data) return { data: d.data, mimeType: d.mimeType || d.mime_type || "" };
+      }
+    } catch (e) {}
+    return null;
+  },
+
+  /* ---------- awaaz + mood ---------- */
+  voiceId: function () {
+    var want = AWAAZ.cfg().voice;
+    for (var i = 0; i < GEMINI_VOICES.length; i++) if (GEMINI_VOICES[i].id === want) return want;
+    return "Kore";
+  },
+  moodId: function () {
+    var c = AWAAZ.cfg();
+    if (c.mood && c.mood !== "auto") return c.mood;
+    return PERSONA_MOOD[c.persona] || "warm";
+  },
+  moodPrompt: function (mood) {
+    for (var i = 0; i < VOICE_MOODS.length; i++) if (VOICE_MOODS[i].id === mood) return VOICE_MOODS[i].p;
+    return "";
+  },
+  /* Gemini ko diya jane wala matn: andaaz ka hukm + zubaan ka ishara + asal jumla */
+  prompt: function (text, mood) {
+    var tip = AWAAZ.moodPrompt(mood);
+    var urdu = /[\u0600-\u06FF]/.test(text);
+    var hindi = /[\u0900-\u097F]/.test(text);
+    var lang = urdu ? " Speak natural Urdu." : (hindi ? " Speak natural Hindi." : "");
+    if (!tip && !lang) return text;
+    return (tip || "Say this naturally") + "." + lang + " Text: " + text;
+  },
+
+  /* ---------- lambe matn ko jumlon par toro ---------- */
+  chunks: function (text, max) {
+    max = max || AWAAZ.CHUNK;
+    text = String(text || "").trim();
+    if (!text) return [];
+    if (text.length <= max) return [text];
+    var sent = [], cur = "", i, ch;
+    for (i = 0; i < text.length; i++) {
+      ch = text.charAt(i); cur += ch;
+      if (ch === "." || ch === "!" || ch === "?" || ch === "\u06D4" || ch === "\n") { sent.push(cur); cur = ""; }
     }
-    var blob = await res.blob();
-    if (!blob || blob.size < 100) { FISH_TTS.processing = false; onFail(); return; }
-    var url = URL.createObjectURL(blob);
-    var audio = new Audio(url);
-    FISH_TTS.audio = audio;
-    audio.onended = function() { FISH_TTS.processing = false; FISH_TTS.audio = null; try { URL.revokeObjectURL(url); } catch(e) {} onDone(); };
-    audio.onerror = function() { FISH_TTS.processing = false; FISH_TTS.audio = null; onFail(); };
-    audio.play().catch(function() { FISH_TTS.processing = false; onFail(); });
-  } catch(e) {
-    pushLog("Fish Audio error: " + e.message);
-    FISH_TTS.processing = false; onFail();
-  }
-}
+    if (cur) sent.push(cur);
+    var out = [], buf = "";
+    for (i = 0; i < sent.length; i++) {
+      var s = sent[i];
+      while (s.length > max) {                         /* ek hi bohat lamba jumla */
+        var cut = s.lastIndexOf(" ", max);
+        if (cut < max * 0.5) cut = max;
+        out.push(s.slice(0, cut).trim());
+        s = s.slice(cut);
+      }
+      if (buf && (buf + s).length > max) { out.push(buf.trim()); buf = s; }
+      else buf += s;
+    }
+    if (buf.trim()) out.push(buf.trim());
+    var clean = [];
+    for (i = 0; i < out.length; i++) if (out[i]) clean.push(out[i]);
+    return clean;
+  },
 
+  /* ---------- cache (LRU) ---------- */
+  cacheGet: function (k) {
+    for (var i = 0; i < AWAAZ.cache.length; i++) if (AWAAZ.cache[i].k === k) {
+      var hit = AWAAZ.cache.splice(i, 1)[0];
+      AWAAZ.cache.push(hit);
+      return hit.url;
+    }
+    return null;
+  },
+  cachePut: function (k, url) {
+    AWAAZ.cache.push({ k: k, url: url });
+    while (AWAAZ.cache.length > AWAAZ.CACHE_MAX) {
+      var old = AWAAZ.cache.shift();
+      try { URL.revokeObjectURL(old.url); } catch (e) {}
+    }
+  },
 
-/* ═══ GEMINI TTS (Google AI — backup) ═══ */
-var GEMINI_TTS = { audio: null, processing: false };
-var TTS_VOICES = {
-  kore: { name: "🌸 Kore — warm female", voice: "Kore" },
-  zephyr: { name: "☀️ Zephyr — bright female", voice: "Zephyr" },
-  leda: { name: "🌿 Leda — gentle female", voice: "Leda" },
-  puck: { name: "🎭 Puck — upbeat", voice: "Puck" },
-  charon: { name: "📖 Charon — calm male", voice: "Charon" }
-};
-function geminiTTS_stop() {
-  try { if (GEMINI_TTS.audio) { GEMINI_TTS.audio.pause(); GEMINI_TTS.audio = null; } } catch(e) {}
-}
-async function geminiTTS_speak(text, voiceName, onDone, onFail) {
-  if (!settings.apikey) { onFail(); return; }
-  GEMINI_TTS.processing = true;
-  try {
-    var res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent?key=" + encodeURIComponent(settings.apikey), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: "Say warmly: " + text }] }],
-        generationConfig: {
-          responseModalities: ["AUDIO"],
-          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceName || "Kore" } } }
-        }
-      })
-    });
-    if (!res.ok) { GEMINI_TTS.processing = false; onFail(); return; }
-    var data = await res.json();
-    var parts = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
-    var audioPart = null;
-    for (var i = 0; i < parts.length; i++) {
-      if (parts[i].inlineData && parts[i].inlineData.mimeType && parts[i].inlineData.mimeType.indexOf("audio") >= 0) {
-        audioPart = parts[i].inlineData; break;
+  /* ---------- model ki tarteeb: jo chala tha wo pehle ---------- */
+  modelOrder: function () {
+    var first = AWAAZ.model || (typeof settings === "object" && settings ? settings.ttsModel : "") || "";
+    var list = [], i;
+    if (first) list.push(first);
+    for (i = 0; i < AWAAZ.MODELS.length; i++) if (AWAAZ.MODELS[i] !== first) list.push(AWAAZ.MODELS[i]);
+    return list;
+  },
+
+  /* ═══ ek clip mangwao (cache + de-dupe + WAV) ═══ */
+  fetchClip: function (text, opt, onOk, onErr) {
+    var c = AWAAZ.cfg();
+    var model = opt.model;
+    var key = model + "|" + opt.voice + "|" + opt.mood + "|" + text;
+
+    var hit = AWAAZ.cacheGet(key);
+    if (hit) { AWAAZ.cacheHits++; onOk(hit, model, true); return; }
+
+    if (AWAAZ.flight[key]) { AWAAZ.flight[key].push({ ok: onOk, err: onErr }); return; }
+    AWAAZ.flight[key] = [{ ok: onOk, err: onErr }];
+    function settle(err, url) {
+      var subs = AWAAZ.flight[key] || []; delete AWAAZ.flight[key];
+      for (var i = 0; i < subs.length; i++) {
+        if (err) subs[i].err(err, model); else subs[i].ok(url, model, false);
       }
     }
-    if (!audioPart || !audioPart.data) { GEMINI_TTS.processing = false; onFail(); return; }
-    var binary = atob(audioPart.data);
-    var bytes = new Uint8Array(binary.length);
-    for (var j = 0; j < binary.length; j++) bytes[j] = binary.charCodeAt(j);
-    var blob = new Blob([bytes], { type: audioPart.mimeType || "audio/wav" });
-    var audio = new Audio(URL.createObjectURL(blob));
-    GEMINI_TTS.audio = audio;
-    audio.onended = function() { GEMINI_TTS.processing = false; audio = null; GEMINI_TTS.audio = null; onDone(); };
-    audio.onerror = function() { GEMINI_TTS.processing = false; GEMINI_TTS.audio = null; onFail(); };
-    audio.play().catch(function() { GEMINI_TTS.processing = false; onFail(); });
-  } catch(e) { GEMINI_TTS.processing = false; onFail(); }
-}
+
+    var body = {
+      contents: [{ parts: [{ text: opt.prompt }] }],
+      generationConfig: {
+        responseModalities: ["AUDIO"],
+        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: opt.voice } } }
+      }
+    };
+
+    var xhr = new XMLHttpRequest();
+    AWAAZ.xhrs.push(xhr);
+    function drop() { for (var i = 0; i < AWAAZ.xhrs.length; i++) if (AWAAZ.xhrs[i] === xhr) { AWAAZ.xhrs.splice(i, 1); break; } }
+    try {
+      xhr.open("POST", AWAAZ.API + encodeURIComponent(model) + ":generateContent", true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.setRequestHeader("x-goog-api-key", c.key);
+      xhr.timeout = AWAAZ.TIMEOUT;
+    } catch (e) { drop(); settle("SEND"); return; }
+
+    xhr.ontimeout = function () { drop(); settle("TIMEOUT"); };
+    xhr.onerror = function () { drop(); settle("NETWORK"); };
+    xhr.onload = function () {
+      drop();
+      var st = xhr.status;
+      if (st === 401 || st === 403) { AWAAZ.keyBad = true; settle("KEY_BAD"); return; }
+      if (st === 429) { AWAAZ.cooldownUntil = Date.now() + AWAAZ.COOLDOWN; settle("QUOTA"); return; }
+      if (st === 400 || st === 404) { settle("MODEL"); return; }
+      if (st < 200 || st >= 300) { settle("HTTP_" + st); return; }
+      var data = null;
+      try { data = JSON.parse(xhr.responseText); } catch (e) { settle("DECODE"); return; }
+      var part = AWAAZ.pickAudio(data);
+      if (!part) { settle("NO_AUDIO"); return; }
+      var url;
+      try {
+        var wav = AWAAZ.wav(AWAAZ.b64(part.data), AWAAZ.rateOf(part.mimeType), 1, 16);
+        url = URL.createObjectURL(new Blob([wav], { type: "audio/wav" }));
+      } catch (e) { settle("DECODE"); return; }
+      AWAAZ.model = model;
+      try { if (typeof settings === "object" && settings) settings.ttsModel = model; } catch (e) {}
+      AWAAZ.cachePut(key, url);
+      settle(null, url);
+    };
+    try { xhr.send(JSON.stringify(body)); } catch (e) { drop(); settle("SEND"); }
+  },
+
+  /* ---------- ek url bajao ---------- */
+  play: function (url, gen, onEnd, onErr) {
+    var a;
+    try { a = new Audio(); } catch (e) { onErr("AUDIO_BLOCKED"); return; }
+    AWAAZ.audio = a;
+    a.onended = function () { if (gen === AWAAZ.gen) onEnd(); };
+    a.onerror = function () { if (gen === AWAAZ.gen) onErr("AUDIO_BLOCKED"); };
+    a.src = url;
+    var p;
+    try { p = a.play(); } catch (e) { onErr("AUDIO_BLOCKED"); return; }
+    if (p && p["catch"]) p["catch"](function () { if (gen === AWAAZ.gen) onErr("AUDIO_BLOCKED"); });
+  },
+
+  /* ═══ TIER 1 — Gemini neural (chunks + prefetch, is liye beech mein khamoshi nahi) ═══ */
+  neural: function (text, onDone, onFail) {
+    var gen = AWAAZ.gen;
+    var voice = AWAAZ.voiceId(), mood = AWAAZ.moodId();
+    var list = AWAAZ.chunks(text, AWAAZ.CHUNK);
+    if (!list.length) { onDone(); return; }
+
+    function grab(idx, cb) {
+      var models = AWAAZ.modelOrder(), at = 0;
+      function go() {
+        var m = models[at];
+        if (!m) { cb("MODEL"); return; }
+        AWAAZ.fetchClip(list[idx], { voice: voice, mood: mood, model: m, prompt: AWAAZ.prompt(list[idx], mood) },
+          function (url) { cb(null, url); },
+          function (code) {
+            var retryable = (code === "MODEL" || code === "NO_AUDIO");
+            if (retryable && !AWAAZ.model && at + 1 < models.length) { at++; go(); }
+            else cb(code);
+          });
+      }
+      go();
+    }
+
+    function step(idx) {
+      if (gen !== AWAAZ.gen) return;
+      if (idx >= list.length) { AWAAZ.spoke++; onDone(); return; }
+      grab(idx, function (err, url) {
+        if (gen !== AWAAZ.gen) return;
+        if (err) { onFail(err); return; }
+        if (idx + 1 < list.length) grab(idx + 1, function () {});    /* prefetch */
+        AWAAZ.play(url, gen, function () { step(idx + 1); }, function (code) { onFail(code); });
+      });
+    }
+    step(0);
+  },
+
+  /* ═══ TIER 2 — Edge TTS (muft, key nahi; default OFF) ═══ */
+  edge: function (text, onDone, onFail) {
+    if (typeof edgeTTS_speak !== "function") { onFail("MODEL"); return; }
+    var gen = AWAAZ.gen;
+    var lang = (typeof settings === "object" && settings && settings.tts) ? settings.tts : "ur-PK";
+    var v = /^ur/.test(lang) ? "ur-PK-UzmaNeural" : (/^hi/.test(lang) ? "hi-IN-SwaraNeural" : "en-US-AriaNeural");
+    edgeTTS_speak(text, v, lang, "+0%", "+0Hz",
+      function () { if (gen === AWAAZ.gen) onDone(); },
+      function () { if (gen === AWAAZ.gen) onFail("NETWORK"); });
+  },
+
+  /* ═══ TIER 3 — phone ki apni awaaz (0 data, 0 latency, hamesha maujood) ═══ */
+  device: function (text, onDone) {
+    var gen = AWAAZ.gen;
+    var s = (typeof settings === "object" && settings) ? settings : {};
+    AWAAZ.deviceDone = function () { if (gen === AWAAZ.gen) { AWAAZ.deviceDone = null; onDone(); } };
+    if (typeof NATIVE !== "undefined" && NATIVE && window.MayaBridge && window.MayaBridge.speak) {
+      try { window.MayaBridge.speak(text, s.tts || "ur-PK", s.rate || 1, s.pitch || 1.05, s.voiceName || ""); return; }
+      catch (e) { AWAAZ.deviceDone = null; onDone(); return; }
+    }
+    if (typeof synth === "undefined" || !synth) { AWAAZ.deviceDone = null; onDone(); return; }
+    try { synth.cancel(); } catch (e) {}
+    var u;
+    try { u = new SpeechSynthesisUtterance(text); } catch (e) { AWAAZ.deviceDone = null; onDone(); return; }
+    u.lang = s.tts || "ur-PK";
+    try {
+      if (s.voiceName && typeof voices !== "undefined") {
+        for (var i = 0; i < voices.length; i++) if (voices[i].name === s.voiceName) { u.voice = voices[i]; u.lang = voices[i].lang; break; }
+      } else if (typeof pickVoice === "function") { var pv = pickVoice(u.lang); if (pv) u.voice = pv; }
+    } catch (e) {}
+    u.rate = s.rate || 1; u.pitch = s.pitch || 1.05;
+    u.onend = function () { if (gen === AWAAZ.gen) { AWAAZ.deviceDone = null; onDone(); } };
+    u.onerror = function () { if (gen === AWAAZ.gen) { AWAAZ.deviceDone = null; onDone(); } };
+    try { synth.speak(u); } catch (e) { AWAAZ.deviceDone = null; onDone(); }
+  },
+
+  /* ---------- nakami darj karo (chup-chaap fail MANA hai) ---------- */
+  note: function (code) {
+    AWAAZ.err = code || "";
+    AWAAZ.errText = AWAAZ.why(code);
+    if (code && typeof pushLog === "function") pushLog("AWAAZ: " + code + " — " + AWAAZ.errText);
+    AWAAZ.paint();
+  },
+  setEngine: function (e) { AWAAZ.engine = e; AWAAZ.paint(); },
+
+  /* ---------- badge + settings ka live status ---------- */
+  paint: function () {
+    try { if (typeof paintAwaaz === "function") paintAwaaz(); } catch (e) {}
+  },
+
+  /* ═══ WAHID DARWAZA ═══
+     cb = { onStart:function(engine){}, onDone:function(){} } */
+  speak: function (text, cb) {
+    cb = cb || {};
+    AWAAZ.stop();
+    AWAAZ.gen++;
+    var gen = AWAAZ.gen;
+    var c = AWAAZ.cfg();
+    text = String(text || "").trim();
+    if (!text) { if (cb.onDone) cb.onDone(); return; }
+
+    var finished = false;
+    function done() {
+      if (finished || gen !== AWAAZ.gen) return;
+      finished = true;
+      if (cb.onDone) cb.onDone();
+    }
+    function useDevice() {
+      if (gen !== AWAAZ.gen) return;
+      AWAAZ.setEngine("device");
+      if (cb.onStart) cb.onStart("device");
+      AWAAZ.device(text, done);
+    }
+
+    if (!c.on || c.mode === "off") { AWAAZ.setEngine("off"); done(); return; }
+
+    var block = AWAAZ.blockReason(text);
+    if (block) {
+      if (block !== "DEVICE_MODE") AWAAZ.note(block);
+      else AWAAZ.note("");
+      useDevice();
+      return;
+    }
+
+    AWAAZ.note("");
+    AWAAZ.setEngine("neural");
+    if (cb.onStart) cb.onStart("neural");
+    AWAAZ.neural(text, done, function (code) {
+      if (gen !== AWAAZ.gen) return;
+      AWAAZ.note(code);
+      if (c.edge) {
+        AWAAZ.setEngine("edge");
+        AWAAZ.edge(text, done, function () { useDevice(); });
+      } else useDevice();
+    });
+  },
+
+  /* ---------- sab kuch rok do ---------- */
+  stop: function () {
+    AWAAZ.gen++;
+    AWAAZ.deviceDone = null;
+    try { if (AWAAZ.audio) { AWAAZ.audio.pause(); AWAAZ.audio.onended = null; AWAAZ.audio.onerror = null; AWAAZ.audio = null; } } catch (e) {}
+    for (var i = 0; i < AWAAZ.xhrs.length; i++) { try { AWAAZ.xhrs[i].abort(); } catch (e) {} }
+    AWAAZ.xhrs = [];
+    AWAAZ.flight = {};
+    try { if (typeof edgeTTS_stop === "function") edgeTTS_stop(); } catch (e) {}
+    try { if (typeof NATIVE !== "undefined" && NATIVE && window.MayaBridge && window.MayaBridge.stopSpeak) window.MayaBridge.stopSpeak(); } catch (e) {}
+    try { if (typeof synth !== "undefined" && synth) synth.cancel(); } catch (e) {}
+  },
+
+  /* ---------- Doctor / status ke liye ---------- */
+  status: function () {
+    var c = AWAAZ.cfg();
+    var block = AWAAZ.blockReason("");
+    return {
+      engine: AWAAZ.engine,
+      mode: c.mode,
+      voice: AWAAZ.voiceId(),
+      mood: AWAAZ.moodId(),
+      model: AWAAZ.model || c.key ? (AWAAZ.model || "auto") : "-",
+      ready: !block,
+      block: block,
+      why: AWAAZ.why(block || AWAAZ.err),
+      err: AWAAZ.err,
+      cache: AWAAZ.cache.length,
+      cacheHits: AWAAZ.cacheHits,
+      cooldown: Math.max(0, Math.round((AWAAZ.cooldownUntil - Date.now()) / 1000))
+    };
+  }
+};
+
+/* Kotlin ka TTS-done callback ab engine ko jata hai */
+window.__nativeTtsDone = function () { try { if (AWAAZ.deviceDone) AWAAZ.deviceDone(); } catch (e) {} };
+
+/* purane naam zinda rahen (baqi code inhen call karta hai) */
+function geminiTTS_stop() { AWAAZ.stop(); }
 
 /* ═══ EDGE TTS (Microsoft — final fallback) ═══ */
 var EDGE_TTS = { token: "6A5AA1D4EAFF4E9FB37E23D68491D6F4", wss: "wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1", ver: "1-143.0.3650.75", audio: null, ws: null };
@@ -1424,181 +1899,58 @@ async function edgeTTS_speak(text, voiceName, lang, rate, pitch, onDone, onFail)
   } catch(e) { onFail(); }
 }
 
+/* ---------- PUBLIC API: poori app sirf isi se bolti hai ---------- */
 function speak(text, wasVoice) {
-  lastWasVoice = wasVoice;
   var clean = cleanSpeech(text);
-  if (!settings.voiceOn || !clean) { afterSpeak(wasVoice); return; }
-  speaking = true; setOrb("speaking");
-  var lang = settings.tts || "en-US";
-  var langBase = (lang || "en").split("-")[0];
-  /* Auto-detect language for Edge TTS */
-  var edgeVoice = "en-US-AvaNeural";
-  var edgeLang = "en-US";
-  if (/[؀-ۿ]/.test(clean)) { edgeVoice = "ur-PK-UzmaNeural"; edgeLang = "ur-PK"; }
-  else if (/[ऀ-ॿ]/.test(clean)) { edgeVoice = "hi-IN-SwaraNeural"; edgeLang = "hi-IN"; }
-  /* Priority 1: Fish Audio (APK mode — bypasses CORS via MayaBridge) */
-  if (NATIVE && settings.fishKey && navigator.onLine !== false) {
-    var fishRef = settings.fishVoice || "f1d76cc64392469ba74779e8031aa0cc";
-    pushLog("VOICE: Fish Audio S2.1 Pro");
-    fishTTS_speak(clean, fishRef,
-      function() { speaking = false; afterSpeak(wasVoice); },
-      function() { edgeTTSWrap(clean, edgeVoice, edgeLang, wasVoice); });
-    return;
-  }
-  /* Priority 1b: Edge TTS (Web — WebSocket, no CORS issues!) */
-  if (navigator.onLine !== false) {
-    pushLog("VOICE: Edge TTS (" + edgeVoice + ")");
-    edgeTTS_speak(clean, edgeVoice, edgeLang, "+0%", "+0Hz",
-      function() { speaking = false; afterSpeak(wasVoice); },
-      function() { edgeFallback(clean, edgeVoice, edgeLang, wasVoice); });
-    return;
-  }
-  /* Priority 2: Gemini TTS (needs API key) */
-  var artist = currentArtist(clean);
-  var geminiVoice = (artist && artist.geminiVoice) || "Kore";
-  if (settings.apikey && navigator.onLine !== false) {
-    pushLog("VOICE: Gemini TTS (" + geminiVoice + ")");
-    geminiTTS_speak(clean, geminiVoice,
-      function() { speaking = false; afterSpeak(wasVoice); },
-      function() { geminiFallback(clean, langBase, wasVoice); });
-    return;
-  }
-  /* Priority 3: Edge TTS (free, no API key) */
-  var edgeVoice = "en-US-AvaNeural";
-  var edgeLang = "en-US";
-  if (/[؀-ۿ]/.test(clean)) { edgeVoice = "ur-PK-UzmaNeural"; edgeLang = "ur-PK"; }
-  else if (/[ऀ-ॿ]/.test(clean)) { edgeVoice = "hi-IN-SwaraNeural"; edgeLang = "hi-IN"; }
-  if (navigator.onLine !== false) {
-    pushLog("VOICE: Edge TTS (" + edgeVoice + ")");
-    edgeTTS_speak(clean, edgeVoice, edgeLang, "+0%", "+0Hz",
-      function() { speaking = false; afterSpeak(wasVoice); },
-      function() { pushLog("Edge FAIL \u2192 native TTS"); nativeSpeak(clean, wasVoice); });
-    return;
-  }
-  nativeSpeak(clean, wasVoice);
-}
-function edgeTTSWrap(clean, edgeVoice, edgeLang, wasVoice) {
-  pushLog("Fish FAIL \u2192 Edge TTS...");
-  if (navigator.onLine !== false) {
-    edgeTTS_speak(clean, edgeVoice, edgeLang, "+0%", "+0Hz",
-      function() { speaking = false; afterSpeak(wasVoice); },
-      function() { pushLog("Edge FAIL \u2192 native"); nativeSpeak(clean, wasVoice); });
-    return;
-  }
-  nativeSpeak(clean, wasVoice);
-}
-function edgeFallback(clean, edgeVoice, edgeLang, wasVoice) {
-  pushLog("Edge FAIL \u2192 Gemini...");
-  if (settings.apikey && navigator.onLine !== false) {
-    var artist = currentArtist(clean);
-    var geminiVoice = (artist && artist.geminiVoice) || "Kore";
-    geminiTTS_speak(clean, geminiVoice,
-      function() { speaking = false; afterSpeak(wasVoice); },
-      function() { pushLog("Gemini FAIL \u2192 native"); nativeSpeak(clean, wasVoice); });
-    return;
-  }
-  nativeSpeak(clean, wasVoice);
+  lastWasVoice = wasVoice;
+  if (!clean) { AWAAZ.stop(); afterSpeak(wasVoice); return; }
+  AWAAZ.speak(clean, {
+    onStart: function () { speaking = true; setOrb("speaking"); },
+    onDone: function () { speaking = false; afterSpeak(wasVoice); }
+  });
 }
 
-function geminiFallback(clean, langBase, wasVoice) {
-  pushLog("Gemini FAIL \u2192 Edge TTS...");
-  var edgeVoice = "en-US-AvaNeural";
-  var edgeLang = "en-US";
-  if (/[؀-ۿ]/.test(clean)) { edgeVoice = "ur-PK-UzmaNeural"; edgeLang = "ur-PK"; }
-  else if (/[ऀ-ॿ]/.test(clean)) { edgeVoice = "hi-IN-SwaraNeural"; edgeLang = "hi-IN"; }
-  if (navigator.onLine !== false) {
-    edgeTTS_speak(clean, edgeVoice, edgeLang, "+0%", "+0Hz",
-      function() { speaking = false; afterSpeak(wasVoice); },
-      function() { pushLog("Edge FAIL too \u2192 native"); nativeSpeak(clean, wasVoice); });
-    return;
-  }
-  nativeSpeak(clean, wasVoice);
-}
-function nativeSpeak(clean, wasVoice){
-  if (NATIVE) {
-    speaking = true; setOrb("speaking");
-    try { window.MayaBridge.speak(clean, settings.tts, settings.rate, settings.pitch || 1, settings.voiceName || ""); }
-    catch(e){ speaking = false; afterSpeak(wasVoice); }
-    return;
-  }
-  if (!synth) { afterSpeak(wasVoice); return; }
-  try { synth.cancel(); } catch(e){}
-  var u = new SpeechSynthesisUtterance(clean);
-  u.lang = settings.tts;
-  if (settings.voiceName) {
-    for (var vi = 0; vi < voices.length; vi++) if (voices[vi].name === settings.voiceName) { u.voice = voices[vi]; u.lang = voices[vi].lang; break; }
-  } else { var v = pickVoice(settings.tts); if (v) u.voice = v; }
-  u.rate = settings.rate; u.pitch = settings.pitch || 1.05;
+/* purana naam — kuch jagah abhi bhi call hota hai */
+function nativeSpeak(clean, wasVoice) {
+  lastWasVoice = wasVoice;
+  AWAAZ.stop(); AWAAZ.gen++;
+  AWAAZ.setEngine("device");
   speaking = true; setOrb("speaking");
-  u.onend = function(){ speaking = false; afterSpeak(wasVoice); };
-  u.onerror = function(){ speaking = false; afterSpeak(wasVoice); };
-  synth.speak(u);
+  AWAAZ.device(String(clean || ""), function () { speaking = false; afterSpeak(wasVoice); });
 }
+
 function afterSpeak(wasVoice){
   setOrb("idle");
   if ((settings.autoListen || settings.wakeWord) && wasVoice) setTimeout(startListening, 350);
 }
+
 function reply(text, wasVoice, link){
   addBubble("ai", text, link);
   chatHist.push({ role:"model", text:text }); persistChat();
   speak(text, wasVoice);
 }
 
-/* ---------- TEST VOICE (AWAAZ SUNO) ---------- */
+/* ---------- TEST VOICE (AWAAZ SUNO) — bolta bhi hai, batata bhi hai ---------- */
 function testMayaVoice() {
-  var sample = "Assalam-o-alaikum! Main MAYA hoon — aap ki personal AI assistant. Kaisi lag rahi meri nayi awaaz? Professional studio voice, bilkul free!";
-  speaking = true; setOrb("speaking");
-  /* Edge TTS — works in browser (WebSocket, no CORS) */
-  var edgeVoice = "ur-PK-UzmaNeural";
-  pushLog("VOICE TEST: Edge TTS (Uzma - warm Urdu female)");
-  edgeTTS_speak(sample, edgeVoice, "ur-PK", "+0%", "+0Hz",
-    function() { speaking = false; setOrb("idle"); toast("Awaaz kaisi lagi?"); },
-    function() {
-      pushLog("Edge FAIL -> Gemini...");
-      if (settings.apikey) {
-        geminiTTS_speak(sample, "Kore",
-          function() { speaking = false; setOrb("idle"); toast("Awaaz kaisi lagi?"); },
-          function() { nativeSpeak(sample, false); });
-      } else { nativeSpeak(sample, false); }
-    });
-}function testMayaVoice() {
-  var sample = "Assalam-o-alaikum! Main MAYA hoon — aap ki personal AI assistant. Kaisi lag rahi meri awaaz? Muft mein professional neural voice use ho rahi hai — koi API key ki zaroorat nahi!";
-  speaking = true; setOrb("speaking");
-  pushLog("VOICE TEST: Puter.js Neural");
-  /* Priority 1: Fish Audio */
-  if (settings.fishKey && navigator.onLine !== false) {
-    pushLog("VOICE TEST: Fish Audio S2.1 Pro");
-    fishTTS_speak(sample, settings.fishVoice || "f1d76cc64392469ba74779e8031aa0cc",
-      function() { speaking = false; setOrb("idle"); toast("Fish Audio awaaz achi lagi?"); },
-      function() {
-        pushLog("Fish FAIL -> Puter.js...");
-        if (navigator.onLine !== false && window.puter && puter.ai && puter.ai.txt2speech) {
-          puterTTS_speak(sample, settings.tts || "en-US",
-            function() { speaking = false; setOrb("idle"); toast("Awaaz achi lagi?"); },
-            function() { nativeSpeak(sample, false); });
-        } else { nativeSpeak(sample, false); }
-      });
-    return;
-  }
-  /* Priority 2: Puter.js */
-  if (navigator.onLine !== false && window.puter && puter.ai && puter.ai.txt2speech) {
-    puterTTS_speak(sample, settings.tts || "en-US",
-      function() { speaking = false; setOrb("idle"); toast("Awaaz achi lagi?"); },
-      function() {
-        pushLog("Fish FAIL -> Edge TTS...");
-        if (settings.apikey) {
-          geminiTTS_speak(sample, "Kore",
-            function() { speaking = false; setOrb("idle"); toast("Awaaz achi lagi?"); },
-            function() { nativeSpeak(sample, false); });
-        } else { nativeSpeak(sample, false); }
-      });
-    return;
-  }
-  if (settings.apikey) {
-    geminiTTS_speak(sample, "Kore",
-      function() { speaking = false; setOrb("idle"); toast("Awaaz achi lagi?"); },
-      function() { nativeSpeak(sample, false); });
-  } else { nativeSpeak(sample, false); }
+  var vId = AWAAZ.voiceId(), mId = AWAAZ.moodId();
+  var vLabel = vId, i;
+  for (i = 0; i < GEMINI_VOICES.length; i++) if (GEMINI_VOICES[i].id === vId) vLabel = GEMINI_VOICES[i].label;
+  var sample = "Assalam-o-alaikum " + (settings.name || "Boss") + "! Main " + (settings.assistName || "Maya") +
+               " hoon, aap ki apni AI. Ye meri awaaz hai — " + vId + ". Kaisi lagi?";
+  AWAAZ.speak(sample, {
+    onStart: function (eng) {
+      speaking = true; setOrb("speaking");
+      toast(eng === "neural" ? "🎭 Neural awaaz aa rahi hai..." : (eng === "edge" ? "🌊 Edge TTS..." : "📱 Phone ki awaaz"));
+      pushLog("VOICE TEST: " + eng + " / " + vId + " / " + mId);
+    },
+    onDone: function () {
+      speaking = false; setOrb("idle");
+      var st = AWAAZ.status();
+      if (st.engine === "neural") toast("🎭 NEURAL bola — " + vLabel);
+      else toast("📱 PHONE ki awaaz — " + (st.why || "neural abhi maujood nahi"));
+      paintAwaaz();
+    }
+  });
 }
 
 /* ---------- STT ---------- */
@@ -1680,6 +2032,7 @@ function setCharState(state){
 if (mayaChar) { mayaChar.addEventListener("click", function(){ startListening(); }); mayaChar.dataset.state = "idle"; }
 
 /* ---------- CHAT UI ---------- */
+var BUBBLE_SAY = [];      /* index -> asal matn (escaping ke jhamele se bachne ke liye) */
 function addBubble(who, text, link){
   var row = document.createElement("div");
   row.className = "row " + (who === "user" ? "me" : "ai");
@@ -1687,10 +2040,40 @@ function addBubble(who, text, link){
   var label = who === "user" ? esc(settings.name).toUpperCase() : "MAYA";
   b.innerHTML = "<span class='who'>" + label + "</span>" + esc(text) +
     (link ? "<br><a href='" + esc(link) + "' target='_blank' rel='noopener'>🔗 Open karo</a>" : "");
+  if (who !== "user") {
+    var idx = BUBBLE_SAY.push(String(text || "")) - 1;      /* v4.2.0: dobara suno */
+    var sb = document.createElement("button");
+    sb.type = "button"; sb.className = "say-btn"; sb.textContent = "🔊";
+    sb.setAttribute("data-say", String(idx));
+    sb.setAttribute("aria-label", "Ye jawab dobara suno");
+    b.appendChild(sb);
+  }
   row.appendChild(b); log.appendChild(row);
   while (log.children.length > 80) log.removeChild(log.firstChild);
   log.scrollTop = log.scrollHeight;
 }
+/* ek hi listener poore chat par (bubbles aate jate rehte hain) */
+(function(){
+  if (!log) return;
+  log.addEventListener("click", function (e) {
+    var t = e.target;
+    if (!t || !t.getAttribute) return;
+    var i = t.getAttribute("data-say");
+    if (i === null) return;
+    var txt = BUBBLE_SAY[parseInt(i, 10)];
+    if (!txt) return;
+    if (t.getAttribute("data-on") === "1") {           /* dobara dabao = rok do */
+      AWAAZ.stop(); speaking = false; setOrb("idle"); t.textContent = "🔊"; t.removeAttribute("data-on"); return;
+    }
+    var prev = log.querySelector(".say-btn[data-on='1']");
+    if (prev) { prev.textContent = "🔊"; prev.removeAttribute("data-on"); }
+    t.textContent = "⏹"; t.setAttribute("data-on", "1");
+    speak(txt, false);
+    var watch = setInterval(function () {
+      if (!speaking) { clearInterval(watch); t.textContent = "🔊"; t.removeAttribute("data-on"); }
+    }, 400);
+  });
+})();
 
 /* ---------- MAIN HANDLER ---------- */
 function stripWake(t){ return t.replace(/^\s*(hey\s+)?(maya|maywa|mya|maaya|boss)[\s,.!:-]*/i, "").trim(); }
@@ -3049,7 +3432,14 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 /* ---------- SETTINGS TAB ---------- */
 function loadSettingsForm(){
   $("#sName").value = settings.name; $("#sCity").value = settings.city || "Hyderabad"; $("#sKey").value = settings.apikey;
-  $("#sGqKey").value = settings.groqKey; $("#sGqModel").value = settings.groqModel || "llama-3.3-70b-versatile"; $("#sGhKey").value = settings.ghKey; $("#sFishKey").value = settings.fishKey || "";
+  $("#sGqKey").value = settings.groqKey; $("#sGqModel").value = settings.groqModel || "llama-3.3-70b-versatile"; $("#sGhKey").value = settings.ghKey; $("#sTtsKey").value = settings.ttsKey || "";
+  awaazFillSelects();
+  $("#sVoiceEngine").value = settings.voiceEngine || "auto";
+  $("#sGVoice").value = settings.gVoice || "Kore";
+  $("#sVoiceMood").value = settings.voiceMood || "auto";
+  $("#sNeuralWifi").checked = settings.neuralWifiOnly === true;
+  $("#sEdgeTts").checked = settings.edgeTTS === true;
+  paintAwaaz();
   $("#sStt").value = settings.stt; $("#sTts").value = settings.tts;
   $("#sRate").value = settings.rate; $("#rateVal").textContent = Number(settings.rate).toFixed(2);
   $("#sPitch").value = settings.pitch || 1.05; $("#pitchVal").textContent = Number(settings.pitch || 1.05).toFixed(2);
@@ -3080,7 +3470,14 @@ $("#saveSettings").addEventListener("click", function(){
   kGrq = $("#sGqKey").value.trim().replace(/\s+/g, "");
   kGit = $("#sGhKey").value.trim().replace(/\s+/g, "");
   settings.apikey = kGem;
-  settings.groqKey = kGrq; settings.groqModel = $("#sGqModel").value; settings.ghKey = kGit; settings.fishKey = ($("#sFishKey").value || "").trim().replace(/\s+/g, "");
+  settings.groqKey = kGrq; settings.groqModel = $("#sGqModel").value; settings.ghKey = kGit;
+  settings.ttsKey = ($("#sTtsKey").value || "").trim().replace(/\s+/g, "");
+  settings.voiceEngine = $("#sVoiceEngine").value || "auto";
+  settings.gVoice = $("#sGVoice").value || "Kore";
+  settings.voiceMood = $("#sVoiceMood").value || "auto";
+  settings.neuralWifiOnly = $("#sNeuralWifi").checked;
+  settings.edgeTTS = $("#sEdgeTts").checked;
+  AWAAZ.keyBad = false; AWAAZ.cooldownUntil = 0;   /* nayi settings = naya mauka */
   settings.stt = $("#sStt").value; settings.tts = $("#sTts").value;
   settings.rate = parseFloat($("#sRate").value) || 1;
   settings.pitch = parseFloat($("#sPitch").value) || 1.05;
@@ -3239,7 +3636,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v4.1.0 — DOCTOR REPORT");
+  out.push("MAYA v4.2.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
@@ -3267,7 +3664,23 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
   }
   out.push("WAKE WORD: " + (settings.wakeWord ? "ON" : "OFF") + (NATIVE ? "" : " (sirf APK)"));
   out.push("TTS VOICES: " + (settings._voiceCount != null ? settings._voiceCount : "0") + " available");
+  (function(){
+    var a = AWAAZ.status();
+    out.push("");
+    out.push("── AWAAZ ENGINE v" + AWAAZ.VER + " ──");
+    out.push("MODE: " + a.mode + "  |  AAKHRI ENGINE: " + a.engine);
+    out.push("VOICE: " + a.voice + "  |  MOOD: " + a.mood);
+    out.push("MODEL: " + (AWAAZ.model || "abhi tay nahi"));
+    out.push("NEURAL READY: " + (a.ready ? "HAAN ✅" : "NAHI — " + a.why));
+    if (a.cooldown) out.push("COOLDOWN: " + a.cooldown + "s");
+    out.push("CACHE: " + a.cache + " clips, " + a.cacheHits + " hits, " + AWAAZ.spoke + " neural clips bole");
+    out.push("");
+  })();
   out.push("LAST ERROR: " + (window.__mayaErr || "koi nahi ✅"));
+  if (window.__errLog && window.__errLog.length) {
+    out.push("CONSOLE ERRORS (" + window.__errLog.length + "):");
+    for (var _e = Math.max(0, window.__errLog.length - 5); _e < window.__errLog.length; _e++) out.push("  • " + window.__errLog[_e]);
+  }
   var el = $("#diagOut");
   el.style.display = "block";
   el.textContent = out.join("\n");
@@ -3304,16 +3717,66 @@ $("#qAuto").addEventListener("click", function(){
   else if (wakeLock) { try { wakeLock.release(); wakeLock = null; } catch(e){} }
 });
 $("#qMute").addEventListener("click", function(){
-  settings.voiceOn = !settings.voiceOn; saveSettings(); paintQuick();
-  if (!settings.voiceOn && synth) try { synth.cancel(); } catch(e){}
+  settings.voiceOn = !settings.voiceOn; saveSettings(); paintQuick(); paintAwaaz();
+  if (!settings.voiceOn) { AWAAZ.stop(); speaking = false; setOrb("idle"); }
 });
 function paintQuick(){
   var a = $("#qAuto"), mu = $("#qMute");
   a.textContent = "🔁 AUTO: " + (settings.autoListen ? "ON" : "OFF");
   a.classList.toggle("on", settings.autoListen);
-  mu.textContent = settings.voiceOn ? "🔊 AWAAZ: ON" : "🔇 AWAAZ: OFF";
+  mu.textContent = awaazBadge();
   mu.classList.toggle("on", !settings.voiceOn);
   hudRefresh();
+}
+
+/* ---------- AWAAZ ka live badge + status (sach hi dikhta hai) ---------- */
+function awaazBadge(){
+  if (!settings.voiceOn || settings.voiceEngine === "off") return "🔇 AWAAZ: OFF";
+  var st = AWAAZ.status();
+  if (st.engine === "neural") return "🎭 AWAAZ: NEURAL";
+  if (st.engine === "edge") return "🌊 AWAAZ: EDGE";
+  if (st.engine === "device") return "📱 AWAAZ: PHONE";
+  return st.ready ? "🎭 AWAAZ: NEURAL" : "📱 AWAAZ: PHONE";
+}
+function awaazFillSelects(){
+  var vs = $("#sGVoice"), ms = $("#sVoiceMood"), i, o;
+  if (vs && !vs.options.length) {
+    for (i = 0; i < GEMINI_VOICES.length; i++) {
+      o = document.createElement("option");
+      o.value = GEMINI_VOICES[i].id;
+      o.textContent = GEMINI_VOICES[i].label + (GEMINI_VOICES[i].g === "f" ? "  (F)" : "  (M)");
+      vs.appendChild(o);
+    }
+  }
+  if (ms && !ms.options.length) {
+    for (i = 0; i < VOICE_MOODS.length; i++) {
+      o = document.createElement("option");
+      o.value = VOICE_MOODS[i].id; o.textContent = VOICE_MOODS[i].label;
+      ms.appendChild(o);
+    }
+  }
+}
+function paintAwaaz(){
+  try {
+    var st = AWAAZ.status();
+    var el = $("#awaazStatus");
+    if (el) {
+      var line;
+      if (!settings.voiceOn || st.mode === "off") line = "🔇 Maya khamosh hai";
+      else if (st.mode === "device") line = "📱 Phone ki awaaz — 0 data, foran";
+      else if (st.ready) line = "🎭 Neural tayyar — <b>" + st.voice + "</b> · " + st.mood + (st.model && st.model !== "auto" ? " · " + st.model : "");
+      else line = "📱 Abhi phone ki awaaz — " + st.why + (st.cooldown ? " (" + st.cooldown + "s)" : "");
+      el.innerHTML = line;
+      el.className = "ui-hint" + (st.ready && st.mode !== "device" ? " ok" : (st.mode === "off" ? "" : " warn"));
+    }
+    var w = $("#awaazWhy");
+    if (w) {
+      w.textContent = st.engine === "-" ? "Test karo — niche likha aayega ke kis engine ne bola."
+        : ("Aakhri dafa: " + (st.engine === "neural" ? "🎭 NEURAL (" + st.voice + ")" : st.engine === "edge" ? "🌊 EDGE" : st.engine === "device" ? "📱 PHONE" : "🔇 OFF")
+           + (st.err ? " — " + AWAAZ.why(st.err) : "") + " · cache " + st.cache + " (" + st.cacheHits + " hits)");
+    }
+    var mu = $("#qMute"); if (mu) mu.textContent = awaazBadge();
+  } catch (e) {}
 }
 
 /* ---------- CONSOLIDATE MEMORY ---------- */
@@ -3365,7 +3828,7 @@ function cleanSpeech(text){
   t = t.replace(/[\uD83C\uDC00-\uD83E\uDEFF\u2600-\u27BF\uFE0F\u2190-\u21FF\u2B00-\u2BFF]/gu, " "); /* emojis */
   t = t.replace(/[*_`#>|~]/g, " ");                                     /* markdown symbols */
   t = t.replace(/\s+/g, " ").trim();
-  if (t.length > 600) t = t.slice(0, 600) + "...";                      /* lambi awaaz cap */
+  if (t.length > 1800) t = t.slice(0, 1800) + "...";                    /* v4.2.0: engine khud chunks mein torta hai */
   return t;
 }
 
@@ -3709,8 +4172,8 @@ function startProactive(){
 
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
-try { $("#hudBuild").textContent = "v4.1.0"; } catch(e){}
-try { pushLog("MAYA v4.1.0 — IRONCLAD UI KIT ONLINE"); } catch(e){}
+try { $("#hudBuild").textContent = "v4.2.0"; } catch(e){}
+try { pushLog("MAYA v4.2.0 — AWAAZ ENGINE v6 + IRONCLAD UI ONLINE"); } catch(e){}
 
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD" runtime   (v4.1.0)
@@ -3836,10 +4299,14 @@ var MayaUI = (function () {
       if (e.preventDefault) e.preventDefault();
     });
     on(track, "touchmove", function (e) {
+      if (!dragging) return;                                  /* v4.2.0: sirf apne drag ke dauran */
       if (e.touches && e.touches[0]) fromX(e.touches[0].clientX);
-      if (e.preventDefault) e.preventDefault();
+      /* v4.2.0 FIX: scroll shuru ho chuka ho to event cancelable nahi hota —
+         wahan preventDefault() call karna console warning deta hai. */
+      if (e.cancelable && e.preventDefault) e.preventDefault();
     });
     on(track, "touchend", function () { dragging = false; });
+    on(track, "touchcancel", function () { dragging = false; });
     on(minus, "click", function (e) { if (e.preventDefault) e.preventDefault(); setV(num(inp.value, lo()) - st()); });
     on(plus, "click", function (e) { if (e.preventDefault) e.preventDefault(); setV(num(inp.value, lo()) + st()); });
     on(inp, "input", paint);
@@ -3965,7 +4432,7 @@ var MayaUI = (function () {
     for (i = 0; i < reopen.length; i++) delCls(reopen[i], "is-open");
 
     var out = [];
-    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v4.1.0 IRONCLAD");
+    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v4.2.0");
     out.push("WEBVIEW: Chrome " + (window.__webviewMajor || "?") + (window.__oldWebview ? " (PURANA)" : ""));
     out.push("");
     out.push("VISIBLE: " + okc + "   INVISIBLE: " + bad + (bad ? "  \u274C" : "  \u2705"));

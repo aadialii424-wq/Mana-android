@@ -70,7 +70,8 @@ var setSection = html.slice(html.indexOf('id="tab-set"'), html.indexOf('</sectio
 var NEEDED_IDS = ['sName', 'sGender', 'sPhone', 'sCity', 'sMusicApp', 'sFavSong', 'sYtChannel',
   'sAssistName', 'sPersona', 'sGf', 'sRemember', 'sConvo', 'sLang', 'sProactive', 'sAuto', 'sWake',
   'sVoiceOn', 'sNotifOn', 'sBatAlert', 'sStt', 'sTts', 'sVoice', 'sPitch', 'sRate', 'sRadius',
-  'sFont', 'sEdgeGlow', 'sKey', 'sModel', 'sGqKey', 'sGqModel', 'sGhKey', 'sFishKey', 'sTurbo',
+  'sFont', 'sEdgeGlow', 'sKey', 'sModel', 'sGqKey', 'sGqModel', 'sGhKey', 'sTtsKey', 'sTurbo',
+  'sVoiceEngine', 'sGVoice', 'sVoiceMood', 'sNeuralWifi', 'sEdgeTts',
   'saveSettings', 'pitchVal', 'rateVal', 'radiusVal', 'fontVal', 'themeGrid', 'accentRow',
   'artistGrid', 'diagOut', 'keyTestOut', 'notifStatus', 'batStatus', 'asStatus', 'uiCheckBtn'];
 var missingIds = NEEDED_IDS.filter(function (id) { return setSection.indexOf('id="' + id + '"') === -1; });
@@ -200,6 +201,30 @@ setTimeout(function () {
   var res = MayaUI.selfTest();
   is(res && typeof res.text === 'string' && res.text.indexOf('UI CHECK') > -1, 'selfTest() report deta hai');
   is(res.visible > 40, 'selfTest ne 40+ controls naape', res.visible + ' visible / ' + res.invisible + ' invisible');
+
+  /* --- AWAAZ studio (v4.2.0) --- */
+  section('10. AWAAZ STUDIO');
+  try { win.loadSettingsForm(); } catch (e) { console.log('     loadSettingsForm: ' + e.message); }
+  var gv = doc.getElementById('sGVoice'), vm = doc.getElementById('sVoiceMood');
+  is(gv && gv.options.length === 30, 'voice picker mein 30 awaazein bhar gayin', gv ? gv.options.length + ' options' : 'select hi nahi');
+  is(vm && vm.options.length >= 9, 'mood picker bhar gaya', vm ? vm.options.length + ' options' : 'select hi nahi');
+  is(gv && gv.value === 'Kore', 'settings ki chuni hui awaaz select par lagi', gv && gv.value);
+  var eng = doc.getElementById('sVoiceEngine');
+  is(eng && eng.options.length === 4, 'engine ke 4 mode', eng ? eng.options.length + '' : '-');
+  is(eng && eng.value === (win.settings.voiceEngine || 'auto'), 'engine mode form par load hua', eng && eng.value);
+  try { win.loadSettingsForm(); } catch (e) {}
+  is(gv && gv.options.length === 30, 'dobara load par options duplicate nahi hote', gv ? gv.options.length + '' : '-');
+  var hint = doc.getElementById('awaazStatus');
+  is(hint && hint.textContent && hint.textContent !== '\u2014', 'AWAAZ status line likhi gayi', hint && hint.textContent.slice(0, 46));
+  is(!!win.AWAAZ && win.AWAAZ.VER === 6, 'AWAAZ engine v6 load hua');
+  is(typeof win.paintAwaaz === 'function' && typeof win.awaazBadge === 'function', 'badge + status painter maujood');
+  /* save -> settings mein sach much pahunchta hai */
+  gv.value = 'Puck'; vm.value = 'whisper'; eng.value = 'device';
+  doc.getElementById('sNeuralWifi').checked = true;
+  try { doc.getElementById('saveSettings').click(); } catch (e) { console.log('     save: ' + e.message); }
+  is(win.settings.gVoice === 'Puck' && win.settings.voiceMood === 'whisper', 'awaaz + mood save hue', win.settings.gVoice + '/' + win.settings.voiceMood);
+  is(win.settings.voiceEngine === 'device' && win.settings.neuralWifiOnly === true, 'engine mode + WiFi-only save hue');
+  is(win.AWAAZ.moodId() === 'whisper' && win.AWAAZ.voiceId() === 'Puck', 'engine ne nayi settings foran uthayin');
 
   done();
 }, 400);
