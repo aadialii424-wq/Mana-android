@@ -36,6 +36,8 @@ function makeWorld(opts = {}) {
 
   const state = {
     calls: [],          /* har XHR */
+    gcalls: [],         /* sirf Google Gemini TTS */
+    freecalls: [],      /* keyless muft neural */
     blobs: [],          /* har createObjectURL(Blob) */
     played: [],         /* har audio src */
     logs: [],
@@ -100,6 +102,8 @@ function makeWorld(opts = {}) {
       self.body = body;
       try { self.json = JSON.parse(body); } catch (e) { self.json = null; }
       state.calls.push(self);
+      if (/generativelanguage/.test(self.url || '')) state.gcalls.push(self);
+      else state.freecalls.push(self);
       self._t = setTimeout(function () {
         if (self.aborted) return;
         const r = state.respond(self, state.calls.length);
@@ -269,12 +273,28 @@ const u16 = (b, o) => b[o] | (b[o + 1] << 8);
     for (let i = 0; i < 15; i++) long += 'Ye jumla number ' + i + ' hai aur is mein kuch alag alfaz hain jaise ' + 'x'.repeat(20 + i) + '. ';
     AWAAZ.speak(long, {});
     await wait(120);
-    const expect = AWAAZ.chunks(long, 420).length;
-    is(expect >= 3, 'matn kai tukron mein toota', expect + ' tukre');
+    const expect = AWAAZ.chunkPlan(long).length;
+    is(expect >= 2, 'matn tukron mein toota', expect + ' tukre');
     is(state.played.length === expect, 'har tukra baja', state.played.length + '/' + expect);
     is(state.calls.length === expect, 'har tukre ki ek hi request (prefetch ne duplicate nahi banaya)', state.calls.length + ' calls');
     const urls = new Set(state.played);
     is(urls.size === expect, 'har tukre ka apna audio (dobara wahi clip nahi baji)', urls.size + ' unique');
+    /* ASAL FAIDA: purana 420-chunk plan isi matn par kai guna requests bhejta tha */
+    const oldWay = AWAAZ.chunks(long, 420).length;
+    is(expect < oldWay, 'naya plan purane se KAM request bhejta hai (quota bachta hai)', expect + ' vs purana ' + oldWay);
+  }
+  {
+    /* pehla tukra chhota = awaaz foran shuru; baqi bare = kam request */
+    const { AWAAZ } = makeWorld();
+    let long = '';
+    for (let i = 0; i < 20; i++) long += 'Jumla number ' + i + ' yahan likha gaya hai. ';
+    const plan = AWAAZ.chunkPlan(long);
+    is(plan.length >= 2, 'lamba matn plan mein toota', plan.length + ' tukre');
+    is(plan[0].length <= AWAAZ.CHUNK1, 'pehla tukra chhota hai (foran bolne ke liye)', plan[0].length + ' harf');
+    is(plan[1].length > AWAAZ.CHUNK1, 'doosra tukra bara hai (request bachane ke liye)', plan[1].length + ' harf');
+    is(plan.join(' ').replace(/\s+/g, ' ').trim() === long.replace(/\s+/g, ' ').trim(), 'plan mein ek lafz bhi zaya nahi hua');
+    is(AWAAZ.chunkPlan('Chhota jumla.').length === 1, 'chhota matn ek hi request');
+    is(AWAAZ.chunkPlan('').length === 0, 'khaali matn = 0 request');
   }
 
   /* ─── 8. ERROR TAXONOMY ─── */
@@ -283,7 +303,9 @@ const u16 = (b, o) => b[o] | (b[o + 1] << 8);
     const cases = [
       [{ status: 429, body: {} }, 'QUOTA'],
       [{ status: 401, body: {} }, 'KEY_BAD'],
-      [{ status: 403, body: {} }, 'KEY_BAD'],
+      [{ status: 403, body: {} }, 'QUOTA'],
+      [{ status: 403, body: { error: { message: 'API key not valid. Please pass a valid API key.' } } }, 'KEY_BAD'],
+      [{ status: 429, body: { error: { message: 'Quota exceeded for quota metric per day' } } }, 'QUOTA_DAY'],
       [{ status: 500, body: {} }, 'HTTP_500'],
       [{ timeout: true }, 'TIMEOUT'],
       [{ neterr: true }, 'NETWORK'],
@@ -311,20 +333,49 @@ const u16 = (b, o) => b[o] | (b[o + 1] << 8);
     await wait(30);
     is(state.calls.length === before, 'doosri dafa Google ko haath hi nahi lagaya', state.calls.length + ' calls');
     is(state.deviceSaid.length === 2, 'phir bhi dono dafa bola', String(state.deviceSaid.length));
-    AWAAZ.cooldownUntil = 0;
-    is(AWAAZ.blockReason('x') === '', 'cooldown khatam hote hi neural wapas');
+    AWAAZ.reset();
+    is(AWAAZ.blockReason('x') === '', 'reset (nayi settings) ke baad neural wapas');
+    is(AWAAZ.liveKeys() === AWAAZ.keyList().length, 'reset par har key azaad ho gayi');
   }
 
   /* ─── 10. KEY BAD ─── */
-  head('10. KHARAB KEY — ek dafa seekha, baar baar nahi');
+  head('10. KHARAB KEY — per key faisla, aur khamoshi phir bhi nahi');
   {
-    const { AWAAZ, state } = makeWorld({ respond: () => ({ status: 403, body: {} }) });
-    AWAAZ.speak('a', {}); await wait(30);
-    is(AWAAZ.keyBad === true, 'keyBad set hua');
-    const before = state.calls.length;
-    AWAAZ.speak('b', {}); await wait(30);
-    is(state.calls.length === before, 'kharab key ke sath dobara try nahi kiya');
+    const { AWAAZ, state } = makeWorld({ respond: () => ({ status: 401, body: { error: { message: 'API key not valid' } } }) });
+    AWAAZ.speak('a', {}); await wait(40);
+    is(AWAAZ.keyBad === true, 'ek hi key thi aur wo sach much kharab -> keyBad');
+    is(AWAAZ.kst(0).why === 'KEY_BAD', 'us key par KEY_BAD ka thappa laga', AWAAZ.kst(0).why);
+    const before = state.gcalls.length;
+    AWAAZ.speak('b', {}); await wait(40);
+    is(state.gcalls.length === before, 'kharab key ke sath Google ko dobara try nahi kiya', state.gcalls.length + ' vs ' + before);
+    is(state.deviceSaid.length + state.played.length >= 2, 'phir bhi dono dafa kuch na kuch bola');
     is(AWAAZ.why('KEY_BAD').length > 5, 'user ke liye insani wajah maujood', AWAAZ.why('KEY_BAD'));
+  }
+  {
+    /* do keys: pehli ka quota khatam -> DOOSRI khud chal padti hai */
+    const { AWAAZ, state } = makeWorld({
+      settings: { ttsKey: 'KEY_ONE,KEY_TWO', apikey: '' },
+      respond: (xhr) => (xhr.headers['x-goog-api-key'] === 'KEY_ONE')
+        ? { status: 429, body: { error: { message: 'rate limit' } } }
+        : { status: 200, body: okBody() }
+    });
+    AWAAZ.speak('do keys ka imtihan', {}); await wait(60);
+    is(AWAAZ.keyList().length === 2, 'comma se do TTS keys nikleen', AWAAZ.keyList().join('|'));
+    is(state.played.length === 1, 'doosri key se awaaz aa gayi', state.played.length + ' clip');
+    is(AWAAZ.ki === 1, 'ab doosri key chal rahi hai', 'ki=' + AWAAZ.ki);
+    is(AWAAZ.kst(0).why === 'QUOTA', 'pehli key par QUOTA ka cooldown laga');
+    is(AWAAZ.liveKeys() === 1, 'ek key abhi bhi zinda hai');
+    is(AWAAZ.engine === 'neural', 'engine neural hi raha (device par nahi gira)', AWAAZ.engine);
+  }
+  {
+    /* app band ho kar khule to bhi quota yaad rahe */
+    const { AWAAZ, w } = makeWorld({ respond: () => ({ status: 429, body: { error: { message: 'quota per day exhausted' } } }) });
+    AWAAZ.speak('din khatam', {}); await wait(40);
+    is(AWAAZ.kst(0).why === 'QUOTA_DAY', 'din wale quota ka alag thappa', AWAAZ.kst(0).why);
+    const saved = w.localStorage.getItem('maya_awaaz');
+    is(!!saved && /QUOTA_DAY/.test(saved), 'halat localStorage mein mehfooz hai');
+    AWAAZ.kstate = {}; AWAAZ.restore();
+    is(AWAAZ.kst(0).why === 'QUOTA_DAY', 'restart ke baad bhi yaad raha');
   }
 
   /* ─── 11. POLICY GATES ─── */
@@ -365,7 +416,8 @@ const u16 = (b, o) => b[o] | (b[o + 1] << 8);
     const { AWAAZ, state } = makeWorld({ settings: { apikey: '', ttsKey: '' } });
     AWAAZ.speak('bina key ke', {});
     await wait(20);
-    is(state.calls.length === 0, 'key na ho to Google ko call hi nahi jati');
+    is(state.gcalls.length === 0, 'key na ho to Google ko call hi nahi jati');
+    is(state.freecalls.length > 0, '  → magar MUFT NEURAL (bina key) ko zaroor try kiya', state.freecalls.length + ' call');
     is(state.deviceSaid[0] === 'bina key ke', 'phone ki awaaz ne bola', state.deviceSaid[0]);
     is(AWAAZ.engine === 'device', 'engine = device');
   }

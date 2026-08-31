@@ -216,7 +216,7 @@ setTimeout(function () {
   is(gv && gv.options.length === 30, 'dobara load par options duplicate nahi hote', gv ? gv.options.length + '' : '-');
   var hint = doc.getElementById('awaazStatus');
   is(hint && hint.textContent && hint.textContent !== '\u2014', 'AWAAZ status line likhi gayi', hint && hint.textContent.slice(0, 46));
-  is(!!win.AWAAZ && win.AWAAZ.VER === 6, 'AWAAZ engine v6 load hua');
+  is(!!win.AWAAZ && win.AWAAZ.VER >= 7, 'AWAAZ engine v7+ load hua');
   is(typeof win.paintAwaaz === 'function' && typeof win.awaazBadge === 'function', 'badge + status painter maujood');
   /* save -> settings mein sach much pahunchta hai */
   gv.value = 'Puck'; vm.value = 'whisper'; eng.value = 'device';
@@ -225,6 +225,63 @@ setTimeout(function () {
   is(win.settings.gVoice === 'Puck' && win.settings.voiceMood === 'whisper', 'awaaz + mood save hue', win.settings.gVoice + '/' + win.settings.voiceMood);
   is(win.settings.voiceEngine === 'device' && win.settings.neuralWifiOnly === true, 'engine mode + WiFi-only save hue');
   is(win.AWAAZ.moodId() === 'whisper' && win.AWAAZ.voiceId() === 'Puck', 'engine ne nayi settings foran uthayin');
+
+  /* --- SETFORM (v4.5.0): jo bug user ne pakda tha --- */
+  section('11. SETFORM — SAVE par kuch bhi chup-chaap reset na ho');
+  is(Array.isArray(win.SET_FIELDS) && win.SET_FIELDS.length >= 40, 'SET_FIELDS registry maujood', (win.SET_FIELDS || []).length + ' fields');
+  is(!!win.SETFORM && typeof win.SETFORM.save === 'function', 'SETFORM.save() wahid darwaza hai');
+
+  /* har registry field ka DOM element sach much maujood ho */
+  var ghayb = (win.SET_FIELDS || []).filter(function (f) { return !doc.getElementById(f.id); });
+  is(ghayb.length === 0, 'registry ka har field DOM mein maujood', ghayb.map(function (f) { return f.id; }).join(', ') || 'sab mile');
+
+  /* ── ASAL BUG: GF mode + Groq key ek saath, phir save ── */
+  doc.getElementById('sGender').value = 'male';
+  doc.getElementById('sGf').checked = true;
+  doc.getElementById('sGqKey').value = 'gsk_test_key_123456';
+  doc.getElementById('sProactive').checked = true;
+  doc.getElementById('sAssistName').value = 'Mana';
+  doc.getElementById('sPhone').value = '03001234567';
+  doc.getElementById('sLang').value = 'urdu';
+  try { doc.getElementById('saveSettings').click(); } catch (e) { console.log('     save: ' + e.message); }
+
+  is(win.settings.gfMode === true, '🔥 GF MODE save hua (purana bug: chup-chaap false ho jata tha)', String(win.settings.gfMode));
+  is(win.settings.groqKey === 'gsk_test_key_123456', '  → saath mein Groq key bhi save hui', win.settings.groqKey);
+  is(win.settings.proactive === true, '  → proactive bhi bacha');
+  is(win.settings.assistName === 'Mana', '  → naam bhi bacha', win.settings.assistName);
+  is(win.settings.phone === '03001234567', '  → phone bhi bacha');
+  is(win.settings.lang === 'urdu', '  → language bhi bachi');
+  is(doc.getElementById('sGf').checked === true, '  → save ke baad switch ON hi raha (form wapas nahi palta)');
+
+  /* dobara save karne par bhi wahi rahe (pehle yahan reset hota tha) */
+  try { doc.getElementById('saveSettings').click(); } catch (e) {}
+  is(win.settings.gfMode === true, 'doosri dafa SAVE par bhi GF mode zinda');
+  is(win.settings.groqKey === 'gsk_test_key_123456', 'doosri dafa SAVE par key bhi zinda');
+
+  /* ek hi save handler — do handler hi asal bug the */
+  var srcAll = fs.readFileSync(path.join(ROOT, 'public/index.html'), 'utf8');
+  is((srcAll.match(/\$\("#saveSettings"\)\.addEventListener/g) || []).length === 1,
+     'SAVE button par sirf EK handler (do handler hi asal bug the)');
+  is(!/function loadV4Form\(\)\{\n  try \{/.test(srcAll), 'purana loadV4Form nikal gaya');
+
+  /* kai keys */
+  doc.getElementById('sKey').value = 'AIzaKey_One, AIzaKey_Two';
+  try { doc.getElementById('saveSettings').click(); } catch (e) {}
+  is(win.settings.apikey === 'AIzaKey_One,AIzaKey_Two', 'Gemini khane mein kai keys comma se save hueen', win.settings.apikey);
+  is(win.BRAIN.keys(win.BRAINS.filter(function (b) { return b.id === 'gemini'; })[0]).length === 2, '  → BRAIN POOL ne dono keys pakar leen');
+
+  /* galat khane mein key -> khud sahi jagah */
+  doc.getElementById('sKey').value = 'gsk_ye_groq_ki_key_hai';
+  doc.getElementById('sGqKey').value = '';
+  try { doc.getElementById('saveSettings').click(); } catch (e) {}
+  is(win.settings.groqKey === 'gsk_ye_groq_ki_key_hai', 'Gemini khane mein pari GROQ key khud sahi jagah chali gayi', win.settings.groqKey);
+  is(win.settings.apikey === '', '  → Gemini khana khaali ho gaya');
+
+  /* gender male na ho to GF mode ka koi matlab nahi */
+  doc.getElementById('sGender').value = 'female';
+  doc.getElementById('sGf').checked = true;
+  try { doc.getElementById('saveSettings').click(); } catch (e) {}
+  is(win.settings.gfMode === false, 'Gender female par GF mode khud band (aur wajah batai gayi)');
 
   done();
 }, 400);

@@ -534,7 +534,7 @@ nav{padding:8px 10px 10px}
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v4.4.0 — BRAIN POOL • 10 DIMAAG • KABHI NA RUKNE WALI</div>
+  <div class="ver">v4.5.0 — SETFORM • AWAAZ POOL • KUCH RESET NAHI HOTA</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid #c85050; background:#3c0a0f; border-radius:12px; padding:12px; text-align:left;">
@@ -559,14 +559,14 @@ nav{padding:8px 10px 10px}
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v4.4.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
+  <div class="dfoot">MAYA v4.5.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.4.0 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.5.0 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -727,7 +727,7 @@ nav{padding:8px 10px 10px}
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.4.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.5.0</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -1010,6 +1010,7 @@ nav{padding:8px 10px 10px}
           </div>
           <button type="button" class="ui-btn ui-btn-ghost" id="poolCheck">🧠 BRAIN POOL DEKHO</button>
           <pre class="ui-pre" id="poolOut">—</pre>
+          <pre class="ui-pre show" id="voicePool" style="display:block">—</pre>
           <div class="ui-field">
             <div class="ui-label">AWAAZ KE LIYE ALAG GEMINI KEY (optional)</div>
             <input class="ui-input" id="sTtsKey" type="password" placeholder="Khaali = upar wali key use hogi">
@@ -1061,7 +1062,7 @@ nav{padding:8px 10px 10px}
       </div>
 
       <button type="button" class="ui-btn ui-btn-save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v4.4.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v4.5.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -1076,7 +1077,7 @@ nav{padding:8px 10px 10px}
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.4.0 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.5.0 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -1144,7 +1145,7 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v4.4.0 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v4.5.0 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
@@ -1225,7 +1226,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v4.4.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v4.5.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1418,10 +1419,22 @@ var VOICE_MOODS = [
 var PERSONA_MOOD = { maya:"warm", friday:"pro", jarvis:"pro", venom:"funny", gf:"warm", coach:"hype", teacher:"calm" };
 
 var AWAAZ = {
-  VER: 6,
+  VER: 7,
   API: "https://generativelanguage.googleapis.com/v1beta/models/",
   MODELS: ["gemini-2.5-flash-preview-tts", "gemini-3.1-flash-tts-preview", "gemini-2.5-pro-preview-tts"],
-  CHUNK: 420,          /* ek request mein zyada se zyada itne harf */
+
+  /* Gemini TTS ka free quota sirf ~15 request ROZ ka hai. Is liye:
+     (a) pehla tukra chhota (jaldi bole), baqi BARE (kam requests) — ek jawab
+         pehle 4-5 request leta tha, ab aksar 1;
+     (b) neeche ek KEYLESS neural awaaz maujood hai jab Gemini ka din khatam ho. */
+  CHUNK: 420,          /* purana — ab CHUNK1/CHUNKN chalte hain */
+  CHUNK1: 300,         /* pehla tukra: foran shuru ho */
+  CHUNKN: 1500,        /* baqi tukre: kam request = zyada din chalega */
+
+  /* ─── KEYLESS NEURAL (Pollinations openai-audio) — koi key nahi, koi signup nahi ─── */
+  POLLEN_URL: "https://text.pollinations.ai/openai",
+  POLLEN_VOICE: { Kore:"nova", Puck:"fable", Charon:"onyx", Aoede:"shimmer", Fenrir:"echo", Leda:"coral", Orus:"alloy", Zephyr:"sage" },
+  POLLEN_COOL: 600000,
   CACHE_MAX: 12,       /* aakhri itni clips yaad rakho */
   TIMEOUT: 25000,
   COOLDOWN: 90000,     /* 429 ke baad itni der Gemini ko haath na lagao */
@@ -1432,8 +1445,11 @@ var AWAAZ = {
   flight: {},          /* key -> [callbacks]  (do dafa same clip na mangwao) */
   cache: [],           /* [{ k, url }] LRU */
   model: "",           /* jo model chal gaya wo yaad */
-  keyBad: false,
+  keyBad: false,        /* purana flag — ab sirf jab SAB keys mar jayen */
   cooldownUntil: 0,
+  ki: 0,                /* is waqt kaun si TTS key chal rahi hai */
+  kstate: {},           /* key index -> { cool:ts, why:"" }  (localStorage mein mehfooz) */
+  pollenBad: 0,         /* keyless neural ka cooldown */
   engine: "-",         /* aakhri engine jo asal mein bola: neural | edge | device | off */
   err: "",             /* aakhri nakami ka code */
   errText: "",
@@ -1448,7 +1464,8 @@ var AWAAZ = {
     return {
       on: s.voiceOn !== false,
       mode: mode,                                        /* auto | neural | device | off */
-      key: String(s.ttsKey || s.apikey || "").trim(),
+      key: AWAAZ.keyAt(AWAAZ.ki),
+      keys: AWAAZ.keyList(),
       voice: s.gVoice || "Kore",
       mood: s.voiceMood || "auto",
       wifiOnly: s.neuralWifiOnly === true,
@@ -1456,6 +1473,56 @@ var AWAAZ = {
       edge: s.edgeTTS === true,
       persona: s.persona || "maya"
     };
+  },
+
+  /* ---------- TTS ki KAI keys (ttsKey pehle, phir main Gemini keys) ---------- */
+  keyList: function () {
+    var s = (typeof settings === "object" && settings) ? settings : {};
+    var raw = String(s.ttsKey || "") + "," + String(s.apikey || "");
+    var parts = raw.split(/[\s,;]+/), out = [], i;
+    for (i = 0; i < parts.length; i++) {
+      var k = parts[i].trim();
+      if (k && out.indexOf(k) < 0) out.push(k);
+    }
+    return out;
+  },
+  keyAt: function (i) { var L = AWAAZ.keyList(); return L[i] || L[0] || ""; },
+  kst: function (i) { if (!AWAAZ.kstate[i]) AWAAZ.kstate[i] = { cool: 0, why: "" }; return AWAAZ.kstate[i]; },
+  kchill: function (i, ms, why) { var st = AWAAZ.kst(i); st.cool = Date.now() + ms; st.why = why; AWAAZ.persist(); },
+  kfree: function (i) { var st = AWAAZ.kst(i); st.cool = 0; st.why = ""; AWAAZ.persist(); },
+
+  /* agli zinda key par jao; koi na bache to false */
+  nextKey: function () {
+    var L = AWAAZ.keyList(), i;
+    for (i = 0; i < L.length; i++) {
+      var j = (AWAAZ.ki + 1 + i) % L.length;
+      if (AWAAZ.kst(j).cool < Date.now()) { AWAAZ.ki = j; return true; }
+    }
+    return false;
+  },
+  liveKeys: function () {
+    var L = AWAAZ.keyList(), n = 0, i;
+    for (i = 0; i < L.length; i++) if (AWAAZ.kst(i).cool < Date.now()) n++;
+    return n;
+  },
+
+  /* halat app band hone par bhi yaad rahe (din ka quota subah tak yaad) */
+  persist: function () {
+    try { localStorage.setItem("maya_awaaz", JSON.stringify({ k: AWAAZ.kstate, p: AWAAZ.pollenBad, m: AWAAZ.model })); } catch (e) {}
+  },
+  restore: function () {
+    try {
+      var j = JSON.parse(localStorage.getItem("maya_awaaz") || "{}");
+      if (j.k) AWAAZ.kstate = j.k;
+      if (j.p) AWAAZ.pollenBad = j.p;
+      if (j.m) AWAAZ.model = j.m;
+    } catch (e) {}
+  },
+  /* nayi settings = sab ko naya mauka */
+  reset: function () {
+    AWAAZ.kstate = {}; AWAAZ.ki = 0; AWAAZ.pollenBad = 0;
+    AWAAZ.keyBad = false; AWAAZ.cooldownUntil = 0; AWAAZ.err = ""; AWAAZ.errText = "";
+    AWAAZ.persist(); AWAAZ.paint();
   },
 
   isWifi: function () {
@@ -1471,9 +1538,9 @@ var AWAAZ = {
     var c = AWAAZ.cfg();
     if (c.mode === "off") return "OFF";
     if (c.mode === "device") return "DEVICE_MODE";
-    if (!c.key) return "KEY_MISSING";
-    if (AWAAZ.keyBad) return "KEY_BAD";
     if (navigator.onLine === false) return "OFFLINE";
+    if (!c.key) return "KEY_MISSING";
+    if (AWAAZ.liveKeys() === 0) return AWAAZ.keyBad ? "KEY_BAD" : "QUOTA";
     if (Date.now() < AWAAZ.cooldownUntil) return "QUOTA";
     if (c.wifiOnly && !AWAAZ.isWifi()) return "MOBILE_DATA";
     if (text && text.length > c.maxChars) return "TOO_LONG";
@@ -1496,6 +1563,8 @@ var AWAAZ = {
     NO_AUDIO: "Google ne audio nahi bheji",
     DECODE: "Audio kharab aayi",
     AUDIO_BLOCKED: "Phone ne audio bajane nahi di",
+    QUOTA_DAY: "Gemini TTS ka aaj ka quota (15/din) khatam — muft awaaz par aa gayi",
+    HTTP_402: "Muft awaaz ka credit khatam",
     SEND: "Request bheji nahi ja saki"
   },
   why: function (code) { return AWAAZ.WHY[code] || (code ? ("Error: " + code) : ""); },
@@ -1624,6 +1693,79 @@ var AWAAZ = {
     }
   },
 
+  /* mara hua TTS model list se nikaalo (deprecation khud sanbhalo) */
+  dropModel: function (m) {
+    var out = [], i;
+    for (i = 0; i < AWAAZ.MODELS.length; i++) if (AWAAZ.MODELS[i] !== m) out.push(AWAAZ.MODELS[i]);
+    if (out.length) AWAAZ.MODELS = out;
+    if (AWAAZ.model === m) AWAAZ.model = "";
+    AWAAZ.persist();
+  },
+
+  /* pehla tukra chhota (foran bole), baqi bare (kam request = quota bacha) */
+  chunkPlan: function (text) {
+    var head = AWAAZ.chunks(text, AWAAZ.CHUNK1);
+    if (!head.length) return [];
+    if (head.length === 1) return head;
+    var first = head[0];
+    var rest = String(text).slice(first.length);
+    return [first].concat(AWAAZ.chunks(rest, AWAAZ.CHUNKN));
+  },
+
+  /* POST: APK mein BRAIN ka async bridge (CORS nahi), warna seedha XHR */
+  post: function (url, body, timeoutMs, cb) {
+    if (typeof BRAIN !== "undefined" && BRAIN && BRAIN.post) { BRAIN.post(url, "", body, timeoutMs, cb); return; }
+    var done = false, xhr = new XMLHttpRequest();
+    function fin(st, t) { if (!done) { done = true; cb(st, t); } }
+    try {
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.timeout = timeoutMs;
+    } catch (e) { fin(0, "open"); return; }
+    xhr.ontimeout = function () { fin(0, "timeout"); };
+    xhr.onerror = function () { fin(0, "network"); };
+    xhr.onload = function () { fin(xhr.status, xhr.responseText || ""); };
+    try { xhr.send(body); } catch (e) { fin(0, "send"); }
+  },
+
+  /* ═══ KEYLESS NEURAL — Gemini ka din khatam? phir bhi asli awaaz ═══ */
+  pollen: function (text, onDone, onFail) {
+    if (Date.now() < AWAAZ.pollenBad) { onFail("QUOTA"); return; }
+    var gen = AWAAZ.gen;
+    var v = AWAAZ.POLLEN_VOICE[AWAAZ.voiceId()] || "nova";
+    var list = AWAAZ.chunkPlan(text);
+    if (!list.length) { onDone(); return; }
+
+    function one(idx) {
+      if (gen !== AWAAZ.gen) return;
+      if (idx >= list.length) { AWAAZ.spoke++; onDone(); return; }
+      var key = "pollen|" + v + "|" + list[idx];
+      var hit = AWAAZ.cacheGet(key);
+      if (hit) { AWAAZ.cacheHits++; AWAAZ.play(hit, gen, function () { one(idx + 1); }, function (c) { onFail(c); }); return; }
+      var body = JSON.stringify({
+        model: "openai-audio", modalities: ["text", "audio"],
+        audio: { voice: v, format: "mp3" },
+        messages: [{ role: "user", content: list[idx] }]
+      });
+      AWAAZ.post(AWAAZ.POLLEN_URL, body, 25000, function (status, txt) {
+        if (gen !== AWAAZ.gen) return;
+        if (status < 200 || status >= 300) {
+          if (status === 429 || status === 402) AWAAZ.pollenBad = Date.now() + AWAAZ.POLLEN_COOL;
+          AWAAZ.persist(); onFail(status ? ("HTTP_" + status) : "NETWORK"); return;
+        }
+        var d = null, b64 = "";
+        try { d = JSON.parse(txt); b64 = d.choices[0].message.audio.data; } catch (e) {}
+        if (!b64) { onFail("NO_AUDIO"); return; }
+        var url;
+        try { url = URL.createObjectURL(new Blob([AWAAZ.b64(b64)], { type: "audio/mpeg" })); }
+        catch (e) { onFail("DECODE"); return; }
+        AWAAZ.cachePut(key, url);
+        AWAAZ.play(url, gen, function () { one(idx + 1); }, function (c) { onFail(c); });
+      });
+    }
+    one(0);
+  },
+
   /* ---------- model ki tarteeb: jo chala tha wo pehle ---------- */
   modelOrder: function () {
     var first = AWAAZ.model || (typeof settings === "object" && settings ? settings.ttsModel : "") || "";
@@ -1665,7 +1807,7 @@ var AWAAZ = {
     try {
       xhr.open("POST", AWAAZ.API + encodeURIComponent(model) + ":generateContent", true);
       xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.setRequestHeader("x-goog-api-key", c.key);
+      xhr.setRequestHeader("x-goog-api-key", AWAAZ.keyAt(AWAAZ.ki) || c.key);
       xhr.timeout = AWAAZ.TIMEOUT;
     } catch (e) { drop(); settle("SEND"); return; }
 
@@ -1674,9 +1816,26 @@ var AWAAZ = {
     xhr.onload = function () {
       drop();
       var st = xhr.status;
-      if (st === 401 || st === 403) { AWAAZ.keyBad = true; settle("KEY_BAD"); return; }
-      if (st === 429) { AWAAZ.cooldownUntil = Date.now() + AWAAZ.COOLDOWN; settle("QUOTA"); return; }
-      if (st === 400 || st === 404) { settle("MODEL"); return; }
+      var msg = "";
+      try { msg = String(JSON.parse(xhr.responseText).error.message || ""); } catch (e) { msg = String(xhr.responseText || "").slice(0, 200); }
+      var ki = AWAAZ.ki;
+      /* 403 aksar QUOTA hota hai, kharab key nahi — purana code ise maut samajhta tha */
+      if (st === 401 || (st === 403 && /api key|invalid|unregistered|permission denied/i.test(msg) && !/quota|rate|exceed/i.test(msg))) {
+        AWAAZ.kchill(ki, 1800000, "KEY_BAD");
+        if (AWAAZ.liveKeys() === 0) AWAAZ.keyBad = true;
+        settle("KEY_BAD"); return;
+      }
+      if (st === 429 || st === 403) {
+        /* "per day" wala quota kal tak — Gemini TTS free tier sirf ~15/din deta hai */
+        var day = /per day|daily|PerDay|exhausted/i.test(msg);
+        AWAAZ.kchill(ki, day ? 3600000 : AWAAZ.COOLDOWN, day ? "QUOTA_DAY" : "QUOTA");
+        if (AWAAZ.liveKeys() === 0) AWAAZ.cooldownUntil = Date.now() + (day ? 3600000 : AWAAZ.COOLDOWN);
+        settle(day ? "QUOTA_DAY" : "QUOTA"); return;
+      }
+      if (st === 400 || st === 404) {
+        if (/model|not found|not supported|deprecat/i.test(msg)) { AWAAZ.dropModel(model); }
+        settle("MODEL"); return;
+      }
       if (st < 200 || st >= 300) { settle("HTTP_" + st); return; }
       var data = null;
       try { data = JSON.parse(xhr.responseText); } catch (e) { settle("DECODE"); return; }
@@ -1688,7 +1847,8 @@ var AWAAZ = {
         url = URL.createObjectURL(new Blob([wav], { type: "audio/wav" }));
       } catch (e) { settle("DECODE"); return; }
       AWAAZ.model = model;
-      try { if (typeof settings === "object" && settings) settings.ttsModel = model; } catch (e) {}
+      AWAAZ.kfree(AWAAZ.ki);
+      try { if (typeof settings === "object" && settings) { settings.ttsModel = model; saveSettings(); } } catch (e) {}
       AWAAZ.cachePut(key, url);
       settle(null, url);
     };
@@ -1712,20 +1872,25 @@ var AWAAZ = {
   neural: function (text, onDone, onFail) {
     var gen = AWAAZ.gen;
     var voice = AWAAZ.voiceId(), mood = AWAAZ.moodId();
-    var list = AWAAZ.chunks(text, AWAAZ.CHUNK);
+    var list = AWAAZ.chunkPlan(text);
     if (!list.length) { onDone(); return; }
 
     function grab(idx, cb) {
-      var models = AWAAZ.modelOrder(), at = 0;
+      var models = AWAAZ.modelOrder(), at = 0, keyTries = 0;
       function go() {
         var m = models[at];
         if (!m) { cb("MODEL"); return; }
         AWAAZ.fetchClip(list[idx], { voice: voice, mood: mood, model: m, prompt: AWAAZ.prompt(list[idx], mood) },
           function (url) { cb(null, url); },
           function (code) {
-            var retryable = (code === "MODEL" || code === "NO_AUDIO");
-            if (retryable && !AWAAZ.model && at + 1 < models.length) { at++; go(); }
-            else cb(code);
+            /* quota/key ka masla? AGLI KEY par jao — 3 keys = 3 guna awaaz */
+            if ((code === "QUOTA" || code === "QUOTA_DAY" || code === "KEY_BAD") && keyTries < AWAAZ.keyList().length - 1 && AWAAZ.nextKey()) {
+              keyTries++; go(); return;
+            }
+            /* model ka masla? agla model — chahe koi model pehle chal chuka ho
+               (purana `!AWAAZ.model` shart is fallback ko band kar deti thi) */
+            if ((code === "MODEL" || code === "NO_AUDIO") && at + 1 < models.length) { at++; go(); return; }
+            cb(code);
           });
       }
       go();
@@ -1820,11 +1985,26 @@ var AWAAZ = {
 
     if (!c.on || c.mode === "off") { AWAAZ.setEngine("off"); done(); return; }
 
+    /* TEH 2: keyless neural — Gemini na ho sake to bhi ASLI awaaz, robot nahi */
+    function usePollen(why) {
+      if (gen !== AWAAZ.gen) return;
+      if (Date.now() < AWAAZ.pollenBad || c.mode === "device") { useEdgeOrDevice(); return; }
+      AWAAZ.setEngine("free");
+      if (cb.onStart) cb.onStart("free");
+      AWAAZ.pollen(text, done, function () { useEdgeOrDevice(); });
+    }
+    function useEdgeOrDevice() {
+      if (gen !== AWAAZ.gen) return;
+      if (c.edge) { AWAAZ.setEngine("edge"); AWAAZ.edge(text, done, function () { useDevice(); }); }
+      else useDevice();
+    }
+
     var block = AWAAZ.blockReason(text);
     if (block) {
-      if (block !== "DEVICE_MODE") AWAAZ.note(block);
-      else AWAAZ.note("");
-      useDevice();
+      AWAAZ.note(block === "DEVICE_MODE" ? "" : block);
+      /* sirf ye teen wajahen sach much neural rokti hain */
+      if (block === "DEVICE_MODE" || block === "OFFLINE" || block === "MOBILE_DATA") { useDevice(); return; }
+      usePollen(block);          /* KEY_MISSING / KEY_BAD / QUOTA / TOO_LONG -> muft neural */
       return;
     }
 
@@ -1834,10 +2014,7 @@ var AWAAZ = {
     AWAAZ.neural(text, done, function (code) {
       if (gen !== AWAAZ.gen) return;
       AWAAZ.note(code);
-      if (c.edge) {
-        AWAAZ.setEngine("edge");
-        AWAAZ.edge(text, done, function () { useDevice(); });
-      } else useDevice();
+      usePollen(code);
     });
   },
 
@@ -1870,10 +2047,25 @@ var AWAAZ = {
       err: AWAAZ.err,
       cache: AWAAZ.cache.length,
       cacheHits: AWAAZ.cacheHits,
+      keys: AWAAZ.keyList().length,
+      liveKeys: AWAAZ.liveKeys(),
+      keyless: Date.now() >= AWAAZ.pollenBad,
       cooldown: Math.max(0, Math.round((AWAAZ.cooldownUntil - Date.now()) / 1000))
     };
+  },
+
+  /* Settings/Doctor ke liye har TTS key ka haal */
+  keyReport: function () {
+    var L = AWAAZ.keyList(), out = [], i;
+    for (i = 0; i < L.length; i++) {
+      var st = AWAAZ.kst(i), c = Math.max(0, st.cool - Date.now());
+      out.push({ i: i + 1, state: c > 0 ? (st.why || "COOL") : "LIVE", cool: Math.round(c / 1000), now: i === AWAAZ.ki });
+    }
+    return out;
   }
 };
+AWAAZ.restore();   /* pichhli dafa ka quota/cooldown yaad karo */
+
 
 /* Kotlin ka TTS-done callback ab engine ko jata hai */
 window.__nativeTtsDone = function () { try { if (AWAAZ.deviceDone) AWAAZ.deviceDone(); } catch (e) {} };
@@ -2851,9 +3043,9 @@ async function resolveModels(){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v4.4.0)
+   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v4.5.0)
    ---------------------------------------------------------------------------
-   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v4.4.0 se pehle Groq
+   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v4.5.0 se pehle Groq
    ne 16 August 2026 ko apne purane Llama 3.x models band kar diye the — hamara
    default wahi tha, is liye "backup brain bhi thak gaya" aata tha.
 
@@ -3151,7 +3343,7 @@ window.__httpDone = function (id, status, b64) {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v4.4.0)
+   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v4.5.0)
    ---------------------------------------------------------------------------
    Purane code ke 3 asli bugs jinki wajah se "Sab free brains busy" bar bar aata tha:
 
@@ -3982,85 +4174,207 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 });
 
 /* ---------- SETTINGS TAB ---------- */
-function loadSettingsForm(){
-  $("#sName").value = settings.name; $("#sCity").value = settings.city || "Hyderabad"; $("#sKey").value = settings.apikey;
-  $("#sGhKey").value = settings.ghKey; $("#sTtsKey").value = settings.ttsKey || "";
-  $("#sGqKey").value = settings.groqKey || ""; $("#sCerebras").value = settings.cerebrasKey || "";
-  $("#sMistral").value = settings.mistralKey || ""; $("#sOpenRouter").value = settings.orKey || "";
-  $("#sNvidia").value = settings.nvidiaKey || ""; $("#sZai").value = settings.zaiKey || "";
-  $("#sLlm7").value = settings.llm7Key || "";
-  paintPool();
-  awaazFillSelects();
-  $("#sVoiceEngine").value = settings.voiceEngine || "auto";
-  $("#sGVoice").value = settings.gVoice || "Kore";
-  $("#sVoiceMood").value = settings.voiceMood || "auto";
-  $("#sNeuralWifi").checked = settings.neuralWifiOnly === true;
-  $("#sEdgeTts").checked = settings.edgeTTS === true;
-  paintAwaaz();
-  $("#sStt").value = settings.stt; $("#sTts").value = settings.tts;
-  $("#sRate").value = settings.rate; $("#rateVal").textContent = Number(settings.rate).toFixed(2);
-  $("#sPitch").value = settings.pitch || 1.05; $("#pitchVal").textContent = Number(settings.pitch || 1.05).toFixed(2);
-  $("#sVoice").value = settings.voiceName || "";
-  $("#sModel").value = settings.model;
-  $("#sVoiceOn").checked = settings.voiceOn; $("#sAuto").checked = settings.autoListen; $("#sWake").checked = !!settings.wakeWord; $("#sTurbo").checked = settings.turbo !== false; $("#sNotifOn").checked = settings.notifSpeak === true; $("#sBatAlert").checked = settings.batteryAlert !== false;
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v4.5.0)
+   ---------------------------------------------------------------------------
+   Purana bug (user ne pakda): "girlfriend mode on karta hun, groq key lagata
+   hun — thori der baad wo option khud band ho jata hai."
+
+   Asal jarh: SAVE button par DO alag click handler lage hue the.
+     handler A  -> keys save kiye, phir loadSettingsForm() chala diya
+                   (jisne form ko PURANI settings se dobara likh diya —
+                    yaani abhi abhi lagaya hua GF switch wapas off ho gaya)
+     handler B  -> ab off ho chuke switch ko parh kar gfMode = false save kar diya
+
+   Yani GF mode, gender, phone, persona, language, proactive — ye SAB
+   button se kabhi save ho hi nahi sakte the. Har SAVE par chup-chaap wapas.
+
+   Ilaj (patch nahi, structure): ab ek hi registry SET_FIELDS hai jo load aur
+   save DONO chalati hai, aur ek hi handler jo is tarteeb se chalta hai:
+        1) collect()  — SAB khane parho
+        2) fixKeys()  — galat khane mein pari key sahi jagah bhejo
+        3) persist()  — localStorage
+        4) apply()    — asraat (theme, awaaz, brain pool, wake service…)
+        5) load()     — form dobara likho (ab mehfooz: sab parha ja chuka)
+   Naya field add karna = is list mein ek line. Wo khud load bhi hoga aur
+   save bhi — dobara kabhi "save hota hi nahi" wala bug mumkin nahi.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+var SET_FIELDS = [
+  /* ---- pehchan ---- */
+  { id: "sName",       key: "name",           t: "text",  def: "Sir" },
+  { id: "sCity",       key: "city",           t: "text",  def: "Hyderabad" },
+  { id: "sGender",     key: "gender",         t: "sel",   def: "male" },
+  { id: "sAssistName", key: "assistName",     t: "text",  def: "Maya" },
+  { id: "sPhone",      key: "phone",          t: "text",  def: "" },
+
+  /* ---- BRAIN POOL ki chaabiyan (sab kai-keys wale) ---- */
+  { id: "sKey",        key: "apikey",         t: "keys" },
+  { id: "sGqKey",      key: "groqKey",        t: "keys" },
+  { id: "sCerebras",   key: "cerebrasKey",    t: "keys" },
+  { id: "sMistral",    key: "mistralKey",     t: "keys" },
+  { id: "sOpenRouter", key: "orKey",          t: "keys" },
+  { id: "sNvidia",     key: "nvidiaKey",      t: "keys" },
+  { id: "sZai",        key: "zaiKey",         t: "keys" },
+  { id: "sLlm7",       key: "llm7Key",        t: "keys" },
+  { id: "sGhKey",      key: "ghKey",          t: "keys" },
+  { id: "sTtsKey",     key: "ttsKey",         t: "keys" },
+
+  /* ---- AWAAZ ---- */
+  { id: "sVoiceEngine", key: "voiceEngine",   t: "sel",   def: "auto" },
+  { id: "sGVoice",      key: "gVoice",        t: "sel",   def: "Kore" },
+  { id: "sVoiceMood",   key: "voiceMood",     t: "sel",   def: "auto" },
+  { id: "sNeuralWifi",  key: "neuralWifiOnly", t: "check", def: false },
+  { id: "sEdgeTts",     key: "edgeTTS",       t: "check", def: false },
+  { id: "sStt",         key: "stt",           t: "sel",   def: "ur-PK" },
+  { id: "sTts",         key: "tts",           t: "sel",   def: "ur-PK" },
+  { id: "sRate",        key: "rate",          t: "num",   def: 1,    out: "rateVal",  dp: 2 },
+  { id: "sPitch",       key: "pitch",         t: "num",   def: 1.05, out: "pitchVal", dp: 2 },
+  { id: "sVoice",       key: "voiceName",     t: "sel",   def: "" },
+  { id: "sVoiceOn",     key: "voiceOn",       t: "check", def: true },
+
+  /* ---- chalne ka andaz ---- */
+  { id: "sModel",     key: "model",      t: "sel",   def: "auto" },
+  { id: "sAuto",      key: "autoListen", t: "check", def: false },
+  { id: "sWake",      key: "wakeWord",   t: "check", def: false },
+  { id: "sTurbo",     key: "turbo",      t: "check", def: true },
+  { id: "sNotifOn",   key: "notifSpeak", t: "check", def: false },
+  { id: "sBatAlert",  key: "batteryAlert", t: "check", def: true },
+  { id: "sPersona",   key: "persona",    t: "sel",   def: "maya" },
+  { id: "sGf",        key: "gfMode",     t: "check", def: false },
+  { id: "sRemember",  key: "remember",   t: "check", def: true },
+  { id: "sConvo",     key: "convoMode",  t: "check", def: false },
+  { id: "sLang",      key: "lang",       t: "sel",   def: "roman-ur" },
+  { id: "sProactive", key: "proactive",  t: "check", def: false },
+  { id: "sMusicApp",  key: "musicApp",   t: "sel",   def: "youtube" },
+  { id: "sFavSong",   key: "favSong",    t: "text",  def: "" },
+  { id: "sYtChannel", key: "ytChannel",  t: "text",  def: "" },
+
+  /* ---- shakl-o-surat ---- */
+  { id: "sRadius",   key: "radius",    t: "int",   def: 18, out: "radiusVal" },
+  { id: "sFont",     key: "fontScale", t: "num",   def: 1,  out: "fontVal", dp: 2 },
+  { id: "sEdgeGlow", key: "edgeGlow",  t: "check", def: false }
+];
+
+var SETFORM = {
+  /* "a, b\nc" -> "a,b,c" ; ek hi key ho to andar ki spaces bhi saaf */
+  keys: function (v) {
+    var s = String(v || "").trim().replace(/[\r\n\t;]+/g, ",").replace(/\s*,\s*/g, ",").replace(/^,+|,+$/g, "");
+    return s.indexOf(",") < 0 ? s.replace(/\s+/g, "") : s;
+  },
+
+  /* ---------- settings ➜ form ---------- */
+  load: function () {
+    try { awaazFillSelects(); } catch (e) {}
+    for (var i = 0; i < SET_FIELDS.length; i++) {
+      var f = SET_FIELDS[i], el = null;
+      try { el = document.getElementById(f.id); } catch (e) {}
+      if (!el) continue;
+      var v = settings[f.key];
+      try {
+        if (f.t === "check") el.checked = (v === undefined || v === null) ? !!f.def : (f.def === true ? v !== false : v === true);
+        else if (f.t === "num" || f.t === "int") el.value = (v === undefined || v === null || v === "") ? f.def : v;
+        else el.value = (v === undefined || v === null) ? (f.def || "") : v;
+        if (f.out) {
+          var o = document.getElementById(f.out);
+          if (o) o.textContent = f.dp ? Number(el.value).toFixed(f.dp) : String(parseInt(el.value, 10) || f.def);
+        }
+      } catch (e) {}
+    }
+    try { paintPool(); } catch (e) {}
+    try { paintAwaaz(); } catch (e) {}
+  },
+
+  /* ---------- form ➜ settings (SAB kuch, ek hi baar) ---------- */
+  collect: function () {
+    for (var i = 0; i < SET_FIELDS.length; i++) {
+      var f = SET_FIELDS[i], el = null;
+      try { el = document.getElementById(f.id); } catch (e) {}
+      if (!el) continue;
+      try {
+        if (f.t === "check") settings[f.key] = !!el.checked;
+        else if (f.t === "keys") settings[f.key] = SETFORM.keys(el.value);
+        else if (f.t === "num") settings[f.key] = parseFloat(el.value) || f.def;
+        else if (f.t === "int") settings[f.key] = parseInt(el.value, 10) || f.def;
+        else settings[f.key] = String(el.value || "").trim() || (f.def || "");
+      } catch (e) {}
+    }
+  },
+
+  /* ---------- galat khane mein pari key khud sahi jagah ---------- */
+  fixKeys: function () {
+    var moved = "";
+    var g = settings.apikey || "";
+    if (/^gsk_/.test(g)) { settings.groqKey = SETFORM.join(settings.groqKey, g); settings.apikey = ""; moved = "GROQ"; }
+    else if (/^(ghp_|github_pat_)/.test(g)) { settings.ghKey = SETFORM.join(settings.ghKey, g); settings.apikey = ""; moved = "GITHUB"; }
+    else if (/^csk-/.test(g)) { settings.cerebrasKey = SETFORM.join(settings.cerebrasKey, g); settings.apikey = ""; moved = "CEREBRAS"; }
+    else if (/^sk-or-/.test(g)) { settings.orKey = SETFORM.join(settings.orKey, g); settings.apikey = ""; moved = "OPENROUTER"; }
+    else if (/^nvapi-/.test(g)) { settings.nvidiaKey = SETFORM.join(settings.nvidiaKey, g); settings.apikey = ""; moved = "NVIDIA"; }
+    var q = settings.groqKey || "";
+    if (/^AIza/.test(q)) { settings.apikey = SETFORM.join(settings.apikey, q); settings.groqKey = ""; moved = "GEMINI"; }
+    return moved;
+  },
+  join: function (have, add) {
+    have = String(have || "").trim();
+    if (!have) return add;
+    return (have.split(",").indexOf(add) >= 0) ? have : (have + "," + add);
+  },
+
+  /* ---------- lagao: asraat ---------- */
+  apply: function () {
+    /* gender male na ho to GF mode ka koi matlab nahi */
+    if (settings.gfMode === true && (settings.gender || "male") !== "male") settings.gfMode = false;
+
+    /* nayi settings = har dimaag aur har awaaz ko naya mauka */
+    try { BRAIN.state = {}; BRAIN.save(); } catch (e) {}
+    try { AWAAZ.reset(); } catch (e) {}
+    try { geminiBadUntil = 0; modelCooldowns = {}; } catch (e) {}
+    try { DIMAAG.keyBadUntil = 0; DIMAAG.dayQuotaUntil = 0; DIMAAG.lastCode = ""; } catch (e) {}
+
+    if (typeof NATIVE !== "undefined" && NATIVE) {
+      try { window.MayaBridge.notifSpeak(settings.notifSpeak); } catch (e) {}
+      try { window.MayaBridge.keepScreenOn(settings.autoListen); } catch (e) {}
+    }
+    if (settings.autoListen) { try { requestWakeLock(); } catch (e) {} }
+
+    try { applyTheme(); } catch (e) {}
+    try { renderThemeUI(); } catch (e) {}
+    try { paintPersonas(); } catch (e) {}
+    try { renderArtists(); } catch (e) {}
+    try { renderFacts(); } catch (e) {}
+    try { startProactive(); } catch (e) {}
+    try { setOrb("idle"); } catch (e) {}
+    try { paintQuick(); } catch (e) {}
+    try { greetMiniRefresh(); } catch (e) {}
+  },
+
+  /* ---------- poora safar: ek button, ek tarteeb ---------- */
+  save: function () {
+    var wakeWas = !!settings.wakeWord;
+
+    SETFORM.collect();                    /* 1. SAB parho — pehle */
+    var moved = SETFORM.fixKeys();        /* 2. keys sahi jagah */
+    var gfWas = settings.gfMode;
+    SETFORM.apply();                      /* 3. asraat + gender check */
+    saveSettings();                       /* 4. mehfooz karo */
+    SETFORM.load();                       /* 5. ab form dobara likho */
+
+    if (wakeWas !== !!settings.wakeWord) { try { setWakeService(!!settings.wakeWord); } catch (e) {} }
+    if (moved) toast("Ye " + moved + " key thi — sahi khane mein rakh di ✓");
+    else if (gfWas === true && settings.gfMode !== true) toast("Girlfriend mode ke liye Gender = Male chahiye");
+    else toast("✅ Settings save ho gayin");
+    pushLog("SETTINGS SAVED • " + BRAIN.liveCount() + " dimaag zinda" + (settings.gfMode ? " • GF ON" : ""));
+  }
+};
+
+/* purane naam zinda rakho — baqi code inhe bulata hai */
+function loadSettingsForm(){ SETFORM.load(); }
+function loadV4Form(){ SETFORM.load(); }
+
+$("#saveSettings").addEventListener("click", function(){ SETFORM.save(); });
 $("#sRate").addEventListener("input", function(){ $("#rateVal").textContent = Number(this.value).toFixed(2); });
-$("#saveSettings").addEventListener("click", function(){
-  settings.name = $("#sName").value.trim() || "Sir";
-  settings.city = $("#sCity").value.trim() || "Hyderabad";
-  /* AUTO KEY-DETECT — galat field mein key? Maya khud theek karegi */
-  var kGem = $("#sKey").value.trim();
-  var kGrq = $("#sGqKey").value.trim();
-  var kGit = $("#sGhKey").value.trim();
-  if (/^gsk_/.test(kGem)) {
-    $("#sGqKey").value = kGem; if (!/^AIza/.test(kGrq)) kGem = settings.apikey || "";
-    $("#sKey").value = kGem;
-    toast("Ye GROQ key thi — Backup Brains field mein rakh di ✓");
-  }
-  if (/^AIza/.test(kGrq)) {
-    $("#sKey").value = kGrq; if (!/^gsk_/.test(kGem)) kGrq = settings.groqKey || "";
-    $("#sGqKey").value = kGrq;
-    toast("Ye GEMINI key thi — Neural Link field mein rakh di ✓");
-  }
-  if (kGem.indexOf("ghp_") === 0 || kGem.indexOf("github_pat_") === 0) { $("#sGhKey").value = kGem; kGem = settings.apikey || ""; $("#sKey").value = kGem; toast("Ye GITHUB key thi — sahi jagah rakh di ✓"); }
-  /* kai keys: nayi line/tab ko comma bana do, warna ek hi lambi galat key ban jati hai */
-  function multiKey(id){
-    var v = ($(id).value || "").trim().replace(/[\r\n\t;]+/g, ",").replace(/\s*,\s*/g, ",").replace(/^,|,$/g, "");
-    return v.indexOf(",") < 0 ? v.replace(/\s+/g, "") : v;
-  }
-  settings.apikey = multiKey("#sKey");
-  settings.ghKey = multiKey("#sGhKey");
-  settings.ttsKey = ($("#sTtsKey").value || "").trim().replace(/\s+/g, "");
-  settings.groqKey = multiKey("#sGqKey");
-  settings.cerebrasKey = multiKey("#sCerebras"); settings.mistralKey = multiKey("#sMistral");
-  settings.orKey = multiKey("#sOpenRouter"); settings.nvidiaKey = multiKey("#sNvidia");
-  settings.zaiKey = multiKey("#sZai"); settings.llm7Key = multiKey("#sLlm7");
-  BRAIN.state = {}; BRAIN.save();     /* nayi keys = sab dimaag ko naya mauka */
-  settings.voiceEngine = $("#sVoiceEngine").value || "auto";
-  settings.gVoice = $("#sGVoice").value || "Kore";
-  settings.voiceMood = $("#sVoiceMood").value || "auto";
-  settings.neuralWifiOnly = $("#sNeuralWifi").checked;
-  settings.edgeTTS = $("#sEdgeTts").checked;
-  AWAAZ.keyBad = false; AWAAZ.cooldownUntil = 0;   /* nayi settings = naya mauka */
-  settings.stt = $("#sStt").value; settings.tts = $("#sTts").value;
-  settings.rate = parseFloat($("#sRate").value) || 1;
-  settings.pitch = parseFloat($("#sPitch").value) || 1.05;
-  settings.voiceName = $("#sVoice").value;
-  settings.model = $("#sModel").value;
-  settings.voiceOn = $("#sVoiceOn").checked; settings.autoListen = $("#sAuto").checked; settings.turbo = $("#sTurbo").checked !== false;
-  /* nayi settings = har brain ko naya mauka */
-  geminiBadUntil = 0;
-  DIMAAG.keyBadUntil = 0; DIMAAG.dayQuotaUntil = 0; DIMAAG.lastCode = ""; modelCooldowns = {};
-  settings.notifSpeak = $("#sNotifOn").checked; settings.batteryAlert = $("#sBatAlert").checked;
-  if (NATIVE) { try { window.MayaBridge.notifSpeak(settings.notifSpeak); } catch(e){} }
-  var wakeOn = $("#sWake").checked;
-  if (wakeOn !== !!settings.wakeWord) { settings.wakeWord = wakeOn; setWakeService(wakeOn); } else settings.wakeWord = wakeOn;
-  saveSettings(); loadSettingsForm(); setOrb("idle"); paintQuick(); greetMiniRefresh(); renderArtists();
-  if (NATIVE) { try { window.MayaBridge.keepScreenOn(settings.autoListen); } catch(e){} }
-  if (settings.autoListen) requestWakeLock();
-  toast("✅ Settings save ho gayin");
-  pushLog("SETTINGS UPDATED" + (settings.apikey ? " • KEY OK" : ""));
-});
+$("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = Number(this.value).toFixed(2); });
+
 (function(_cs){ if (_cs) _cs.addEventListener("click", function(){
   customSkills = []; saveSkills(); refreshSkillList(); toast("Custom skills khatam");
 }); })($("#clearSkills"));
@@ -4214,7 +4528,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v4.4.0 — DOCTOR REPORT");
+  out.push("MAYA v4.5.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
@@ -4380,15 +4694,30 @@ function paintAwaaz(){
       var line;
       if (!settings.voiceOn || st.mode === "off") line = "🔇 Maya khamosh hai";
       else if (st.mode === "device") line = "📱 Phone ki awaaz — 0 data, foran";
-      else if (st.ready) line = "🎭 Neural tayyar — <b>" + st.voice + "</b> · " + st.mood + (st.model && st.model !== "auto" ? " · " + st.model : "");
+      else if (st.ready) line = "🎭 Gemini neural tayyar — <b>" + st.voice + "</b> · " + st.mood + " · " + st.liveKeys + "/" + st.keys + " key zinda";
+      else if (st.keyless) line = "🌸 Muft neural awaaz chalegi — " + st.why + (st.cooldown ? " (" + st.cooldown + "s)" : "");
       else line = "📱 Abhi phone ki awaaz — " + st.why + (st.cooldown ? " (" + st.cooldown + "s)" : "");
       el.innerHTML = line;
       el.className = "ui-hint" + (st.ready && st.mode !== "device" ? " ok" : (st.mode === "off" ? "" : " warn"));
     }
+    var vp = $("#voicePool");
+    if (vp) {
+      var rows = AWAAZ.keyReport(), out = [], i;
+      out.push("🎙️ AWAAZ POOL v" + AWAAZ.VER);
+      if (!rows.length) out.push("  💎 Gemini TTS — koi key nahi");
+      for (i = 0; i < rows.length; i++)
+        out.push("  💎 Gemini key" + rows[i].i + (rows[i].now ? " (abhi yahi)" : "") + " — " + (rows[i].state === "LIVE" ? "✅ LIVE" : "⏳ " + rows[i].state + " " + rows[i].cool + "s"));
+      out.push("  🌸 Muft neural (bina key) — " + (st.keyless ? "✅ LIVE" : "⏳ " + Math.round((AWAAZ.pollenBad - Date.now()) / 1000) + "s"));
+      out.push("  📱 Phone ki awaaz — ✅ hamesha");
+      out.push("");
+      out.push("💡 Gemini TTS ka muft quota sirf ~15 request ROZ hai.");
+      out.push("   TTS khane mein comma laga kar aur keys daalo — har key 15 aur.");
+      vp.textContent = out.join("\n");
+    }
     var w = $("#awaazWhy");
     if (w) {
       w.textContent = st.engine === "-" ? "Test karo — niche likha aayega ke kis engine ne bola."
-        : ("Aakhri dafa: " + (st.engine === "neural" ? "🎭 NEURAL (" + st.voice + ")" : st.engine === "edge" ? "🌊 EDGE" : st.engine === "device" ? "📱 PHONE" : "🔇 OFF")
+        : ("Aakhri dafa: " + (st.engine === "neural" ? "🎭 NEURAL (" + st.voice + ")" : st.engine === "free" ? "🌸 MUFT NEURAL" : st.engine === "edge" ? "🌊 EDGE" : st.engine === "device" ? "📱 PHONE" : "🔇 OFF")
            + (st.err ? " — " + AWAAZ.why(st.err) : "") + " · cache " + st.cache + " (" + st.cacheHits + " hits)");
     }
     var mu = $("#qMute"); if (mu) mu.textContent = awaazBadge();
@@ -4636,8 +4965,6 @@ function renderThemeUI(){
     });
   }
 }
-try { $("#sRadius").addEventListener("input", function(){ $("#radiusVal").textContent = this.value; settings.radius = parseInt(this.value,10); saveSettings(); applyTheme(); }); } catch(e){}
-try { $("#sFont").addEventListener("input", function(){ $("#fontVal").textContent = Number(this.value).toFixed(2); settings.fontScale = parseFloat(this.value); saveSettings(); applyTheme(); }); } catch(e){}
 try { $("#sEdgeGlow").addEventListener("change", function(){ settings.edgeGlow = this.checked; saveSettings(); applyTheme(); }); } catch(e){}
 
 /* ---------- DRAWER ---------- */
@@ -4663,54 +4990,20 @@ document.querySelectorAll(".setgrp-head").forEach(function(h){
   h.addEventListener("click", function(){ h.parentElement.classList.toggle("open"); });
 });
 
-/* ---------- NAYE SETTINGS FIELDS ---------- */
-function loadV4Form(){
-  try {
-    $("#sGender").value = settings.gender || "male";
-    $("#sPhone").value = settings.phone || "";
-    $("#sMusicApp").value = settings.musicApp || "youtube";
-    $("#sFavSong").value = settings.favSong || "";
-    $("#sYtChannel").value = settings.ytChannel || "";
-    $("#sAssistName").value = settings.assistName || "Maya";
-    $("#sPersona").value = settings.persona || "maya";
-    $("#sGf").checked = settings.gfMode === true;
-    $("#sRemember").checked = settings.remember !== false;
-    $("#sConvo").checked = settings.convoMode === true;
-    $("#sLang").value = settings.lang || "roman-ur";
-    $("#sProactive").checked = settings.proactive === true;
-    $("#sRadius").value = settings.radius || 18; $("#radiusVal").textContent = settings.radius || 18;
-    $("#sFont").value = settings.fontScale || 1; $("#fontVal").textContent = Number(settings.fontScale || 1).toFixed(2);
-    $("#sEdgeGlow").checked = !!settings.edgeGlow;
-    if (settings.gfMode === true && (settings.gender || "male") !== "male") { settings.gfMode = false; $("#sGf").checked = false; }
-  } catch(e){}
-}
-var _loadSettingsFormCore = loadSettingsForm;
-loadSettingsForm = function(){ try { _loadSettingsFormCore(); } catch(e){} loadV4Form(); };
-
-try { $("#saveSettings").addEventListener("click", function(){
-  settings.gender = $("#sGender").value;
-  settings.phone = ($("#sPhone").value || "").trim();
-  settings.musicApp = $("#sMusicApp").value;
-  settings.favSong = ($("#sFavSong").value || "").trim();
-  settings.ytChannel = ($("#sYtChannel").value || "").trim();
-  settings.assistName = ($("#sAssistName").value || "Maya").trim();
-  settings.persona = $("#sPersona").value;
-  settings.gfMode = $("#sGf").checked && settings.gender === "male";
-  settings.remember = $("#sRemember").checked;
-  settings.convoMode = $("#sConvo").checked;
-  settings.lang = $("#sLang").value;
-  settings.proactive = $("#sProactive").checked;
-  settings.radius = parseInt($("#sRadius").value, 10) || 18;
-  settings.fontScale = parseFloat($("#sFont").value) || 1;
-  settings.edgeGlow = $("#sEdgeGlow").checked;
-  saveSettings(); applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
+/* NOTE: loadV4Form / doosra saveSettings handler v4.5.0 mein khatam.
+   Ab SETFORM (upar) hi settings ka wahid darwaza hai — dekho SET_FIELDS.
+   Sliders live update karte hain, baqi sab SAVE par ek hi tarteeb se. */
+try { $("#sRadius").addEventListener("input", function(){ $("#radiusVal").textContent = this.value; settings.radius = parseInt(this.value,10) || 18; saveSettings(); applyTheme(); }); } catch(e){}
+try { $("#sFont").addEventListener("input", function(){ $("#fontVal").textContent = Number(this.value).toFixed(2); settings.fontScale = parseFloat(this.value) || 1; saveSettings(); applyTheme(); }); } catch(e){}
+try { $("#sGf").addEventListener("change", function(){
+  if (this.checked && ($("#sGender").value || "male") !== "male") { this.checked = false; toast("Girlfriend mode ke liye Gender = Male chuno"); }
 }); } catch(e){}
 
 try { $("#sLang").addEventListener("change", function(){
   var map = { "urdu":["ur-PK","ur-PK"], "roman-ur":["ur-PK","ur-PK"], "hi-en":["hi-IN","hi-IN"], "hindi":["hi-IN","hi-IN"], "english":["en-IN","en-IN"] };
   if (map[this.value]) { $("#sStt").value = map[this.value][0]; $("#sTts").value = map[this.value][1]; }
 }); } catch(e){}
-try { $("#sGender").addEventListener("change", function(){ if (this.value !== "male") { settings.gfMode = false; $("#sGf").checked = false; } }); } catch(e){}
+try { $("#sGender").addEventListener("change", function(){ if (this.value !== "male") { $("#sGf").checked = false; } }); } catch(e){}
 
 /* ---------- MEMORIES SCREEN ---------- */
 try {
@@ -4788,8 +5081,8 @@ function startProactive(){
 
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
-try { $("#hudBuild").textContent = "v4.4.0"; } catch(e){}
-try { pushLog("MAYA v4.4.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
+try { $("#hudBuild").textContent = "v4.5.0"; } catch(e){}
+try { pushLog("MAYA v4.5.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
 
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD" runtime   (v4.1.0)
@@ -5048,7 +5341,7 @@ var MayaUI = (function () {
     for (i = 0; i < reopen.length; i++) delCls(reopen[i], "is-open");
 
     var out = [];
-    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v4.4.0");
+    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v4.5.0");
     out.push("WEBVIEW: Chrome " + (window.__webviewMajor || "?") + (window.__oldWebview ? " (PURANA)" : ""));
     out.push("");
     out.push("VISIBLE: " + okc + "   INVISIBLE: " + bad + (bad ? "  \u274C" : "  \u2705"));

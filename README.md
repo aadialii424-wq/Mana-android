@@ -1,9 +1,61 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 4.4.0 "BRAIN POOL" — 0-Budget Build • Android APK + Web PWA**
+**Version 4.5.0 "SETFORM + AWAAZ POOL" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🗄️🎙️ v4.5.0 — SETFORM + AWAAZ POOL (do asli bug, jarh se)
+
+### 🗄️ "Settings baar baar reset ho jati hain / girlfriend mode khud band ho jata hai"
+
+**Asal jarh:** SAVE button par **do** click handler lage hue the. Handler A keys save
+kar ke `loadSettingsForm()` chala deta tha — jisne form ko *purani* settings se dobara
+likh diya (GF switch OFF) — aur phir handler B usi palti hui halat ko save kar deta tha.
+Natija: GF mode, gender, phone, persona, language, proactive, remember, convo mode,
+music app, assistant naam — **ye sab SAVE button se kabhi save ho hi nahi sakte the.**
+
+**Ilaj:** ab ek hi `SETFORM` darwaza hai aur ek data-driven `SET_FIELDS` registry
+(44 fields) jo **load aur save dono** chalati hai:
+
+```
+collect() → fixKeys() → apply() → persist() → load()
+   ▲ SAB parho pehle              form dobara likhna AB safe hai ▲
+```
+
+Saath mein: `fixKeys()` galat khane mein pari key khud sahi jagah bhejta hai
+(`gsk_`, `csk-`, `sk-or-`, `nvapi-`, `github_pat_`) — aur purani key mitata nahi,
+comma laga kar jorta hai. GF mode ab chup-chaap band nahi hota, wajah batata hai.
+
+### 🎙️ "Gemini ki voice chal hi nahi rahi, baar baar band ho jati hai"
+
+**Teen asal jarhen mileen:**
+
+1. **Gemini TTS ka muft quota sirf ~15 request ROZ hai** (baqi models jaise 1,500 nahi).
+   Purana code har 420 harf par ek request bhejta tha → ek lamba jawab = 4-5 request →
+   **din mein sirf 3-4 jawab** aur awaaz khatam.
+2. **403 ko "mari hui key" samajh liya jata tha** — halanke Gemini 403 aksar *quota* ke
+   liye bhejta hai. Ek quota 403 poore session ki awaaz band kar deta tha.
+3. **Model fallback** ek dafa koi model chalne ke baad **band** ho jata tha
+   (`!AWAAZ.model` shart), is liye wo model marte hi awaaz hamesha ke liye girti thi.
+
+**Ilaj — AWAAZ POOL, teen tehen:**
+
+| Teh | Kya |
+|-----|-----|
+| 💎 **Gemini neural** | **kai keys** (comma se) — key1 ka quota khatam? key2 khud chal padti hai. Model mara? agla model. |
+| 🌸 **MUFT NEURAL** | **bina key, bina signup** — asli insani awaaz jab Gemini ka din khatam ho |
+| 📱 **Phone ki awaaz** | hamesha, 0 data |
+
+Plus **smart chunking**: pehla tukra 300 harf (awaaz *foran* shuru), baqi 1500-1500
+(kam request). 2,400 harf ka jawab pehle **6** request leta tha — ab **2**.
+Har key ka apna cooldown `localStorage` mein mehfooz (restart ke baad bhi yaad),
+aur Settings mein live pool nazar aata hai.
+
+📖 Poori forensic tafseel: [`docs/SETFORM-AWAAZ-POOL.md`](docs/SETFORM-AWAAZ-POOL.md)
+🧪 Saboot: `npm test` — CSS PASS · **64** Settings · **142** AWAAZ · **155** DIMAAG
+
+---
 
 ## 🧠🔥 v4.4.0 — BRAIN POOL ("quota khatam" ka mustaqil ilaj)
 
