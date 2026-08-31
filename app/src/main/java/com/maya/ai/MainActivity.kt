@@ -34,8 +34,10 @@ import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.view.WindowManager
 import android.webkit.JavascriptInterface
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -44,6 +46,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewClientCompat
+import androidx.webkit.WebViewCompat
 import org.json.JSONArray
 import java.net.HttpURLConnection
 import java.net.URL
@@ -93,6 +96,16 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
             allowUniversalAccessFromFileURLs = true
             allowFileAccessFromFileURLs = true
+            /* v4.0.1 WebView compat: file:// fallback + old-engine safety */
+            allowFileAccess = true
+            allowContentAccess = true
+            javaScriptCanOpenWindowsAutomatically = true
+            loadWithOverviewMode = true
+            useWideViewPort = true
+            setSupportZoom(false)
+            cacheMode = WebSettings.LOAD_DEFAULT
+            mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            textZoom = 100
         }
         webView.addJavascriptInterface(MayaBridge(), "MayaBridge")
         webView.webChromeClient = object : android.webkit.WebChromeClient() {
@@ -108,14 +121,22 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = MayaWebViewClient()
         setContentView(webView)
         webView.loadUrl("https://$VIRTUAL_HOST/assets/web/index.html")
-        Toast.makeText(this, "MAYA v4.0.0 • naya Obsidian design install hua hai", Toast.LENGTH_LONG).show()
-        // WebView zinda hai ya nahi — 8 second baad native check
+        Toast.makeText(this, "MAYA v4.0.1 • WebView compat fix install hua hai", Toast.LENGTH_LONG).show()
+        // WebView zinda hai ya nahi — 8 second baad native check (v4.0.1: onPageFinished/markAlive true karte hain)
         webViewAlive = false
         android.os.Handler(Looper.getMainLooper()).postDelayed({
             if (!webViewAlive) {
                 Toast.makeText(this, "WebView load NAHI hua (blank ka wajah) — developer ko batayen", Toast.LENGTH_LONG).show()
             }
         }, 8000)
+        // v4.0.1: PURANA Android System WebView detect — layout (inset/color-mix) kharab ho sakta hai
+        val wvVer = try { WebViewCompat.getCurrentWebViewPackage(this)?.versionName ?: "" } catch (e: Exception) { "" }
+        val wvMajor = wvVer.split(".").firstOrNull()?.toIntOrNull() ?: 0
+        android.os.Handler(Looper.getMainLooper()).postDelayed({
+            if (wvMajor in 1..86) {
+                Toast.makeText(this, "Purana WebView (Chrome $wvMajor) — Play Store se 'Android System WebView' update karo, warna layout kharab ho sakta hai", Toast.LENGTH_LONG).show()
+            }
+        }, 12000)
 
         initTts()
         createNotificationChannel()
@@ -160,12 +181,35 @@ class MainActivity : AppCompatActivity() {
             request: WebResourceRequest
         ): WebResourceResponse? = assetLoader.shouldInterceptRequest(request.url)
 
+        /* v4.0.1: JS ke markAlive() + ye dono ab webViewAlive true karte hain —
+           pehle false-alarm toast har launch par aata tha */
+        override fun onPageFinished(view: WebView, url: String?) {
+            if (url != null && (url.startsWith("https://$VIRTUAL_HOST") || url.startsWith("file:///android_asset"))) {
+                webViewAlive = true
+            }
+            super.onPageFinished(view, url)
+        }
+
+        /* v4.0.1: WebViewAssetLoader/https virtual-host kisi purane/odd WebView par
+           fail ho jaye to seedha file:///android_asset fallback — blank screen khatam */
+        override fun onReceivedError(
+            view: WebView,
+            request: WebResourceRequest,
+            error: WebResourceError
+        ) {
+            if (request.isForMainFrame && request.url.host == VIRTUAL_HOST) {
+                view.loadUrl("file:///android_asset/web/index.html")
+            }
+            super.onReceivedError(view, request, error)
+        }
+
         override fun shouldOverrideUrlLoading(
             view: WebView,
             request: WebResourceRequest
         ): Boolean {
             val url = request.url
-            if (url.host == VIRTUAL_HOST) return false   // apni app — andar khule
+            // apni app — andar khule (v4.0.1: file:// fallback bhi WebView ke andar)
+            if (url.host == VIRTUAL_HOST || url.scheme == "file") return false
             return try {
                 startActivity(Intent(Intent.ACTION_VIEW, url))  // bahar ke links/apps
                 true
@@ -222,7 +266,17 @@ class MainActivity : AppCompatActivity() {
     inner class MayaBridge {
 
         @JavascriptInterface
-        fun appVersion(): String = "2.1.0-native"
+        fun appVersion(): String = "4.0.1-native"
+
+        /* v4.0.1: index.html boot-guard ye call karta hai — ab native alive flag true hota hai */
+        @JavascriptInterface
+        fun markAlive() { webViewAlive = true }
+
+        /* v4.0.1: doctor report ke liye installed WebView package version */
+        @JavascriptInterface
+        fun webViewVersion(): String = try {
+            WebViewCompat.getCurrentWebViewPackage(this@MainActivity)?.versionName ?: ""
+        } catch (e: Exception) { "" }
 
         /** Native TTS v2 — voice picker + pitch (crispy awaaz) */
         @JavascriptInterface

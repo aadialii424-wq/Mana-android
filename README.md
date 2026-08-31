@@ -1,9 +1,17 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 4.0.0 "OBSIDIAN" — 0-Budget Build • Android APK + Web PWA**
+**Version 4.0.1 "OBSIDIAN" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🆕 v4.0.1 "OBSIDIAN" — WebView Compat Fix
+
+- 🧩 **Old-WebView COMPAT** — `inset`/`color-mix` fallback (Chrome <87 layout toot nahi sakta)
+- 🛟 **file:// fallback** — WebViewAssetLoader fail ho to bhi app khulti hai (blank screen khatam)
+- 📶 **old-WebView detect + toast** — purana Android System WebView update karne ka nudge
+- 🔧 **false-alarm fix** — "WebView load NAHI hua" ka jhoota toast khatam (markAlive + onPageFinished)
+- ⚡ **sw.js full ES5** — purane WebView par service worker bhi parse hota hai
 
 ## 🆕 v4.0.0 "OBSIDIAN" — Kya Naya Hai
 
