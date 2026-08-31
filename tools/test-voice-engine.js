@@ -31,9 +31,15 @@ const ENGINE = HTML.slice(A, B);
 
 /* 🌊 EDGE TTS ka hissa alag hai (geminiTTS_stop ke baad shuru hota hai) */
 const EA = HTML.indexOf('var EDGE_TTS = {');
-const EB = HTML.indexOf('/* ---------- PUBLIC API: poori app sirf isi se bolti hai ---------- */');
+const EB = HTML.indexOf('var FISH = {');
 if (EA < 0 || EB < 0 || EB < EA) { console.error('EDGE TTS source nahi mila — index.html badal gaya?'); process.exit(1); }
 const EDGE = HTML.slice(EA, EB);
+
+/* 🐟 FISH AUDIO ka hissa (EDGE ke baad, PUBLIC API se pehle) */
+const FA = HTML.indexOf('var FISH = {');
+const FB = HTML.indexOf('/* ---------- PUBLIC API: poori app sirf isi se bolti hai ---------- */');
+if (FA < 0 || FB < 0 || FB < FA) { console.error('FISH source nahi mila — index.html badal gaya?'); process.exit(1); }
+const FISHSRC = HTML.slice(FA, FB);
 
 /* ─────────────── naqli duniya ─────────────── */
 function makeWorld(opts = {}) {
@@ -125,7 +131,8 @@ function makeWorld(opts = {}) {
 
   w.eval(ENGINE);
   w.eval(EDGE);          /* 🌊 Edge TTS — asli app jaisa, alag se nahi */
-  return { w, state, AWAAZ: w.AWAAZ, EDGE_TTS: w.EDGE_TTS };
+  w.eval(FISHSRC);       /* 🐟 Fish Audio */
+  return { w, state, AWAAZ: w.AWAAZ, EDGE_TTS: w.EDGE_TTS, FISH: w.FISH };
 }
 
 /* 24 kHz mono s16le ke 100 samples */
@@ -561,7 +568,8 @@ const u16 = (b, o) => b[o] | (b[o + 1] << 8);
   {
     const src = HTML;
     is(/function geminiTTS_stop\(\)\s*\{\s*AWAAZ\.stop\(\);\s*\}/.test(src), 'geminiTTS_stop() ab AWAAZ.stop() hai');
-    is(src.indexOf('fish.audio') < 0 && src.indexOf('fishTTS_speak') < 0, 'fish.audio poori tarah nikal gaya (CORS error khatam)');
+    is(src.indexOf('fishTTS_speak') < 0, 'purana toota hua fishTTS_speak khatam (wo CORS par marta tha)');
+    is(src.indexOf('MayaBridge.httpBytes') > 0, 'fish.audio ab WAPAS hai — magar sirf native bridge se (Section 18)');
     is(src.indexOf('puterTTS_speak') < 0, 'puter.js ka murda reference khatam');
     is((src.match(/function testMayaVoice/g) || []).length === 1, 'testMayaVoice sirf ek dafa');
     is((src.match(/function speak\(text, wasVoice\)/g) || []).length === 1, 'speak() sirf ek dafa');
@@ -808,6 +816,289 @@ const u16 = (b, o) => b[o] | (b[o + 1] << 8);
         'DRM token ka hisab edge-tts wala hi hai (5 min block + windows epoch)');
       is(/0x80 or opcode/.test(KT) && /mask\[i % 4\]/.test(KT),
         'client frames par mask lagta hai (RFC-6455 ki lazmi shart)');
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     18. 🐟 FISH AUDIO S2.1 Pro — BE-HISAAB + *ANDAAZ* WAPAS   (v4.8.0)
+     -----------------------------------------------------------------------
+     Do cheezein sabit karni hain:
+       1. MOOD zinda hai — Gemini ko hum lafzi hidayat bhejte the, Edge wo kha
+          gaya tha; Fish us hidayat ko [bracket] mein wapas leta hai.
+       2. BINARY mehfooz hai — purana bridge jawab ko TEXT samajhta tha, jo MP3
+          ko barbaad kar deta. Naya httpBytes() raw bytes deta hai.
+     Aur teesri: nakami par sach — khaas kar 402, jo kehta hai muft daur khatam.
+     ═══════════════════════════════════════════════════════════════════════ */
+  head('18. 🐟 FISH AUDIO — be-hisaab + andaaz (Kotlin binary bridge)');
+  {
+    const MP3 = Buffer.from([0xFF, 0xFB, 0x90, 0x64, 0x00, 0x11, 0xEE, 0x7F, 0x80, 0x01, 0xFE, 0x42]);
+    const MP3B64 = MP3.toString('base64');
+    const jb64 = (o) => Buffer.from(JSON.stringify(o), 'utf8').toString('base64');
+
+    function fishWorld(opts = {}) {
+      const bridge = { calls: [] };
+      const world = makeWorld({
+        native: opts.native !== false,
+        respond: opts.respond,
+        bridge,
+        settings: Object.assign({ fishKey: 'fk_test_key_123456', fishOn: true }, opts.settings || {})
+      });
+      const w = world.w;
+      bridge.httpBytes = function (method, url, headersJson, body, reqId, timeoutMs) {
+        let hdrs = {}; try { hdrs = JSON.parse(headersJson); } catch (e) {}
+        let json = null; try { json = JSON.parse(body); } catch (e) {}
+        bridge.calls.push({ method, url, hdrs, body, json, reqId, timeoutMs });
+        if (opts.silent) return;
+        setTimeout(function () {
+          const r = (typeof opts.reply === 'function')
+            ? opts.reply(bridge.calls.length, bridge.calls[bridge.calls.length - 1])
+            : (opts.reply || { status: 200, b64: MP3B64, ctype: 'audio/mpeg' });
+          w.__binDone(reqId, r.status || 0, r.b64 || '', r.ctype || '', r.err || '');
+        }, opts.delay == null ? 1 : opts.delay);
+      };
+      return Object.assign(world, { bridge, FISH: w.FISH, MP3, MP3B64 });
+    }
+
+    /* ── 18a. MOOD -> [bracket] : yehi asal maqsad hai ── */
+    {
+      const { FISH, w } = fishWorld();
+      is(FISH.BRACKET.warm.indexOf('warmly') >= 0 && FISH.BRACKET.warm.indexOf('friend') >= 0,
+        'Warm mood ka wohi matlab jo Gemini ko bheja jata tha', FISH.BRACKET.warm);
+      is(/whisper/i.test(FISH.BRACKET.whisper), 'Whisper mood zinda hai', FISH.BRACKET.whisper);
+      is(/excited|energy/i.test(FISH.BRACKET.hype) && /playful|teasing/i.test(FISH.BRACKET.funny),
+        'Hype aur Funny bhi zinda');
+      /* app ke SAB mood (auto ke ilawa) Fish par kaam karen — koi peeche na chhoote */
+      const moods = (HTML.match(/\{ id:"([a-z]+)",\s+label:"[^"]*",\s+p:"[^"]*"/g) || [])
+        .map(m => /id:"([a-z]+)"/.exec(m)[1]).filter(x => x !== 'auto');
+      const missing = moods.filter(m => !FISH.BRACKET[m]);
+      is(moods.length >= 8 && missing.length === 0,
+        'app ke HAR mood ka Fish ishara maujood (Edge par ye sab mar jate the)',
+        moods.length + ' mood, ' + missing.length + ' gayab');
+      const st = FISH.styled('Kaise ho', 'whisper');
+      is(st.indexOf(FISH.BRACKET.whisper) === 0 && /Kaise ho$/.test(st),
+        'ishara matn ke SHURU mein lagta hai, matn baad mein', st);
+      is(FISH.styled('Salam', '') === 'Salam' && FISH.styled('Salam', 'bakwaas') === 'Salam',
+        'mood na ho to matn saaf rehta hai — koi fazool bracket nahi');
+    }
+
+    /* ── 18b. Request ki shakl ── */
+    {
+      const { FISH, bridge, w } = fishWorld({ settings: { fishVoice: 'voice_abc123', rate: 1.25 } });
+      FISH.speak('Assalam o alaikum', 'warm', () => {}, () => {});
+      const c = bridge.calls[0];
+      is(!!c && c.method === 'POST' && c.url === 'https://api.fish.audio/v1/tts',
+        'sahih endpoint par POST', c ? c.url : '-');
+      is(c.hdrs.model === 's2.1-pro-free',
+        '🔑 custom header `model: s2.1-pro-free` gaya (purana bridge ye bhej HI nahi sakta tha)', c.hdrs.model);
+      is(c.hdrs.Authorization === 'Bearer fk_test_key_123456', 'Bearer key sahih');
+      is(c.json.format === 'mp3' && c.json.mp3_bitrate === 128, 'MP3 manga gaya');
+      is(c.json.reference_id === 'voice_abc123', 'chuni hui awaaz bheji gayi', c.json.reference_id);
+      is(c.json.text.indexOf('[warmly') === 0 && c.json.text.indexOf('Assalam') > 0,
+        'matn ke sath andaaz ka ishara bhi gaya', c.json.text.slice(0, 40));
+      is(c.json.prosody.speed === 1.25, 'settings ka rate prosody.speed ban gaya', String(c.json.prosody.speed));
+      is(c.timeoutMs > 0, 'native ko timeout diya gaya', c.timeoutMs + 'ms');
+      const c2 = fishWorld({ settings: { fishVoice: '' } });
+      c2.FISH.speak('hi', 'warm', () => {}, () => {});
+      is(c2.bridge.calls[0].json.reference_id === undefined,
+        'awaaz na chuni ho to reference_id bheja hi nahi jata (Fish default use kare)');
+      const c3 = fishWorld({ settings: { rate: 9 } });
+      c3.FISH.speak('hi', 'warm', () => {}, () => {});
+      is(c3.bridge.calls[0].json.prosody.speed === 2, 'speed hadd (2.0) se bahar nahi ja sakti',
+        String(c3.bridge.calls[0].json.prosody.speed));
+    }
+
+    /* ── 18c. BINARY — doosra asal fix ── */
+    {
+      const { FISH, state } = fishWorld();
+      let ok = 0, bad = '';
+      FISH.speak('test', 'warm', () => ok++, (c) => { bad = c; });
+      await wait(20);
+      is(ok === 1 && !bad, 'awaaz aa gayi aur baji', 'ok=' + ok + ' bad=' + bad);
+      const b = state.blobs[state.blobs.length - 1];
+      is(b && b.type === 'audio/mpeg', 'blob MP3 hai', b ? b.type : '-');
+      const bytes = await bytesOf(b.blob);
+      is(bytes.length === MP3.length && bytes[0] === 0xFF && bytes[1] === 0xFB && bytes[6] === 0xEE && bytes[11] === 0x42,
+        '🔑 raw bytes JYUN KE TYUN baje — text-decode ne MP3 nahi bigara', bytes.length + ' bytes');
+      is(FISH.spoke === 1 && FISH.lastHttp === 200, 'counter aur status sach bolte hain');
+      is(FISH.lastMs >= 0 && typeof FISH.lastMs === 'number', 'raftaar naapi gayi', FISH.lastMs + 'ms');
+    }
+
+    /* ── 18d. Nakami par SACH ── */
+    {
+      const t = async (status, b64, want, note) => {
+        const { FISH } = fishWorld({ reply: { status, b64: b64 || '' } });
+        let code = '';
+        FISH.speak('x', 'warm', () => {}, (c) => { code = c; });
+        await wait(20);
+        is(code === want, note, code + (FISH.lastErr ? (' — ' + FISH.lastErr.slice(0, 60)) : ''));
+        return FISH;
+      };
+      await t(401, jb64({ message: 'Invalid API key' }), 'KEY_BAD', '401 = key ghalat');
+      const f402 = await t(402, jb64({ message: 'Insufficient balance' }), 'PAYMENT',
+        '🚨 402 = muft daur band / balance khatam');
+      is(f402.cool > Date.now(), '402 ke baad Fish thori der ke liye so jati hai (baar baar na maare)');
+      const f429 = await t(429, jb64({ message: 'Rate limit exceeded' }), 'RATE', '429 = Fair Use ki hadd');
+      is(f429.cool > Date.now(), '429 par bhi cooldown lagta hai');
+      await t(403, '', 'FORBIDDEN', '403 = ijazat nahi');
+      await t(503, '', 'BUSY', '503 = server busy');
+      await t(0, '', 'NETWORK', 'network gir gaya');
+      await t(200, '', 'NO_AUDIO', '200 magar audio khaali');
+      const { FISH } = fishWorld();
+      is(FISH.readErr(jb64({ message: 'Free tier ended on 2026-08-31' })) === 'Free tier ended on 2026-08-31',
+        'Fish ka APNA message nikal aata hai (andaza nahi)');
+      is(FISH.readErr(Buffer.from('plain text error', 'utf8').toString('base64')) === 'plain text error',
+        'JSON na ho to bhi matn mil jata hai');
+      is(FISH.readErr('') === '' && FISH.readErr(null) === '', 'khaali jawab par crash nahi');
+      is(FISH.code(200) === 'OK' && FISH.code(402) === 'PAYMENT' && FISH.code(418) === 'HTTP_418',
+        'har HTTP status ka apna code');
+      is(/402/.test(FISH.why('PAYMENT')) && /31 Aug/i.test(FISH.why('PAYMENT')),
+        'PAYMENT ka matlab insani zubaan mein likha hai (31 Aug wala dar)', FISH.why('PAYMENT').slice(0, 50));
+    }
+
+    /* ── 18e. Pehredaar — bekaar request bheji hi na jaye ── */
+    {
+      const a = fishWorld({ settings: { fishKey: '' } });
+      let c1 = '';
+      a.FISH.speak('x', 'warm', () => {}, (c) => { c1 = c; });
+      is(c1 === 'KEY_MISSING' && a.bridge.calls.length === 0,
+        'key na ho to ek byte bhi nahi bheja jata', c1);
+      const b = fishWorld({ native: false });
+      let c2 = '';
+      b.FISH.speak('x', 'warm', () => {}, (c) => { c2 = c; });
+      is(c2 === 'BROWSER' && /CORS/.test(b.FISH.why('BROWSER')),
+        'browser mein saaf sach: CORS rokta hai (purana zakhm yaad hai)', c2);
+      const c = fishWorld({ settings: { fishOn: false } });
+      let c3 = '';
+      c.FISH.speak('x', 'warm', () => {}, (x) => { c3 = x; });
+      is(c3 === 'OFF' && c.bridge.calls.length === 0, 'switch OFF = bilkul band');
+      const d = fishWorld();
+      d.FISH.cool = Date.now() + 60000;
+      is(d.FISH.ready() === false && d.FISH.block() === 'RATE', 'cooldown mein Fish khud ko tayyar nahi kehti');
+      d.FISH.persist();
+      is(String(d.w.localStorage.getItem('maya_fish')).indexOf('"c"') > 0,
+        'cooldown app band hone par bhi yaad rehta hai');
+    }
+
+    /* ── 18f. SEERHI — Fish sab se upar ── */
+    {
+      const { AWAAZ, bridge, state } = fishWorld();
+      const seen = [];
+      AWAAZ.speak('Salam', { onStart: (e) => seen.push(e) });
+      await wait(30);
+      is(seen[0] === 'fish', '🐟 Fish SAB SE PEHLE bolti hai', seen.join('>'));
+      is(state.gcalls.length === 0, 'Fish chali to Gemini ka quota bilkul nahi jala', state.gcalls.length + ' Google calls');
+      is(bridge.calls.length === 1, 'ek jawab = ek Fish request');
+    }
+    {
+      const { AWAAZ, state } = fishWorld({ reply: { status: 402, b64: '' } });
+      const seen = [];
+      AWAAZ.speak('Salam', { onStart: (e) => seen.push(e) });
+      await wait(40);
+      is(seen[0] === 'fish' && seen[1] === 'neural',
+        'Fish mar jaye to 🎭 Gemini par jata hai (khamoshi nahi)', seen.join('>'));
+      is(state.gcalls.length >= 1, 'Gemini ko sach much request gayi');
+    }
+    {
+      const { AWAAZ } = fishWorld({ reply: { status: 402 }, settings: { apikey: '', ttsKey: '' } });
+      const seen = [];
+      AWAAZ.speak('Salam', { onStart: (e) => seen.push(e) });
+      await wait(50);
+      is(seen[0] === 'fish' && seen.indexOf('free') > 0,
+        'Fish + Gemini dono na hon to bhi asli awaaz aati hai', seen.join('>'));
+    }
+    {
+      const { AWAAZ, bridge, state } = fishWorld({ settings: { fishKey: '' } });
+      const seen = [];
+      AWAAZ.speak('Salam', { onStart: (e) => seen.push(e) });
+      await wait(30);
+      is(seen[0] === 'neural' && bridge.calls.length === 0,
+        'Fish key na ho to purana raasta jyun ka tyun (koi regression nahi)', seen.join('>'));
+    }
+    {
+      const { AWAAZ, bridge, state } = fishWorld({ settings: { voiceEngine: 'fish', apikey: 'KEY-123' } });
+      const seen = [];
+      AWAAZ.speak('Salam', { onStart: (e) => seen.push(e) });
+      await wait(30);
+      is(seen.join('>') === 'fish' && state.gcalls.length === 0,
+        'mode "fish" par sirf Fish — Gemini ka quota poora bacha', seen.join('>'));
+      is(bridge.calls.length === 1, 'Fish ne kaam kiya');
+    }
+    {
+      const { AWAAZ, state } = fishWorld({ delay: 30 });
+      let done = 0;
+      AWAAZ.speak('Salam', { onDone: () => done++ });
+      AWAAZ.stop();
+      await wait(60);
+      is(done === 0 && state.played.length === 0, 'stop() ke baad Fish ka jawab chup rehta hai');
+    }
+
+    /* ── 18g. 🩺 FISH DOCTOR ── */
+    {
+      const mk = (opts) => new Promise((res) => fishWorld(opts).FISH.doctor(() => {}, res));
+      const noKey = await mk({ settings: { fishKey: '' } });
+      is(noKey.verdict === 'KEY_MISSING' && /api-keys/.test(noKey.text),
+        'DOCTOR: key na ho to seedha bata deta hai kahan se banani hai', noKey.verdict);
+      const brow = await mk({ native: false });
+      is(brow.verdict === 'BROWSER' && /CORS/.test(brow.text),
+        'DOCTOR: browser mein wajah CORS batata hai', brow.verdict);
+      const good = await mk({ reply: { status: 200, b64: Buffer.alloc(4000, 7).toString('base64'), ctype: 'audio/mpeg' } });
+      is(good.verdict === 'OK' && good.ok === true && /ZINDA HAI/.test(good.text),
+        '✅ DOCTOR: 200 + audio = muft daur ZINDA', good.verdict);
+      is(/Koi rozana hadd nahi/.test(good.text) && good.bytes > 500,
+        'DOCTOR bytes aur "koi hadd nahi" dono batata hai', good.bytes + ' bytes');
+      const dead = await mk({ reply: { status: 402, b64: jb64({ message: 'free tier ended' }) } });
+      is(dead.verdict === 'PAYMENT' && dead.ok === false && /402/.test(dead.text) && /31 August 2026/.test(dead.text),
+        '🚨 DOCTOR: 402 par saaf kehta hai muft window band ho gaya', dead.verdict);
+      is(/Edge/.test(dead.text), 'DOCTOR: band hone par bhi tasalli deta hai ke Edge zinda hai');
+      const bad = await mk({ reply: { status: 401, b64: jb64({ message: 'bad key' }) } });
+      is(bad.verdict === 'KEY_BAD' && /401/.test(bad.text) && /bad key/.test(bad.text),
+        'DOCTOR: 401 par Fish ka apna message bhi dikhata hai', bad.verdict);
+      const busy = await mk({ reply: { status: 429, b64: '' } });
+      is(busy.verdict === 'RATE' && /Fair Use/.test(busy.text), 'DOCTOR: 429 = Fair Use', busy.verdict);
+    }
+
+    /* ── 18h. Awaaz ki library ── */
+    {
+      const lib = { items: [
+        { _id: 'v1', title: 'Warm Urdu Girl', languages: ['ur'], like_count: 42 },
+        { _id: 'v2', title: 'Calm Narrator', languages: ['en', 'hi'], like_count: 7 },
+        { _id: null, title: 'kharab' }
+      ] };
+      const { FISH, bridge } = fishWorld({ reply: { status: 200, b64: jb64(lib), ctype: 'application/json' } });
+      let got = null, code = '-';
+      FISH.library('', (L, c) => { got = L; code = c; });
+      await wait(20);
+      is(bridge.calls[0].method === 'GET' && /api\.fish\.audio\/model/.test(bridge.calls[0].url),
+        'library GET /model se aati hai', bridge.calls[0].url.slice(0, 46));
+      is(got && got.length === 2, 'awaazein parh li gayin, kharab entry chhaan di gayi', got ? got.length + '' : '-');
+      is(got[0].id === 'v1' && got[0].title === 'Warm Urdu Girl' && got[0].langs === 'ur',
+        'har awaaz ka id, naam aur zubaan mehfooz');
+      const fail = fishWorld({ reply: { status: 401, b64: jb64({ message: 'nope' }) } });
+      let c2 = '';
+      fail.FISH.library('', (L, c) => { c2 = c; });
+      await wait(20);
+      is(c2 === 'KEY_BAD', 'library bhi nakami par sach bolti hai', c2);
+    }
+
+    /* ── 18i. Purana toota hua raasta wapas na aaye ── */
+    {
+      const src = HTML;
+      const KT = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8');
+      is(src.indexOf('fishTTS_speak') < 0,
+        'purana fishTTS_speak khatam — wo browser XHR par tha aur CORS se marta tha');
+      is(/req: function \(method, url, headersJson, body, cb\) \{\s*if \(!FISH\.native\(\)\)/.test(src),
+        '🔑 Fish ka HAR request pehle native bridge check karta hai (CORS ka ilaj)');
+      is(src.indexOf('MayaBridge.httpBytes') > 0 && !/XMLHttpRequest[\s\S]{0,120}fish\.audio/.test(src),
+        'Fish kabhi seedha browser XHR se call nahi hota');
+      is(/fun httpBytes\(/.test(KT), 'Kotlin mein httpBytes() bridge maujood');
+      const hb = KT.slice(KT.indexOf('fun httpBytes('), KT.indexOf('fun httpBytes(') + 3200);
+      is(hb.indexOf('bufferedReader') < 0 && /bos\.write\(buf, 0, n\)/.test(hb) && /Base64\.encodeToString\(bos\.toByteArray\(\)/.test(hb),
+        '🔑 Kotlin RAW BYTES base64 karta hai — httpBytes mein bufferedReader hai HI nahi (wohi MP3 tor deta tha)');
+      is(/bufferedReader/.test(KT.slice(KT.indexOf('fun httpPostAsync('), KT.indexOf('fun httpPostAsync(') + 1800)),
+        'purana httpPostAsync jyun ka tyun hai (matn ke liye) — koi regression nahi');
+      is(/JSONObject\(headersJson\)[\s\S]{0,220}setRequestProperty/.test(KT),
+        'Kotlin har custom header bhejta hai (model: s2.1-pro-free is ke bagair na jata)');
+      is(src.indexOf('window.__binDone') > 0, 'bytes wapas lene ka darwaza maujood');
     }
   }
 

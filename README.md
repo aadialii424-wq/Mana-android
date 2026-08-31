@@ -1,9 +1,47 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 4.7.0 "EDGE TTS" — 0-Budget Build • Android APK + Web PWA**
+**Version 4.8.0 "FISH AUDIO" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🐟 v4.8.0 — FISH AUDIO ("Edge mein wohi awaaz hogi?")
+
+**Jawab tha: nahi. Aur asal masla awaaz nahi — ANDAAZ tha.**
+
+Gemini ki awaaz pyari isi liye lagti thi ke app use lafzon mein hidayat bhejti hai:
+*"Say this warmly and affectionately, like a close friend."* Edge TTS ye kar hi nahi
+sakta (Microsoft ne uska SSML sirf pitch/rate tak mehdood kar rakha hai) — is liye
+v4.7.0 mein aap ke saare **9 MOOD Edge par bekaar** ho gaye the.
+
+**Fish Audio S2.1 Pro wo andaaz WAPAS le aata hai:**
+```
+"[whispers softly and gently] Assalam o alaikum..."
+"[excited, high energy] Mubarak ho!"
+```
+Fish ki dastavez: *"You can use **any** descriptive expression and the model will
+interpret it."* App ke har mood ka Fish ishara ban gaya — aur ek test zid karta hai
+ke koi mood peeche na chhoote.
+
+**Aur:** `s2.1-pro-free` = **$0.00, koi hard cap nahi** (Fair Use) · **~70ms** pehli
+awaaz · **83 zubanein** (Urdu samet, khud pehchanta hai) · **awaaz ki library** ·
+**voice cloning**.
+
+**Do purane zakhm bhare:**
+- **CORS** — isi liye `fish.audio` pehle app se *nikala* gaya tha. Hal wahi jo Edge ka tha: **Kotlin bridge**.
+- **🔴 BINARY** — purana bridge jawab ko *text* samajh kar UTF-8 base64 karta tha, jo **MP3 ko tabah** kar deta. Naya `httpBytes()` **raw bytes** deta hai + custom headers (`model: s2.1-pro-free`).
+
+- 🐟 **Nayi seerhi:** Fish → 🎭 Gemini → 🌊 Edge → 🌸 muft → 📱 phone
+- 🐟 **Naya mode "Sirf Fish Audio"** — Gemini ka rozana quota bilkul nahi jalta
+- 📚 **Awaaz library** seedha Settings mein + 🐟 SUNO button
+- 🩺 **FISH DOCTOR** — `200` = zinda · **`402` = muft daur band** · `401` = key ghalat. Fish ka apna message, andaza nahi
+- 🧪 **71 naye test** (kul 293) — mood pul, **exact MP3 bytes**, poori seerhi, Doctor ke 8 verdict
+
+⚠️ Imaandari: free daur ki zamanat nahi (blog "31 Aug 2026" kehta hai, docs "$0.00"),
+aur aap ke jumle Fish ke paas ruk sakte hain. Isi liye Fish **akela sahara nahi** —
+402 aate hi awaaz khud Edge par chali jati hai.
+
+📖 Poori tafseel: [`docs/FISH-AUDIO-ARCHITECTURE.md`](docs/FISH-AUDIO-ARCHITECTURE.md)
 
 ## 🌊 v4.7.0 — EDGE TTS ("koi aur free unlimited TTS dhoondo")
 

@@ -210,9 +210,15 @@ setTimeout(function () {
   is(vm && vm.options.length >= 9, 'mood picker bhar gaya', vm ? vm.options.length + ' options' : 'select hi nahi');
   is(gv && gv.value === 'Kore', 'settings ki chuni hui awaaz select par lagi', gv && gv.value);
   var eng = doc.getElementById('sVoiceEngine');
-  is(eng && eng.options.length === 5, 'engine ke 5 mode (auto/neural/edge/device/off)', eng ? eng.options.length + '' : '-');
+  is(eng && eng.options.length === 6, 'engine ke 6 mode (auto/neural/fish/edge/device/off)', eng ? eng.options.length + '' : '-');
   var engVals = eng ? Array.prototype.map.call(eng.options, function (o) { return o.value; }).join(',') : '';
-  is(engVals === 'auto,neural,edge,device,off', 'edge mode picker mein maujood hai', engVals);
+  is(engVals === 'auto,neural,fish,edge,device,off', 'fish + edge dono mode picker mein hain', engVals);
+  is(!!doc.getElementById('sFishKey') && !!doc.getElementById('sFishOn'), '\uD83D\uDC1F Fish key ka khana + switch maujood');
+  var fv = doc.getElementById('sFishVoice');
+  is(!!fv && fv.options.length >= 1 && fv.options[0].value === '', 'Fish awaaz picker maujood (pehla = default)', fv ? fv.options[0].textContent.slice(0, 22) : '-');
+  is(!!doc.getElementById('fishLib') && !!doc.getElementById('fishTest') && !!doc.getElementById('fishDoctor'),
+     'Fish ke teeno button: LIBRARY / SUNO / DOCTOR');
+  is(!!doc.getElementById('fishDocOut'), 'Fish Doctor ka jawab dikhane ki jagah maujood');
   var ev = doc.getElementById('sEdgeVoice');
   is(!!ev && ev.options.length > 5, 'Edge awaaz picker bhar gaya', ev ? ev.options.length + ' options' : 'nadarad');
   is(!!ev && ev.options[0].value === '', 'Edge picker ka pehla option Auto hai', ev ? ev.options[0].textContent.slice(0, 24) : '-');

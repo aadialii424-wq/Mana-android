@@ -1018,6 +1018,78 @@ class MainActivity : AppCompatActivity() {
         }
 
         /**
+         * 🐟 BINARY HTTP — jab jawab MATN nahi, BYTES ho (misaal: Fish Audio ka MP3).
+         *
+         * httpPostAsync() jawab ko bufferedReader().readText() se parhta hai aur phir
+         * UTF-8 bytes ka base64 banata hai. Matn ke liye theek — magar MP3 par ye
+         * TABAHI hai: har ghair-UTF8 byte U+FFFD ban kar audio barbaad kar deta hai.
+         * Ye version raw bytes uthata hai, chhuta nahi, seedha base64 karta hai.
+         *
+         * Saath hi custom headers bhi bhejta hai — Fish ko `model: s2.1-pro-free`
+         * chahiye, jo purana bridge bhej hi nahi sakta tha.
+         *
+         * Ghalati ka jawab bhi bytes hi mein aata hai (JSON), JS use atob kar ke
+         * parh leta hai — is liye kamyabi aur nakami dono ka ek hi raasta hai.
+         *
+         *   window.__binDone(reqId, status, base64Body, contentType, errText)
+         */
+        @JavascriptInterface
+        fun httpBytes(method: String, url: String, headersJson: String, body: String, reqId: String, timeoutMs: Int) {
+            Thread {
+                var code = 0
+                var b64 = ""
+                var ctype = ""
+                var err = ""
+                var conn: HttpURLConnection? = null
+                try {
+                    val m = if (method.isBlank()) "GET" else method.uppercase(java.util.Locale.US)
+                    conn = URL(url).openConnection() as HttpURLConnection
+                    conn.requestMethod = m
+                    conn.connectTimeout = if (timeoutMs > 0) timeoutMs else 12000
+                    conn.readTimeout = if (timeoutMs > 0) timeoutMs else 30000
+                    conn.instanceFollowRedirects = true
+                    if (headersJson.isNotBlank()) {
+                        val h = JSONObject(headersJson)
+                        val it = h.keys()
+                        while (it.hasNext()) {
+                            val k = it.next()
+                            conn.setRequestProperty(k, h.optString(k, ""))
+                        }
+                    }
+                    if (m == "POST" || m == "PUT" || m == "PATCH") {
+                        conn.doOutput = true
+                        conn.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+                    }
+                    code = conn.responseCode
+                    ctype = conn.contentType ?: ""
+                    val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+                    val bos = java.io.ByteArrayOutputStream()
+                    if (stream != null) {
+                        val buf = ByteArray(16384)
+                        stream.use { s ->
+                            while (true) {
+                                val n = s.read(buf)
+                                if (n < 0) break
+                                bos.write(buf, 0, n)
+                                if (bos.size() > 24_000_000) break        /* 24 MB ki hadd */
+                            }
+                        }
+                    }
+                    b64 = Base64.encodeToString(bos.toByteArray(), Base64.NO_WRAP)
+                } catch (e: Exception) {
+                    code = 0
+                    err = e.message ?: "network error"
+                } finally {
+                    try { conn?.disconnect() } catch (e: Exception) {}
+                }
+                evalAsync(
+                    "window.__binDone && window.__binDone('" + jsEscape(reqId) + "'," + code +
+                    ",'" + b64 + "','" + jsEscape(ctype) + "','" + jsEscape(err) + "')"
+                )
+            }.start()
+        }
+
+        /**
          * 🎙️ EDGE TTS — muft, be-hisaab neural awaaz (asli Urdu bhi).
          *
          * JS ye kaam khud kyun nahi kar sakta? Kyun ke Microsoft ka WebSocket
