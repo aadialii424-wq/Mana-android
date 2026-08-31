@@ -1,9 +1,25 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 2.12.1 — 0-Budget Build • Android APK + Web PWA**
+**Version 4.0.0 "OBSIDIAN" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🆕 v4.0.0 "OBSIDIAN" — Kya Naya Hai
+
+- 🏠 **HOME screen + animated ORB** — tap to speak, live states (listening/thinking/speaking)
+- 💜 **3 PERSONAS** — Maya (best friend) / Friday (professional) / Venom (alien funny) — voice se badlo: *"maya venom ko bhejo"*
+- 💖 **Girlfriend Mode** — settings ya voice command se
+- 🎨 **THEME ENGINE** — 7 themes (Midnight Obsidian, Cyber Cyan, Aurora, Rose, Forest, Daylight, Paper) + accent colors + corner-radius/text-size sliders + **Edge Glow**
+- 🧠 **Memories screen** — poora CRUD (add/edit/delete) + JSON backup download
+- 🌐 **13 Languages** — Roman Urdu, Urdu, Hindi, Hinglish, English, Punjabi, Bangla, Tamil, Telugu, Marathi, Gujarati, Kannada, Malayalam
+- ✨ **Proactive Mode** — Maya khud ba khud baat karti hai (memory-based)
+- 🗣️ **Assistant name** + Conversation Mode + favorite song memory
+- 📋 Naya **drawer navigation** (☰) — Home / Chat / Memories / Skills / HUD / Commands / Settings
+- 🐛 **Bug fixes** — `cleanSpeech` crash fix (voice replies ab safe), duplicate ID fix
+
+**Video-series roadmap (getmaya.online wali Maya jaisa):** Phase 2 = Voice Guardian + Touch Guard + SOS + screen lock — structure ready hai (`docs/maya-v4-structure.md`).
+
 
 - 🎤 **Native voice input** — Urdu (ur-PK) / Hindi / English (Google recognition)
 - 🗣️ **Native voice output** — system TTS engine (behtar Urdu awaaz)
@@ -63,12 +79,15 @@ ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
 
 ## 📱 App mein kya hai
 
-| Tab | Kaam |
+| Screen | Kaam |
 |---|---|
-| 💬 CHAT | Voice (🎤) ya type se baat karo |
+| 🏠 HOME | Animated orb — tap to speak, persona chips, quick actions, live reply |
+| 💬 CHAT | Voice (🎤) ya type se baat karo (text replies) |
+| 🧠 MEMORIES | Maya ki yaadein — add / edit / delete / backup |
+| 🧩 SKILLS | 8 built-in skills + custom seekhe hue skills |
 | 🎯 HUD | Live clock, battery, AI status, system log, quick actions |
 | ⚡ COMMANDS | Saari commands + RUN buttons + setup guides |
-| ⚙️ SETTINGS | Naam, API key, awaaz, languages, memory management |
+| ⚙️ SETTINGS | Personal / Personas / Awaaz / Customize / API Keys / Advanced |
 
 ## 🗣️ Voice Commands (misal)
 

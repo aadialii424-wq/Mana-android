@@ -1,7 +1,7 @@
 /* MAYA Service Worker — v2.13.0
    Network-first for HTML (so updates apply immediately),
    cache-first for static assets. */
-const CACHE = 'maya-v2.17.0';
+const CACHE = 'maya-v4.0.0';
 const ASSETS = [
   './',
   './index.html',

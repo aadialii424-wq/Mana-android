@@ -3,296 +3,316 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#050b14">
-<meta name="description" content="MAYA — 0-budget personal AI assistant. Voice + Gemini brain + phone commands.">
+<meta name="theme-color" content="#050508">
+<meta name="description" content="MAYA v4 — personal AI assistant. Voice + Gemini brain + phone commands + personas.">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.svg">
-<title>MAYA — Personal AI</title>
+<title>MAYA — Personal AI v4</title>
 <style>
-  :root{
-    --bg:#050b14; --panel:rgba(13,26,42,.72); --panel2:rgba(9,20,33,.9);
-    --line:rgba(56,189,248,.22); --cyan:#22d3ee; --cyan2:#67e8f9;
-    --purple:#a78bfa; --pink:#f472b6; --amber:#fbbf24; --red:#f87171; --green:#34d399;
-    --text:#dbeafe; --dim:#7c9cb8; --user:#0e7490;
-  }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
-  html,body{height:100%}
-  body{
-    margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-    background:
-      radial-gradient(1200px 500px at 50% -10%, rgba(34,211,238,.10), transparent 60%),
-      repeating-linear-gradient(0deg, rgba(34,211,238,.025) 0 1px, transparent 1px 3px),
-      var(--bg);
-    color:var(--text); display:flex; flex-direction:column; overflow:hidden;
-  }
-  button{font-family:inherit}
+/* ================= MAYA v4.0 — DESIGN SYSTEM (video-matched) =================
+   Midnight Obsidian default • orange accent • theme engine • radius/font sliders */
+:root{
+  /* new tokens */
+  --bg:#050508; --bg1:#0E0E16; --bg2:#171722;
+  --accent:#FF7A1A; --accent2:#FFB347;
+  --text0:#F5F5FA; --text1:#A2A2B5;
+  --ok:#3DD68C; --warn:#FFC24B; --danger:#FF5C5C;
+  --radius:18px; --fs:1;
+  /* legacy aliases (core JS inline styles in kaam use karte hain) */
+  --panel:rgba(14,14,22,.82); --panel2:rgba(10,10,16,.94);
+  --line:rgba(255,122,26,.20); --glass:rgba(23,23,34,.85);
+  --cyan:#22d3ee; --cyan2:#67e8f9; --purple:#a78bfa; --pink:#f472b6;
+  --amber:#fbbf24; --red:#f87171; --green:#34d399;
+  --text:#F5F5FA; --dim:#A2A2B5; --user:#7c3aed;
+}
+html.t-cyber{ --bg:#050b14; --bg1:#0d1a2a; --bg2:#12233a; --accent:#22d3ee; --accent2:#67e8f9;
+  --line:rgba(56,189,248,.22); --panel:rgba(13,26,42,.72); --panel2:rgba(9,20,33,.9); --text0:#dbeafe; --text1:#7c9cb8; --text:var(--text0); --dim:var(--text1);}
+html.t-aurora{ --bg:#0a0614; --bg1:#161027; --bg2:#1e1635; --accent:#a78bfa; --accent2:#c4b5fd;
+  --line:rgba(167,139,250,.22); --panel:rgba(22,16,39,.8); --panel2:rgba(15,10,28,.92); --text0:#ece9fb; --text1:#9d94c4; --text:var(--text0); --dim:var(--text1);}
+html.t-rose{ --bg:#12060b; --bg1:#231019; --bg2:#2c1622; --accent:#fb7185; --accent2:#fda4af;
+  --line:rgba(251,113,133,.22); --panel:rgba(35,16,25,.8); --panel2:rgba(24,10,17,.92); --text0:#ffe9ee; --text1:#c49aa6; --text:var(--text0); --dim:var(--text1);}
+html.t-forest{ --bg:#04100a; --bg1:#0b2015; --bg2:#102b1d; --accent:#34d399; --accent2:#6ee7b7;
+  --line:rgba(52,211,153,.22); --panel:rgba(11,32,21,.8); --panel2:rgba(7,23,15,.92); --text0:#e3fff0; --text1:#8fc4a7; --text:var(--text0); --dim:var(--text1);}
+html.t-day{ --bg:#f2f3f7; --bg1:#ffffff; --bg2:#eceef4; --accent:#e05e00; --accent2:#ff8a3d;
+  --line:rgba(20,20,40,.12); --panel:rgba(255,255,255,.9); --panel2:rgba(255,255,255,.97); --text0:#171722; --text1:#5a5a6e; --text:var(--text0); --dim:var(--text1);}
+html.t-paper{ --bg:#f7f3ea; --bg1:#fffdf6; --bg2:#efe9db; --accent:#b45309; --accent2:#d97706;
+  --line:rgba(120,80,20,.15); --panel:rgba(255,253,246,.92); --panel2:rgba(255,253,246,.97); --text0:#2b2115; --text1:#77664d; --text:var(--text0); --dim:var(--text1);}
 
-  /* ============ SPLASH ============ */
-  #splash{
-    position:fixed; inset:0; z-index:50; background:
-      radial-gradient(700px 400px at 50% 35%, rgba(34,211,238,.14), transparent 70%),
-      radial-gradient(500px 300px at 30% 70%, rgba(167,139,250,.08), transparent),
-      radial-gradient(400px 250px at 80% 30%, rgba(244,114,182,.06), transparent),
-      var(--bg);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
-    transition:opacity .6s; text-align:center; padding:20px;
-  }
-  #splash.gone{opacity:0; pointer-events:none}
-  @keyframes splashAutoFade{to{opacity:0; pointer-events:none; visibility:hidden}}
-  #splash{animation:splashAutoFade .6s ease 3.2s forwards}
-  .sring{position:relative; width:150px; height:150px}
-  .sring div{
-    position:absolute; border-radius:50%; border:1.5px solid rgba(34,211,238,.45);
-    animation:spin 9s linear infinite;
-  }
-  .sring .r1{inset:0}
-  .sring .r2{inset:16px; border-style:dashed; animation-duration:6s; animation-direction:reverse; border-color:rgba(103,232,249,.6)}
-  .sring .r3{inset:34px; border:none; background:radial-gradient(circle, rgba(103,232,249,.95) 0%, rgba(34,211,238,.5) 45%, transparent 75%); animation:pulse 2s ease-in-out infinite}
-  .sring span{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    font-weight:900; font-size:44px; color:#04222f; letter-spacing:2px;
-  }
-  @keyframes spin{to{transform:rotate(360deg)}}
-  @keyframes pulse{0%,100%{transform:scale(.93); opacity:.8}50%{transform:scale(1.06); opacity:1}}
-  #splash h1{margin:6px 0 0; letter-spacing:14px; font-size:34px; color:var(--cyan2); font-weight:800; text-indent:14px}
-  #splash .sub{letter-spacing:3px; font-size:10px; color:var(--dim)}
-  #splash .ver{font-size:10px; color:var(--dim); letter-spacing:1px}
-  #bootBtn{
-    margin-top:18px; background:linear-gradient(135deg,#22d3ee,#a78bfa); color:#032330; border:none;
-    font-weight:800; letter-spacing:3px; font-size:13px; padding:14px 34px; border-radius:99px; cursor:pointer;
-    box-shadow:0 0 26px rgba(34,211,238,.4);
-  }
-  .bootline{font-size:11px; color:var(--dim); letter-spacing:2px; min-height:14px}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html{font-size:calc(16px * var(--fs))}
+html,body{height:100%}
+body{
+  margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:
+    radial-gradient(900px 420px at 50% -8%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 62%),
+    var(--bg);
+  color:var(--text0); display:flex; flex-direction:column; overflow:hidden;
+}
+button{font-family:inherit}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--accent) 35%,transparent);border-radius:4px}
 
-  /* ============ APP FRAME ============ */
-  #app{display:flex; flex-direction:column; height:100%}
-  #app.on{display:flex}
-  header{
-    display:flex; align-items:center; gap:10px; padding:10px 14px; flex:none;
-    border-bottom:1px solid var(--line); background:rgba(5,11,20,.88); backdrop-filter:blur(6px);
-  }
-  .logo{font-weight:800; letter-spacing:5px; color:var(--cyan2); font-size:17px}
-  .logo small{display:block; font-weight:500; letter-spacing:1px; font-size:8.5px; color:var(--dim)}
-  #statusPill{
-    margin-left:auto; font-size:11px; padding:4px 10px; border:1px solid var(--line);
-    border-radius:99px; color:var(--dim); white-space:nowrap;
-  }
-  #statusPill.ok{color:var(--green); border-color:rgba(52,211,153,.4)}
-  main{flex:1; min-height:0; position:relative}
-  .tab{display:none; flex-direction:column; height:100%; overflow-y:auto; padding:12px; gap:10px; animation:tabFadeIn .3s ease}
-  @keyframes tabFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-  .tab.active{display:flex}
+/* ============ EDGE GLOW (video wala — 4 taraf gradient ring) ============ */
+#edgeGlow{position:fixed;inset:0;z-index:29;pointer-events:none;opacity:0;transition:opacity .8s}
+#edgeGlow.on{opacity:1}
+#edgeGlow::before{content:"";position:absolute;inset:-35vmax;
+  background:conic-gradient(from 0deg, transparent 0 8%, var(--accent) 12%, transparent 16% 33%, var(--accent2) 37%, transparent 41% 58%, var(--accent) 62%, transparent 66% 83%, var(--accent2) 87%, transparent 91%);
+  animation:egspin 9s linear infinite;filter:blur(2px);opacity:.55}
+#edgeGlow::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 26px 6px color-mix(in srgb,var(--accent) 30%,transparent)}
+@keyframes egspin{to{transform:rotate(360deg)}}
 
-  /* bottom nav */
-  nav{
-    flex:none; display:flex; border-top:1px solid var(--line);
-    background:rgba(5,11,20,.95); padding-bottom:env(safe-area-inset-bottom);
-  }
-  nav button{
-    flex:1; background:none; border:none; color:var(--dim); padding:9px 0 7px; cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; letter-spacing:.5px;
-  }
-  nav button .ic{font-size:19px; line-height:1}
-  nav button.active{color:var(--cyan2);position:relative}
-  nav button.active::after{content:"";position:absolute;bottom:0;left:25%;right:25%;height:2px;background:var(--cyan);border-radius:2px;box-shadow:0 0 8px var(--cyan)}
-  nav button.active .ic{filter:drop-shadow(0 0 8px rgba(34,211,238,.8))}
+/* ============ SPLASH ============ */
+#splash{
+  position:fixed; inset:0; z-index:60; background:
+    radial-gradient(700px 400px at 50% 35%, color-mix(in srgb,var(--accent) 14%,transparent), transparent 70%),
+    var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+  transition:opacity .6s; text-align:center; padding:20px;
+}
+#splash.gone{opacity:0;pointer-events:none}
+#splash h1{margin:0;font-size:44px;letter-spacing:14px;font-weight:900;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+#splash .sub{font-size:11px;letter-spacing:5px;color:var(--text1)}
+#splash .ver{font-size:10px;color:var(--text1);opacity:.8;font-family:ui-monospace,monospace}
+#bootBtn{
+  margin-top:8px;padding:14px 42px;font-size:15px;font-weight:800;letter-spacing:2px;border:none;cursor:pointer;
+  border-radius:999px;color:#0b0b10;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  box-shadow:0 6px 30px color-mix(in srgb,var(--accent) 45%,transparent);
+}
+.sring{position:relative;width:120px;height:120px;display:grid;place-items:center}
+.sring span{font-size:34px;font-weight:900;color:var(--accent)}
+.sring div{position:absolute;inset:0;border-radius:50%;border:2px solid color-mix(in srgb,var(--accent) 40%,transparent)}
+.sring .r1{animation:rr 2.2s linear infinite;border-top-color:var(--accent)}
+.sring .r2{inset:14px;animation:rr 1.6s linear infinite reverse;border-bottom-color:var(--accent2)}
+.sring .r3{inset:28px;animation:rr 3s linear infinite;border-left-color:var(--accent)}
+@keyframes rr{to{transform:rotate(360deg)}}
+.bootline{min-height:16px;font-size:10.5px;color:var(--text1);font-family:ui-monospace,monospace}
 
-  /* ============ CHAT TAB ============ */
-  #tab-chat{padding:0 0 0 0}
-  .chatHead{
-    display:flex; align-items:center; gap:10px; padding:10px 14px; flex:none;
-    border-bottom:1px solid var(--line);
-  }
-  .dot{width:9px; height:9px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse 2s infinite}
-  .dot.listening{background:var(--cyan); box-shadow:0 0 10px var(--cyan)}
-  .dot.thinking{background:var(--amber); box-shadow:0 0 10px var(--amber)}
-  .chatHead .t{font-size:12px; letter-spacing:2px; color:var(--dim)}
-  #log{flex:1; overflow-y:auto; padding:10px 12px; display:flex; flex-direction:column; gap:8px; min-height:0}
-  .row{display:flex} .row.me{justify-content:flex-end} .row.ai{justify-content:flex-start}
-  .bubble{
-    max-width:83%; padding:10px 14px; border-radius:16px; font-size:14px; line-height:1.5; word-wrap:break-word;
-    border:1px solid var(--line); background:rgba(20,35,60,.6); backdrop-filter:blur(8px);
-  }
-  .row.me .bubble{background:rgba(14,116,144,.45); border-color:rgba(103,232,249,.35); border-bottom-right-radius:4px}
-  .row.ai .bubble{border-bottom-left-radius:4px}
-  .bubble{animation:bubbleIn .2s ease}
-  @keyframes bubbleIn{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:none}}
-  .bubble .who{display:block; font-size:10px; letter-spacing:1.5px; color:var(--dim); margin-bottom:3px}
-  .bubble a{color:var(--cyan2)}
-  .quickrow{display:flex; gap:8px; padding:0 12px 6px; flex:none}
-  .quick{
-    flex:1; font-size:11px; padding:7px 4px; border-radius:9px; background:var(--panel);
-    border:1px solid var(--line); color:var(--dim); cursor:pointer;
-  }
-  .quick.on{color:#032330; background:var(--cyan); border-color:var(--cyan); font-weight:700}
-  .chatbar{
-    display:flex; gap:8px; padding:10px 12px calc(10px + env(safe-area-inset-bottom)); flex:none;
-    border-top:1px solid var(--line); background:rgba(5,11,20,.92); align-items:center;
-  }
-  #micBtn{
-    width:44px; height:44px; border-radius:50%; border:1px solid var(--line); background:var(--panel);
-    color:var(--cyan2); font-size:18px; cursor:pointer; flex:none; position:relative;
-  }
-  #micBtn.listening{background:var(--cyan); color:#032330; box-shadow:0 0 18px rgba(34,211,238,.6); animation:pulse 1s infinite}
-  #txt{
-    flex:1; background:var(--panel); border:1px solid var(--line); color:var(--text);
-    border-radius:12px; padding:11px 14px; font-size:15px; outline:none; min-width:0;
-  }
-  #send{background:var(--cyan); color:#032330; border:none; border-radius:12px; padding:11px 16px; font-weight:700; font-size:13px; cursor:pointer}
+/* ============ APP SHELL ============ */
+#app{display:flex;flex-direction:column;height:100%;opacity:0;transition:opacity .5s}
+#app.on{opacity:1}
+header{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  border-bottom:1px solid var(--line);background:var(--panel2);backdrop-filter:blur(14px);z-index:10;
+}
+#drawerBtn{background:none;border:1px solid var(--line);color:var(--text0);border-radius:10px;
+  width:38px;height:38px;font-size:17px;cursor:pointer;flex:none}
+.logo{display:flex;flex-direction:column;line-height:1.1;flex:1;min-width:0}
+.logo b{font-size:19px;letter-spacing:6px;font-weight:900;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo small{font-size:8.5px;letter-spacing:2.5px;color:var(--text1)}
+#statusPill{font-size:9.5px;letter-spacing:1px;padding:6px 10px;border-radius:999px;
+  border:1px solid var(--line);color:var(--text1);background:var(--bg2);flex:none}
+#statusPill.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
 
+main{flex:1;overflow:hidden;position:relative}
+.tab{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;
+  padding:14px 14px 92px;scroll-behavior:smooth}
+.tab.active{display:flex}
 
-  /* ============ ANIME CHARACTER ============ */
-  .maya-char{position:relative;width:200px;height:240px;margin:0 auto;cursor:pointer;transition:transform .3s}
-  .maya-char:active{transform:scale(.95)}
-  .maya-char svg{width:100%;height:100%;filter:drop-shadow(0 4px 20px rgba(34,211,238,.2))}
-  .maya-char .char-glow{position:absolute;inset:-30px;border-radius:50%;background:radial-gradient(circle,rgba(34,211,238,.12) 0%,transparent 70%);pointer-events:none;animation:charPulse 3s ease-in-out infinite}
-  @keyframes charPulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
-  .maya-char[data-state="listening"] .char-glow{background:radial-gradient(circle,rgba(34,211,238,.35) 0%,transparent 70%);animation:charPulse 1.5s ease-in-out infinite}
-  .maya-char[data-state="thinking"] .char-glow{background:radial-gradient(circle,rgba(251,191,36,.35) 0%,transparent 70%);animation:charPulse 1s ease-in-out infinite}
-  .maya-char[data-state="speaking"] .char-glow{background:radial-gradient(circle,rgba(147,197,253,.4) 0%,transparent 70%);animation:charPulse .8s ease-in-out infinite}
-  .maya-char .char-name{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);font-size:12px;letter-spacing:4px;color:var(--cyan2);font-weight:700;white-space:nowrap;text-shadow:0 0 14px rgba(34,211,238,.7)}
-  .maya-char .char-status{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:2px;color:var(--dim);white-space:nowrap}
-  .char-hair{transition:fill .4s ease}
-  .char-hair-ribbon{transition:fill .4s ease}
-  .maya-char[data-state="speaking"] .char-mouth{animation:mouthMove .3s ease-in-out infinite alternate}
-  @keyframes mouthMove{0%{ry:3}100%{ry:5}}
-  .maya-char[data-state="idle"] .char-eyes{animation:blink 4s ease-in-out infinite}
-  @keyframes blink{0%,90%,100%{ry:5}95%{ry:1}}
-  .maya-char[data-state="listening"] .char-eyes{animation:none;ry:8}
-  .maya-char[data-state="listening"] .char-pupils{animation:lookAround 2s ease-in-out infinite}
-  @keyframes lookAround{0%,100%{transform:translateX(0)}50%{transform:translateX(2px)}}
-  .char-sparkle{animation:sparkle 2s ease-in-out infinite}
-  @keyframes sparkle{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
-  .maya-char[data-state="thinking"] .char-thought{opacity:1;transform:translateY(0)}
-  .char-thought{position:absolute;top:-10px;right:-15px;opacity:0;transform:translateY(5px);transition:all .4s ease;pointer-events:none}
-  .maya-char[data-state="idle"] .char-hair-flow{animation:hairFlow 3s ease-in-out infinite}
-  @keyframes hairFlow{0%,100%{transform:rotate(0)}50%{transform:rotate(1deg)}}
+/* ============ HOME — ORB ============ */
+#tab-home{align-items:center;text-align:center;gap:10px;padding-top:26px}
+#orb{
+  position:relative;width:190px;height:190px;border-radius:50%;cursor:pointer;flex:none;
+  display:grid;place-items:center;user-select:none;
+}
+#orb::before{content:"";position:absolute;inset:-8px;border-radius:50%;
+  background:conic-gradient(from 0deg,var(--accent),transparent 30%,var(--accent2) 50%,transparent 78%,var(--accent));
+  animation:orbspin 6s linear infinite;opacity:.75;filter:blur(1px)}
+#orb::after{content:"";position:absolute;inset:-2px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, var(--bg2), var(--bg1) 70%);
+  border:1px solid var(--line)}
+@keyframes orbspin{to{transform:rotate(360deg)}}
+.orbCore{
+  position:relative;z-index:2;width:62%;height:62%;border-radius:50%;display:grid;place-items:center;
+  font-size:40px;font-weight:900;color:#0b0b10;
+  background:radial-gradient(circle at 32% 28%,var(--accent2),var(--accent));
+  box-shadow:0 0 34px color-mix(in srgb,var(--accent) 55%,transparent);
+  transition:transform .25s;
+}
+#orb[data-state="listening"] .orbCore{background:radial-gradient(circle at 32% 28%,#6ff0b0,var(--ok));box-shadow:0 0 44px color-mix(in srgb,var(--ok) 60%,transparent);animation:pulse 1.4s ease-in-out infinite}
+#orb[data-state="thinking"] .orbCore{background:radial-gradient(circle at 32% 28%,#ffd98a,var(--warn));box-shadow:0 0 40px color-mix(in srgb,var(--warn) 55%,transparent);animation:pulse 1s ease-in-out infinite}
+#orb[data-state="speaking"] .orbCore{background:radial-gradient(circle at 32% 28%,#b9a7ff,var(--purple));box-shadow:0 0 44px color-mix(in srgb,var(--purple) 60%,transparent);animation:pulse .8s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.orbTag{position:absolute;bottom:8px;z-index:3;font-size:8px;letter-spacing:2px;color:#0b0b10;font-weight:800}
+#statusText{font-size:12px;letter-spacing:3px;color:var(--text1);font-weight:700}
+#interim{min-height:20px;font-size:13px;color:var(--accent2);font-style:italic;max-width:340px}
+#homeLast{
+  max-width:400px;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--radius);padding:12px 14px;font-size:13.5px;line-height:1.55;color:var(--text0);
+  display:none;white-space:pre-wrap;
+}
+#homeLast.show{display:block}
+#homeLast .hl-who{display:block;font-size:8.5px;letter-spacing:2px;color:var(--accent);font-weight:800;margin-bottom:4px}
+.homebar{display:flex;gap:8px;max-width:400px;width:100%}
+.homebar input{flex:1;background:var(--bg1);border:1px solid var(--line);border-radius:999px;
+  padding:12px 16px;color:var(--text0);font-size:13px;outline:none;min-width:0}
+.homebar input:focus{border-color:var(--accent)}
+#micHome{width:48px;height:48px;border-radius:50%;border:none;cursor:pointer;flex:none;font-size:19px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b0b10;font-weight:800}
+#micHome.listening{background:radial-gradient(circle at 30% 30%,#6ff0b0,var(--ok));animation:pulse 1.2s infinite}
+.pchips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.pchip{background:var(--bg1);border:1px solid var(--line);color:var(--text1);border-radius:999px;
+  padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.5px}
+.pchip.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b0b10;border-color:transparent}
+.qactions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;max-width:400px}
+.qactions button{background:var(--panel);border:1px solid var(--line);color:var(--text0);
+  border-radius:14px;padding:10px 6px;font-size:11px;cursor:pointer}
+.qactions button:active{background:color-mix(in srgb,var(--accent) 18%,var(--bg1))}
+.micbar{height:100%;background:var(--cyan);transition:width .12s;border-radius:3px}
 
-  /* ============ HUD TAB ============ */
-  #tab-hud{align-items:center;padding-top:16px}
-  .orb{
-    position:relative; width:160px; height:160px; border-radius:50%; border:none; cursor:pointer; margin-top:6px; flex:none;
-    background:radial-gradient(circle at 50% 42%, #0b2233 0%, #06121f 70%);
-    box-shadow:0 0 24px rgba(34,211,238,.25), inset 0 0 30px rgba(34,211,238,.15);
-    transition:box-shadow .3s;
-  }
-  .orb::before,.orb::after{
-    content:""; position:absolute; inset:-14px; border-radius:50%;
-    border:1.5px dashed rgba(34,211,238,.35); animation:spin 14s linear infinite;
-  }
-  .orb::after{inset:-26px; border-style:solid; border-color:rgba(34,211,238,.15); animation-duration:26s; animation-direction:reverse}
-  .core{
-    position:absolute; inset:27px; border-radius:50%;
-    background:radial-gradient(circle, rgba(103,232,249,.9) 0%, rgba(34,211,238,.55) 40%, transparent 72%);
-    display:flex; align-items:center; justify-content:center; animation:pulse 2.6s ease-in-out infinite;
-  }
-  .core svg{width:46px; height:46px; fill:#032330; filter:drop-shadow(0 0 6px #67e8f9)}
-  .orb[data-state="listening"]{box-shadow:0 0 42px rgba(34,211,238,.65), inset 0 0 40px rgba(34,211,238,.3)}
-  .orb[data-state="listening"] .core{animation:pulse .8s ease-in-out infinite; background:radial-gradient(circle, #bae6fd 0%, #22d3ee 45%, transparent 75%)}
-  .orb[data-state="thinking"]{box-shadow:0 0 34px rgba(251,191,36,.5), inset 0 0 34px rgba(251,191,36,.22)}
-  .orb[data-state="thinking"] .core{animation:pulse 1.1s ease-in-out infinite; background:radial-gradient(circle, #fde68a 0%, #f59e0b 45%, transparent 75%)}
-  .orb[data-state="thinking"]::before{animation-duration:1.6s}
-  .orb[data-state="speaking"]{box-shadow:0 0 46px rgba(147,197,253,.7), inset 0 0 40px rgba(147,197,253,.3)}
-  .orb[data-state="speaking"] .core{animation:pulse .45s ease-in-out infinite; background:radial-gradient(circle, #eff6ff 0%, #60a5fa 45%, transparent 75%)}
-  #statusText{font-size:12px; letter-spacing:3px; color:var(--dim); text-transform:uppercase}
-  #interim{min-height:18px; font-size:13px; color:var(--cyan2); text-align:center; font-style:italic; padding:0 10px}
-  .chips{display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; max-width:480px}
-  @media(min-width:400px){.chips{grid-template-columns:1fr 1fr 1fr}}
-  .chip{
-    background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:10px 12px;
-  }
-  .chip .k{font-size:9.5px; letter-spacing:2px; color:var(--dim)}
-  .chip .v{font-size:16px; color:var(--cyan2); font-weight:700; margin-top:2px; font-variant-numeric:tabular-nums}
-  .chip .v.big{font-size:22px; letter-spacing:1px}
-  .qactions{display:flex; gap:8px; width:100%; max-width:480px; flex-wrap:wrap}
-  .qactions button{
-    flex:1; min-width:100px; background:var(--panel); border:1px solid var(--line); color:var(--text);
-    border-radius:10px; padding:9px 6px; font-size:12px; cursor:pointer;
-  }
-  .qactions button:active{background:rgba(34,211,238,.25)}
-  #sysWrap{width:100%; max-width:480px}
-  #sysWrap .k{font-size:9.5px; letter-spacing:2px; color:var(--dim); margin:2px 0 6px}
-  #syslog{
-    list-style:none; margin:0; padding:8px 10px; background:rgba(2,8,16,.6); border:1px solid var(--line);
-    border-radius:10px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11px; color:var(--dim);
-    min-height:110px; max-height:150px; overflow-y:auto;
-  }
-  #syslog li{padding:2px 0} #syslog li b{color:var(--cyan2); font-weight:500}
-  #installBtn{
-    display:none; width:100%; max-width:480px; background:linear-gradient(135deg,#22d3ee,#a78bfa); color:#032330;
-    border:none; border-radius:10px; padding:11px; font-weight:800; letter-spacing:1px; cursor:pointer;
-  }
-  #installBtn.show{display:block}
+/* ============ CHAT ============ */
+.chatHead{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:1.5px;
+  color:var(--text1);padding:4px 2px 10px;flex:none;font-weight:700}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none}
+.dot.listening{background:var(--ok);animation:pulse 1.2s infinite}
+.dot.thinking{background:var(--warn);animation:pulse .8s infinite}
+.dot .t{color:var(--text0)}
+#log{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 2px;min-height:120px}
+.row{display:flex;flex-direction:column;max-width:86%}
+.row.me{align-self:flex-end;align-items:flex-end}
+.row.ai{align-self:flex-start;align-items:flex-start}
+.bubble{border-radius:var(--radius);padding:10px 13px;font-size:13.5px;line-height:1.55;
+  background:var(--panel);border:1px solid var(--line);color:var(--text0);word-break:break-word;white-space:pre-wrap}
+.row.me .bubble{background:color-mix(in srgb,var(--accent) 16%,var(--bg1));border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+.bubble .who{display:block;font-size:8px;letter-spacing:2px;font-weight:800;color:var(--accent);margin-bottom:4px}
+.bubble a{color:var(--accent2)}
+.quickrow{display:flex;gap:8px;padding:8px 0;flex:none}
+.quick{background:var(--bg1);border:1px solid var(--line);color:var(--text1);border-radius:999px;
+  padding:8px 13px;font-size:10.5px;font-weight:700;cursor:pointer;letter-spacing:.5px}
+.quick.on{background:color-mix(in srgb,var(--accent) 18%,var(--bg1));color:var(--accent2);border-color:color-mix(in srgb,var(--accent) 40%,transparent)}
+.chatbar{display:flex;gap:8px;padding:8px 0 4px;flex:none}
+#micBtn{width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;flex:none;font-size:17px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b0b10;font-weight:800}
+#micBtn.listening{background:radial-gradient(circle at 30% 30%,#6ff0b0,var(--ok));animation:pulse 1.2s infinite}
+#txt{flex:1;background:var(--bg1);border:1px solid var(--line);border-radius:999px;padding:12px 16px;
+  color:var(--text0);font-size:13px;outline:none;min-width:0}
+#txt:focus{border-color:var(--accent)}
+#send,#saveSettings{border:none;cursor:pointer;font-weight:800;letter-spacing:1px;color:#0b0b10;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:999px;padding:12px 18px;font-size:12px;flex:none}
 
-  /* ============ COMMANDS TAB ============ */
-  .searchWrap{position:sticky; top:-12px; z-index:5; background:linear-gradient(180deg, var(--bg) 75%, transparent); padding:4px 0 8px}
-  #cmdFilter{
-    width:100%; background:var(--panel); border:1px solid var(--line); color:var(--text);
-    border-radius:10px; padding:11px 12px; font-size:14px; outline:none;
-  }
-  .grp{border:1px solid var(--line); border-radius:14px; overflow:hidden}
-  .grp h3{margin:0; padding:10px 12px; font-size:12px; letter-spacing:2px; color:var(--cyan2); background:var(--panel2)}
-  .cmd{
-    display:flex; align-items:center; gap:8px; padding:10px 12px; border-top:1px solid rgba(56,189,248,.1); font-size:13.5px;
-  }
-  .cmd code{color:var(--cyan2); background:rgba(34,211,238,.1); padding:3px 8px; border-radius:7px; flex:1; font-size:12.5px}
-  .cmd button{
-    background:var(--cyan); color:#032330; border:none; border-radius:8px; padding:6px 12px; font-weight:700; font-size:11px; cursor:pointer; flex:none;
-  }
-  details.g{border:1px solid var(--line); border-radius:14px; background:var(--panel2)}
-  details.g summary{padding:12px 14px; font-size:13px; font-weight:700; color:var(--cyan2); letter-spacing:1px; cursor:pointer; list-style:none}
-  details.g summary::before{content:"▸ "}
-  details.g[open] summary::before{content:"▾ "}
-  details.g .body{padding:0 14px 14px; font-size:13.5px; line-height:1.7}
-  details.g .body b{color:var(--cyan2)}
-  .step{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:8px 10px; margin:8px 0}
-  .note{font-size:12px; color:var(--dim)}
-  .warn{border-color:rgba(251,191,36,.4)} .warn summary{color:var(--amber)}
+/* ============ CARDS / SETTINGS TREE ============ */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px;margin-bottom:12px;backdrop-filter:blur(8px)}
+.card h3{margin:0 0 10px;font-size:12.5px;letter-spacing:1.5px;color:var(--accent);font-weight:800}
+.setgrp{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.setgrp-head{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;user-select:none;
+  font-size:12.5px;font-weight:800;letter-spacing:1px;color:var(--text0)}
+.setgrp-head .gic{font-size:16px}
+.setgrp-head .chev{margin-left:auto;color:var(--text1);transition:transform .25s;font-size:11px}
+.setgrp.open .chev{transform:rotate(180deg)}
+.setgrp-body{display:none;padding:2px 14px 14px;border-top:1px solid var(--line)}
+.setgrp.open .setgrp-body{display:block}
+.f{display:block;width:100%;margin:8px 0 2px;padding:11px 13px;font-size:13px;color:var(--text0);
+  background:var(--bg1);border:1px solid var(--line);border-radius:12px;outline:none;font-family:inherit}
+.f:focus{border-color:var(--accent)}
+label.f{background:none;border:none;padding:8px 0 0;margin:8px 0 0;color:var(--text1);font-size:11px;letter-spacing:1px}
+.save,.danger{width:100%;margin-top:10px;padding:12px;font-size:12.5px;font-weight:800;letter-spacing:1px;
+  border:none;border-radius:12px;cursor:pointer}
+.save{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b0b10}
+.danger{background:color-mix(in srgb,var(--danger) 16%,transparent);color:var(--danger);
+  border:1px solid color-mix(in srgb,var(--danger) 40%,transparent)}
+.note{font-size:10.5px;color:var(--text1);line-height:1.6;margin-top:8px}
+.switchrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;
+  border-bottom:1px dashed var(--line);font-size:12.5px}
+.switchrow:last-child{border-bottom:none}
+.switch{position:relative;display:inline-block;width:44px;height:24px;flex:none}
+.switch input{opacity:0;width:0;height:0}
+.switch i{position:absolute;inset:0;background:var(--bg2);border:1px solid var(--line);border-radius:999px;transition:.25s}
+.switch i::before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;border-radius:50%;
+  background:var(--text1);transition:.25s}
+.switch input:checked + i{background:color-mix(in srgb,var(--accent) 45%,var(--bg2));border-color:var(--accent)}
+.switch input:checked + i::before{transform:translateX(20px);background:var(--accent2)}
+input[type=range]{width:100%;accent-color:var(--accent);margin:6px 0}
 
-  /* ============ SETTINGS TAB ============ */
-  .card{border:1px solid var(--line); border-radius:14px; background:var(--panel2); padding:12px 14px}
-  .card h3{margin:0 0 4px; font-size:12px; letter-spacing:2px; color:var(--cyan2)}
-  label.f{display:block; margin:11px 0 4px; font-size:11.5px; color:var(--dim); letter-spacing:.5px}
-  input.f,select.f{
-    width:100%; background:var(--panel); border:1px solid var(--line); color:var(--text);
-    border-radius:10px; padding:10px 12px; font-size:14px; outline:none;
-  }
-  .switchrow{display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px solid rgba(56,189,248,.1); font-size:14px}
-  .switch{position:relative; width:44px; height:24px; flex:none}
-  .switch input{opacity:0; width:0; height:0}
-  .switch i{
-    position:absolute; inset:0; background:rgba(120,150,180,.3); border-radius:99px; transition:.2s; cursor:pointer;
-  }
-  .switch i::after{
-    content:""; position:absolute; width:18px; height:18px; border-radius:50%; background:#cbd5e1; top:3px; left:3px; transition:.2s;
-  }
-  .switch input:checked + i{background:var(--cyan)}
-  .switch input:checked + i::after{transform:translateX(20px); background:#032330}
-  .save{
-    width:100%; background:linear-gradient(135deg,#22d3ee,#a78bfa); border:none; color:#0a0f1a; font-weight:800;
-    padding:12px; border-radius:12px; font-size:15px; cursor:pointer; margin-top:10px; transition:all .2s;
-  }
-  .danger{width:100%; background:transparent; border:1px solid rgba(248,113,113,.4); color:var(--red); padding:10px; border-radius:12px; cursor:pointer; margin-top:8px}
-  #factList{list-style:none; margin:8px 0 0; padding:0; display:flex; flex-direction:column; gap:6px}
-  #factList li{
-    display:flex; gap:8px; align-items:center; background:var(--panel); border:1px solid var(--line);
-    border-radius:10px; padding:8px 10px; font-size:13px;
-  }
-  #factList li span{flex:1}
-  #factList li button{background:none; border:none; color:var(--red); font-size:15px; cursor:pointer}
-  .phase{display:flex; gap:10px; align-items:center; padding:7px 0; font-size:13.5px; border-bottom:1px solid rgba(56,189,248,.1)}
-  .phase:last-child{border:none}
-  .phase .st{flex:none; width:22px; text-align:center}
-  .vtag{font-size:10.5px; color:var(--dim); letter-spacing:1px; text-align:center; padding:8px 0 2px}
+/* theme grid / accents */
+#themeGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.tsw{border:1px solid var(--line);background:var(--bg1);border-radius:12px;padding:8px 4px;cursor:pointer;text-align:center}
+.tsw .swp{height:26px;border-radius:8px;margin-bottom:5px;border:1px solid var(--line)}
+.tsw span{font-size:9px;color:var(--text1);letter-spacing:.4px}
+.tsw.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.tsw.active span{color:var(--accent2)}
+#accentRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.acc{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer}
+.acc.active{border-color:var(--text0);transform:scale(1.15)}
 
-  /* toast */
-  #toast{
-    position:fixed; left:50%; bottom:88px; transform:translateX(-50%) translateY(20px); z-index:60;
-    background:#0b1f33; border:1px solid var(--line); color:var(--cyan2); padding:10px 18px;
-    border-radius:99px; font-size:13px; opacity:0; transition:.3s; pointer-events:none; max-width:88vw; text-align:center;
-  }
-  #toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+/* ============ HUD ============ */
+.maya-char{position:relative;width:170px;margin:0 auto;flex:none}
+.char-glow{position:absolute;inset:-16px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 22%,transparent),transparent 70%);animation:pulse 3s infinite}
+.char-name{text-align:center;font-size:10px;letter-spacing:6px;color:var(--accent);font-weight:800;margin-top:2px}
+.char-status{text-align:center;font-size:9.5px;letter-spacing:2px;color:var(--text1);margin-top:3px}
+.char-eyes{animation:pulse 4s infinite}
+.char-mouth{}
+.char-sparkle{animation:pulse 2.4s infinite}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.chip .k{font-size:8.5px;letter-spacing:1.5px;color:var(--text1)}
+.chip .v{font-size:15px;font-weight:800;color:var(--text0);margin-top:2px}
+.chip .v.big{font-size:21px}
+#sysWrap{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius);padding:12px}
+#sysWrap .k{font-size:9px;letter-spacing:2px;color:var(--text1);margin-bottom:8px}
+#syslog{list-style:none;margin:0;padding:0;font-family:ui-monospace,monospace;font-size:10px;color:var(--text1);max-height:180px;overflow-y:auto}
+#syslog li{padding:3px 0;border-bottom:1px dashed var(--line)}
+#installBtn{display:none;width:100%;margin-top:10px;padding:13px;border:none;border-radius:14px;cursor:pointer;
+  font-size:12.5px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b0b10}
+#installBtn.show{display:block}
+
+/* ============ COMMANDS ============ */
+.searchWrap{flex:none;padding-bottom:10px}
+#cmdFilter{width:100%;padding:12px 16px;border-radius:999px;border:1px solid var(--line);
+  background:var(--bg1);color:var(--text0);font-size:13px;outline:none}
+#cmdFilter:focus{border-color:var(--accent)}
+#cmdList .grp{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px;margin-bottom:10px}
+#cmdList .grp h3{margin:0 0 8px;font-size:11px;letter-spacing:1.5px;color:var(--accent)}
+#cmdList .cmd{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:12px}
+#cmdList .cmd:last-child{border-bottom:none}
+#cmdList .cmd code{flex:1;background:var(--bg1);border:1px solid var(--line);border-radius:8px;padding:6px 9px;
+  font-size:11px;color:var(--accent2);font-family:ui-monospace,monospace;word-break:break-word}
+#cmdList .cmd button{border:none;border-radius:8px;padding:6px 11px;font-size:10px;font-weight:800;cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b0b10}
+
+/* ============ MEMORIES / SKILLS ============ */
+.memrow{display:flex;gap:8px;margin-bottom:10px}
+.memrow input{flex:1;min-width:0}
+#factList{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+#factList li{display:flex;align-items:center;gap:8px;background:var(--bg1);border:1px solid var(--line);
+  border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--text0);line-height:1.5}
+#factList li .fx{margin-left:auto;display:flex;gap:6px;flex:none}
+#factList li .fx button{background:none;border:1px solid var(--line);color:var(--text1);border-radius:8px;
+  width:28px;height:28px;cursor:pointer;font-size:12px}
+.skillgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.skillgrid div{background:var(--bg1);border:1px solid var(--line);border-radius:12px;padding:10px;font-size:11px;color:var(--text1);line-height:1.5}
+.skillgrid b{display:block;color:var(--accent2);font-size:11.5px;margin-bottom:3px}
+.vtag{text-align:center;font-size:9px;letter-spacing:2px;color:var(--text1);padding:14px 0}
+.phase{display:flex;gap:8px;padding:5px 0;font-size:11px;color:var(--text1);line-height:1.5}
+.phase .st{flex:none}
+
+/* ============ DRAWER + DOCK ============ */
+#drawer{position:fixed;inset:0 auto 0 0;width:min(78vw,300px);z-index:45;background:var(--panel2);
+  border-right:1px solid var(--line);transform:translateX(-102%);transition:transform .3s;
+  display:flex;flex-direction:column;padding:18px 14px;backdrop-filter:blur(18px)}
+#drawer.open{transform:none}
+#drawer .dhead{font-size:16px;font-weight:900;letter-spacing:6px;padding:6px 8px 16px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+#drawer button.dbtn{display:flex;align-items:center;gap:12px;width:100%;background:none;border:none;
+  color:var(--text0);font-size:13.5px;font-weight:700;padding:13px 10px;border-radius:12px;cursor:pointer;text-align:left}
+#drawer button.dbtn:active,#drawer button.dbtn.active{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent2)}
+#drawer .dsep{height:1px;background:var(--line);margin:10px 6px}
+#drawer .dfoot{margin-top:auto;font-size:9px;color:var(--text1);letter-spacing:1.5px;padding:8px;text-align:center}
+#drawerScrim{position:fixed;inset:0;z-index:44;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .3s}
+#drawerScrim.open{opacity:1;pointer-events:auto}
+
+nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;gap:4px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+  background:var(--panel2);border-top:1px solid var(--line);backdrop-filter:blur(16px)}
+nav button{flex:1;background:none;border:none;color:var(--text1);font-size:9px;font-weight:800;letter-spacing:1px;
+  padding:7px 2px;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav button .ic{font-size:17px}
+nav button.active{color:var(--accent2);background:color-mix(in srgb,var(--accent) 13%,transparent)}
+
+#toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(20px);z-index:70;
+  background:var(--panel2);border:1px solid var(--line);color:var(--text0);border-radius:999px;
+  padding:10px 18px;font-size:12px;opacity:0;pointer-events:none;transition:.3s;max-width:86vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
@@ -302,7 +322,7 @@
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v3.0 — NEXT LEVEL — SAFE MODE 🔧 • 0-BUDGET</div>
+  <div class="ver">v4.0.0 — OBSIDIAN — PERSONAS • THEMES • MEMORY</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid rgba(248,113,113,.6); background:rgba(60,10,15,.9); border-radius:12px; padding:12px; text-align:left;">
@@ -312,20 +332,63 @@
   </div>
 </div>
 
+<!-- ================= EDGE GLOW (video style — Customize mein toggle) ================= -->
+<div id="edgeGlow"></div>
+
+<!-- ================= DRAWER ================= -->
+<div id="drawerScrim"></div>
+<aside id="drawer">
+  <div class="dhead">MAYA</div>
+  <button class="dbtn" data-tab="tab-home">🏠 Home</button>
+  <button class="dbtn" data-tab="tab-chat">💬 Chat</button>
+  <button class="dbtn" data-tab="tab-mem">🧠 Memories</button>
+  <button class="dbtn" data-tab="tab-skills">🧩 Skills</button>
+  <button class="dbtn" data-tab="tab-hud">🎯 HUD</button>
+  <div class="dsep"></div>
+  <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
+  <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
+  <div class="dfoot">MAYA v4.0.0 • 0-BUDGET • FREE</div>
+</aside>
+
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
-    <div class="logo">MAYA<small id="subTitle">PERSONAL AI v3.0 ✨ 🔝</small></div>
+    <button id="drawerBtn">☰</button>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.0 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
   <main>
-    <!-- CHAT -->
-    <section class="tab active" id="tab-chat">
+    <!-- ============ HOME (orb — video jaisa) ============ -->
+    <section class="tab active" id="tab-home">
+      <div id="orb" data-state="idle" aria-label="MAYA — tap to speak">
+        <div class="orbCore">M<span class="orbTag" id="orbPersona">MAYA</span></div>
+      </div>
+      <div id="statusText">TAP TO SPEAK</div>
+      <div id="interim"></div>
+      <div class="pchips" id="personaChips"></div>
+      <div id="homeLast"></div>
+      <div class="homebar">
+        <input id="homeTxt" placeholder="Maya se bolo... (voice reply)" autocomplete="off">
+        <button id="micHome" title="Bolo">🎤</button>
+      </div>
+      <div class="qactions">
+        <button data-cmd="waqt kya hua hai">⏰ TIME</button>
+        <button data-cmd="battery kitni hai">🔋 BATTERY</button>
+        <button data-cmd="search karo latest tech news">🔍 SEARCH</button>
+        <button data-cmd="1 minute ka timer lagao">⏱️ TIMER</button>
+        <button data-cmd="open whatsapp">💬 WHATSAPP</button>
+        <button data-cmd="open youtube">▶️ YOUTUBE</button>
+      </div>
+      <div class="note" style="max-width:380px">🎤 Mic / orb dabao aur bolo • persona chip se Maya / Friday / Venom badlo • ☰ mein sab kuch hai</div>
+    </section>
+
+    <!-- ============ CHAT (text replies) ============ -->
+    <section class="tab" id="tab-chat">
       <div class="chatHead">
         <span class="dot" id="dot"></span>
         <span class="t" id="chatState">MAYA READY</span>
-        <div style="width:80px;height:4px;background:rgba(56,189,248,.15);border-radius:3px;overflow:hidden;margin-left:8px"><div class="micbar" style="height:100%;width:4%;background:var(--cyan);transition:width .12s;border-radius:2px"></div></div>
+        <div style="width:80px;height:4px;background:color-mix(in srgb,var(--accent) 14%,transparent);border-radius:3px;overflow:hidden;margin-left:8px"><div class="micbar" style="height:100%;width:4%"></div></div>
         <span style="margin-left:auto; font-size:11px; color:var(--dim)" id="greetMini"></span>
       </div>
       <div id="log"></div>
@@ -337,16 +400,54 @@
       <div class="chatbar">
         <button id="camBtn" title="Ye dekho" style="width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--cyan2);font-size:17px;cursor:pointer;flex:none">📸</button>
         <button id="micBtn" title="Bolo">🎤</button>
-        <input id="txt" placeholder="Maya se kuch poocho..." autocomplete="off">
+        <input id="txt" placeholder="Type karo (text reply)..." autocomplete="off">
         <button id="send">BHEJO</button>
       </div>
     </section>
 
-    <!-- HUD -->
+    <!-- ============ MEMORIES ============ -->
+    <section class="tab" id="tab-mem">
+      <div class="card">
+        <h3>🧠 MEMORY BANK</h3>
+        <div class="note">Maya ki yaad rasheeda cheezein. Khud bhi add kar sakte ho — "yaad rakhna ki..." bol kar bhi hota hai.</div>
+        <div class="memrow">
+          <input class="f" id="newFact" placeholder="Nayi yaad likho... (jaise: kal doctor appointment)" style="margin:10px 0 0">
+          <button class="save" id="addFactBtn" style="width:auto;margin:10px 0 0;padding:11px 16px">➕ ADD</button>
+        </div>
+        <ul id="factList"></ul>
+        <button class="danger" id="clearFacts">🗑️ SARI MEMORY MITAO</button>
+      </div>
+      <div class="card">
+        <h3>💾 BACKUP</h3>
+        <div class="note">Memories + settings ka backup file — naye phone par wapas la sakte ho.</div>
+        <button class="save" id="expBtn" style="background:var(--bg2);color:var(--accent2);border:1px solid var(--line)">⬇️ BACKUP DOWNLOAD</button>
+      </div>
+    </section>
+
+    <!-- ============ SKILLS ============ -->
+    <section class="tab" id="tab-skills">
+      <div class="card">
+        <h3>🧩 SKILLS</h3>
+        <div class="skillgrid">
+          <div><b>🎯 Daily Routine</b>subah ka brief, alarm routine</div>
+          <div><b>📚 Study Mode</b>concept samjhana, quiz</div>
+          <div><b>💼 Office Helper</b>email drafts, reports</div>
+          <div><b>🍳 Kitchen Helper</b>recipes aur khayal</div>
+          <div><b>💰 Money Tracker</b>kharcha yaad rakhna</div>
+          <div><b>🎧 Music DJ</b>gaana mood ke hisab se</div>
+          <div><b>🧘 Calm Mode</b>stress kam karna</div>
+          <div><b>🛠️ Tech Support</b>phone ki madad</div>
+        </div>
+        <div class="note" style="margin-top:10px">Custom skills: "seekh lo: jab main kaahun subah jaga dena" — Maya khud seekh leti hai.</div>
+        <div class="note" id="skillList" style="color:var(--accent2)">—</div>
+        <button class="danger" id="clearSkills">🗑️ CUSTOM SKILLS MITAO</button>
+      </div>
+    </section>
+
+    <!-- ============ HUD ============ -->
     <section class="tab" id="tab-hud">
       <div class="maya-char" id="mayaChar" data-state="idle" aria-label="MAYA — tap to speak">
-        <div class="char-glow"></div>
-        <svg viewBox="0 0 220 260" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 220 260" xmlns="http://www.w3.org/2000/svg">
           <!-- Hair back layer -->
           <g class="char-hair-flow">
             <path d="M30,80 Q25,30 70,15 Q90,10 110,12 Q130,10 150,15 Q195,30 190,80 L188,130 Q185,155 170,165 L50,165 Q35,155 32,130 Z" fill="#0e7490" opacity="0.9" class="char-hair"/>
@@ -396,22 +497,16 @@
           <g class="char-sparkle" style="animation-delay:1.4s"><path d="M195,110 l2,-5 2,5 -5,-2 5,0 Z" fill="#22d3ee" opacity="0.5"/></g>
           <g class="char-sparkle" style="animation-delay:2s"><path d="M20,100 l2,-5 2,5 -5,-2 5,0 Z" fill="#f472b6" opacity="0.4"/></g>
         </svg>
-        <!-- Thinking bubble -->
-        <div class="char-thought">
-          <svg width="30" height="30" viewBox="0 0 30 30"><circle cx="8" cy="24" r="3" fill="#fbbf24" opacity="0.5"/><circle cx="16" cy="18" r="2" fill="#fbbf24" opacity="0.3"/><circle cx="22" cy="12" r="1.5" fill="#fbbf24" opacity="0.2"/></svg>
-        </div>
         <div class="char-name">M A Y A</div>
         <div class="char-status" id="charStatus">TAP TO SPEAK</div>
       </div>
-      <div id="statusText">TAP TO SPEAK</div>
-      <div style="display:flex;gap:8px;margin-top:4px">
-        <button onclick="testMayaVoice()" style="background:var(--panel);border:1px solid var(--line);color:var(--cyan2);border-radius:8px;padding:6px 14px;font-size:11px;cursor:pointer;letter-spacing:1px">🎧 AWAAZ SUNO</button>
-        <button onclick="startListening()" style="background:var(--panel);border:1px solid var(--line);color:var(--cyan2);border-radius:8px;padding:6px 14px;font-size:11px;cursor:pointer;letter-spacing:1px">🎤 BAIKHO</button>
+      <div id="statusText2" style="text-align:center;font-size:11px;letter-spacing:3px;color:var(--text1);font-weight:700;margin-top:6px">TAP TO SPEAK</div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px">
+        <button onclick="testMayaVoice()" style="background:var(--panel);border:1px solid var(--line);color:var(--accent2);border-radius:999px;padding:7px 15px;font-size:11px;cursor:pointer;letter-spacing:1px">🎧 AWAAZ SUNO</button>
+        <button onclick="startListening()" style="background:var(--panel);border:1px solid var(--line);color:var(--accent2);border-radius:999px;padding:7px 15px;font-size:11px;cursor:pointer;letter-spacing:1px">🎤 BAIKHO</button>
       </div>
-      <div style="width:180px;height:5px;background:rgba(56,189,248,.15);border-radius:3px;overflow:hidden"><div class="micbar" style="height:100%;width:4%;background:var(--cyan);border-radius:3px;transition:width .12s;box-shadow:0 0 8px var(--cyan)"></div></div>
-      <div id="interim"></div>
-
-      <div class="chips">
+      <div style="display:flex;justify-content:center"><div style="width:180px;height:5px;background:color-mix(in srgb,var(--accent) 14%,transparent);border-radius:3px;overflow:hidden"><div class="micbar" style="height:100%;width:4%;border-radius:3px;box-shadow:0 0 8px var(--cyan)"></div></div></div>
+      <div class="chips" style="margin-top:14px">
         <div class="chip"><div class="k">◈ SYSTEM TIME</div><div class="v big" id="hudClock">--:--</div><div class="k" id="hudDate" style="margin-top:2px">—</div></div>
         <div class="chip"><div class="k">◈ POWER CELL</div><div class="v big" id="hudBat">—</div><div class="k" id="hudCharge" style="margin-top:2px">&nbsp;</div></div>
         <div class="chip"><div class="k">◈ NEURAL LINK</div><div class="v" id="hudAI">NO KEY</div></div>
@@ -420,220 +515,224 @@
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v3.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.0</div></div>
       </div>
-
-      <div class="qactions">
+      <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
         <button data-cmd="battery kitni hai">🔋 BATTERY</button>
         <button data-cmd="search karo latest tech news">🔍 SEARCH</button>
-        <button data-cmd="1 minute ka timer lagao">⏱️ TIMER</button>
-        <button data-cmd="open whatsapp">💬 WHATSAPP</button>
-        <button data-cmd="open youtube">▶️ YOUTUBE</button>
       </div>
-
       <button id="installBtn">📲 MAYA INSTALL KARO (APP BAN JAYEGA)</button>
-
       <div id="sysWrap">
         <div class="k">◈ SYSTEM LOG</div>
         <ul id="syslog"></ul>
       </div>
     </section>
 
-    <!-- COMMANDS -->
+    <!-- ============ COMMANDS ============ -->
     <section class="tab" id="tab-cmds">
       <div class="searchWrap"><input id="cmdFilter" placeholder="🔎 Command dhoondo... (jaise: timer, open, yaad)"></div>
       <div id="cmdList"></div>
-
-      <details class="g" open>
-        <summary>📖 SETUP GUIDE — Free API key (2 minute)</summary>
-        <div class="body">
-          <div class="step"><b>1.</b> Phone browser mein <b>aistudio.google.com</b> kholo → Google account se sign in karo</div>
-          <div class="step"><b>2.</b> <b>Get API key</b> → <b>Create API key</b> → key copy karo (<b>AIza...</b> se shuru)</div>
-          <div class="step"><b>3.</b> ⚙️ <b>Settings</b> tab → API key paste → <b>SAVE</b>. Bas — Maya online dimaag ke saath! <span class="note">(Bilkul free — roz sainkdon requests normal use ke liye kaafi.)</span></div>
-        </div>
-      </details>
-
-      <details class="g">
-        <summary>🌐 FREE HOSTING — App jesa install karne ka tarika</summary>
-        <div class="body">
-          <div class="step"><b>1.</b> Poora <b>maya</b> folder (index.html, manifest.json, sw.js, icons) download karo</div>
-          <div class="step"><b>2.</b> <b>app.netlify.com/drop</b> kholo (free account) → folder drag & drop karo → live link mil jayega (HTTPS)</div>
-          <div class="step"><b>3.</b> Wo link phone ke Chrome mein kholo → menu (⋮) → <b>Add to Home screen / Install app</b> → Maya ka apna icon, full screen app ban jayegi ✅</div>
-          <div class="note">GitHub Pages se bhi free host ho sakta hai (thoda technical). Hosting ke baad offline bhi chalegi — service worker app ko cache kar leta hai.</div>
-        </div>
-      </details>
-
-      <details class="g warn">
-        <summary>⚠️ HONEST LIMITS — jo Maya <i>nahi</i> kar sakti (abhi)</summary>
-        <div class="body">
-          • PWA/browser version mein system alarm jaise controls nahi — <b>APK version</b> mein real alarm + system timer milta hai<br>
-          • Wake word background service ab available — Settings se ON karo<br>
-          • AI ke jawab ke liye internet chahiye; local commands offline bhi chalte hain<br>
-          • Mic sirf HTTPS ya local file par chalta hai
-        </div>
-      </details>
     </section>
 
-    <!-- SETTINGS -->
+    <!-- ============ SETTINGS (video jaisa tree) ============ -->
     <section class="tab" id="tab-set">
-      <div class="card">
-        <h3>👤 PILOT PROFILE</h3>
-        <label class="f">AAP KA NAAM (Maya isi se bulayegi)</label>
-        <input class="f" id="sName" placeholder="Sir">
-        <label class="f">MAUSAM KA SHEHER (weather city)</label>
-        <input class="f" id="sCity" placeholder="Hyderabad">
-        <h3 style="margin-top:18px">🧠 NEURAL LINK</h3>
-        <label class="f">GEMINI API KEY (FREE — Commands tab mein guide)</label>
-        <input class="f" id="sKey" type="password" placeholder="AIza... se shuru hoti hai">
-        <label class="f">AI MODEL</label>
-        <select class="f" id="sModel">
-          <option value="auto">Auto (best free model khud dhoondegi)</option>
-          <option value="gemini-2.5-flash">gemini-2.5-flash</option>
-          <option value="gemini-2.0-flash">gemini-2.0-flash</option>
-          <option value="gemini-1.5-flash">gemini-1.5-flash</option>
-        </select>
+
+      <div class="setgrp open">
+        <div class="setgrp-head"><span class="gic">👤</span>PERSONAL SETTINGS<span class="chev">▼</span></div>
+        <div class="setgrp-body">
+          <label class="f">AAP KA NAAM</label>
+          <input class="f" id="sName" placeholder="Sir">
+          <label class="f">GENDER</label>
+          <select class="f" id="sGender"><option value="male">Male</option><option value="female">Female</option></select>
+          <label class="f">PHONE NUMBER (call/SMS ke liye)</label>
+          <input class="f" id="sPhone" placeholder="03xx-xxxxxxx" inputmode="tel">
+          <label class="f">SHEHER (mausam)</label>
+          <input class="f" id="sCity" placeholder="Hyderabad">
+          <label class="f">MUSIC APP</label>
+          <select class="f" id="sMusicApp"><option value="youtube">YouTube</option><option value="spotify">Spotify</option><option value="ytmusic">YouTube Music</option></select>
+          <label class="f">FAVORITE SONG (Maya yaad rakhegi — ya baat cheet me batado)</label>
+          <input class="f" id="sFavSong" placeholder="gaana / artist">
+          <label class="f">YOUTUBE CHANNEL ID (stats ke liye — UC... se shuru)</label>
+          <input class="f" id="sYtChannel" placeholder="UCxxxxxxxx">
+        </div>
+      </div>
+
+      <div class="setgrp">
+        <div class="setgrp-head"><span class="gic">🗣️</span>MAYA & PERSONAS<span class="chev">▼</span></div>
+        <div class="setgrp-body">
+          <label class="f">ASSISTANT KA NAAM (UI par Maya hi rahega)</label>
+          <input class="f" id="sAssistName" placeholder="Maya">
+          <label class="f">PERSONA (default)</label>
+          <select class="f" id="sPersona">
+            <option value="maya">💜 Maya — warm, witty best friend</option>
+            <option value="friday">🤖 Friday — professional assistant</option>
+            <option value="venom">🐍 Venom — alien, funny, dark</option>
+          </select>
+          <div class="switchrow"><span>💖 Girlfriend Mode <small style="color:var(--text1)">(Male profile par)</small></span>
+            <label class="switch"><input type="checkbox" id="sGf"><i></i></label></div>
+          <div class="switchrow"><span>🧠 "Maya Remembers" — khud yaad rakhe</span>
+            <label class="switch"><input type="checkbox" id="sRemember"><i></i></label></div>
+          <div class="switchrow"><span>💬 Conversation Mode <small>(emotional real voice — thora delay)</small></span>
+            <label class="switch"><input type="checkbox" id="sConvo"><i></i></label></div>
+          <label class="f">LANGUAGE</label>
+          <select class="f" id="sLang">
+            <option value="roman-ur">Roman Urdu (default)</option>
+            <option value="urdu">اردو Urdu script</option>
+            <option value="hi-en">Hindi + English mix</option>
+            <option value="hindi">हिंदी Hindi</option>
+            <option value="english">English</option>
+            <option value="pa">ਪੰਜਾਬੀ Punjabi</option>
+            <option value="bn">বাংলা Bangla</option>
+            <option value="ta">தமிழ் Tamil</option>
+            <option value="te">తెలుగు Telugu</option>
+            <option value="mr">मराठी Marathi</option>
+            <option value="gu">ગુજરાતી Gujarati</option>
+            <option value="kn">ಕನ್ನಡ Kannada</option>
+            <option value="ml">മലയാളം Malayalam</option>
+          </select>
+          <div class="switchrow"><span>✨ Proactive Maya — khud ba khud baat kare</span>
+            <label class="switch"><input type="checkbox" id="sProactive"><i></i></label></div>
+          <div class="switchrow"><span>🔁 Auto Listen (screen on lock)</span>
+            <label class="switch"><input type="checkbox" id="sAuto"><i></i></label></div>
+          <div class="switchrow"><span>👂 Wake Word — "Maya" / "Boss" (APK)</span>
+            <label class="switch"><input type="checkbox" id="sWake"><i></i></label></div>
+          <div class="switchrow"><span>🔊 Voice Replies</span>
+            <label class="switch"><input type="checkbox" id="sVoiceOn"><i></i></label></div>
+          <div class="switchrow"><span>📬 WhatsApp Reader — "naye messages sunao"</span>
+            <label class="switch"><input type="checkbox" id="sNotifOn"><i></i></label></div>
+          <div class="note">Reader: notification access chahiye. ON karne par Maya aaye hue messages khud bhi bolti hai.</div>
+          <button class="save" id="readerBtn" style="background:var(--bg2);color:var(--accent2);border:1px solid var(--line)">📬 READER PERMISSION ENABLE KARO</button>
+          <div class="note" id="notifStatus" style="margin-top:4px">Status: checking...</div>
+          <div class="switchrow"><span>🔋 Battery-full alert ("charger nikal do!")</span>
+            <label class="switch"><input type="checkbox" id="sBatAlert"><i></i></label></div>
+        </div>
+      </div>
+
+      <div class="setgrp">
+        <div class="setgrp-head"><span class="gic">🎧</span>AWAAZ — VOICE STUDIO<span class="chev">▼</span></div>
+        <div class="setgrp-body">
+          <label class="f">SUNNE KI ZUBAAN (STT)</label>
+          <select class="f" id="sStt">
+            <option value="ur-PK">اردو Urdu (Pakistan)</option>
+            <option value="hi-IN">हिंदी Hindi (India)</option>
+            <option value="en-IN">English (India)</option>
+            <option value="en-US">English (US)</option>
+          </select>
+          <label class="f">BOLNE KI ZUBAAN (TTS)</label>
+          <select class="f" id="sTts">
+            <option value="ur-PK">اردو Urdu (Pakistan)</option>
+            <option value="hi-IN">हिंदी Hindi (India)</option>
+            <option value="en-IN">English (India)</option>
+            <option value="en-US">English (US)</option>
+          </select>
+          <div id="artistGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px"></div>
+          <label class="f">TTS VOICE (system engine)</label>
+          <select class="f" id="sVoice"><option value="">Auto (engine default)</option></select>
+          <button class="save" id="testVoice" style="background:var(--bg2);color:var(--accent2);border:1px solid var(--line)">🎧 TEST AWAAZ SUNO</button>
+          <label class="f">🎵 AWAAZ KI PITCH: <span id="pitchVal">1.05</span></label>
+          <input type="range" id="sPitch" min="0.7" max="1.4" step="0.05" value="1.05">
+          <label class="f">AWAAZ KI RAFTAR: <span id="rateVal">1.00</span>x</label>
+          <input type="range" id="sRate" min="0.7" max="1.4" step="0.05" value="1">
+        </div>
+      </div>
+
+      <div class="setgrp">
+        <div class="setgrp-head"><span class="gic">🎨</span>CUSTOMIZE — THEME & LOOK<span class="chev">▼</span></div>
+        <div class="setgrp-body">
+          <label class="f">THEME</label>
+          <div id="themeGrid"></div>
+          <label class="f">ACCENT COLOR</label>
+          <div id="accentRow"></div>
+          <label class="f">CORNER STYLE: <span id="radiusVal">18</span>px <small>(4 = sharp, 24 = soft)</small></label>
+          <input type="range" id="sRadius" min="4" max="24" step="1" value="18">
+          <label class="f">TEXT SIZE: <span id="fontVal">1.00</span>x</label>
+          <input type="range" id="sFont" min="0.85" max="1.25" step="0.05" value="1">
+          <div class="switchrow"><span>🌈 Edge Glow — screen ke kinare roshni <small>(battery zyada khaata hai)</small></span>
+            <label class="switch"><input type="checkbox" id="sEdgeGlow"><i></i></label></div>
+        </div>
+      </div>
+
+      <div class="setgrp">
+        <div class="setgrp-head"><span class="gic">🔑</span>API KEYS — BRAINS<span class="chev">▼</span></div>
+        <div class="setgrp-body">
+          <label class="f">GEMINI API KEY (FREE — aistudio.google.com)</label>
+          <input class="f" id="sKey" type="password" placeholder="AIza... se shuru hoti hai">
+          <label class="f">GEMINI MODEL</label>
+          <select class="f" id="sModel">
+            <option value="auto">Auto — best available</option>
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+          </select>
+          <label class="f">GROQ KEY (backup brain — optional)</label>
+          <input class="f" id="sGqKey" type="password" placeholder="gsk_... se shuru hoti hai">
+          <select class="f" id="sGqModel">
+            <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
+            <option value="llama-3.1-8b-instant">Llama 3.1 8B (instant)</option>
+          </select>
+          <label class="f">GITHUB TOKEN (coding/upload — optional)</label>
+          <input class="f" id="sGhKey" type="password" placeholder="github_pat_...">
+          <label class="f">FISH AUDIO KEY (neural awaaz — optional)</label>
+          <input class="f" id="sFishKey" type="password" placeholder="Free signup at fish.audio">
+          <div class="switchrow"><span>⚡ TURBO MODE (fast responses)</span>
+            <label class="switch"><input type="checkbox" id="sTurbo"><i></i></label></div>
+          <button class="save" id="testKeys" style="background:var(--bg2);color:var(--accent2);border:1px solid var(--line)">🧪 SAB KEYS TEST KARO</button>
+          <div class="note" id="keyTestOut" style="margin-top:8px; display:none; font-family:ui-monospace,Menlo,monospace; white-space:pre-wrap; color:var(--accent2); background:var(--bg1); border:1px solid var(--line); border-radius:10px; padding:10px">—</div>
+        </div>
+      </div>
+
+      <div class="setgrp">
+        <div class="setgrp-head"><span class="gic">🧰</span>DATA & MAINTENANCE<span class="chev">▼</span></div>
+        <div class="setgrp-body">
+          <button class="danger" id="clearChat">🗑️ CHAT HISTORY CLEAR</button>
+          <button class="save" id="diagBtn" style="background:var(--bg2);color:var(--accent2);border:1px solid var(--line)">🔍 DOCTOR — TEST CHALAO</button>
+          <pre id="diagOut" style="display:none; margin:10px 0 0; background:var(--bg1); border:1px solid var(--line); border-radius:10px; padding:10px; font-size:11.5px; line-height:1.6; color:var(--accent2); white-space:pre-wrap; word-break:break-all; font-family:ui-monospace,Menlo,Consolas,monospace;"></pre>
+        </div>
+      </div>
+
+      <div class="setgrp">
+        <div class="setgrp-head"><span class="gic">🔧</span>ADVANCED — PERMISSIONS<span class="chev">▼</span></div>
+        <div class="setgrp-body">
+          <button class="save" id="batShield" style="background:var(--bg2);color:var(--accent2);border:1px solid var(--line)">🔋 BATTERY SHIELD (zaroori — 1 dafa)</button>
+          <div class="note" id="batStatus" style="margin-top:6px">Status: checking...</div>
+          <button class="save" id="asStep1" style="background:var(--bg2);color:var(--accent2);border:1px solid var(--line)">1️⃣ APP SETTINGS KHOLO (⋮ → Allow restricted settings)</button>
+          <button class="save" id="asStep2" style="background:var(--bg2);color:var(--accent2);border:1px solid var(--line)">2️⃣ ACCESSIBILITY KHOLO (MAYA AutoSend ON)</button>
+          <button class="save" id="asStep3" style="background:var(--bg2);color:var(--accent2);border:1px solid var(--line)">3️⃣ STATUS CHECK KARO</button>
+          <div class="note" id="asWizardStatus" style="margin-top:4px">—</div>
+          <button class="save" id="autoSendBtn">☠️ WHATSAPP AUTO-SEND ENABLE KARO (purana rasta)</button>
+          <div class="note" id="asStatus" style="margin-top:4px">Status: checking...</div>
+        </div>
       </div>
 
       <div class="card">
-        <h3>🧠 BACKUP BRAINS — Never-Stop System</h3>
-        <label class="f">GROQ API KEY (FREE backup #1 — console.groq.com → Google login)</label>
-        <input class="f" id="sGqKey" type="password" placeholder="gsk_... se shuru hoti hai">
-        <label class="f">GROQ MODEL</label>
-        <select class="f" id="sGqModel">
-          <option value="llama-3.3-70b-versatile">llama-3.3-70b (smart)</option>
-          <option value="llama-3.1-8b-instant">llama-3.1-8b (turant)</option>
-        </select>
-        <label class="f">GITHUB MODELS PAT (backup #2 — optional)</label>
-        <input class="f" id="sGhKey" type="password" placeholder="github_pat_... (GitHub → Settings → Developer settings)">
-        <button class="save" id="testKeys" style="background:#7c3aed">🧪 SAB KEYS TEST KARO</button>
-        <div class="switchrow"><span>\u26a1 TURBO REPLY (simple baat seedha Groq — instant)</span>
-          <label class="switch"><input type="checkbox" id="sTurbo"><i></i></label></div>
-        <div class="s-row"><span class="s-label">🎵 Fish Audio Key <span class="opt">(FREE studio voice)</span></span>
-        <input class="f" id="sFishKey" type="password" placeholder="Free signup at fish.audio → API Keys">
-        <div style="font-size:10px;color:var(--dim);margin-top:2px">fish.audio par FREE account banao → API Keys → Copy. 83 languages, pro voice!</div></div>
-        <div class="note" id="keyTestOut" style="margin-top:8px; display:none; font-family:ui-monospace,Menlo,monospace; white-space:pre-wrap; color:#a5f3fc; background:rgba(2,8,16,.8); border:1px solid var(--line); border-radius:10px; padding:10px">—</div>
-        <div class="note" style="margin-top:8px">Gemini ki limit khatam? Maya <b>khud</b> Groq → GitHub par switch karti hai. Aap ko mehsoos tak nahi hoga. Local commands to hamesha unlimited hain!</div>
-      </div>
-
-      <div class="card">
-        <h3>🗣️ VOICE & LANGUAGE</h3>
-        <label class="f">AAP KI BOLI (Speech-to-Text)</label>
-        <select class="f" id="sStt">
-          <option value="ur-PK">Urdu (ur-PK)</option>
-          <option value="hi-IN">Hindi (hi-IN)</option>
-          <option value="en-IN">English-India (en-IN)</option>
-          <option value="en-US">English-US (en-US)</option>
-        </select>
-        <label class="f">MAYA KI AWAAZ (Text-to-Speech)</label>
-        <select class="f" id="sTts">
-          <option value="ur-PK">Urdu (agar phone mein ho)</option>
-          <option value="hi-IN">Hindi (hi-IN)</option>
-          <option value="en-IN">English-India (en-IN)</option>
-          <option value="en-US">English-US (en-US)</option>
-        </select>
-
-                <label class="f">🎭 VOICE ARTIST CHUNO (premium neural — Urdu/Hindi/English)</label>
-        <div id="artistGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:2px"></div>
-        <label class="f">🎙️ OFFLINE VOICE (koi artist kaam na kare to — phone wali)</label>
-        <select class="f" id="sVoice"><option value="">Auto (engine default)</option></select>
-        <button class="save" id="testVoice" style="background:#0891b2">🎧 TEST AWAAZ SUNO</button>
-        <label class="f">🎵 AWAAZ KI PITCH: <span id="pitchVal">1.05</span></label>
-        <input type="range" id="sPitch" min="0.7" max="1.4" step="0.05" value="1.05">
-        <div class="note">Tip: "network" wali awaazein (internet se) sab se crispy hoti hain. Behtareen ke liye: Play Store → Google Speech Services update + apni boli ki voice data install karo.</div>
-        <label class="f">AWAAZ KI RAFTAR: <span id="rateVal">1.00</span>x</label>
-        <input type="range" id="sRate" min="0.7" max="1.4" step="0.05" value="1">
-        <div class="switchrow"><span>🔊 Maya bol kar jawab de</span>
-          <label class="switch"><input type="checkbox" id="sVoiceOn"><i></i></label></div>
-        <div class="switchrow"><span>🔁 Auto-listen (jawab ke baad khud sune)</span>
-          <label class="switch"><input type="checkbox" id="sAuto"><i></i></label></div>
-        <div class="switchrow"><span>👂 ALWAYS-ON Wake Word — "Maya"/"Boss" (bg + screen off try)</span>
-          <label class="switch"><input type="checkbox" id="sWake"><i></i></label></div>
-        <div class="note" style="padding-bottom:8px">Wake word ON = Maya hamesha sunti hai (notification mein chalti hai). Battery thori zyada lagti hai. Best: battery optimization MAYA ko "Unrestricted" karo.</div>
+        <h3>🚀 MAYA v4.0 — KYA NAYA HAI</h3>
+        <div class="phase"><span class="st">✅</span><span><b>Personas</b> — Maya / Friday / Venom + voice command switch</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Girlfriend Mode</b> + assistant name</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Theme Engine</b> — 7 themes, accent colors, corner/text sliders, edge glow</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Home Orb</b> — video jaisa animated orb + persona chips</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Memories</b> — poora CRUD + backup</span></div>
+        <div class="phase"><span class="st">✅</span><span><b>Languages</b> — 13 zubanein + Proactive mode</span></div>
+        <div class="phase"><span class="st">🔮</span><span><b>Phase 2 (agla)</b> — Voice Guardian, Touch Guard, SOS, screen lock</span></div>
       </div>
 
       <button class="save" id="saveSettings">💾 SAVE KARO</button>
-
-      <div class="card">
-        <h3>🧷 MEMORY BANK — Maya ki yaaddasht</h3>
-        <div class="note">Kaho: <b>"maya, yaad rakhna ki ..."</b> — Maya yaad rakhegi. Poocho: <b>"kya yaad hai?"</b></div>
-        <ul id="factList"></ul>
-        <button class="danger" id="clearFacts">🗑️ SARI MEMORY MITAO</button>
-      </div>
-
-      <div class="card">
-        <h3>🧩 SKILLS LIBRARY (ruflo-inspired)</h3>
-        <div class="note">8 built-in skills (Planner, Coder, Researcher, Teacher, Kharcha, Writer, Health, Verifier) — sawal ke hisaab se khud ACTIVE hoti hain. Maya khud bhi seekhti hai: bolo "Maya, naya skill seekho..."</div>
-        <div class="note" id="skillList">—</div>
-        <button class="danger" id="clearSkills" style="margin-top:8px">🗑️ CUSTOM SKILLS MITAO</button>
-      </div>
-
-      <div class="card">
-        <h3>🗂️ DATA</h3>
-        <button class="danger" id="clearChat">🗑️ CHAT HISTORY CLEAR</button>
-        <div class="note" style="margin-top:8px">Sab data (key, chat, memory) sirf isi phone ke browser mein hai — kahin upload nahi hota.</div>
-      </div>
-
-      <div class="card">
-        <h3>🔬 DIAGNOSTICS — Doctor Check</h3>
-        <div class="note">Sab systems test karo — masla ho to ye report screenshot kar ke bhejo.</div>
-        <button class="save" id="diagBtn" style="background:#0891b2">🔍 TEST CHALAO</button>
-        <pre id="diagOut" style="display:none; margin:10px 0 0; background:rgba(2,8,16,.8); border:1px solid var(--line); border-radius:10px; padding:10px; font-size:11.5px; line-height:1.6; color:#a5f3fc; white-space:pre-wrap; word-break:break-all; font-family:ui-monospace,Menlo,Consolas,monospace;"></pre>
-      </div>
-
-      <div class="card">
-        <h3>☠️ HANDS-FREE + AUTO-SEND (Phase 5)</h3>
-        <button class="save" id="batShield" style="background:#0891b2">🔋 BATTERY SHIELD (zaroori — 1 dafa)</button>
-        <div class="note" id="batStatus" style="margin-top:6px">Status: checking...</div>
-        <div class="note" style="margin-top:8px"><b>☠️ AUTO-SEND SETUP (3 steps — security error ka pakka ilaaj):</b><br>
-        <b>STEP 1:</b> Neeche button dabao → App info khulegi → upar right <b>⋮ (3 dots)</b> → <b>"Allow restricted settings"</b> dabao (Android 13+ par zaroori — Google ka rule hai)<br>
-        <b>STEP 2:</b> Phir doosra button → Accessibility → <b>MAYA AutoSend</b> → ON<br>
-        <b>STEP 3:</b> Teesra button = status check</div>
-        <button class="save" id="asStep1" style="background:#b45309">1️⃣ APP SETTINGS KHOLO (⋮ → Allow restricted settings)</button>
-        <button class="save" id="asStep2" style="background:#7c3aed">2️⃣ ACCESSIBILITY KHOLO (MAYA AutoSend ON)</button>
-        <button class="save" id="asStep3" style="background:#0891b2">3️⃣ STATUS CHECK KARO</button>
-        <div class="note" id="asWizardStatus" style="margin-top:4px">—</div>
-        <button class="save" id="autoSendBtn">☠️ WHATSAPP AUTO-SEND ENABLE KARO (purana rasta)</button>
-        <div class="note" style="margin-top:6px">Auto-send = Maya WhatsApp mein message <b>khud bhej</b> degi. Enable: Phone Settings → Accessibility → <b>MAYA AutoSend</b> → ON. (Beta — WhatsApp update par badal sakta hai)</div>
-        <div class="note" id="asStatus" style="margin-top:4px">Status: checking...</div>
-        <div class="switchrow" style="margin-top:8px"><span>\u{1F4EC} WhatsApp Reader — "naye messages sunao"</span>
-          <label class="switch"><input type="checkbox" id="sNotifOn"><i></i></label></div>
-        <div class="note">Reader: notification access chahiye (enable par settings khulenge \u2192 MAYA ON karo). ON karne par Maya aaye hue messages khud bhi bolti hai.</div>
-        <button class="save" id="readerBtn" style="background:#0891b2">\u{1F4EC} READER PERMISSION ENABLE KARO</button>
-        <div class="note" id="notifStatus" style="margin-top:4px">Status: checking...</div>
-        <div class="switchrow"><span>\u{1F50B} Battery-full alert ("charger nikal do!")</span>
-          <label class="switch"><input type="checkbox" id="sBatAlert"><i></i></label></div>
-      </div>
-
-      <div class="card">
-        <h3>🚀 ROADMAP — Project MAYA</h3>
-        <div class="phase"><span class="st">✅</span><span><b>Phase 1</b> — PWA Pro (multi-tab, HUD, memory, offline)</span></div>
-        <div class="phase"><span class="st">✅</span><span><b>Phase 2</b> — Asli APK (native: alarm, timer, notifications, battery)</span></div>
-        <div class="phase"><span class="st">✅</span><span><b>Phase 3</b> — Smart Brain (13 AI tools, weather, routines, reminders)</span></div>
-        <div class="phase"><span class="st">✅</span><span><b>Phase 4</b> — Wake Word ("Maya"/"Boss") + YouTube auto-play</span></div>
-        <div class="phase"><span class="st">✅</span><span><b>Phase 5</b> — HANDS-FREE: naam se call, WhatsApp draft/auto-send, battery shield, boot start</span></div>
-        <div class="phase"><span class="st">✅</span><span><b>Phase 6</b> — NEVER-STOP BRAIN: Gemini pool → Groq → GitHub → auto-queue</span></div>
-        <div class="phase"><span class="st">✅</span><span><b>Phase 7</b> — TABAHI: 7 Voice Artists (neural Urdu/Hindi) + Agent Mode (code runner) + Web Fetch + Smart Diary</span></div>
-        <div class="phase"><span class="st">✅</span><span><b>Phase 8</b> — WORKHORSE: File Manager + Web Shark + MEMORY X + Cache</span></div>
-        <div class="phase"><span class="st">✅</span><span><b>Phase 8b</b> — TURBO: thinking-off + Groq-instant + live mic meter + partial results</span></div>
-        <div class="phase"><span class="st">✅</span><span><b>Phase 9</b> — FULL-AUTO PRO: Reader, Vision, Namaz, Controls, Scheduler, AutoSend 2.0</span></div>
-        <div class="phase"><span class="st">✅</span><span><b>Phase 10</b> — ALWAYS-ON: auto-boot, wake service khud app kholta hai, AutoSend 3-step wizard, 1-tap Vision</span></div>
-      </div>
-      <div class="vtag">MAYA v3.0 — NEXT LEVEL EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v4.0.0 — OBSIDIAN EDITION • 0-BUDGET • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
 
   <nav>
-    <button data-tab="tab-chat" class="active"><span class="ic">💬</span>CHAT</button>
-    <button data-tab="tab-hud"><span class="ic">🎯</span>HUD</button>
-    <button data-tab="tab-cmds"><span class="ic">⚡</span>COMMANDS</button>
-    <button data-tab="tab-set"><span class="ic">⚙️</span>SETTINGS</button>
+    <button data-tab="tab-home" class="active"><span class="ic">🏠</span>HOME</button>
+    <button data-tab="tab-chat"><span class="ic">💬</span>CHAT</button>
+    <button data-tab="tab-mem"><span class="ic">🧠</span>MEM</button>
+    <button data-tab="tab-cmds"><span class="ic">⚡</span>CMDS</button>
+    <button data-tab="tab-set"><span class="ic">⚙️</span>SET</button>
   </nav>
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(8,20,35,.92);border:1px solid rgba(56,189,248,.4);color:#67e8f9;padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v3.0 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.0 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -674,11 +773,11 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v3.0 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v4.0 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
-var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", groqModel:"llama-3.3-70b-versatile", ghKey:"", fishKey:"", fishVoice:"f1d76cc64392469ba74779e8031aa0cc", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"maya", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true };
+var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", groqModel:"llama-3.3-70b-versatile", ghKey:"", fishKey:"", fishVoice:"f1d76cc64392469ba74779e8031aa0cc", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"maya", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true, gender:"male", phone:"", musicApp:"youtube", favSong:"", ytChannel:"", assistName:"Maya", gfMode:false, persona:"maya", remember:true, convoMode:false, lang:"roman-ur", proactive:false, theme:"obsidian", accent:"#FF7A1A", radius:18, fontScale:1, edgeGlow:false };
 var settings = Object.assign({}, DEFAULTS);
 try {
   var s1 = JSON.parse(localStorage.getItem("maya_settings") || "null");
@@ -755,7 +854,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v3.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v4.0.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -2831,7 +2930,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v3.0 — DOCTOR REPORT");
+  out.push("MAYA v4.0.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));
@@ -2923,14 +3022,375 @@ if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
   var sver = document.querySelector("#splash .ver");
-  if (sver) sver.textContent = "VERSION 2.11.0 — SKILLS ENGINE";
+  if (sver) sver.textContent = "VERSION 4.0.0 — OBSIDIAN EDITION";
 }
 greetMiniRefresh();
 chatHist.slice(-40).forEach(function(h){ addBubble(h.role === "user" ? "user" : "ai", h.text); });
 if (!chatHist.length) {
   addBubble("ai", "MAYA online, " + settings.name + "! 🎉 Main aap ki personal AI hoon — mic 🎤 dabao aur bolo, ya type karo. " +
-    (settings.apikey ? "Neural link tayyar hai — kuch bhi poocho!" : "Smart banane ke liye ⚡Commands tab se FREE API key lo. Aur yaad rakhna kaam bhi karta hoon — kaho: 'yaad rakhna ki ...'"));
+    (settings.apikey ? "Neural link tayyar hai — kuch bhi poocho!" : "Smart banane ke liye ⚙️ Settings → API Keys se FREE Gemini key lo. Aur yaad rakhna kaam bhi karta hoon — kaho: 'yaad rakhna ki ...'"));
 }
+</script>
+
+<script>
+"use strict";
+/* ================= MAYA v4.0 OBSIDIAN MODULE =================
+   Personas (Maya/Friday/Venom) • GF Mode • Theme Engine • Languages
+   Home Orb wiring • Memories CRUD • Proactive Mode • Drawer
+   (core brain untouched — yeh sab wrappers hain) */
+
+/* ---------- cleanSpeech FIX (yeh function core mein call hota tha par defined nahi tha — v4 fix) ---------- */
+function cleanSpeech(text){
+  var t = String(text || "");
+  t = t.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");                       /* markdown link → text */
+  t = t.replace(/https?:\/\/\S+/g, " ");                                /* raw URLs hatao */
+  t = t.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu, " "); /* emojis */
+  t = t.replace(/[*_`#>|~]/g, " ");                                     /* markdown symbols */
+  t = t.replace(/\s+/g, " ").trim();
+  if (t.length > 600) t = t.slice(0, 600) + "...";                      /* lambi awaaz cap */
+  return t;
+}
+
+/* ---------- PERSONAS ---------- */
+var MAYA_PERSONAS = {
+  maya:   { label:"Maya",   emoji:"💜", pitch:1.05, rate:1.00,
+            prompt:"PERSONA: You are MAYA — warm, witty, fiercely loyal best friend. Playful but sharp, caring, light sci-fi flair." },
+  friday: { label:"Friday", emoji:"🤖", pitch:1.12, rate:1.05,
+            prompt:"PERSONA: You are FRIDAY — crisp professional assistant (like Iron Man's FRIDAY). Efficient, precise, minimal words, respectful — but still warm." },
+  venom:  { label:"Venom",  emoji:"🐍", pitch:0.78, rate:0.92,
+            prompt:"PERSONA: You are VENOM — the alien symbiote! Darkly funny, dramatic, growly, calls the user 'insaan' sometimes. Creepy-cute one-liners but deeply protective and loyal." }
+};
+window.MAYA_PERSONAS = MAYA_PERSONAS;
+function persona(){ return MAYA_PERSONAS[settings.persona] || MAYA_PERSONAS.maya; }
+function personaName(){
+  return settings.persona === "venom" ? "VENOM" : settings.persona === "friday" ? "FRIDAY" : "MAYA";
+}
+
+/* ---------- sysPrompt WRAP (persona + GF + language) ---------- */
+var _sysPromptCore = sysPrompt;
+sysPrompt = function(){
+  var p = _sysPromptCore();
+  try {
+    p += "\n" + persona().prompt;
+    if (settings.assistName && settings.assistName !== "Maya")
+      p += "\nYou also answer to the name \"" + settings.assistName + "\".";
+    if (settings.gfMode === true && (settings.gender || "male") === "male")
+      p += "\nGIRLFRIEND MODE ON: tum user ki pyaari girlfriend ho — Roman Urdu mein 'jaan/babu' style, caring, thori cute-possessive, par kaam ke waqt sharp aur helpful. Wholesome rakho.";
+    var LR = {
+      "roman-ur":"Default spoken style: Roman Urdu (Latin letters) with natural English tech words.",
+      "urdu":"Always reply in Urdu script (اردو).",
+      "hi-en":"Reply in Hindi + English mix (Hinglish, Latin script).",
+      "hindi":"Reply in Hindi (Devanagari script).",
+      "english":"Reply in English.",
+      "pa":"Reply in Punjabi.", "bn":"Reply in Bengali.", "ta":"Reply in Tamil.",
+      "te":"Reply in Telugu.", "mr":"Reply in Marathi.", "gu":"Reply in Gujarati.",
+      "kn":"Reply in Kannada.", "ml":"Reply in Malayalam."
+    };
+    p += "\nLANGUAGE RULE: " + (LR[settings.lang || "roman-ur"] || LR["roman-ur"]);
+    if (settings.remember === false) p += "\n(Auto memory save OFF hai — facts silently store mat karo.)";
+    if (settings.favSong) p += "\nUser's FAVORITE SONG: " + settings.favSong + " — 'mera favorite gaana' par yehi chalao.";
+    if (settings.musicApp && settings.musicApp !== "youtube") p += "\nMusic app preference: " + settings.musicApp + ".";
+    if (settings.convoMode) p += "\nCONVERSATION MODE: thora zyada emotional/expressive tone — real insaan jaisi feel.";
+  } catch(e){}
+  return p;
+};
+
+/* ---------- speak WRAP (persona voice tuning) ---------- */
+var _speakCore = speak;
+speak = function(text, wasVoice){
+  var _r = settings.rate, _p = settings.pitch;
+  try {
+    var per = persona(), pr = per.rate, pp = per.pitch;
+    if (settings.gfMode === true && settings.persona === "maya") { pr *= 0.98; pp = Math.min(1.4, pp + 0.08); }
+    if (settings.convoMode) pr *= 0.95;
+    settings.rate = _r * pr; settings.pitch = _p * pp;
+  } catch(e){}
+  try { return _speakCore(text, wasVoice); }
+  finally { settings.rate = _r; settings.pitch = _p; }
+};
+
+/* ---------- setOrb WRAP (HUD status + home mic sync) ---------- */
+var _setOrbCore = setOrb;
+setOrb = function(s){
+  _setOrbCore(s);
+  try { var s2 = $("#statusText2"); if (s2) s2.textContent = s === "idle" ? "TAP TO SPEAK" : s.toUpperCase() + "..."; } catch(e){}
+  try { $("#micHome").classList.toggle("listening", s === "listening"); } catch(e){}
+};
+
+/* ---------- addBubble WRAP (home last-reply mirror) ---------- */
+var _addBubbleCore = addBubble;
+addBubble = function(who, text, link){
+  _addBubbleCore(who, text, link);
+  try {
+    var h = $("#homeLast");
+    if (h && who !== "user") {
+      h.innerHTML = "<span class='hl-who'>" + persona().emoji + " " + personaName() + "</span>" + esc(text);
+      h.classList.add("show");
+    }
+  } catch(e){}
+};
+
+/* ---------- handleUserText WRAP (persona/mode voice commands) ---------- */
+var _handleUserTextCore = handleUserText;
+handleUserText = function(text, wasVoice){
+  var t = String(text || "").toLowerCase().trim();
+  var np = null;
+  if (/(venom)/.test(t)) np = "venom";
+  else if (/(friday)/.test(t)) np = "friday";
+  else if (/(maya)/.test(t) && /(wapas|back|switch|badlo|bhalo)/.test(t)) np = "maya";
+  if (np && /(bhejo|ban jao|a jao|aa jao|switch|change|mode|awaz|awaaz|voice|bolo|jao)/.test(t)) {
+    settings.persona = np; saveSettings(); paintPersonas();
+    var m = np === "venom" ? "Hum Venom hain. Bolo insaan. 🐍"
+          : np === "friday" ? "Friday online, sir. All systems nominal. 🤖"
+          : "Main wapas Maya hoon! 💜 Bolo, kya haal hai?";
+    addBubble("user", text); reply(m, wasVoice);
+    toast("Persona: " + MAYA_PERSONAS[np].label + " " + MAYA_PERSONAS[np].emoji);
+    return;
+  }
+  if (/girlfriend (mode )?(on|chalao|start)/.test(t)) { settings.gfMode = true; saveSettings(); loadV4Form(); addBubble("user", text); reply("Girlfriend mode ON — ab se main sirf tumhari hoon! 💖", wasVoice); return; }
+  if (/girlfriend ?(mode )?off/.test(t)) { settings.gfMode = false; saveSettings(); loadV4Form(); addBubble("user", text); reply("Girlfriend mode off — best-friend mode par wapas. 💜", wasVoice); return; }
+  if (/conversation mode on/.test(t)) { settings.convoMode = true; saveSettings(); loadV4Form(); addBubble("user", text); reply("Conversation mode on — ab awaaz mein zyada feel aayegi.", wasVoice); return; }
+  if (/conversation mode off/.test(t)) { settings.convoMode = false; saveSettings(); loadV4Form(); addBubble("user", text); reply("Conversation mode off — fast mode wapas.", wasVoice); return; }
+  if (/(proactive|khud ba khud|khud bakhud).*(on|chalao|start)/.test(t)) { settings.proactive = true; saveSettings(); loadV4Form(); startProactive(); addBubble("user", text); reply("Proactive mode on — main beech beech mein khud tumse baat karungi.", wasVoice); return; }
+  if (/(proactive|khud ba khud|khud bakhud).*(off|band|stop)/.test(t)) { settings.proactive = false; saveSettings(); loadV4Form(); addBubble("user", text); reply("Proactive mode off — chup rahungi jab tak na bolo.", wasVoice); return; }
+  _handleUserTextCore(text, wasVoice);
+};
+
+/* ---------- interaction timestamp (proactive ke liye) ---------- */
+var _hutInteract = handleUserText;
+handleUserText = function(t, w){ MAYA_V4.lastInteract = Date.now(); return _hutInteract(t, w); };
+var MAYA_V4 = { lastInteract: Date.now(), proactiveTimer: null };
+
+/* ---------- HOME WIRING ---------- */
+try { $("#micHome").addEventListener("click", startListening); } catch(e){}
+try {
+  $("#homeTxt").addEventListener("keydown", function(e){
+    if (e.key === "Enter") { var v = this.value.trim(); if (!v) return; this.value = ""; handleUserText(v, true); }
+  });
+} catch(e){}
+/* home quick actions — home par raho, voice reply */
+document.querySelectorAll("#tab-home .qactions button").forEach(function(b){
+  var nb = b.cloneNode(true); if (b.parentNode) b.parentNode.replaceChild(nb, b);
+  nb.addEventListener("click", function(){ handleUserText(nb.dataset.cmd, true); });
+});
+
+/* ---------- PERSONA CHIPS ---------- */
+function paintPersonas(){
+  var host = $("#personaChips"); if (!host) return;
+  host.innerHTML = "";
+  ["maya","friday","venom"].forEach(function(k){
+    var p = MAYA_PERSONAS[k];
+    var b = document.createElement("button");
+    b.className = "pchip" + ((settings.persona || "maya") === k ? " active" : "");
+    b.textContent = p.emoji + " " + p.label.toUpperCase();
+    b.onclick = function(){
+      settings.persona = k; saveSettings(); paintPersonas();
+      toast("Persona: " + p.label + " " + p.emoji);
+    };
+    host.appendChild(b);
+  });
+  try { $("#orbPersona").textContent = personaName(); } catch(e){}
+}
+
+/* ---------- THEME ENGINE ---------- */
+var THEMES = {
+  obsidian:{ name:"Midnight Obsidian", sw:["#050508","#FF7A1A"] },
+  cyber:{ name:"Cyber Cyan", sw:["#050b14","#22d3ee"] },
+  aurora:{ name:"Aurora Violet", sw:["#0a0614","#a78bfa"] },
+  rose:{ name:"Rose Quartz", sw:["#12060b","#fb7185"] },
+  forest:{ name:"Deep Forest", sw:["#04100a","#34d399"] },
+  day:{ name:"Daylight", sw:["#f2f3f7","#e05e00"] },
+  paper:{ name:"Warm Paper", sw:["#f7f3ea","#b45309"] }
+};
+var ACCENTS = ["#FF7A1A","#22d3ee","#a78bfa","#34d399","#fb7185","#fbbf24","#f87171"];
+function accent2Of(a){
+  var m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(a); if (!m) return "#FFB347";
+  var r = Math.min(255, parseInt(m[1],16)+55), g = Math.min(255, parseInt(m[2],16)+55), b = Math.min(255, parseInt(m[3],16)+55);
+  return "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+function applyTheme(){
+  document.documentElement.className = "t-" + (settings.theme || "obsidian");
+  document.documentElement.style.setProperty("--accent", settings.accent || "#FF7A1A");
+  document.documentElement.style.setProperty("--accent2", accent2Of(settings.accent || "#FF7A1A"));
+  document.documentElement.style.setProperty("--radius", (settings.radius || 18) + "px");
+  document.documentElement.style.setProperty("--fs", String(settings.fontScale || 1));
+  try { $("#edgeGlow").classList.toggle("on", !!settings.edgeGlow); } catch(e){}
+  try { var mt = document.querySelector('meta[name=theme-color]'); if (mt) mt.setAttribute("content", getComputedStyle(document.body).backgroundColor); } catch(e){}
+}
+function renderThemeUI(){
+  var tg = $("#themeGrid");
+  if (tg) { tg.innerHTML = "";
+    Object.keys(THEMES).forEach(function(k){
+      var d = document.createElement("div");
+      d.className = "tsw" + (((settings.theme || "obsidian") === k) ? " active" : "");
+      d.innerHTML = '<div class="swp" style="background:linear-gradient(135deg,' + THEMES[k].sw[0] + ' 55%,' + THEMES[k].sw[1] + ')"></div><span>' + THEMES[k].name + '</span>';
+      d.onclick = function(){ settings.theme = k; saveSettings(); applyTheme(); renderThemeUI(); toast("Theme: " + THEMES[k].name); };
+      tg.appendChild(d);
+    });
+  }
+  var ar = $("#accentRow");
+  if (ar) { ar.innerHTML = "";
+    ACCENTS.forEach(function(c){
+      var b = document.createElement("button");
+      b.className = "acc" + (((settings.accent || "#FF7A1A") === c) ? " active" : "");
+      b.style.background = c;
+      b.onclick = function(){ settings.accent = c; saveSettings(); applyTheme(); renderThemeUI(); toast("Accent color set"); };
+      ar.appendChild(b);
+    });
+  }
+}
+try { $("#sRadius").addEventListener("input", function(){ $("#radiusVal").textContent = this.value; settings.radius = parseInt(this.value,10); saveSettings(); applyTheme(); }); } catch(e){}
+try { $("#sFont").addEventListener("input", function(){ $("#fontVal").textContent = Number(this.value).toFixed(2); settings.fontScale = parseFloat(this.value); saveSettings(); applyTheme(); }); } catch(e){}
+try { $("#sEdgeGlow").addEventListener("change", function(){ settings.edgeGlow = this.checked; saveSettings(); applyTheme(); }); } catch(e){}
+
+/* ---------- DRAWER ---------- */
+try {
+  var drawerEl = $("#drawer"), scrimEl = $("#drawerScrim");
+  function drawerToggle(open){ drawerEl.classList.toggle("open", open); scrimEl.classList.toggle("open", open); }
+  $("#drawerBtn").addEventListener("click", function(){ drawerToggle(true); });
+  scrimEl.addEventListener("click", function(){ drawerToggle(false); });
+  drawerEl.querySelectorAll("button.dbtn").forEach(function(b){
+    b.addEventListener("click", function(){ showTab(b.dataset.tab); drawerToggle(false); });
+  });
+} catch(e){}
+var _showTabCore = showTab;
+showTab = function(id){
+  _showTabCore(id);
+  try { document.querySelectorAll("#drawer .dbtn").forEach(function(b){ b.classList.toggle("active", b.dataset.tab === id); }); } catch(e){}
+};
+
+/* ---------- SETTINGS GROUPS (collapsible) ---------- */
+document.querySelectorAll(".setgrp-head").forEach(function(h){
+  h.addEventListener("click", function(){ h.parentElement.classList.toggle("open"); });
+});
+
+/* ---------- NAYE SETTINGS FIELDS ---------- */
+function loadV4Form(){
+  try {
+    $("#sGender").value = settings.gender || "male";
+    $("#sPhone").value = settings.phone || "";
+    $("#sMusicApp").value = settings.musicApp || "youtube";
+    $("#sFavSong").value = settings.favSong || "";
+    $("#sYtChannel").value = settings.ytChannel || "";
+    $("#sAssistName").value = settings.assistName || "Maya";
+    $("#sPersona").value = settings.persona || "maya";
+    $("#sGf").checked = settings.gfMode === true;
+    $("#sRemember").checked = settings.remember !== false;
+    $("#sConvo").checked = settings.convoMode === true;
+    $("#sLang").value = settings.lang || "roman-ur";
+    $("#sProactive").checked = settings.proactive === true;
+    $("#sRadius").value = settings.radius || 18; $("#radiusVal").textContent = settings.radius || 18;
+    $("#sFont").value = settings.fontScale || 1; $("#fontVal").textContent = Number(settings.fontScale || 1).toFixed(2);
+    $("#sEdgeGlow").checked = !!settings.edgeGlow;
+    if (settings.gfMode === true && (settings.gender || "male") !== "male") { settings.gfMode = false; $("#sGf").checked = false; }
+  } catch(e){}
+}
+var _loadSettingsFormCore = loadSettingsForm;
+loadSettingsForm = function(){ try { _loadSettingsFormCore(); } catch(e){} loadV4Form(); };
+
+try { $("#saveSettings").addEventListener("click", function(){
+  settings.gender = $("#sGender").value;
+  settings.phone = ($("#sPhone").value || "").trim();
+  settings.musicApp = $("#sMusicApp").value;
+  settings.favSong = ($("#sFavSong").value || "").trim();
+  settings.ytChannel = ($("#sYtChannel").value || "").trim();
+  settings.assistName = ($("#sAssistName").value || "Maya").trim();
+  settings.persona = $("#sPersona").value;
+  settings.gfMode = $("#sGf").checked && settings.gender === "male";
+  settings.remember = $("#sRemember").checked;
+  settings.convoMode = $("#sConvo").checked;
+  settings.lang = $("#sLang").value;
+  settings.proactive = $("#sProactive").checked;
+  settings.radius = parseInt($("#sRadius").value, 10) || 18;
+  settings.fontScale = parseFloat($("#sFont").value) || 1;
+  settings.edgeGlow = $("#sEdgeGlow").checked;
+  saveSettings(); applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
+}); } catch(e){}
+
+try { $("#sLang").addEventListener("change", function(){
+  var map = { "urdu":["ur-PK","ur-PK"], "roman-ur":["ur-PK","ur-PK"], "hi-en":["hi-IN","hi-IN"], "hindi":["hi-IN","hi-IN"], "english":["en-IN","en-IN"] };
+  if (map[this.value]) { $("#sStt").value = map[this.value][0]; $("#sTts").value = map[this.value][1]; }
+}); } catch(e){}
+try { $("#sGender").addEventListener("change", function(){ if (this.value !== "male") { settings.gfMode = false; $("#sGf").checked = false; } }); } catch(e){}
+
+/* ---------- MEMORIES SCREEN ---------- */
+try {
+  $("#addFactBtn").addEventListener("click", function(){
+    var v = ($("#newFact").value || "").trim(); if (!v) return;
+    facts.push(v); saveFacts(); $("#newFact").value = "";
+    toast("Yaad save ho gayi ✅"); pushLog("MEMORY +1 (manual)");
+  });
+  $("#newFact").addEventListener("keydown", function(e){ if (e.key === "Enter") $("#addFactBtn").click(); });
+} catch(e){}
+try { $("#expBtn").addEventListener("click", function(){
+  var data = { v:4, settings: settings, facts: facts, skills: customSkills };
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  var a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = "maya-backup-v4.json"; a.click();
+  toast("Backup download ho raha hai 💾");
+}); } catch(e){}
+
+/* renderFacts override — edit/delete rows */
+var _renderFactsCore = renderFacts;
+renderFacts = function(){
+  var host = $("#factList");
+  if (!host) { _renderFactsCore(); return; }
+  host.innerHTML = "";
+  if (!facts.length) {
+    host.innerHTML = "<li style='color:var(--text1)'>Abhi koi yaad nahi — upar se add karo, ya Maya se bolo: \"yaad rakhna ki...\"</li>";
+    return;
+  }
+  facts.forEach(function(f, i){
+    var li = document.createElement("li");
+    var sp = document.createElement("span"); sp.textContent = f; sp.style.flex = "1";
+    var fx = document.createElement("div"); fx.className = "fx";
+    var eb = document.createElement("button"); eb.textContent = "✏️"; eb.title = "Edit";
+    eb.onclick = function(){ var nv = prompt("Yaad edit karo:", facts[i]); if (nv != null && nv.trim()) { facts[i] = nv.trim(); saveFacts(); } };
+    var db = document.createElement("button"); db.textContent = "🗑️"; db.title = "Delete";
+    db.onclick = function(){ facts.splice(i, 1); saveFacts(); toast("Yaad mit gayi"); };
+    fx.appendChild(eb); fx.appendChild(db);
+    li.appendChild(sp); li.appendChild(fx);
+    host.appendChild(li);
+  });
+  try { hudRefresh(); } catch(e){}
+};
+
+/* ---------- PROACTIVE MODE (video jaisa — khud ba khud baat) ---------- */
+var PRO_LINES = [
+  "{n}, soch rahi thi... aaj ka din kaisa ja raha hai?",
+  "Bore ho rahi hoon {n} — koi quiz karein ya interesting fact sunaun?",
+  "{n}, ek kaam karo — paani pi lo. Main dekh rahi hoon. 💧",
+  "Kuch kaam tha ya bas aise hi bulaya? Main yahin hoon.",
+  "Mausam check karun? ya battery? bas bol do.",
+  "Waise {n}, mujhe tumhari baatein yaad rehti hain — kaafi memory bank bhar gaya hai."
+];
+function startProactive(){
+  if (MAYA_V4.proactiveTimer) { clearInterval(MAYA_V4.proactiveTimer); MAYA_V4.proactiveTimer = null; }
+  if (!settings.proactive) return;
+  MAYA_V4.proactiveTimer = setInterval(function(){
+    try {
+      if (!settings.proactive) return;
+      if (speaking || thinking) return;
+      var st = "idle"; try { st = $("#orb").dataset.state || "idle"; } catch(e){}
+      if (st === "listening") return;
+      if (Date.now() - MAYA_V4.lastInteract < 300000) return;   /* 5 min aaram */
+      var msg;
+      if (facts.length && Math.random() < 0.5) {
+        msg = "Waise yaad hai tumne bataya tha ki " + facts[Math.floor(Math.random() * facts.length)] + " — uska kya bana?";
+      } else {
+        msg = PRO_LINES[Math.floor(Math.random() * PRO_LINES.length)].replace("{n}", settings.name);
+      }
+      MAYA_V4.lastInteract = Date.now();
+      reply(msg, true);
+      pushLog("PROACTIVE: khud baat ki");
+    } catch(e){}
+  }, 360000);  /* har 6 minute check */
+}
+
+/* ---------- v4 INIT ---------- */
+applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
+try { $("#hudBuild").textContent = "v4.0.0"; } catch(e){}
+try { pushLog("MAYA v4.0 — OBSIDIAN MODULE ONLINE (personas+themes)"); } catch(e){}
 </script>
 </body>
 </html>

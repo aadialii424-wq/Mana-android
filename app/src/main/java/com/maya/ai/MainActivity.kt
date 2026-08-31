@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = MayaWebViewClient()
         setContentView(webView)
         webView.loadUrl("https://$VIRTUAL_HOST/assets/web/index.html")
-        Toast.makeText(this, "MAYA v2.11.1 • nayi build install hui hai", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "MAYA v4.0.0 • naya Obsidian design install hua hai", Toast.LENGTH_LONG).show()
         // WebView zinda hai ya nahi — 8 second baad native check
         webViewAlive = false
         android.os.Handler(Looper.getMainLooper()).postDelayed({
