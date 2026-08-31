@@ -730,7 +730,8 @@ P6 (asli khud-mukhtari — jo sirf tab mehfooz hai jab P3 maujood ho).
 # 📎 SAATH WALI DASTAVEZ
 
 Ye dastavez batati hai **KYA** banega.
-[`AMAL-WORKFLOW.md`](AMAL-WORKFLOW.md) batati hai **KAISE** banega — 7 qanoon,
+[`AMAL-WORKFLOW.md`](AMAL-WORKFLOW.md) batati hai **KAISE** banega
+aur [`MALIK-PROFILE.md`](MALIK-PROFILE.md) batati hai Maya apne **malik** ko kaise jane — 7 qanoon,
 8 invariant, shadow mode, feature flags, rollback, aur har phase ka khatra + ilaj.
 
 **Dono sath parhni chahiyen.** Plan bina workflow ke = khatra.

@@ -609,3 +609,29 @@ Ye farq likha hona chahiye taake dabao na rahe.
 | **Naya Qanoon 8** | Har qadam par commit + push (sandbox bharose ke laiq nahi) |
 
 Plan mein ye sab shamil kar diya gaya. **Ab naqsha mukammal hai.**
+
+---
+
+# HISSA L — 🔍 TEESRA AUDIT: nayi farmaish ne 3 chhed khole
+
+Aap ne portfolio ka link diya aur kaha "Maya ko mere bare mein pata hona chahiye".
+Us ek farmaish ne teen aisi kamiyan khol deen jo pehle nazar hi nahi aayi thin:
+
+| # | Chhed | Ilaj |
+|---|---|---|
+| **16** | Maya ko apne **malik** ka pata hi nahi (`settings.name` = "Boss", bas) | naya `MALIK` block |
+| **17** | `facts[]` ek bikhri fehrist hai — `slice(0,15)` se **kat** jati hai. Malik ki pehchan aise kat gayi to sharmindagi | `MALIK` alag, mehfooz khana — kabhi na kate |
+| **18** | Portfolio **kal live hoga**, Maya ka ta'aruf **purana** ho jayega | `web_fetch` (pehle se maujood) se haftawar khud-taza |
+
+Tafseel: [`MALIK-PROFILE.md`](MALIK-PROFILE.md)
+
+## Is se ek AAM sabaq bhi mila
+
+> **Chhed us waqt tak nazar nahi aate jab tak koi ASLI farmaish unhen na chhue.**
+
+Do audit round mein 15 chhed mile. **Teesra round maine nahi kiya — aap ki ek
+farmaish ne kar diya**, aur 3 aur nikal aaye. Isi liye workflow mein **SHADOW MODE**
+(Qanoon 3) aur **aap ki device tasdeeq** (Qanoon 7) hain: kaghaz par har cheez
+mukammal lagti hai, asal imtihan istemal hai.
+
+**Kul chhed: 18. Sab plan mein shamil.**
