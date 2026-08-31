@@ -28,7 +28,7 @@ const head = (t) => console.log('\n\x1b[1m' + t + '\x1b[0m');
 const LA = HTML.indexOf('var SCHEMA = {');
 const LB = HTML.indexOf('var AWAAZ = {');
 if (LA < 0 || LB < 0 || LB < LA) { console.error('MAYA LAB source nahi mila — index.html badal gaya?'); process.exit(1); }
-const LAB = HTML.slice(LA, LB);
+const LAB = HTML.slice(LA, LB);   /* SUNO bhi isi mein hai (SCHEMA..AWAAZ) */
 
 /* ⚡ AMAL (P2a) — TOOL_DECLS + execTool ke baad rehta hai */
 const AA = HTML.indexOf('var AMAL = {');
@@ -444,6 +444,87 @@ Here's a thinking process:
       '🔑 402 (paisa maanga) → 6 ghante cooldown (Cerebras ne diya tha)');
     is(/if \(useTools && \(status === 400 \|\| status === 422\)/.test(src),
       'tools par 400 → bina tools dobara, dimaag marta nahi');
+  }
+
+
+  /* ═══ 14. 🎙️ SUNO — "Maya meri awaaz theek nahi samajhti" ═══ */
+  head('14. 🎙️ SUNO — aap ki asli chat ke jumle');
+  {
+    const w = world({ suno: true });
+    const S = w.SUNO;
+
+    /* ── Urdu script -> Roman Urdu ── */
+    is(S.roman('\u0686\u0644\u0648 \u0679\u06BE\u06CC\u06A9 \u06C1\u06D2') === 'chalo theek hai',
+      'chalo theek hai', S.roman('\u0686\u0644\u0648 \u0679\u06BE\u06CC\u06A9 \u06C1\u06D2'));
+    is(S.roman('\u06CC\u06C1 \u06A9\u06CC\u0627 \u06C1\u06D2') === 'ye kya hai', 'ye kya hai');
+    is(S.roman('\u0627\u0628 \u062C\u0627\u0624 \u0627\u0648\u0631 \u0628\u06BE\u06CC\u062C\u0648') === 'ab jao aur bhejo',
+      'ab jao aur bhejo', S.roman('\u0627\u0628 \u062C\u0627\u0624 \u0627\u0648\u0631 \u0628\u06BE\u06CC\u062C\u0648'));
+    is(/WhatsApp/i.test(S.roman('\u0648\u0627\u0679\u0633 \u0627\u06CC\u067E \u067E\u0631')),
+      '"واٹس ایپ" -> WhatsApp', S.roman('\u0648\u0627\u0679\u0633 \u0627\u06CC\u067E \u067E\u0631'));
+    is(/YouTube/i.test(S.roman('\u06CC\u0648\u0679\u06CC\u0648\u0628 \u067E\u0631 \u0633\u0648\u0646\u06AF \u0644\u06AF\u0627\u0624')),
+      '"یوٹیوب پر سونگ لگاؤ" -> YouTube', S.roman('\u06CC\u0648\u0679\u06CC\u0648\u0628 \u067E\u0631 \u0633\u0648\u0646\u06AF \u0644\u06AF\u0627\u0624'));
+    is(S.roman('brightness 100 karo') === 'brightness 100 karo', 'Roman matn bilkul nahi chhua jata');
+    is(S.isUrdu('\u06C1\u06D2') === true && S.isUrdu('hai') === false, 'Urdu script pehchani jati hai');
+
+    /* ── pise hue naam theek (aap ki chat se) ── */
+    is(S.fixWord('monak') === 'Monarch', '🔑 "monak" -> Monarch (aap ki chat ka asli lafz)');
+    is(S.fixWord('manar') === 'Monarch',
+      '🔑 "manar" -> Monarch (chhote lafz "maya" ko jeetne nahi diya jata)');
+    is(S.fixWord('maya') === 'Maya', '   → magar sach much "maya" ho to wo pehchana bhi jata hai');
+    is(S.fixWord('instgram') === 'Instagram', '"instgram" -> Instagram');
+    is(S.fixWord('watsapp') === 'WhatsApp', '"watsapp" -> WhatsApp');
+    is(S.fixWord('yotube') === 'YouTube', '"yotube" -> YouTube');
+    is(S.fixWord('karo') === 'karo' && S.fixWord('kholo') === 'kholo',
+      '✅ aam lafz kabhi nahi badle jate (karo -> Chrome nahi banta)');
+    is(S.fixWord('hi') === 'hi' && S.fixWord('ab') === 'ab', '✅ chhote lafz chhue hi nahi jate');
+    is(S.fixWord('beast') === 'beast', '✅ jo lughat mein nahi wo jyun ka tyun');
+
+    /* ── poora jumla ── */
+    const line = S.fix(S.roman('\u0645\u0648\u0646\u0627\u06A9 \u06A9\u0648 \u0648\u0627\u0679\u0633 \u0627\u06CC\u067E \u067E\u0631 \u0645\u06CC\u0633\u062C \u0628\u06BE\u06CC\u062C\u0648'));
+    is(/Monarch/.test(line) && /WhatsApp/i.test(line) && /message/.test(line) && /bhejo/.test(line),
+      '🔑 "موناک کو واٹس ایپ پر میسج بھیجو" poora theek', line);
+
+    /* ── N-best: behtareen andaza chuno ── */
+    const alts = ['\u0645\u0646\u0627\u0631 \u06A9\u0648 \u0628\u06BE\u06CC\u062C\u0648', '\u0645\u0648\u0646\u0627\u06A9 \u06A9\u0648 \u0628\u06BE\u06CC\u062C\u0648', 'kuch aur'];
+    is(S.pick(alts).indexOf('\u0645') === 0, '🔑 kai andazon mein se wo chuna jismein naam mila', 'pick');
+    is(S.pick([]) === '' && S.pick(null) === '', 'khali list par crash nahi');
+    is(S.score('\u0645\u0648\u0646\u0627\u06A9 \u06A9\u0648') > S.score('kuch bhi nahi'), 'jaane-pehchane naam wala andaza zyada score leta hai');
+
+    /* ── seekhna ── */
+    S.learn('Funk Taka ka link Monarch ko bhejo');
+    is(S.load().indexOf('funk') >= 0 || S.load().indexOf('taka') >= 0,
+      '🔑 aap jo naam KHUD likhte ho, SUNO wo yaad rakh leta hai', S.load().join(','));
+    is(S.load().indexOf('bhejo') < 0 && S.load().indexOf('link') < 0, 'aam lafz yaad nahi rakhe jate');
+    is(String(w.localStorage.getItem('maya_suno')).length > 2, 'seekha hua app band hone par bhi mehfooz');
+
+    /* ── wahid darwaza ── */
+    const heard = S.heard(['\u0645\u0648\u0646\u0627\u06A9 \u06A9\u0648 \u06C1\u0627\u0626\u06CC \u06A9\u0631\u0648']);
+    is(/Monarch/.test(heard) && !/[\u0600-\u06FF]/.test(heard),
+      '🔑 heard(): Urdu andar -> saaf Roman Urdu bahar', heard);
+    const off = world({ suno: false });
+    is(off.SUNO.heard(['\u06C1\u06D2']) === '\u06C1\u06D2', '🔒 switch OFF -> matn bilkul nahi chhua');
+
+    /* ── Kotlin ab saare andaze bhejta hai ── */
+    const KT = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8');
+    is(/RESULTS_RECOGNITION[\s\S]{0,200}JSONArray/.test(KT),
+      '🔑 Kotlin ab SAARE andaze bhejta hai (pehle sirf firstOrNull)');
+    is(/__nativeSpeech\('" \+ jsEscape\(text\) \+\s*"','" \+ jsEscape\(arr\.toString\(\)\)/.test(KT.replace(/\s+/g, ' ')),
+      'dono cheezein JS ko jati hain: pehla andaza + poori list');
+  }
+
+  /* ═══ 15. 🩹 v4.10 ke device se mile bug ═══ */
+  head('15. 🩹 UI + SAAF ke naye bug (aap ke UI CHECK se)');
+  {
+    const w = world({ saaf: true });
+    is(w.SAAF('Bhej di gayi. (Note: emojis not allowed per rules, remove)Sir link bhej di.').indexOf('Note:') < 0,
+      '🔑 "(Note: emojis not allowed per rules)" wali soch bhi chhupi', 'note');
+    is(w.SAAF('Ye (100 rupay) ka hisab hai.').indexOf('100 rupay') > 0,
+      '✅ aam bracket wala jumla bilkul salamat');
+    const src = HTML;
+    is(!/#send,#saveSettings\{[^}]*[^-]background:linear-gradient/.test(src),
+      '🔑 SAVE button ka background ab shorthand se transparent nahi hota (UI CHECK ne pakra tha)');
+    is(/#send,#saveSettings\{[\s\S]{0,220}background-color:var\(--accent/.test(src),
+      '   → solid rang ka fallback maujood (purane WebView par bhi dikhega)');
   }
 
   console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');

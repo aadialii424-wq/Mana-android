@@ -374,10 +374,19 @@ class MainActivity : AppCompatActivity() {
                             evalAsync("window.__nativeSpeechErr && window.__nativeSpeechErr($error)")
                         }
                         override fun onResults(results: Bundle?) {
-                            val text = results
-                                ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                                ?.firstOrNull() ?: ""
-                            evalAsync("window.__nativeSpeech && window.__nativeSpeech('" + jsEscape(text) + "')")
+                            /* 🎙️ Android 3-5 andaze deta hai. Pehle sirf pehla liya jata tha
+                               aur baqi phenk diye jate the — isi liye "Monarch" -> "منار" ban
+                               jata tha. Ab SAARE andaze JS ko jate hain; SUNO un mein se wo
+                               chunta hai jismein jaane-pehchane naam sab se zyada hon. */
+                            val all = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                                ?: arrayListOf()
+                            val text = all.firstOrNull() ?: ""
+                            val arr = JSONArray()
+                            for (i in 0 until minOf(all.size, 6)) arr.put(all[i])
+                            evalAsync(
+                                "window.__nativeSpeech && window.__nativeSpeech('" + jsEscape(text) +
+                                "','" + jsEscape(arr.toString()) + "')"
+                            )
                         }
                         override fun onPartialResults(partialResults: Bundle?) {
                             val pt = partialResults

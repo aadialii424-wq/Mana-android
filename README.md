@@ -1,9 +1,25 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 4.10.0 "AMAL" — 0-Budget Build • Android APK + Web PWA**
+**Version 4.11.0 "SUNO" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🎙️ v4.11.0 — SUNO: Maya ab aap ki AWAAZ theek samajhti hai
+
+**Pehle v4.10.0 ka natija (asli device se): `tool wale turn 0/12 → 27/44`, p90 `31.2s → 18.4s`.** ⚡ AMAL ne kaam kiya.
+
+Ab asal masla: `"Funk Taka"` → Maya ne suna `"اس لاوا فنک"`. `"Monarch"` → `"موناک"` / `"منار"` / `"منا"`.
+
+- 🎙️ **Saare andaze** — Kotlin sirf `firstOrNull()` leta tha aur Android ke baqi 3-5 andaze **phenk deta tha**. Ab SUNO un mein se wo chunta hai jismein jaane-pehchane naam sab se zyada hon
+- ✍️ **Urdu script → Roman Urdu** — lafz ki lughat (~90) pehle, phir harf-ba-harf (بھ→bh, چھ→chh). `"موناک کو واٹس ایپ پر میسج بھیجو"` → `"Monarch ko WhatsApp par message bhejo"`
+- 🔧 **Pise hue naam theek** — `monak`/`manar`→Monarch · `instgram`→Instagram · `watsapp`→WhatsApp. Aur `karo` kabhi `Chrome` nahi banta
+- 🧠 **SUNO seekhta hai** — jo naam aap khud likhte ho, hamesha ke liye yaad
+- 🩹 **SAVE button transparent tha** — `background:` shorthand `background-color` reset kar deta hai (`UI CHECK` ne pakra)
+- 🩹 SAAF ne `"(Note: emojis not allowed per rules)"` bhi pakar liya
+- 🧪 **677 test** (646 → 677) — SUNO ke test **asli chat ke jumlon** par
+
+📖 [`docs/RELEASE-v4.11.0.md`](docs/RELEASE-v4.11.0.md)
 
 ## ⚡ v4.10.0 — AMAL: TOOLS AB HAR DIMAAG KO
 
