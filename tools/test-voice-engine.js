@@ -410,6 +410,69 @@ const u16 = (b, o) => b[o] | (b[o + 1] << 8);
     }
   }
 
+  /* ─── 11b. AWAAZ DOCTOR ─── */
+  head('11b. AWAAZ DOCTOR — "3 nayi keys lagayin, ek bhi nahi chali"');
+  {
+    const { AWAAZ } = makeWorld();
+    const r = (st, m) => AWAAZ.readErr(st, JSON.stringify({ error: { message: m } }));
+    is(r(429, 'Quota exceeded for metric: generate_content_free_tier_requests, limit: 0').tag === 'LIMIT0',
+       'limit: 0 ko alag pehchanta hai (project ko free tier mila hi nahi)');
+    is(r(400, 'API key not valid. Please pass a valid API key.').tag === 'BADKEY', 'ghalat key pehchani');
+    is(r(403, 'PERMISSION_DENIED: requests from this key are blocked').tag === 'RESTRICT', 'restriction wali key pehchani');
+    is(r(429, 'You have exhausted your daily quota for this model').tag === 'DAYQUOTA', 'din ka quota pehchana');
+    is(r(429, 'rate limit exceeded').tag === 'QUOTA', 'saada quota pehchana');
+    is(r(200, '').tag === 'OK', 'kamyabi bhi pehchani');
+    is(r(0, '').tag === 'NET', 'request pahunchi hi nahi — NET');
+    is(r(403, 'PERMISSION_DENIED').fix.indexOf('restriction') > -1, 'har masle ka ILAJ bhi likha hai');
+  }
+  {
+    /* 🎯 ASAL SHIKAYAT: teen nayi keys, teenon EK HI project ki */
+    const { AWAAZ } = makeWorld();
+    const rows = [1, 2, 3].map(n => ({
+      n, tail: 'aaa' + n, models: ['gemini-2.5-flash-preview-tts'], model: 'gemini-2.5-flash-preview-tts',
+      list: { tag: 'OK', status: 200, msg: '', fix: '' },
+      tts: { tag: 'QUOTA', status: 429, msg: 'quota exceeded', fix: '' }
+    }));
+    const v = AWAAZ.verdict(rows);
+    is(v.verdict === 'SAMEPROJECT', '🔥 teenon keys zinda magar teenon ka quota khatam -> EK HI PROJECT ka faisla', v.verdict);
+    is(/EK HI PROJECT/.test(v.text), '  → user ko saaf batata hai ke sab keys ek hi project ki hain');
+    is(/ALAG GOOGLE ACCOUNT/.test(v.text), '  → asal ilaj bhi batata hai (alag Google account)');
+    is(/MUFT NEURAL/.test(v.text), '  → aur tasalli deta hai ke awaaz phir bhi chalegi');
+  }
+  {
+    const { AWAAZ } = makeWorld();
+    const mk = (listTag, ttsTag) => ({
+      n: 1, tail: 'zzz', models: [], model: 'm',
+      list: { tag: listTag, status: listTag === 'OK' ? 200 : 403, msg: '', fix: 'restriction lagao' },
+      tts: { tag: ttsTag, status: ttsTag === 'OK' ? 200 : 429, msg: '', fix: '' }
+    });
+    is(AWAAZ.verdict([mk('OK', 'OK')]).verdict === 'OK', 'chalti key par faisla OK');
+    is(AWAAZ.verdict([mk('RESTRICT', 'QUOTA')]).verdict === 'RESTRICT', 'restriction sab se pehle pakda jata hai');
+    is(/19 June 2026/.test(AWAAZ.verdict([mk('RESTRICT', 'QUOTA')]).text), '  → June 2026 wali policy ka hawala diya');
+    is(AWAAZ.verdict([mk('BADKEY', 'QUOTA')]).verdict === 'BADKEY', 'ghalat copy hui key ka apna faisla');
+    const one = AWAAZ.verdict([mk('OK', 'DAYQUOTA')]);
+    is(one.verdict === 'QUOTA', 'ek hi key ka din khatam -> QUOTA (SAMEPROJECT nahi)', one.verdict);
+    is(AWAAZ.verdict([]).verdict === undefined || true, 'khaali list par crash nahi');
+  }
+  {
+    /* poora muaina end-to-end: ListModels + TTS dono */
+    const { AWAAZ } = makeWorld({
+      settings: { ttsKey: 'AIzaKeyOne,AIzaKeyTwo', apikey: '' },
+      respond: (xhr) => /\/models$/.test(xhr.url || '')
+        ? { status: 200, body: { models: [{ name: 'models/gemini-2.5-flash-preview-tts' }, { name: 'models/gemini-2.5-flash' }] } }
+        : { status: 429, body: { error: { message: 'Quota exceeded, limit: 0' } } }
+    });
+    let res = null, lines = 0;
+    AWAAZ.doctor(() => { lines++; }, (r) => { res = r; });
+    await wait(120);
+    is(!!res, 'doctor poora chala');
+    is(res.rows.length === 2, 'dono keys ka muaina hua', res.rows.length + '');
+    is(res.rows[0].models.length === 1, 'ListModels se sirf TTS model chune gaye', res.rows[0].models.join());
+    is(res.verdict === 'LIMIT0', 'limit:0 -> project ko free tier mila hi nahi', res.verdict);
+    is(/ALAG GOOGLE ACCOUNT/.test(res.text), 'ilaj mein alag account ka mashwara');
+    is(lines >= 4, 'har qadam live likha gaya', lines + ' lines');
+  }
+
   /* ─── 12. FALLBACK CHAIN ─── */
   head('12. FALLBACK — khamoshi kabhi nahi');
   {

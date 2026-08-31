@@ -1,9 +1,42 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 4.5.0 "SETFORM + AWAAZ POOL" — 0-Budget Build • Android APK + Web PWA**
+**Version 4.6.0 "AWAAZ DOCTOR" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🩺 v4.6.0 — AWAAZ DOCTOR ("3 nayi keys lagayin, ek bhi nahi chali")
+
+**Wajah hamare code mein nahi thi — Google ke usoolon mein thi. Magar qusoor hamara tha
+ke app ne wajah batai hi nahi.**
+
+1. **Quota KEY par nahi, PROJECT par lagta hai.** AI Studio mein "Create API key" baar
+   baar dabane se sab keys **ek hi project** mein banti hain aur **ek hi quota pool** se
+   peeti hain. 3 nayi keys = wahi purana khatam quota. Faida sirf **alag Google account**
+   (ya "new project") se banai gayi key ka hai.
+2. **19 June 2026 se "unrestricted" keys Gemini par block hain** → 403, chahe key abhi bani ho.
+3. Kuch projects ko free tier milta hi nahi — Google literally `limit: 0` bhejta hai.
+
+*(CORS wajah nahi thi — Google ka preflight `x-goog-api-key` allow karta hai. Check kar ke
+rad kiya, taake ghalat cheez theek na karte rahen.)*
+
+**Ilaj — andaza band, muaina shuru.** Settings → AWAAZ mein naya
+**🩺 GEMINI VOICE KEYS CHECK KARO** button. Har key par do imtihan:
+`ListModels` (key khud zinda hai? restriction to nahi?) aur ek chhoti TTS request
+(quota bacha?). Phir sab natije mila kar **saaf faisla** — inme sab se ahem:
+
+> 🎯 **ASAL MASLA: AAP KI SAB KEYS EK HI PROJECT KI HAIN.**
+> ILAJ: har key ALAG GOOGLE ACCOUNT se banao — har account = apna quota.
+> Tab tak 🌸 MUFT NEURAL awaaz chalti rahegi.
+
+Saath mein: TTS model **auto-discovery** (`ListModels` se), APK mein Gemini TTS ab
+**Kotlin bridge** se (CORS ka sawal khatam, poora error text parha jata hai), aur sacche
+paighamat jo 🩺 button ki taraf bhejte hain.
+
+📖 Tafseel: [`docs/SETFORM-AWAAZ-POOL.md`](docs/SETFORM-AWAAZ-POOL.md) (Hissa 3)
+🧪 `npm test` — CSS PASS · 64 Settings · **166** AWAAZ · 155 DIMAAG
+
+---
 
 ## 🗄️🎙️ v4.5.0 — SETFORM + AWAAZ POOL (do asli bug, jarh se)
 

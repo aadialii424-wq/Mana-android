@@ -534,7 +534,7 @@ nav{padding:8px 10px 10px}
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v4.5.0 — SETFORM • AWAAZ POOL • KUCH RESET NAHI HOTA</div>
+  <div class="ver">v4.6.0 — AWAAZ DOCTOR • ASAL WAJAH BATATA HAI</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid #c85050; background:#3c0a0f; border-radius:12px; padding:12px; text-align:left;">
@@ -559,14 +559,14 @@ nav{padding:8px 10px 10px}
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v4.5.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
+  <div class="dfoot">MAYA v4.6.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.5.0 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.6.0 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -727,7 +727,7 @@ nav{padding:8px 10px 10px}
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.5.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.6.0</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -1011,8 +1011,11 @@ nav{padding:8px 10px 10px}
           <button type="button" class="ui-btn ui-btn-ghost" id="poolCheck">🧠 BRAIN POOL DEKHO</button>
           <pre class="ui-pre" id="poolOut">—</pre>
           <pre class="ui-pre show" id="voicePool" style="display:block">—</pre>
+          <button type="button" class="ui-btn ui-btn-ghost" id="awaazDoctor">🩺 GEMINI VOICE KEYS CHECK KARO</button>
+          <div class="ui-hint">Har key ko Google se KHUD poochh kar batata hai ke wo kyun nahi chal rahi — andaza nahi, Google ka apna jawab.</div>
+          <pre class="ui-pre" id="awaazDocOut">—</pre>
           <div class="ui-field">
-            <div class="ui-label">AWAAZ KE LIYE ALAG GEMINI KEY (optional)</div>
+            <div class="ui-label">🎙️ AWAAZ KE LIYE GEMINI KEYS <small>(comma se kai — magar HAR EK ALAG GOOGLE ACCOUNT SE)</small></div>
             <input class="ui-input" id="sTtsKey" type="password" placeholder="Khaali = upar wali key use hogi">
             <div class="ui-hint">Alag key = alag quota. Neural awaaz baat-cheet ka quota nahi khaati.</div>
           </div>
@@ -1062,7 +1065,7 @@ nav{padding:8px 10px 10px}
       </div>
 
       <button type="button" class="ui-btn ui-btn-save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v4.5.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v4.6.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -1077,7 +1080,7 @@ nav{padding:8px 10px 10px}
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.5.0 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.6.0 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -1145,7 +1148,7 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v4.5.0 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v4.6.0 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
@@ -1226,7 +1229,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v4.5.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v4.6.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1551,10 +1554,10 @@ var AWAAZ = {
   WHY: {
     OFF: "Awaaz band hai (Settings se on karo)",
     DEVICE_MODE: "Aap ne sirf phone ki awaaz chuni hai",
-    KEY_MISSING: "Gemini key nahi hai — Settings mein daalo",
-    KEY_BAD: "Gemini key ghalat ya band hai",
+    KEY_MISSING: "Gemini key nahi hai — muft neural awaaz chal rahi hai",
+    KEY_BAD: "Gemini key nahi chal rahi — 🩺 KEYS CHECK KARO dabao, asal wajah pata chal jayegi",
     OFFLINE: "Internet nahi hai",
-    QUOTA: "Google ka free quota abhi khatam — thori der baad",
+    QUOTA: "Gemini TTS ka quota khatam — muft neural awaaz chal rahi hai",
     MOBILE_DATA: "Mobile data par neural band hai (WiFi-only on hai)",
     TOO_LONG: "Jawab bohat lamba tha",
     TIMEOUT: "Google ne waqt par jawab nahi diya",
@@ -1563,7 +1566,7 @@ var AWAAZ = {
     NO_AUDIO: "Google ne audio nahi bheji",
     DECODE: "Audio kharab aayi",
     AUDIO_BLOCKED: "Phone ne audio bajane nahi di",
-    QUOTA_DAY: "Gemini TTS ka aaj ka quota (15/din) khatam — muft awaaz par aa gayi",
+    QUOTA_DAY: "Gemini TTS ka aaj ka quota khatam (free tier ~15/din) — 🩺 button se poori wajah dekho",
     HTTP_402: "Muft awaaz ka credit khatam",
     SEND: "Request bheji nahi ja saki"
   },
@@ -1816,6 +1819,7 @@ var AWAAZ = {
     xhr.onload = function () {
       drop();
       var st = xhr.status;
+      AWAAZ.lastHttp = st;
       var msg = "";
       try { msg = String(JSON.parse(xhr.responseText).error.message || ""); } catch (e) { msg = String(xhr.responseText || "").slice(0, 200); }
       var ki = AWAAZ.ki;
@@ -2052,6 +2056,239 @@ var AWAAZ = {
       keyless: Date.now() >= AWAAZ.pollenBad,
       cooldown: Math.max(0, Math.round((AWAAZ.cooldownUntil - Date.now()) / 1000))
     };
+  },
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     🩺 AWAAZ DOCTOR — "3 nayi keys lagayin, ek bhi nahi chali" ka jawab
+     -----------------------------------------------------------------------
+     Google ke do usool jo har banda pehli dafa mein pakda jata hai:
+
+     1) QUOTA KEY PAR NAHI, **PROJECT PAR** LAGTA HAI.
+        AI Studio mein "Create API key" teen dafa dabao to teenon keys aksar
+        EK HI project mein banti hain — aur teenon EK HI quota pool se peeti
+        hain. Is liye 3 nayi keys = wahi purana khatam quota. Faida sirf tab
+        hai jab keys ALAG Google ACCOUNT (ya alag project) se banai jayen.
+
+     2) 19 June 2026 se "unrestricted" keys Gemini par BLOCK hain.
+        Cloud Console se bani key jispar API restriction nahi lagi, wo
+        403/PERMISSION_DENIED deti hai — chahe abhi banai ho.
+
+     Is liye ye Doctor har key ko DO dafa aazmata hai:
+        a) ListModels  -> key khud zinda hai? (restriction/ghalat key pakadta hai)
+        b) ek chhoti TTS request -> TTS ka quota bacha hai?
+     Aur phir sab keys ke natije mila kar SAAF batata hai ke asal masla kya hai.
+     Andaza nahi — Google ka apna jawab dikhata hai.
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /* GET: APK mein bridge (CORS nahi), warna XHR */
+  get: function (url, key, cb) {
+    if (typeof NATIVE !== "undefined" && NATIVE && window.MayaBridge && window.MayaBridge.httpGet) {
+      var txt = "";
+      try { txt = window.MayaBridge.httpGet(url + (url.indexOf("?") < 0 ? "?" : "&") + "key=" + encodeURIComponent(key), ""); }
+      catch (e) { cb(0, ""); return; }
+      cb(txt ? 200 : 0, txt || "");
+      return;
+    }
+    var xhr = new XMLHttpRequest();
+    try {
+      xhr.open("GET", url, true);
+      xhr.setRequestHeader("x-goog-api-key", key);
+      xhr.timeout = 15000;
+    } catch (e) { cb(0, ""); return; }
+    xhr.ontimeout = function () { cb(0, "timeout"); };
+    xhr.onerror = function () { cb(0, "network"); };
+    xhr.onload = function () { cb(xhr.status, xhr.responseText || ""); };
+    try { xhr.send(); } catch (e) { cb(0, "send"); }
+  },
+
+  /* Google ke jawab ka insani tarjuma */
+  readErr: function (status, txt) {
+    var msg = "";
+    try { msg = String(JSON.parse(txt).error.message || ""); } catch (e) { msg = String(txt || "").slice(0, 200); }
+    var low = msg.toLowerCase();
+    var tag = "", fix = "";
+    if (status === 0) { tag = "NET"; fix = "Internet ya firewall — request Google tak pahunchi hi nahi."; }
+    else if (status >= 200 && status < 300) { tag = "OK"; }
+    else if (/limit:\s*0/.test(low)) { tag = "LIMIT0"; fix = "Is project ka free quota ZERO hai. Google ab billing link kiye bagair kuch projects ko 0 deta hai. Alag Google ACCOUNT se nayi key banao."; }
+    else if (/api key not valid|invalid api key|api_key_invalid/.test(low)) { tag = "BADKEY"; fix = "Key ghalat likhi gayi ya delete ho chuki hai. Dobara copy karo (aage/peeche space na ho)."; }
+    else if (/permission|restrict|blocked|forbidden|consumer/.test(low) || status === 403) { tag = "RESTRICT"; fix = "19 June 2026 se Google 'unrestricted' keys block karta hai. Cloud Console -> Credentials -> is key par API restriction = 'Generative Language API' laga do. Ya AI Studio se nayi key banao."; }
+    else if (/per day|daily|exhaust/.test(low)) { tag = "DAYQUOTA"; fix = "Aaj ka quota khatam (Gemini TTS free tier ~15 request ROZ). Pacific midnight par reset hota hai."; }
+    else if (status === 429 || /quota|rate/.test(low)) { tag = "QUOTA"; fix = "Quota khatam ya bohat tez requests. Yaad rahe: quota KEY par nahi, PROJECT par lagta hai."; }
+    else if (status === 404 || /not found|not supported/.test(low)) { tag = "MODEL"; fix = "Ye TTS model is key par maujood nahi. MAYA khud doosra model dhoondegi."; }
+    else if (status >= 500) { tag = "SERVER"; fix = "Google ka apna server masla — thori der baad."; }
+    else { tag = "HTTP_" + status; fix = ""; }
+    return { tag: tag, status: status, msg: msg.slice(0, 160), fix: fix };
+  },
+
+  /* zinda TTS model dhoondo (naam badal jaye to bhi app na mare) */
+  findTtsModels: function (key, cb) {
+    AWAAZ.get("https://generativelanguage.googleapis.com/v1beta/models", key, function (st, txt) {
+      if (st < 200 || st >= 300) { cb(null, AWAAZ.readErr(st, txt)); return; }
+      var j = null; try { j = JSON.parse(txt); } catch (e) {}
+      var arr = (j && j.models) || [], out = [], i;
+      for (i = 0; i < arr.length; i++) {
+        var nm = String(arr[i].name || "").replace(/^models\//, "");
+        if (/tts/i.test(nm)) out.push(nm);
+      }
+      cb(out, null);
+    });
+  },
+
+  /* ek key ka poora muaina */
+  probeKey: function (key, cb) {
+    var r = { key: key, tail: key.slice(-6), list: null, tts: null, models: [] };
+    AWAAZ.findTtsModels(key, function (models, err) {
+      if (err) { r.list = err; cb(r); return; }
+      r.list = { tag: "OK", status: 200, msg: "", fix: "" };
+      r.models = models || [];
+      var model = r.models[0] || AWAAZ.MODELS[0];
+      r.model = model;
+      var body = JSON.stringify({
+        contents: [{ parts: [{ text: "Salam" }] }],
+        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } } }
+      });
+      AWAAZ.postKeyed(AWAAZ.API + encodeURIComponent(model) + ":generateContent", key, body, 20000, function (st, txt) {
+        r.tts = AWAAZ.readErr(st, txt);
+        cb(r);
+      });
+    });
+  },
+
+  /* key wala POST — APK mein bridge se (CORS bilkul nahi) */
+  postKeyed: function (url, key, body, timeoutMs, cb) {
+    if (typeof NATIVE !== "undefined" && NATIVE && window.MayaBridge && window.MayaBridge.httpPostAsync && typeof BRAIN !== "undefined") {
+      BRAIN.post(url + (url.indexOf("?") < 0 ? "?" : "&") + "key=" + encodeURIComponent(key), "", body, timeoutMs, cb);
+      return;
+    }
+    var done = false, xhr = new XMLHttpRequest();
+    function fin(st, t) { if (!done) { done = true; cb(st, t); } }
+    try {
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.setRequestHeader("x-goog-api-key", key);
+      xhr.timeout = timeoutMs;
+    } catch (e) { fin(0, "open"); return; }
+    xhr.ontimeout = function () { fin(0, "timeout"); };
+    xhr.onerror = function () { fin(0, "network"); };
+    xhr.onload = function () { fin(xhr.status, xhr.responseText || ""); };
+    try { xhr.send(body); } catch (e) { fin(0, "send"); }
+  },
+
+  /* SAB keys ka muaina + ek saaf faisla */
+  doctor: function (onLine, onDone) {
+    var keys = AWAAZ.keyList();
+    if (!keys.length) { onDone({ rows: [], verdict: "NOKEY", text: "Koi Gemini key hi nahi lagi." }); return; }
+    var rows = [], i = 0;
+    function next() {
+      if (i >= keys.length) { onDone(AWAAZ.verdict(rows)); return; }
+      onLine("🔍 KEY " + (i + 1) + "/" + keys.length + " (…" + keys[i].slice(-6) + ") check ho rahi hai…");
+      AWAAZ.probeKey(keys[i], function (r) {
+        r.n = i + 1;
+        rows.push(r);
+        onLine(AWAAZ.rowText(r));
+        i++; next();
+      });
+    }
+    next();
+  },
+
+  rowText: function (r) {
+    var L = [];
+    L.push("");
+    L.push("━━━ KEY " + r.n + "  (…" + r.tail + ") ━━━");
+    if (r.list.tag !== "OK") {
+      L.push("  Key khud   : ❌ " + r.list.tag + (r.list.status ? " (" + r.list.status + ")" : ""));
+      if (r.list.msg) L.push("               " + r.list.msg);
+      if (r.list.fix) L.push("  ➜ " + r.list.fix);
+      return L.join("\n");
+    }
+    L.push("  Key khud   : ✅ zinda — Google ne " + r.models.length + " TTS model dikhaye");
+    if (r.tts.tag === "OK") L.push("  TTS        : ✅ CHAL RAHI HAI (" + r.model + ")");
+    else {
+      L.push("  TTS        : ❌ " + r.tts.tag + " (" + r.tts.status + ") — " + r.model);
+      if (r.tts.msg) L.push("               " + r.tts.msg);
+      if (r.tts.fix) L.push("  ➜ " + r.tts.fix);
+    }
+    return L.join("\n");
+  },
+
+  /* sab natije mila kar ASAL masle ka naam */
+  verdict: function (rows) {
+    var ok = [], i, tags = {}, ttsTags = {};
+    for (i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      if (r.list.tag === "OK" && r.tts && r.tts.tag === "OK") ok.push(r.n);
+      tags[r.list.tag] = (tags[r.list.tag] || 0) + 1;
+      if (r.tts) ttsTags[r.tts.tag] = (ttsTags[r.tts.tag] || 0) + 1;
+    }
+    var out = [], v = "";
+    out.push("");
+    out.push("═══════════ FAISLA ═══════════");
+    if (ok.length) {
+      v = "OK";
+      out.push("✅ " + ok.length + "/" + rows.length + " key CHAL RAHI HAI (key " + ok.join(", ") + ").");
+      out.push("   Gemini ki asli awaaz tayyar hai.");
+    } else if (tags.RESTRICT || ttsTags.RESTRICT) {
+      v = "RESTRICT";
+      out.push("🔒 ASAL MASLA: KEY PAR RESTRICTION NAHI LAGI.");
+      out.push("   19 June 2026 se Google un keys ko block karta hai jinpar");
+      out.push("   API restriction set nahi. Nayi key bhi isi liye nahi chalti.");
+      out.push("");
+      out.push("   ILAJ (2 minute):");
+      out.push("   • Key AI STUDIO se banao: aistudio.google.com/apikey");
+      out.push("     (wahan se bani keys khud restricted hoti hain)");
+      out.push("   • Ya Cloud Console → Credentials → key → API restrictions");
+      out.push("     → 'Restrict key' → Generative Language API");
+    } else if (tags.BADKEY) {
+      v = "BADKEY";
+      out.push("✍️ ASAL MASLA: KEY THEEK SE COPY NAHI HUI.");
+      out.push("   Google keh raha hai 'API key not valid'.");
+      out.push("   Poori key copy karo — 'AIza' se shuru hoti hai, ~39 harf.");
+    } else if (ttsTags.LIMIT0 || tags.LIMIT0) {
+      v = "LIMIT0";
+      out.push("🚫 ASAL MASLA: IS PROJECT KA FREE QUOTA **ZERO** HAI.");
+      out.push("   Google ne is project ko free tier diya hi nahi (limit: 0).");
+      out.push("   Nayi keys banane se kuch nahi hoga — wo bhi isi project ki hain.");
+      out.push("");
+      out.push("   ILAJ: BILKUL ALAG GOOGLE ACCOUNT se sign-in kar ke");
+      out.push("   aistudio.google.com/apikey se nayi key banao.");
+    } else if (rows.length > 1 && (ttsTags.QUOTA || ttsTags.DAYQUOTA) === rows.length) {
+      v = "SAMEPROJECT";
+      out.push("🎯 ASAL MASLA: AAP KI SAB KEYS EK HI PROJECT KI HAIN.");
+      out.push("");
+      out.push("   Google ka quota KEY par nahi, **PROJECT** par lagta hai.");
+      out.push("   AI Studio mein 'Create API key' baar baar dabane se sab keys");
+      out.push("   EK HI project mein banti hain — aur ek hi quota pool se peeti hain.");
+      out.push("   Is liye " + rows.length + " nayi keys = wahi purana khatam quota.");
+      out.push("");
+      out.push("   ILAJ (yehi kaam karta hai):");
+      out.push("   • Har key ALAG GOOGLE ACCOUNT se banao (Gmail badal kar),");
+      out.push("     aistudio.google.com/apikey — har account = apna quota.");
+      out.push("   • Ya AI Studio mein 'Create API key in new project' chuno.");
+      out.push("");
+      out.push("   Tab tak 🌸 MUFT NEURAL awaaz chalti rahegi — bina kisi key ke.");
+    } else if (ttsTags.DAYQUOTA || ttsTags.QUOTA) {
+      v = "QUOTA";
+      out.push("⏳ ASAL MASLA: TTS KA QUOTA KHATAM HAI (key theek hai).");
+      out.push("   Gemini TTS free tier sirf ~15 request ROZ deta hai.");
+      out.push("   Pacific midnight (PK time ~12:00 din) par reset hota hai.");
+      out.push("");
+      out.push("   ILAJ: kisi ALAG Google account se ek aur key bana kar");
+      out.push("   isi khane mein comma laga kar daal do.");
+      out.push("   Tab tak 🌸 MUFT NEURAL awaaz chalti rahegi.");
+    } else if (tags.NET || (rows[0] && rows[0].tts && rows[0].tts.tag === "NET")) {
+      v = "NET";
+      out.push("📡 ASAL MASLA: REQUEST GOOGLE TAK PAHUNCH HI NAHI RAHI.");
+      out.push("   Internet, DNS ya firewall dekho.");
+    } else {
+      v = "OTHER";
+      out.push("❔ Google ka jawab upar likha hai — wahi asal wajah hai.");
+    }
+    out.push("");
+    out.push("🌸 Yaad rahe: chahe koi Gemini key na chale, MAYA phir bhi");
+    out.push("   MUFT NEURAL awaaz se bolti hai — aap kabhi khamosh nahi rahenge.");
+    var head = ["🩺 AWAAZ DOCTOR — " + rows.length + " key ka muaina"];
+    return { rows: rows, verdict: v, text: head.concat(rows.map(AWAAZ.rowText)).concat(out).join("\n") };
   },
 
   /* Settings/Doctor ke liye har TTS key ka haal */
@@ -3043,9 +3280,9 @@ async function resolveModels(){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v4.5.0)
+   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v4.6.0)
    ---------------------------------------------------------------------------
-   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v4.5.0 se pehle Groq
+   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v4.6.0 se pehle Groq
    ne 16 August 2026 ko apne purane Llama 3.x models band kar diye the — hamara
    default wahi tha, is liye "backup brain bhi thak gaya" aata tha.
 
@@ -3343,7 +3580,7 @@ window.__httpDone = function (id, status, b64) {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v4.5.0)
+   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v4.6.0)
    ---------------------------------------------------------------------------
    Purane code ke 3 asli bugs jinki wajah se "Sab free brains busy" bar bar aata tha:
 
@@ -4175,7 +4412,7 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 
 /* ---------- SETTINGS TAB ---------- */
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v4.5.0)
+   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v4.6.0)
    ---------------------------------------------------------------------------
    Purana bug (user ne pakda): "girlfriend mode on karta hun, groq key lagata
    hun — thori der baad wo option khud band ho jata hai."
@@ -4402,6 +4639,31 @@ function refreshHandsFreeStatus(){
   try { $("#asStatus").textContent = "Status: " + (window.MayaBridge.accessibilityEnabled() ? "✅ AUTO-SEND ON" : "OFF — button dabao aur MAYA AutoSend ON karo"); } catch(e){}
 }
 (function(){
+  var db = $("#awaazDoctor");
+  if (db) db.addEventListener("click", function(){
+    var el = $("#awaazDocOut");
+    el.classList.add("show"); el.style.display = "block";
+    if (db.disabled) return;
+    db.disabled = true; db.textContent = "🩺 CHECK HO RAHA HAI…";
+    var lines = ["🩺 AWAAZ DOCTOR chal raha hai — thora sabar…"];
+    el.textContent = lines.join("\n");
+    AWAAZ.doctor(
+      function (line) { lines.push(line); el.textContent = lines.join("\n"); el.scrollTop = el.scrollHeight; },
+      function (res) {
+        el.textContent = res.text;
+        db.disabled = false; db.textContent = "🩺 GEMINI VOICE KEYS CHECK KARO";
+        pushLog("AWAAZ DOCTOR: " + res.verdict);
+        if (res.verdict === "OK") { AWAAZ.reset(); toast("✅ Key chal rahi hai — neural awaaz on"); }
+        else if (res.verdict === "SAMEPROJECT") toast("Sab keys EK hi project ki hain — alag account chahiye");
+        else if (res.verdict === "RESTRICT") toast("Key par API restriction lagani hai");
+        else toast("Faisla neeche likha hai");
+        paintAwaaz();
+      }
+    );
+  });
+})();
+
+(function(){
   var pb = $("#poolCheck");
   if (pb) pb.addEventListener("click", function(){
     var el = $("#poolOut");
@@ -4528,7 +4790,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v4.5.0 — DOCTOR REPORT");
+  out.push("MAYA v4.6.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
@@ -4711,7 +4973,9 @@ function paintAwaaz(){
       out.push("  📱 Phone ki awaaz — ✅ hamesha");
       out.push("");
       out.push("💡 Gemini TTS ka muft quota sirf ~15 request ROZ hai.");
-      out.push("   TTS khane mein comma laga kar aur keys daalo — har key 15 aur.");
+      out.push("   Quota KEY par nahi, PROJECT par lagta hai — is liye EK HI account");
+      out.push("   ki 3 keys ka koi faida nahi. ALAG Google account se key banao.");
+      out.push("   Neeche 🩺 button se pata chal jayega ke asal masla kya hai.");
       vp.textContent = out.join("\n");
     }
     var w = $("#awaazWhy");
@@ -4990,7 +5254,7 @@ document.querySelectorAll(".setgrp-head").forEach(function(h){
   h.addEventListener("click", function(){ h.parentElement.classList.toggle("open"); });
 });
 
-/* NOTE: loadV4Form / doosra saveSettings handler v4.5.0 mein khatam.
+/* NOTE: loadV4Form / doosra saveSettings handler v4.6.0 mein khatam.
    Ab SETFORM (upar) hi settings ka wahid darwaza hai — dekho SET_FIELDS.
    Sliders live update karte hain, baqi sab SAVE par ek hi tarteeb se. */
 try { $("#sRadius").addEventListener("input", function(){ $("#radiusVal").textContent = this.value; settings.radius = parseInt(this.value,10) || 18; saveSettings(); applyTheme(); }); } catch(e){}
@@ -5081,8 +5345,8 @@ function startProactive(){
 
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
-try { $("#hudBuild").textContent = "v4.5.0"; } catch(e){}
-try { pushLog("MAYA v4.5.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
+try { $("#hudBuild").textContent = "v4.6.0"; } catch(e){}
+try { pushLog("MAYA v4.6.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
 
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD" runtime   (v4.1.0)
@@ -5341,7 +5605,7 @@ var MayaUI = (function () {
     for (i = 0; i < reopen.length; i++) delCls(reopen[i], "is-open");
 
     var out = [];
-    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v4.5.0");
+    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v4.6.0");
     out.push("WEBVIEW: Chrome " + (window.__webviewMajor || "?") + (window.__oldWebview ? " (PURANA)" : ""));
     out.push("");
     out.push("VISIBLE: " + okc + "   INVISIBLE: " + bad + (bad ? "  \u274C" : "  \u2705"));
