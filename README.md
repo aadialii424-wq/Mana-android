@@ -1,9 +1,25 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 4.0.1 "OBSIDIAN" — 0-Budget Build • Android APK + Web PWA**
+**Version 4.0.2 "OBSIDIAN" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🆕 v4.0.2 "OBSIDIAN" — Settings UI Fix (purane WebView par bhi)
+
+- 🎚️ **Sliders wapas dikhte hain** — pitch / raftar / corner / text-size ke range inputs ka
+  track + thumb ab explicit hex/`var()` colors se bane hain (pehle `accent-color` drop hone par
+  patli invisible lakeer reh jati thi)
+- 🔘 **Switches asli toggle jaise** — 48×26px, fixed offsets (`top/left`), `transform` ki jagah
+  `left` animation, `color-mix()` ke baghair
+- 🏷️ **Labels aur inputs solid** — har `.f` field par background + border + `min-height:44px`
+  (invisible field khatam)
+- 📜 **Settings ab poori scroll hoti hai** — `#app > main > .tab` chain par `min-height:0`
+  (pehle `main` content jitna lamba ho jata tha aur body ka `overflow:hidden` neeche ke
+  sections — AWAAZ, THEME — kaat deta tha)
+- 🧪 **Feature detect** — `CSS.supports()` se `color-mix` / `accent-color` / flex-`gap` check,
+  `<html>` par `nocm` / `noacc` / `nogap` class + Doctor report mein "CSS COMPAT" line
+- 📐 **`gap` aur `env()` fallbacks** — margin-based spacing + nav ka safe-area padding fallback
 
 ## 🆕 v4.0.1 "OBSIDIAN" — WebView Compat Fix
 

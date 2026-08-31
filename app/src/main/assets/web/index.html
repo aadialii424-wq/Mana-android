@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icons/icon-192.svg">
 <title>MAYA — Personal AI v4</title>
 <style>
-/* ================= MAYA v4.0.1 — DESIGN SYSTEM (video-matched + old-WebView compat) =================
+/* ================= MAYA v4.0.2 — DESIGN SYSTEM (video-matched + old-WebView compat) =================
    Midnight Obsidian default • orange accent • theme engine • radius/font sliders */
 :root{
   /* new tokens */
@@ -44,7 +44,7 @@ html{font-size:calc(16px * var(--fs))}
 html,body{height:100%}
 body{
   margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  background-color:var(--bg); /* v4.0.1: old WebView — color-mix fail ho to bhi dark bg (blank-screen fix) */
+  background-color:var(--bg); /* v4.0.2: old WebView — color-mix fail ho to bhi dark bg (blank-screen fix) */
   background:
     radial-gradient(900px 420px at 50% -8%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 62%),
     var(--bg);
@@ -67,7 +67,7 @@ button{font-family:inherit}
 /* ============ SPLASH ============ */
 #splash{
   position:fixed; inset:0; z-index:60;
-  background-color:var(--bg); /* v4.0.1: old WebView fallback — color-mix fail ho to dark splash */
+  background-color:var(--bg); /* v4.0.2: old WebView fallback — color-mix fail ho to dark splash */
   background:
     radial-gradient(700px 400px at 50% 35%, color-mix(in srgb,var(--accent) 14%,transparent), transparent 70%),
     var(--bg);
@@ -115,8 +115,12 @@ header{
 #statusPill.ok{color:#3DD68C;border-color:#4db87a}
 @supports(border-color:color-mix(in srgb,red 50%,blue)){#statusPill.ok{border-color:color-mix(in srgb,var(--ok) 40%,transparent)}}
 
-main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
-.tab{display:none;flex-direction:column;overflow-y:auto;flex:1;min-height:0;
+/* v4.0.2: `min-height:0` poori flex-chain par zaroori hai (#app > main > .tab).
+   Iske baghair purane WebView mein main apne content jitna lamba ho jata hai,
+   body ka overflow:hidden neeche ka sab kuch kaat deta hai aur .tab kabhi scroll
+   nahi karta — Settings ke neeche waale sections (AWAAZ, THEME) pahunch se bahar. */
+main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;min-height:0;height:auto}
+.tab{display:none;flex-direction:column;overflow-y:auto;overflow-x:hidden;flex:1 1 auto;min-height:0;max-height:100%;
   padding:14px 14px 92px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 .tab.active{display:flex}
 
@@ -140,8 +144,8 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative
   box-shadow:0 0 34px #c76615;
 }
 @supports(box-shadow:0 0 0 0 color-mix(in srgb,red 50%,blue)){.orbCore{box-shadow:0 0 34px color-mix(in srgb,var(--accent) 55%,transparent)}}
-.orbCore{position:relative;z-index:2;width:62%;height:62%;border-radius:50%;display:grid;place-items:center;font-size:40px;font-weight:900;color:#0b0b10;background:radial-gradient(circle at 32% 28%,var(--accent2),var(--accent));transition:transform .25s
-  transition:transform .25s;
+.orbCore{position:relative;z-index:2;width:62%;height:62%;border-radius:50%;display:grid;place-items:center;font-size:40px;font-weight:900;color:#0b0b10;background:radial-gradient(circle at 32% 28%,var(--accent2),var(--accent));
+  -webkit-transition:transform .25s;transition:transform .25s;
 }
 #orb[data-state="listening"] .orbCore{background:radial-gradient(circle at 32% 28%,#6ff0b0,#3DD68C);box-shadow:0 0 44px #5ec68c;animation:pulse 1.4s ease-in-out infinite}
 @supports(box-shadow:0 0 0 0 color-mix(in srgb,red 50%,blue)){#orb[data-state="listening"] .orbCore{box-shadow:0 0 44px color-mix(in srgb,var(--ok) 60%,transparent)}}
@@ -343,7 +347,7 @@ nav button.active{color:#FFB347;background:#441c05}
   padding:10px 18px;font-size:12px;opacity:0;pointer-events:none;transition:.3s;max-width:86vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* ================= v4.0.1 — OLD-WEBVIEW COMPAT (Chrome < 87) =================
+/* ================= v4.0.2 — OLD-WEBVIEW COMPAT (Chrome < 87) =================
    `inset` property purane Android System WebView par ignore hoti hai -> splash
    screen cover nahi karta, tabs ka size zero, drawer ghalat -> "blank app".
    Neeche explicit top/right/bottom/left equivalents (modern WebView par bhi
@@ -355,13 +359,101 @@ nav button.active{color:#FFB347;background:#441c05}
 .sring div{top:0;left:0;right:0;bottom:0}
 .sring .r2{top:14px;right:14px;bottom:14px;left:14px}
 .sring .r3{top:28px;right:28px;bottom:28px;left:28px}
-.tab{top:0;left:0;right:0;bottom:0}
+/* v4.0.2: `.tab` ab position:absolute NAHI hai (flex child hai) — is liye yahan
+   top/right/bottom/left dena zaroori nahi. Purana `.tab{top:0;...}` hata diya
+   gaya taake koi ghalti se dobara absolute na samjhe. */
 #orb::before{top:-8px;right:-8px;bottom:-8px;left:-8px}
 #orb::after{top:-2px;right:-2px;bottom:-2px;left:-2px}
 .switch i{top:0;left:0;right:0;bottom:0}
 .char-glow{top:-16px;right:-16px;bottom:-16px;left:-16px}
 #drawer{top:0;bottom:0;left:0;right:auto;width:78vw;max-width:300px}
 #drawerScrim{top:0;left:0;right:0;bottom:0}
+
+/* ================= v4.0.2 — SETTINGS FORM CONTROLS · OLD-WEBVIEW HARD FALLBACK =================
+   MASLA: purane Android System WebView (Chrome < 111) mein `color-mix()` support
+   nahi, aur `accent-color` (Chrome 93+), flex `gap` (Chrome 84+), `inset`
+   (Chrome 87+) aur `env()` (Chrome 69+) bhi nahi. Parser aisi declaration ko
+   CHUP-CHAAP drop kar deta hai — natija: input ka background ghayab, border
+   0-height, slider ka thumb gayab. Screen par sirf "patli invisible lakeerein"
+   nazar aati hain. Sirf <select> aur <input type="text"> theek dikhte the
+   kyunki unki styling simple thi.
+
+   HAL: har form control ke liye plain `var(--x, #hex)` colors + explicit
+   width/height + physical offsets (top/left/right/bottom). Yahan koi
+   color-mix, accent-color, gap ya inset nahi hai. Ye block sab se aakhir mein
+   hai is liye purane WebView par yahi jeetta hai; naye browser par bhi bilkul
+   same look deta hai, aur `var()` ki wajah se saare themes (cyber/aurora/day/
+   paper...) sahi rangon ke saath chalte rehte hain. */
+
+/* --- 1) Group cards + rows: hamesha ek visible surface --- */
+.setgrp{background-color:var(--panel,#0E0E16);border:1px solid var(--line,#3a2a10);
+  border-radius:14px;margin-bottom:10px}
+.setgrp-head{min-height:46px;padding:13px 14px}
+.setgrp-head .chev{margin-left:auto}
+.setgrp-body{padding:4px 14px 14px;border-top:1px solid var(--line,#3a2a10)}
+.card{background-color:var(--panel,#0E0E16);border:1px solid var(--line,#3a2a10)}
+
+/* --- 2) Text inputs / selects / labels: solid bg + border (kabhi invisible nahi) --- */
+.f{display:block;width:100%;min-height:44px;margin:8px 0 2px;padding:11px 13px;font-size:13px;
+  color:var(--text0,#F5F5FA);background-color:var(--bg1,#0E0E16);border:1px solid var(--line,#3a2a10);
+  border-radius:12px;outline:none;font-family:inherit;line-height:1.35;
+  -webkit-box-sizing:border-box;box-sizing:border-box}
+label.f{min-height:0;margin:12px 0 2px;padding:10px 13px;font-size:11px;letter-spacing:1px;
+  color:var(--text1,#A2A2B5);background-color:var(--bg2,#171722);border:1px solid var(--line,#3a2a10);
+  border-radius:10px}
+label.f span{color:var(--accent2,#FFB347);font-weight:800}
+label.f small{letter-spacing:0}
+option{background-color:var(--bg1,#0E0E16);color:var(--text0,#F5F5FA)}
+
+/* --- 3) RANGE SLIDERS: track aur thumb dono explicitly banao (warna 0px lakeer) --- */
+input[type=range]{display:block;width:100%;height:36px;min-height:36px;margin:6px 0 10px;padding:0 10px;
+  background-color:var(--bg2,#171722);border:1px solid var(--line,#3a2a10);border-radius:999px;
+  -webkit-appearance:none;outline:none;-webkit-box-sizing:border-box;box-sizing:border-box}
+input[type=range]::-webkit-slider-runnable-track{width:100%;height:6px;border:none;border-radius:3px;
+  background-color:var(--line,#3a2a10)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-8px;
+  border-radius:50%;background-color:var(--accent,#FF7A1A);border:2px solid var(--accent2,#FFB347);cursor:pointer}
+input[type=range]::-moz-range-track{width:100%;height:6px;border:none;border-radius:3px;
+  background-color:var(--line,#3a2a10)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
+  background-color:var(--accent,#FF7A1A);border:2px solid var(--accent2,#FFB347);cursor:pointer}
+input[type=range]:focus{border-color:var(--accent,#FF7A1A)}
+
+/* --- 4) SWITCHES: fixed pixel size, physical offsets, transform ke bajaye `left` --- */
+.switchrow{display:flex;align-items:center;justify-content:space-between;min-height:54px;
+  margin-bottom:8px;padding:11px 13px;font-size:12.5px;line-height:1.4;border-bottom:none;
+  background-color:var(--bg1,#0E0E16);border:1px solid var(--line,#3a2a10);border-radius:12px}
+.switchrow > span{flex:1 1 auto;min-width:0;margin-right:12px}   /* flex `gap` ka fallback */
+.switch{position:relative;display:inline-block;width:48px;height:26px;min-width:48px;flex:none;
+  margin:0;vertical-align:middle;cursor:pointer}
+.switch input{position:absolute;top:0;left:0;width:48px;height:26px;margin:0;opacity:0;z-index:2;cursor:pointer}
+.switch i{position:absolute;top:0;left:0;right:auto;bottom:auto;display:block;width:48px;height:26px;
+  background-color:var(--bg2,#171722);border:1px solid var(--line,#3a2a10);border-radius:999px;
+  -webkit-box-sizing:border-box;box-sizing:border-box}
+.switch i::before{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
+  background-color:var(--text1,#A2A2B5);-webkit-transform:none;transform:none;
+  -webkit-transition:left .2s,background-color .2s;transition:left .2s,background-color .2s}
+.switch input:checked + i{background-color:var(--accent,#FF7A1A);border-color:var(--accent2,#FFB347)}
+.switch input:checked + i::before{left:24px;background-color:#0b0b10;-webkit-transform:none;transform:none}
+
+/* --- 5) Theme grid / accent dots: `gap` na chale to bhi na chipkein --- */
+#themeGrid{display:grid;grid-template-columns:repeat(3,1fr);grid-gap:8px;gap:8px;margin-top:8px}
+#artistGrid{grid-gap:6px}
+.tsw{background-color:var(--bg1,#0E0E16);border:1px solid var(--line,#3a2a10);border-radius:12px}
+.tsw .swp{height:26px;border:1px solid var(--line,#3a2a10)}
+#accentRow{display:block;margin-top:8px;font-size:0}
+#accentRow .acc{display:inline-block;width:30px;height:30px;margin:0 10px 10px 0;
+  border:2px solid transparent;border-radius:50%;vertical-align:middle}
+#accentRow .acc.active{border-color:var(--text0,#F5F5FA)}
+
+/* --- 6) Buttons hamesha full-width + tappable --- */
+.save,.danger,#saveSettings{display:block;width:100%;min-height:46px}
+
+/* --- 7) Bottom nav ke neeche kuch na chhupe (env() na chale to bhi) --- */
+nav{padding:8px 10px 10px}
+@supports(padding-bottom:env(safe-area-inset-bottom)){nav{padding-bottom:calc(10px + env(safe-area-inset-bottom))}}
+#tab-set{padding-bottom:130px}
+
 </style>
 </head>
 <body>
@@ -371,7 +463,7 @@ nav button.active{color:#FFB347;background:#441c05}
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v4.0.1 — OBSIDIAN — WEBVIEW COMPAT • PERSONAS • THEMES</div>
+  <div class="ver">v4.0.2 — OBSIDIAN — WEBVIEW COMPAT • PERSONAS • THEMES</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid #c85050; background:#3c0a0f; border-radius:12px; padding:12px; text-align:left;">
@@ -396,14 +488,14 @@ nav button.active{color:#FFB347;background:#441c05}
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v4.0.1 • 0-BUDGET • WEBVIEW COMPAT</div>
+  <div class="dfoot">MAYA v4.0.2 • 0-BUDGET • WEBVIEW COMPAT</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.0.1 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.0.2 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -564,7 +656,7 @@ nav button.active{color:#FFB347;background:#441c05}
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.0.1</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.0.2</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -766,7 +858,7 @@ nav button.active{color:#FFB347;background:#441c05}
       </div>
 
       <button class="save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v4.0.1 — OBSIDIAN EDITION • WEBVIEW COMPAT • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v4.0.2 — OBSIDIAN EDITION • WEBVIEW COMPAT • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -781,7 +873,7 @@ nav button.active{color:#FFB347;background:#441c05}
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.0.1 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.0.2 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -795,12 +887,27 @@ window.__consoleErr = function(m){
    Agar main app script crash ho jaye to error screen par dikhta hai + FORCE ENTRY milti hai */
 window.__mayaErr = null;
 window.__mayaJSOK = false;
-/* v4.0.1: WebView ke Chrome major version ka detect — old WebView = inset/color-mix support nahi */
+/* v4.0.2: WebView ke Chrome major version ka detect — old WebView = inset/color-mix support nahi */
 window.__webviewMajor = (function(){
   var m = String(navigator.userAgent || "").match(/Chrome\/(\d+)\./);
   return m ? parseInt(m[1], 10) : 0;
 })();
 window.__oldWebview = window.__webviewMajor > 0 && window.__webviewMajor < 87;
+/* v4.0.2: seedha feature-detect (UA se zyada bharosa mand) — jo CSS support na ho
+   uske liye <html> par class lag jati hai, taake plain-CSS fallback chal sake. */
+window.__cssOK = function(prop, val){
+  try { return !!(window.CSS && window.CSS.supports && window.CSS.supports(prop, val)); }
+  catch (e) { return false; }
+};
+window.__noColorMix  = !window.__cssOK("background-color", "color-mix(in srgb,red 50%,blue)");
+window.__noAccentCol = !window.__cssOK("accent-color", "red");
+window.__noFlexGap   = !window.__cssOK("row-gap", "1px");
+window.__compatClass =
+  (window.__noColorMix  ? " nocm"  : "") +
+  (window.__noAccentCol ? " noacc" : "") +
+  (window.__noFlexGap   ? " nogap" : "") +
+  (window.__oldWebview  ? " oldwv" : "");
+try { document.documentElement.className += window.__compatClass; } catch (e) {}
 window.onerror = function(m, s, l, c, e){
   window.__mayaErr = (m || "unknown error") + " (line " + (l || "?") + ")";
   try {
@@ -828,7 +935,7 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v4.0.1 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v4.0.2 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
@@ -909,13 +1016,13 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v4.0.1 — SYSTEMS ONLINE");
+    pushLog("MAYA v4.0.2 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
     if (window.__oldWebview) pushLog("OLD WEBVIEW: Chrome " + window.__webviewMajor + " — update karo!");
   } catch(e){}
-  /* v4.0.1: purana WebView par non-blocking warning (2.5s baad) */
+  /* v4.0.2: purana WebView par non-blocking warning (2.5s baad) */
   if (window.__oldWebview) setTimeout(function(){
     try { toast("⚠ Purana WebView (Chrome " + window.__webviewMajor + ") — Play Store se 'Android System WebView' update karo"); } catch(e){}
   }, 2500);
@@ -2990,11 +3097,16 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v4.0.1 — DOCTOR REPORT");
+  out.push("MAYA v4.0.2 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
   out.push("NATIVE WEBVIEW PKG: " + (window.MayaBridge && window.MayaBridge.webViewVersion ? window.MayaBridge.webViewVersion() : "n/a (web mode)"));
+  out.push("CSS COMPAT: color-mix " + (window.__noColorMix ? "NO (fallback chal raha)" : "YES") +
+           " • accent-color " + (window.__noAccentCol ? "NO (fallback)" : "YES") +
+           " • flex-gap " + (window.__noFlexGap ? "NO (margin fallback)" : "YES"));
+  try { out.push("SETTINGS SCROLL: " + (function(){ var t = document.getElementById("tab-set");
+        return t ? (t.scrollHeight > t.clientHeight ? "scrollable ✅ (" + t.scrollHeight + "/" + t.clientHeight + "px)" : "content fits (" + t.scrollHeight + "px)") : "n/a"; })()); } catch (e) {}
   out.push("MAYA BRIDGE (APK): " + (window.MayaBridge ? "YES ✅" : "NO — web/PWA mode"));
   try { localStorage.setItem("_mayaT", "1"); localStorage.removeItem("_mayaT"); out.push("STORAGE: OK ✅"); }
   catch (e) { out.push("STORAGE: FAIL ❌ — " + e.message); }
@@ -3084,7 +3196,7 @@ if (NATIVE) {
   $("#installBtn").style.display = "none";
   pushLog("NATIVE BRIDGE: ACTIVE (alarm/timer/notify/battery)");
   var sver = document.querySelector("#splash .ver");
-  if (sver) sver.textContent = "VERSION 4.0.1 — WEBVIEW COMPAT EDITION";
+  if (sver) sver.textContent = "VERSION 4.0.2 — WEBVIEW COMPAT EDITION";
 }
 greetMiniRefresh();
 chatHist.slice(-40).forEach(function(h){ addBubble(h.role === "user" ? "user" : "ai", h.text); });
@@ -3271,7 +3383,7 @@ function accent2Of(a){
   return "#" + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
 }
 function applyTheme(){
-  document.documentElement.className = "t-" + (settings.theme || "obsidian");
+  document.documentElement.className = "t-" + (settings.theme || "obsidian") + (window.__compatClass || "");
   document.documentElement.style.setProperty("--accent", settings.accent || "#FF7A1A");
   document.documentElement.style.setProperty("--accent2", accent2Of(settings.accent || "#FF7A1A"));
   document.documentElement.style.setProperty("--radius", (settings.radius || 18) + "px");
@@ -3451,8 +3563,8 @@ function startProactive(){
 
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
-try { $("#hudBuild").textContent = "v4.0.1"; } catch(e){}
-try { pushLog("MAYA v4.0.1 — OBSIDIAN MODULE ONLINE (compat patch)"); } catch(e){}
+try { $("#hudBuild").textContent = "v4.0.2"; } catch(e){}
+try { pushLog("MAYA v4.0.2 — OBSIDIAN MODULE ONLINE (compat patch)"); } catch(e){}
 </script>
 </body>
 </html>

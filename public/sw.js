@@ -1,7 +1,7 @@
-/* MAYA Service Worker — v4.0.1 (FULL ES5 — old Android System WebView par bhi parse hota hai)
+/* MAYA Service Worker — v4.0.2 (FULL ES5 — old Android System WebView par bhi parse hota hai)
    Network-first for HTML (so updates apply immediately),
    cache-first for static assets. */
-var CACHE = 'maya-v4.0.1';
+var CACHE = 'maya-v4.0.2';
 var ASSETS = [
   './',
   './index.html',
