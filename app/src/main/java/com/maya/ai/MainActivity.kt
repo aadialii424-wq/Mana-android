@@ -34,7 +34,7 @@ import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.view.WindowManager
 import android.webkit.JavascriptInterface
-import android.webkit.WebResourceError
+import androidx.webkit.WebResourceErrorCompat
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
@@ -195,7 +195,7 @@ class MainActivity : AppCompatActivity() {
         override fun onReceivedError(
             view: WebView,
             request: WebResourceRequest,
-            error: WebResourceError
+            error: WebResourceErrorCompat
         ) {
             if (request.isForMainFrame && request.url.host == VIRTUAL_HOST) {
                 view.loadUrl("file:///android_asset/web/index.html")
