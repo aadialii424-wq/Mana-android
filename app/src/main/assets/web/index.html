@@ -51,7 +51,8 @@ body{
   color:var(--text0); display:flex; flex-direction:column; overflow:hidden;
 }
 button{font-family:inherit}
-::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--accent) 35%,transparent);border-radius:4px}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:rgba(255,122,26,.35);border-radius:4px}
+@supports(background:color-mix(in srgb,red 50%,blue)){::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--accent) 35%,transparent)}}
 
 /* ============ EDGE GLOW (video wala — 4 taraf gradient ring) ============ */
 #edgeGlow{position:fixed;inset:0;z-index:29;pointer-events:none;opacity:0;transition:opacity .8s}
@@ -59,7 +60,8 @@ button{font-family:inherit}
 #edgeGlow::before{content:"";position:absolute;inset:-35vmax;
   background:conic-gradient(from 0deg, transparent 0 8%, var(--accent) 12%, transparent 16% 33%, var(--accent2) 37%, transparent 41% 58%, var(--accent) 62%, transparent 66% 83%, var(--accent2) 87%, transparent 91%);
   animation:egspin 9s linear infinite;filter:blur(2px);opacity:.55}
-#edgeGlow::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 26px 6px color-mix(in srgb,var(--accent) 30%,transparent)}
+#edgeGlow::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 26px 6px rgba(255,122,26,.3)}
+@supports(box-shadow:inset 0 0 0 0 color-mix(in srgb,red 50%,blue)){#edgeGlow::after{box-shadow:inset 0 0 26px 6px color-mix(in srgb,var(--accent) 30%,transparent)}}
 @keyframes egspin{to{transform:rotate(360deg)}}
 
 /* ============ SPLASH ============ */
@@ -80,11 +82,15 @@ button{font-family:inherit}
 #bootBtn{
   margin-top:8px;padding:14px 42px;font-size:15px;font-weight:800;letter-spacing:2px;border:none;cursor:pointer;
   border-radius:999px;color:#0b0b10;background:linear-gradient(135deg,var(--accent),var(--accent2));
-  box-shadow:0 6px 30px color-mix(in srgb,var(--accent) 45%,transparent);
+  box-shadow:0 6px 30px rgba(255,122,26,.45);
+}
+@supports(box-shadow:0 0 0 0 color-mix(in srgb,red 50%,blue)){#bootBtn{box-shadow:0 6px 30px color-mix(in srgb,var(--accent) 45%,transparent)}}
+#bootBtn{margin-top:8px;padding:14px 42px;font-size:15px;font-weight:800;letter-spacing:2px;border:none;cursor:pointer;border-radius:999px;color:#0b0b10;background:linear-gradient(135deg,var(--accent),var(--accent2))
 }
 .sring{position:relative;width:120px;height:120px;display:grid;place-items:center}
 .sring span{font-size:34px;font-weight:900;color:var(--accent)}
-.sring div{position:absolute;inset:0;border-radius:50%;border:2px solid color-mix(in srgb,var(--accent) 40%,transparent)}
+.sring div{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,122,26,.4)}
+@supports(border:2px solid color-mix(in srgb,red 50%,blue)){.sring div{border:2px solid color-mix(in srgb,var(--accent) 40%,transparent)}}
 .sring .r1{animation:rr 2.2s linear infinite;border-top-color:var(--accent)}
 .sring .r2{inset:14px;animation:rr 1.6s linear infinite reverse;border-bottom-color:var(--accent2)}
 .sring .r3{inset:28px;animation:rr 3s linear infinite;border-left-color:var(--accent)}
@@ -106,7 +112,8 @@ header{
 .logo small{font-size:8.5px;letter-spacing:2.5px;color:var(--text1)}
 #statusPill{font-size:9.5px;letter-spacing:1px;padding:6px 10px;border-radius:999px;
   border:1px solid var(--line);color:var(--text1);background:var(--bg2);flex:none}
-#statusPill.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+#statusPill.ok{color:var(--ok);border-color:rgba(61,214,140,.4)}
+@supports(border-color:color-mix(in srgb,red 50%,blue)){#statusPill.ok{border-color:color-mix(in srgb,var(--ok) 40%,transparent)}}
 
 main{flex:1;overflow:hidden;position:relative}
 .tab{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;
@@ -130,12 +137,18 @@ main{flex:1;overflow:hidden;position:relative}
   position:relative;z-index:2;width:62%;height:62%;border-radius:50%;display:grid;place-items:center;
   font-size:40px;font-weight:900;color:#0b0b10;
   background:radial-gradient(circle at 32% 28%,var(--accent2),var(--accent));
-  box-shadow:0 0 34px color-mix(in srgb,var(--accent) 55%,transparent);
+  box-shadow:0 0 34px rgba(255,122,26,.55);
+}
+@supports(box-shadow:0 0 0 0 color-mix(in srgb,red 50%,blue)){.orbCore{box-shadow:0 0 34px color-mix(in srgb,var(--accent) 55%,transparent)}}
+.orbCore{position:relative;z-index:2;width:62%;height:62%;border-radius:50%;display:grid;place-items:center;font-size:40px;font-weight:900;color:#0b0b10;background:radial-gradient(circle at 32% 28%,var(--accent2),var(--accent));transition:transform .25s
   transition:transform .25s;
 }
-#orb[data-state="listening"] .orbCore{background:radial-gradient(circle at 32% 28%,#6ff0b0,var(--ok));box-shadow:0 0 44px color-mix(in srgb,var(--ok) 60%,transparent);animation:pulse 1.4s ease-in-out infinite}
-#orb[data-state="thinking"] .orbCore{background:radial-gradient(circle at 32% 28%,#ffd98a,var(--warn));box-shadow:0 0 40px color-mix(in srgb,var(--warn) 55%,transparent);animation:pulse 1s ease-in-out infinite}
-#orb[data-state="speaking"] .orbCore{background:radial-gradient(circle at 32% 28%,#b9a7ff,var(--purple));box-shadow:0 0 44px color-mix(in srgb,var(--purple) 60%,transparent);animation:pulse .8s ease-in-out infinite}
+#orb[data-state="listening"] .orbCore{background:radial-gradient(circle at 32% 28%,#6ff0b0,var(--ok));box-shadow:0 0 44px rgba(61,214,140,.6);animation:pulse 1.4s ease-in-out infinite}
+@supports(box-shadow:0 0 0 0 color-mix(in srgb,red 50%,blue)){#orb[data-state="listening"] .orbCore{box-shadow:0 0 44px color-mix(in srgb,var(--ok) 60%,transparent)}}
+#orb[data-state="thinking"] .orbCore{background:radial-gradient(circle at 32% 28%,#ffd98a,var(--warn));box-shadow:0 0 40px rgba(255,194,75,.55);animation:pulse 1s ease-in-out infinite}
+@supports(box-shadow:0 0 0 0 color-mix(in srgb,red 50%,blue)){#orb[data-state="thinking"] .orbCore{box-shadow:0 0 40px color-mix(in srgb,var(--warn) 55%,transparent)}}
+#orb[data-state="speaking"] .orbCore{background:radial-gradient(circle at 32% 28%,#b9a7ff,var(--purple));box-shadow:0 0 44px rgba(167,139,250,.6);animation:pulse .8s ease-in-out infinite}
+@supports(box-shadow:0 0 0 0 color-mix(in srgb,red 50%,blue)){#orb[data-state="speaking"] .orbCore{box-shadow:0 0 44px color-mix(in srgb,var(--purple) 60%,transparent)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
 .orbTag{position:absolute;bottom:8px;z-index:3;font-size:8px;letter-spacing:2px;color:#0b0b10;font-weight:800}
 #statusText{font-size:12px;letter-spacing:3px;color:var(--text1);font-weight:700}
@@ -161,7 +174,8 @@ main{flex:1;overflow:hidden;position:relative}
 .qactions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;max-width:400px}
 .qactions button{background:var(--panel);border:1px solid var(--line);color:var(--text0);
   border-radius:14px;padding:10px 6px;font-size:11px;cursor:pointer}
-.qactions button:active{background:color-mix(in srgb,var(--accent) 18%,var(--bg1))}
+.qactions button:active{background:rgba(255,122,26,.18)}
+@supports(background:color-mix(in srgb,red 50%,blue)){.qactions button:active{background:color-mix(in srgb,var(--accent) 18%,var(--bg1))}}
 .micbar{height:100%;background:var(--cyan);transition:width .12s;border-radius:3px}
 
 /* ============ CHAT ============ */
@@ -177,13 +191,15 @@ main{flex:1;overflow:hidden;position:relative}
 .row.ai{align-self:flex-start;align-items:flex-start}
 .bubble{border-radius:var(--radius);padding:10px 13px;font-size:13.5px;line-height:1.55;
   background:var(--panel);border:1px solid var(--line);color:var(--text0);word-break:break-word;white-space:pre-wrap}
-.row.me .bubble{background:color-mix(in srgb,var(--accent) 16%,var(--bg1));border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+.row.me .bubble{background:rgba(255,122,26,.16);border-color:rgba(255,122,26,.35)}
+@supports(background:color-mix(in srgb,red 50%,blue)){.row.me .bubble{background:color-mix(in srgb,var(--accent) 16%,var(--bg1));border-color:color-mix(in srgb,var(--accent) 35%,transparent)}}
 .bubble .who{display:block;font-size:8px;letter-spacing:2px;font-weight:800;color:var(--accent);margin-bottom:4px}
 .bubble a{color:var(--accent2)}
 .quickrow{display:flex;gap:8px;padding:8px 0;flex:none}
 .quick{background:var(--bg1);border:1px solid var(--line);color:var(--text1);border-radius:999px;
   padding:8px 13px;font-size:10.5px;font-weight:700;cursor:pointer;letter-spacing:.5px}
-.quick.on{background:color-mix(in srgb,var(--accent) 18%,var(--bg1));color:var(--accent2);border-color:color-mix(in srgb,var(--accent) 40%,transparent)}
+.quick.on{background:rgba(255,122,26,.18);color:var(--accent2);border-color:rgba(255,122,26,.4)}
+@supports(background:color-mix(in srgb,red 50%,blue)){.quick.on{background:color-mix(in srgb,var(--accent) 18%,var(--bg1));border-color:color-mix(in srgb,var(--accent) 40%,transparent)}}
 .chatbar{display:flex;gap:8px;padding:8px 0 4px;flex:none}
 #micBtn{width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;flex:none;font-size:17px;
   background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b0b10;font-weight:800}
@@ -213,8 +229,8 @@ label.f{background:none;border:none;padding:8px 0 0;margin:8px 0 0;color:var(--t
 .save,.danger{width:100%;margin-top:10px;padding:12px;font-size:12.5px;font-weight:800;letter-spacing:1px;
   border:none;border-radius:12px;cursor:pointer}
 .save{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b0b10}
-.danger{background:color-mix(in srgb,var(--danger) 16%,transparent);color:var(--danger);
-  border:1px solid color-mix(in srgb,var(--danger) 40%,transparent)}
+.danger{background:rgba(255,92,92,.16);color:var(--danger);border:1px solid rgba(255,92,92,.4)}
+@supports(background:color-mix(in srgb,red 50%,blue)){.danger{background:color-mix(in srgb,var(--danger) 16%,transparent);border:1px solid color-mix(in srgb,var(--danger) 40%,transparent)}}
 .note{font-size:10.5px;color:var(--text1);line-height:1.6;margin-top:8px}
 .switchrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;
   border-bottom:1px dashed var(--line);font-size:12.5px}
@@ -224,7 +240,8 @@ label.f{background:none;border:none;padding:8px 0 0;margin:8px 0 0;color:var(--t
 .switch i{position:absolute;inset:0;background:var(--bg2);border:1px solid var(--line);border-radius:999px;transition:.25s}
 .switch i::before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;border-radius:50%;
   background:var(--text1);transition:.25s}
-.switch input:checked + i{background:color-mix(in srgb,var(--accent) 45%,var(--bg2));border-color:var(--accent)}
+.switch input:checked + i{background:rgba(255,122,26,.45);border-color:var(--accent)}
+@supports(background:color-mix(in srgb,red 50%,blue)){.switch input:checked + i{background:color-mix(in srgb,var(--accent) 45%,var(--bg2))}}
 .switch input:checked + i::before{transform:translateX(20px);background:var(--accent2)}
 input[type=range]{width:100%;accent-color:var(--accent);margin:6px 0}
 
@@ -241,7 +258,8 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:6px 0}
 
 /* ============ HUD ============ */
 .maya-char{position:relative;width:170px;margin:0 auto;flex:none}
-.char-glow{position:absolute;inset:-16px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 22%,transparent),transparent 70%);animation:pulse 3s infinite}
+.char-glow{position:absolute;inset:-16px;border-radius:50%;background:radial-gradient(circle,rgba(255,122,26,.22),transparent 70%);animation:pulse 3s infinite}
+@supports(background:radial-gradient(circle,color-mix(in srgb,red 50%,blue),transparent)){.char-glow{background:radial-gradient(circle,color-mix(in srgb,var(--accent) 22%,transparent),transparent 70%)}}
 .char-name{text-align:center;font-size:10px;letter-spacing:6px;color:var(--accent);font-weight:800;margin-top:2px}
 .char-status{text-align:center;font-size:9.5px;letter-spacing:2px;color:var(--text1);margin-top:3px}
 .char-eyes{animation:pulse 4s infinite}
@@ -299,7 +317,8 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:6px 0}
   background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
 #drawer button.dbtn{display:flex;align-items:center;gap:12px;width:100%;background:none;border:none;
   color:var(--text0);font-size:13.5px;font-weight:700;padding:13px 10px;border-radius:12px;cursor:pointer;text-align:left}
-#drawer button.dbtn:active,#drawer button.dbtn.active{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent2)}
+#drawer button.dbtn:active,#drawer button.dbtn.active{background:rgba(255,122,26,.15);color:var(--accent2)}
+@supports(background:color-mix(in srgb,red 50%,blue)){#drawer button.dbtn:active,#drawer button.dbtn.active{background:color-mix(in srgb,var(--accent) 15%,transparent)}}
 #drawer .dsep{height:1px;background:var(--line);margin:10px 6px}
 #drawer .dfoot{margin-top:auto;font-size:9px;color:var(--text1);letter-spacing:1.5px;padding:8px;text-align:center}
 #drawerScrim{position:fixed;inset:0;z-index:44;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .3s}
@@ -310,7 +329,8 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;gap:4px;paddi
 nav button{flex:1;background:none;border:none;color:var(--text1);font-size:9px;font-weight:800;letter-spacing:1px;
   padding:7px 2px;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
 nav button .ic{font-size:17px}
-nav button.active{color:var(--accent2);background:color-mix(in srgb,var(--accent) 13%,transparent)}
+nav button.active{color:var(--accent2);background:rgba(255,122,26,.13)}
+@supports(background:color-mix(in srgb,red 50%,blue)){nav button.active{background:color-mix(in srgb,var(--accent) 13%,transparent)}}
 
 #toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(20px);z-index:70;
   background:var(--panel2);border:1px solid var(--line);color:var(--text0);border-radius:999px;
@@ -411,7 +431,7 @@ nav button.active{color:var(--accent2);background:color-mix(in srgb,var(--accent
       <div class="chatHead">
         <span class="dot" id="dot"></span>
         <span class="t" id="chatState">MAYA READY</span>
-        <div style="width:80px;height:4px;background:color-mix(in srgb,var(--accent) 14%,transparent);border-radius:3px;overflow:hidden;margin-left:8px"><div class="micbar" style="height:100%;width:4%"></div></div>
+        <div style="width:80px;height:4px;background:rgba(255,122,26,.14);border-radius:3px;overflow:hidden;margin-left:8px"><div class="micbar" style="height:100%;width:4%"></div></div>
         <span style="margin-left:auto; font-size:11px; color:var(--dim)" id="greetMini"></span>
       </div>
       <div id="log"></div>
@@ -528,7 +548,7 @@ nav button.active{color:var(--accent2);background:color-mix(in srgb,var(--accent
         <button onclick="testMayaVoice()" style="background:var(--panel);border:1px solid var(--line);color:var(--accent2);border-radius:999px;padding:7px 15px;font-size:11px;cursor:pointer;letter-spacing:1px">🎧 AWAAZ SUNO</button>
         <button onclick="startListening()" style="background:var(--panel);border:1px solid var(--line);color:var(--accent2);border-radius:999px;padding:7px 15px;font-size:11px;cursor:pointer;letter-spacing:1px">🎤 BAIKHO</button>
       </div>
-      <div style="display:flex;justify-content:center"><div style="width:180px;height:5px;background:color-mix(in srgb,var(--accent) 14%,transparent);border-radius:3px;overflow:hidden"><div class="micbar" style="height:100%;width:4%;border-radius:3px;box-shadow:0 0 8px var(--cyan)"></div></div></div>
+      <div style="display:flex;justify-content:center"><div style="width:180px;height:5px;background:rgba(255,122,26,.14);border-radius:3px;overflow:hidden"><div class="micbar" style="height:100%;width:4%;border-radius:3px;box-shadow:0 0 8px var(--cyan)"></div></div></div>
       <div class="chips" style="margin-top:14px">
         <div class="chip"><div class="k">◈ SYSTEM TIME</div><div class="v big" id="hudClock">--:--</div><div class="k" id="hudDate" style="margin-top:2px">—</div></div>
         <div class="chip"><div class="k">◈ POWER CELL</div><div class="v big" id="hudBat">—</div><div class="k" id="hudCharge" style="margin-top:2px">&nbsp;</div></div>
