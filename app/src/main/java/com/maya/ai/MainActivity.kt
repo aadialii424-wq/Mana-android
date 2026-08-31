@@ -942,9 +942,6 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) { false }
         }
 
-        @JavascriptInterface
-        fun markAlive() { webViewAlive = true }
-
         /** Universal HTTP (CORS-proof) — backup brains ke liye */
         @JavascriptInterface
         fun httpPost(url: String, authHeader: String, body: String): String {
