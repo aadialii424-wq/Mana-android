@@ -1,9 +1,33 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 4.2.0 "AWAAZ" — 0-Budget Build • Android APK + Web PWA**
+**Version 4.3.0 "DIMAAG" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🧠 v4.3.0 — DIMAAG ENGINE v2 ("Sab free brains busy" ka ilaj)
+
+Wo message bar bar isliye aata tha ke **3 bug ek doosre ko khila rahe the**:
+
+1. **HTTP 400 ko "key ka masla" samjha jata tha** → Gemini par **10 minute** ka blackout.
+   Halanki 400 aksar kharab request hoti hai, key ka masla `401`/`403` hota hai.
+2. **`chatHist.slice(-8)` ka pehla turn `model` ho jata tha** → Gemini multi-turn history
+   `user` se shuru maangta hai → **400** → upar wala blackout. Chaar baat-cheet ke baad
+   ye **har dafa** hota tha. Yahi "bar bar" ki asal jarh.
+3. **Ek sawal par 5 model try** hote the → free quota 5 guna tez khatam.
+
+Ab:
+- **Har nakami ka naam** — KEY_MISSING / KEY_BAD / QUOTA / QUOTA_DAY / BAD_REQUEST / SERVER / NETWORK / MODEL_404 / EMPTY
+- **Khud-marammat** — 400 aaye to history saaf kar ke, bina tools, foran dobara koshish
+- **Quota izzat se** — Google jitna waqt maange (`retryDelay`) utna cooldown; per-day quota alag pehchana jata hai
+- **Bekaar request kabhi nahi** — offline / key nahi / blackout par network call hi nahi jati
+- **Khali haath nahi** — sab fail? pehle local jawab (waqt, tareekh, hisab, yaad-dasht), warna **asli wajah + agla qadam**
+- **7 alag paigham** us ek jumle ki jagah — aur wo jumla source se hi nikal gaya
+- **Header pill ab sach bolta hai** — `AI ONLINE` sirf jab aakhri 15 min mein asli jawab aaya ho
+- **Doctor** mein har provider ki koshish ka poora record
+
+Saboot: `tools/test-brain-engine.js` — **109 assertions**.
+Tafseel: [`docs/DIMAAG-ENGINE-ARCHITECTURE.md`](docs/DIMAAG-ENGINE-ARCHITECTURE.md)
 
 ## 🎙️ v4.2.0 — AWAAZ ENGINE v6
 

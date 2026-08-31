@@ -61,6 +61,10 @@ function makeWorld(opts = {}) {
   };
   w.SpeechSynthesisUtterance = function (t) { this.text = t; };
 
+  /* Blob ko lapet lo taake bytes har jsdom version par mil jayen */
+  const RealBlob = w.Blob;
+  w.Blob = function (parts, o) { const b = new RealBlob(parts, o); try { b.__parts = parts; } catch (e) {} return b; };
+
   /* URL.createObjectURL — Blob ke bytes pakar lo */
   let n = 0;
   w.URL.createObjectURL = function (blob) {
@@ -122,7 +126,11 @@ function okBody(rate = 24000, b64 = pcmB64()) {
   return { candidates: [{ content: { parts: [{ inlineData: { mimeType: 'audio/L16;codec=pcm;rate=' + rate, data: b64 } }] } }] };
 }
 const wait = (ms = 12) => new Promise(r => setTimeout(r, ms));
-const bytesOf = async (blob) => new Uint8Array(await blob.arrayBuffer());
+const bytesOf = async (blob) => {
+  if (blob.__parts && blob.__parts[0]) return new Uint8Array(blob.__parts[0]);
+  if (typeof blob.arrayBuffer === 'function') return new Uint8Array(await blob.arrayBuffer());
+  throw new Error('blob bytes nahi mile');
+};
 const str = (b, o, n) => String.fromCharCode.apply(null, Array.from(b.slice(o, o + n)));
 const u32 = (b, o) => b[o] | (b[o + 1] << 8) | (b[o + 2] << 16) | (b[o + 3] << 24);
 const u16 = (b, o) => b[o] | (b[o + 1] << 8);
