@@ -534,7 +534,7 @@ nav{padding:8px 10px 10px}
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v4.3.0 — DIMAAG ENGINE v2 • SACHA STATUS • KHUD-MARAMMAT</div>
+  <div class="ver">v4.4.0 — BRAIN POOL • 10 DIMAAG • KABHI NA RUKNE WALI</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid #c85050; background:#3c0a0f; border-radius:12px; padding:12px; text-align:left;">
@@ -559,14 +559,14 @@ nav{padding:8px 10px 10px}
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v4.3.0 • 0-BUDGET • DIMAAG + AWAAZ</div>
+  <div class="dfoot">MAYA v4.4.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.3.0 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.4.0 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -727,7 +727,7 @@ nav{padding:8px 10px 10px}
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.3.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.4.0</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -976,20 +976,40 @@ nav{padding:8px 10px 10px}
             </select>
           </div>
           <div class="ui-field">
-            <div class="ui-label">GROQ KEY (backup brain — optional)</div>
-            <input class="ui-input" id="sGqKey" type="password" placeholder="gsk_... se shuru hoti hai">
-          </div>
-          <div class="ui-field">
-            <div class="ui-label">GROQ MODEL</div>
-            <select class="ui-input ui-select" id="sGqModel">
-              <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
-              <option value="llama-3.1-8b-instant">Llama 3.1 8B (instant)</option>
-            </select>
-          </div>
-          <div class="ui-field">
-            <div class="ui-label">GITHUB TOKEN (coding/upload — optional)</div>
+            <div class="ui-label">🐙 GITHUB TOKEN — coding + models <small>(github.com/settings/tokens)</small></div>
             <input class="ui-input" id="sGhKey" type="password" placeholder="github_pat_...">
           </div>
+          <div class="ui-hint" id="poolHint">🧠 BRAIN POOL — <b id="poolLive">0</b> dimaag zinda. Har khane mein <b>kai keys</b> comma se daal sakte ho — quota dugna, tigna, jitna chaho.</div>
+          <div class="ui-field">
+            <div class="ui-label">⚡ GROQ KEY — sab se tez <small>(console.groq.com)</small></div>
+            <input class="ui-input" id="sGqKey" type="password" placeholder="gsk_... (kai keys comma se)">
+          </div>
+          <div class="ui-field">
+            <div class="ui-label">🚀 CEREBRAS KEY — roz 10 lakh token <small>(cloud.cerebras.ai)</small></div>
+            <input class="ui-input" id="sCerebras" type="password" placeholder="csk-... (kai keys comma se)">
+          </div>
+          <div class="ui-field">
+            <div class="ui-label">🇪🇺 MISTRAL KEY — mahina 1 arab token <small>(console.mistral.ai)</small></div>
+            <input class="ui-input" id="sMistral" type="password" placeholder="kai keys comma se">
+          </div>
+          <div class="ui-field">
+            <div class="ui-label">🔀 OPENROUTER KEY — 20+ free models <small>(openrouter.ai)</small></div>
+            <input class="ui-input" id="sOpenRouter" type="password" placeholder="sk-or-v1-...">
+          </div>
+          <div class="ui-field">
+            <div class="ui-label">🟩 NVIDIA NIM KEY — 120+ models <small>(build.nvidia.com)</small></div>
+            <input class="ui-input" id="sNvidia" type="password" placeholder="nvapi-...">
+          </div>
+          <div class="ui-field">
+            <div class="ui-label">🇨🇳 Z.AI GLM KEY <small>(z.ai)</small></div>
+            <input class="ui-input" id="sZai" type="password" placeholder="optional">
+          </div>
+          <div class="ui-field">
+            <div class="ui-label">🆓 LLM7 TOKEN — bina key bhi chalta hai <small>(token.llm7.io)</small></div>
+            <input class="ui-input" id="sLlm7" type="password" placeholder="khaali chhoro to bhi chalega">
+          </div>
+          <button type="button" class="ui-btn ui-btn-ghost" id="poolCheck">🧠 BRAIN POOL DEKHO</button>
+          <pre class="ui-pre" id="poolOut">—</pre>
           <div class="ui-field">
             <div class="ui-label">AWAAZ KE LIYE ALAG GEMINI KEY (optional)</div>
             <input class="ui-input" id="sTtsKey" type="password" placeholder="Khaali = upar wali key use hogi">
@@ -1041,7 +1061,7 @@ nav{padding:8px 10px 10px}
       </div>
 
       <button type="button" class="ui-btn ui-btn-save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v4.3.0 — DIMAAG + AWAAZ • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v4.4.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -1056,7 +1076,7 @@ nav{padding:8px 10px 10px}
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.3.0 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.4.0 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -1124,11 +1144,11 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v4.3.0 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v4.4.0 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
-var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", groqModel:"llama-3.3-70b-versatile", ghKey:"", ttsKey:"", voiceEngine:"auto", gVoice:"Kore", voiceMood:"auto", neuralWifiOnly:false, neuralMaxChars:1400, edgeTTS:false, ttsModel:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"maya", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true, gender:"male", phone:"", musicApp:"youtube", favSong:"", ytChannel:"", assistName:"Maya", gfMode:false, persona:"maya", remember:true, convoMode:false, lang:"roman-ur", proactive:false, theme:"obsidian", accent:"#FF7A1A", radius:18, fontScale:1, edgeGlow:false };
+var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", ghKey:"", cerebrasKey:"", mistralKey:"", orKey:"", nvidiaKey:"", zaiKey:"", llm7Key:"", ttsKey:"", voiceEngine:"auto", gVoice:"Kore", voiceMood:"auto", neuralWifiOnly:false, neuralMaxChars:1400, edgeTTS:false, ttsModel:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"maya", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true, gender:"male", phone:"", musicApp:"youtube", favSong:"", ytChannel:"", assistName:"Maya", gfMode:false, persona:"maya", remember:true, convoMode:false, lang:"roman-ur", proactive:false, theme:"obsidian", accent:"#FF7A1A", radius:18, fontScale:1, edgeGlow:false };
 var settings = Object.assign({}, DEFAULTS);
 try {
   var s1 = JSON.parse(localStorage.getItem("maya_settings") || "null");
@@ -1205,7 +1225,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v4.3.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v4.4.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -2831,7 +2851,307 @@ async function resolveModels(){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v4.3.0)
+   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v4.4.0)
+   ---------------------------------------------------------------------------
+   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v4.4.0 se pehle Groq
+   ne 16 August 2026 ko apne purane Llama 3.x models band kar diye the — hamara
+   default wahi tha, is liye "backup brain bhi thak gaya" aata tha.
+
+   Ab MAYA ke paas 10 dimaag hain, teen tehon mein:
+     TEH 1  KEYED   — Gemini, Groq, Cerebras, Mistral, OpenRouter, GitHub, NVIDIA, Z.ai
+     TEH 2  KEYLESS — LLM7.io aur Pollinations: koi signup nahi, koi key nahi
+     TEH 3  LOCAL   — waqt/tareekh/hisab/yaad-dasht
+
+   Teen chaabiyan jo "unlimited" banati hain:
+     1. HAR key field mein KAI keys daali ja sakti hain (comma ya nayi line se
+        alag). 3 Gemini keys = 3 guna quota. Quota lagte hi agli key.
+     2. Model auto-discovery — provider ka /models endpoint parh kar chalta hai,
+        is liye koi model band ho jaye to app nahi marti (Groq wala hadsa dobara nahi).
+     3. Keyless teh hamesha zinda — chahe koi key na ho, MAYA phir bhi sochti hai.
+
+   Cooldown localStorage mein mehfooz hai, is liye app band kar ke kholne par
+   bhi wo provider dobara nahi chhera jata jiska quota khatam hai.
+   Tafseel: docs/BRAIN-POOL-ARCHITECTURE.md
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+var BRAINS = [
+  { id:"groq", name:"Groq", icon:"⚡", kind:"openai", keyField:"groqKey", pri:10, speed:"bijli",
+    url:"https://api.groq.com/openai/v1/chat/completions",
+    modelsUrl:"https://api.groq.com/openai/v1/models",
+    models:["openai/gpt-oss-120b","qwen/qwen3.6-27b","moonshotai/kimi-k2-instruct","openai/gpt-oss-20b","groq/compound-mini"],
+    free:"30/min · 1000/din har model", signup:"console.groq.com" },
+
+  { id:"cerebras", name:"Cerebras", icon:"🚀", kind:"openai", keyField:"cerebrasKey", pri:12, speed:"bijli",
+    url:"https://api.cerebras.ai/v1/chat/completions",
+    modelsUrl:"https://api.cerebras.ai/v1/models",
+    models:["gpt-oss-120b","llama-3.3-70b","qwen-3-235b-a22b-instruct-2507"],
+    free:"~10 lakh token roz", signup:"cloud.cerebras.ai" },
+
+  { id:"gemini", name:"Google Gemini", icon:"💎", kind:"gemini", keyField:"apikey", pri:5, tools:true, speed:"tez",
+    free:"15/min · 250-1500/din", signup:"aistudio.google.com" },
+
+  { id:"mistral", name:"Mistral", icon:"🇪🇺", kind:"openai", keyField:"mistralKey", pri:30,
+    url:"https://api.mistral.ai/v1/chat/completions",
+    modelsUrl:"https://api.mistral.ai/v1/models",
+    models:["mistral-small-latest","mistral-medium-latest","open-mistral-nemo"],
+    free:"~1 arab token mahina", signup:"console.mistral.ai" },
+
+  { id:"openrouter", name:"OpenRouter", icon:"🔀", kind:"openai", keyField:"orKey", pri:40,
+    url:"https://openrouter.ai/api/v1/chat/completions",
+    models:["openai/gpt-oss-120b:free","deepseek/deepseek-chat-v3-0324:free","meta-llama/llama-4-scout:free","qwen/qwen3.6-plus:free"],
+    free:"20/min · 50/din", signup:"openrouter.ai" },
+
+  { id:"github", name:"GitHub Models", icon:"🐙", kind:"openai", keyField:"ghKey", pri:50,
+    url:"https://models.github.ai/inference/chat/completions",
+    models:["openai/gpt-4.1-mini","openai/gpt-4o-mini","openai/gpt-4.1"],
+    free:"15/min · 150/din", signup:"github.com/settings/tokens" },
+
+  { id:"nvidia", name:"NVIDIA NIM", icon:"🟩", kind:"openai", keyField:"nvidiaKey", pri:60,
+    url:"https://integrate.api.nvidia.com/v1/chat/completions",
+    modelsUrl:"https://integrate.api.nvidia.com/v1/models",
+    models:["openai/gpt-oss-120b","meta/llama-3.3-70b-instruct","qwen/qwen2.5-72b-instruct"],
+    free:"~40/min", signup:"build.nvidia.com" },
+
+  { id:"zai", name:"Z.ai GLM", icon:"🇨🇳", kind:"openai", keyField:"zaiKey", pri:70,
+    url:"https://api.z.ai/api/paas/v4/chat/completions",
+    models:["glm-4.5-flash","glm-4-flash"],
+    free:"GLM Flash muft", signup:"z.ai" },
+
+  /* ── TEH 2: KEYLESS — koi signup nahi, hamesha zinda ── */
+  { id:"llm7", name:"LLM7", icon:"🆓", kind:"openai", keyless:true, key:"unused", keyField:"llm7Key", pri:80,
+    url:"https://api.llm7.io/v1/chat/completions",
+    modelsUrl:"https://api.llm7.io/v1/models",
+    models:["gpt-oss:20b","mistral-Nemo-Instruct-2407","deepseek-v3-0324","gpt-4o-mini"],
+    free:"bina key 10/min · token se 120/min", signup:"token.llm7.io (marzi se)" },
+
+  { id:"pollen", name:"Pollinations", icon:"🌸", kind:"openai", keyless:true, key:"", keyField:"pollenKey", pri:90,
+    url:"https://text.pollinations.ai/openai",
+    models:["openai","openai-fast","mistral"],
+    free:"koi signup nahi, koi key nahi", signup:"—" }
+];
+
+var BRAIN = {
+  VER: 3,
+  state: {},          /* id|keyIdx -> { cool:ts, why:"" } ; localStorage mein mehfooz */
+  models: {},         /* id -> auto-discover ki hui model list */
+  lastUsed: "",
+  reqSeq: 0,
+  waiting: {},        /* bridge ke async jawab */
+
+  /* ---------- mehfooz halat (app band ho kar khulne par bhi yaad) ---------- */
+  load: function () {
+    try {
+      var raw = JSON.parse(localStorage.getItem("maya_brainpool") || "{}");
+      if (raw && raw.state) BRAIN.state = raw.state;
+      if (raw && raw.models) BRAIN.models = raw.models;
+    } catch (e) {}
+  },
+  save: function () {
+    try { localStorage.setItem("maya_brainpool", JSON.stringify({ state: BRAIN.state, models: BRAIN.models, ts: Date.now() })); } catch (e) {}
+  },
+  st: function (id, ki) {
+    var k = id + "|" + (ki || 0);
+    if (!BRAIN.state[k]) BRAIN.state[k] = { cool: 0, why: "" };
+    return BRAIN.state[k];
+  },
+  chill: function (id, ki, ms, why) {
+    var s = BRAIN.st(id, ki);
+    s.cool = Date.now() + ms; s.why = why || "";
+    BRAIN.save();
+  },
+  free: function (id, ki) { var s = BRAIN.st(id, ki); s.cool = 0; s.why = ""; BRAIN.save(); },
+  cool: function (id, ki) { return Math.max(0, BRAIN.st(id, ki).cool - Date.now()); },
+
+  byId: function (id) { for (var i = 0; i < BRAINS.length; i++) if (BRAINS[i].id === id) return BRAINS[i]; return null; },
+
+  /* ---------- KAI KEYS: "a, b\nc" -> ["a","b","c"]  (yahi 3 guna quota deta hai) ---------- */
+  keys: function (p) {
+    if (p.keyless) return [p.key || ""];
+    var raw = String((settings && settings[p.keyField]) || "");
+    var parts = raw.split(/[\s,;]+/), out = [], i;
+    for (i = 0; i < parts.length; i++) { var k = parts[i].trim(); if (k.length > 0) out.push(k); }
+    return out;
+  },
+
+  /* ---------- kaun sa brain abhi tayyar hai ---------- */
+  ready: function (p, ki) {
+    if (navigator.onLine === false) return "OFFLINE";
+    var ks = BRAIN.keys(p);
+    if (!p.keyless && !ks.length) return "KEY_MISSING";
+    if (BRAIN.cool(p.id, ki || 0) > 0) return BRAIN.st(p.id, ki || 0).why || "QUOTA";
+    return "";
+  },
+
+  /* ---------- koshish ki tarteeb: har provider ki har key, behtareen pehle ---------- */
+  plan: function (needTools) {
+    var out = [], i, j;
+    for (i = 0; i < BRAINS.length; i++) {
+      var p = BRAINS[i], ks = BRAIN.keys(p);
+      for (j = 0; j < ks.length; j++) {
+        if (BRAIN.ready(p, j)) continue;
+        var pri = p.pri + j * 2;                                  /* pehli key ko tarjeeh */
+        if (needTools && p.tools) pri -= 100;                      /* tool wala kaam Gemini ko */
+        if (needTools && !p.tools) pri += 5;
+        out.push({ p: p, ki: j, pri: pri });
+      }
+    }
+    out.sort(function (a, b) { return a.pri - b.pri; });
+    return out;
+  },
+
+  /* ---------- ek HTTP POST: APK mein bridge (CORS nahi, UI jam nahi), warna XHR ---------- */
+  post: function (url, auth, payload, timeoutMs, cb) {
+    var done = false;
+    function finish(status, body) { if (done) return; done = true; cb(status, body); }
+
+    if (typeof NATIVE !== "undefined" && NATIVE && window.MayaBridge && window.MayaBridge.httpPostAsync) {
+      var id = "r" + (++BRAIN.reqSeq) + "_" + Date.now();
+      BRAIN.waiting[id] = function (status, body) { delete BRAIN.waiting[id]; finish(status, body); };
+      setTimeout(function () { if (BRAIN.waiting[id]) { delete BRAIN.waiting[id]; finish(0, "timeout"); } }, timeoutMs + 3000);
+      try { window.MayaBridge.httpPostAsync(url, auth, payload, id, timeoutMs); }
+      catch (e) { delete BRAIN.waiting[id]; finish(0, String(e && e.message || e)); }
+      return;
+    }
+    var xhr = new XMLHttpRequest();
+    try {
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      if (auth) xhr.setRequestHeader("Authorization", auth);
+      xhr.timeout = timeoutMs;
+    } catch (e) { finish(0, "open fail"); return; }
+    xhr.ontimeout = function () { finish(0, "timeout"); };
+    xhr.onerror = function () { finish(0, "network"); };
+    xhr.onload = function () { finish(xhr.status, xhr.responseText || ""); };
+    try { xhr.send(payload); } catch (e) { finish(0, "send fail"); }
+  },
+
+  /* ---------- OpenAI-shakl provider se baat ---------- */
+  ask: function (p, ki, msgs, cb) {
+    var keys = BRAIN.keys(p);
+    var key = keys[ki] || "";
+    var model = (BRAIN.models[p.id] && BRAIN.models[p.id][0]) || p.models[0];
+    var payload = JSON.stringify({
+      model: model, messages: msgs, temperature: 0.7, max_tokens: 320, stream: false
+    });
+    var auth = key ? ("Bearer " + key) : "";
+    DIMAAG.calls++;
+    BRAIN.post(p.url, auth, payload, 22000, function (status, body) {
+      var data = null;
+      try { data = JSON.parse(body); } catch (e) {}
+      if (status >= 200 && status < 300) {
+        var out = null;
+        try { out = data.choices[0].message.content; } catch (e) {}
+        if (out && String(out).trim()) {
+          BRAIN.free(p.id, ki);
+          BRAIN.lastUsed = p.id;
+          DIMAAG.ok(p.icon + " " + p.name);
+          cb(null, String(out).trim());
+          return;
+        }
+        DIMAAG.log(p.name, "EMPTY", model);
+        cb("EMPTY"); return;
+      }
+      var msg = "";
+      try { msg = String((data && (data.error && (data.error.message || data.error)) || data.message) || body).slice(0, 110); } catch (e) { msg = String(body).slice(0, 110); }
+      var code = DIMAAG.classify(status, { error: { message: msg, code: status } });
+
+      /* model band ho gaya? list dobara nikaalo — Groq wala hadsa dobara na ho */
+      if ((code === "MODEL_404" || code === "BAD_REQUEST") && /model|decommission|deprecat|not found|does not exist/i.test(msg)) {
+        DIMAAG.log(p.name, "MODEL", model + " → " + msg.slice(0, 50));
+        BRAIN.dropModel(p, model);
+        BRAIN.discover(p, key);
+        cb("MODEL"); return;
+      }
+      if (code === "QUOTA") { BRAIN.chill(p.id, ki, DIMAAG.isDayQuota(data || {}) ? 3600000 : 90000, "QUOTA"); }
+      else if (code === "KEY_BAD") { BRAIN.chill(p.id, ki, 1800000, "KEY_BAD"); }
+      else if (code === "SERVER") { BRAIN.chill(p.id, ki, 120000, "SERVER"); }
+      DIMAAG.log(p.name + (keys.length > 1 ? " key" + (ki + 1) : ""), code, msg);
+      cb(code);
+    });
+  },
+
+  /* ---------- mara hua model list se nikaalo ---------- */
+  dropModel: function (p, model) {
+    var list = BRAIN.models[p.id] || p.models.slice(0);
+    var out = [], i;
+    for (i = 0; i < list.length; i++) if (list[i] !== model) out.push(list[i]);
+    if (!out.length) out = p.models.slice(0);
+    BRAIN.models[p.id] = out;
+    BRAIN.save();
+  },
+
+  /* ---------- /models se zinda models ka pata (deprecation-proof) ---------- */
+  discover: function (p, key) {
+    if (!p.modelsUrl || BRAIN.discover._busy === p.id) return;
+    BRAIN.discover._busy = p.id;
+    var xhr = new XMLHttpRequest();
+    var useBridge = (typeof NATIVE !== "undefined" && NATIVE && window.MayaBridge && window.MayaBridge.httpGet);
+    function handle(txt) {
+      BRAIN.discover._busy = "";
+      var j = null;
+      try { j = JSON.parse(txt); } catch (e) { return; }
+      var arr = (j && (j.data || j.models)) || [];
+      var ids = [], i;
+      for (i = 0; i < arr.length; i++) { var id = arr[i].id || arr[i].name; if (id) ids.push(String(id).replace(/^models\//, "")); }
+      if (!ids.length) return;
+      /* pehle wo jo hamari pasandeeda list mein hain, phir baqi */
+      var pick = [], j2;
+      for (i = 0; i < p.models.length; i++) for (j2 = 0; j2 < ids.length; j2++) if (ids[j2] === p.models[i]) pick.push(ids[j2]);
+      for (i = 0; i < ids.length && pick.length < 6; i++) if (pick.indexOf(ids[i]) < 0 && !/whisper|tts|embed|guard|image|vision|rerank/i.test(ids[i])) pick.push(ids[i]);
+      if (pick.length) { BRAIN.models[p.id] = pick; BRAIN.save(); pushLog("BRAIN " + p.name + ": " + pick.length + " zinda models mile"); }
+    }
+    if (useBridge) {
+      try { handle(window.MayaBridge.httpGet(p.modelsUrl, key ? "Bearer " + key : "")); } catch (e) { BRAIN.discover._busy = ""; }
+      return;
+    }
+    try {
+      xhr.open("GET", p.modelsUrl, true);
+      if (key) xhr.setRequestHeader("Authorization", "Bearer " + key);
+      xhr.timeout = 10000;
+      xhr.onload = function () { handle(xhr.responseText || ""); };
+      xhr.onerror = function () { BRAIN.discover._busy = ""; };
+      xhr.ontimeout = function () { BRAIN.discover._busy = ""; };
+      xhr.send();
+    } catch (e) { BRAIN.discover._busy = ""; }
+  },
+
+  /* ---------- Settings/Doctor ke liye poori tasveer ---------- */
+  status: function () {
+    var out = [], i, j;
+    for (i = 0; i < BRAINS.length; i++) {
+      var p = BRAINS[i], ks = BRAIN.keys(p), rows = [];
+      if (!ks.length) rows.push({ ki: 0, state: "NO_KEY", cool: 0 });
+      for (j = 0; j < ks.length; j++) {
+        var c = BRAIN.cool(p.id, j);
+        rows.push({ ki: j, state: c > 0 ? (BRAIN.st(p.id, j).why || "COOL") : "LIVE", cool: Math.round(c / 1000) });
+      }
+      out.push({ id: p.id, name: p.name, icon: p.icon, keyless: !!p.keyless, keys: ks.length, free: p.free, signup: p.signup, rows: rows });
+    }
+    return out;
+  },
+  liveCount: function () {
+    var n = 0, i, j;
+    for (i = 0; i < BRAINS.length; i++) {
+      var ks = BRAIN.keys(BRAINS[i]);
+      for (j = 0; j < ks.length; j++) if (!BRAIN.ready(BRAINS[i], j)) n++;
+    }
+    return n;
+  }
+};
+BRAIN.load();
+
+/* bridge ka async jawab yahan aata hai (base64 → text) */
+window.__httpDone = function (id, status, b64) {
+  var cb = BRAIN.waiting[id];
+  if (!cb) return;
+  var txt = "";
+  try { txt = decodeURIComponent(escape(atob(String(b64 || "")))); }
+  catch (e) { try { txt = atob(String(b64 || "")); } catch (e2) { txt = ""; } }
+  cb(status, txt);
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v4.4.0)
    ---------------------------------------------------------------------------
    Purane code ke 3 asli bugs jinki wajah se "Sab free brains busy" bar bar aata tha:
 
@@ -2946,6 +3266,16 @@ var DIMAAG = {
     }
     return out;
   },
+  /* OpenAI-shakl messages (poore pool ke liye ek hi jagah bante hain) */
+  msgs: function (needTools) {
+    var sys = sysPrompt();
+    if (needTools) sys += " NOTE: Is waqt phone ke tools available nahi — phone ke kaam (app kholna, alarm, timer, call) app khud handle karta hai. Aap sirf baat-cheet aur maloomat ka jawab do, chhota aur kaam ka.";
+    var out = [{ role: "system", content: sys }];
+    var c = DIMAAG.contents(8), i;
+    for (i = 0; i < c.length; i++) out.push({ role: c[i].role === "model" ? "assistant" : "user", content: c[i].parts[0].text });
+    return out;
+  },
+
   lastUser: function () {
     for (var i = chatHist.length - 1; i >= 0; i--) if (chatHist[i].role === "user") return chatHist[i].text;
     return "";
@@ -2963,13 +3293,14 @@ var DIMAAG = {
   /* ── Header pill ka SACH (I4 ka ilaj — ab sirf navigator.onLine nahi) ── */
   pill: function () {
     if (navigator.onLine === false) return "OFFLINE";
-    if (!settings.apikey && !settings.groqKey && !settings.ghKey) return "NO KEY";
     if (Date.now() < DIMAAG.keyBadUntil) return "KEY MASLA";
     if (Date.now() < DIMAAG.dayQuotaUntil) return "QUOTA KHATAM";
     if (DIMAAG.lastOk && Date.now() - DIMAAG.lastOk < 900000) return "AI ONLINE • " + DIMAAG.provider;
     if (DIMAAG.lastCode === "QUOTA") return "AI BUSY";
     if (DIMAAG.lastCode) return "AI: " + DIMAAG.lastCode;
-    return "AI READY";
+    var live = BRAIN.liveCount();
+    if (live === 0) return "SAB THAKE";
+    return "AI READY • " + live + " DIMAAG";
   },
 
   /* ── Sab fail? Phir bhi kuch kaam ka jawab (khali haath nahi bhejte) ── */
@@ -3003,11 +3334,11 @@ var DIMAAG = {
     if (navigator.onLine === false)
       return "Internet nahi hai, " + n + ". Local commands chal rahe hain — waqt, battery, alarm, timer, app kholna. Net aate hi main wapas.";
     if (code === "KEY_MISSING")
-      return "Mere paas AI key hi nahi hai, " + n + ". Settings (⚙️) → API KEYS mein FREE Gemini key daal do — 2 minute ka kaam, aistudio.google.com se milti hai.";
+      return "Mere sab " + BRAINS.length + " dimaag abhi band hain, " + n + ". Settings (⚙️) → API KEYS mein koi bhi FREE key daal do — Groq (console.groq.com) sab se tez hai, Cerebras roz 10 lakh token deta hai. Ek key = poora dimaag wapas.";
     if (code === "KEY_BAD")
       return "Gemini key kaam nahi kar rahi, " + n + ". aistudio.google.com se nayi FREE key banao aur Settings → API KEYS mein paste kar do." + (hasBackup ? " Backup brain bhi jawab nahi de raha." : " Ya phir Groq ki free key daal do — wo backup ban jayegi.");
     if (code === "QUOTA_DAY")
-      return "Aaj ka free Gemini quota khatam ho gaya, " + n + ". " + (hasBackup ? "Backup brain bhi thak gaya — thori der baad." : "Groq ki FREE key daal lo (console.groq.com) — wo alag quota deti hai aur foran chal jati hai.") + " Local commands abhi bhi chal rahe hain.";
+      return "Aaj ke liye mere " + BRAIN.liveCount() + " zinda dimaagon ka quota khatam, " + n + ". Do minute ka pakka ilaj: Settings → API KEYS mein Cerebras (cloud.cerebras.ai — roz 10 LAKH token) ya Mistral (console.mistral.ai — mahina 1 ARAB token) ki free key daal do. Ya kisi bhi key ke saamne comma laga kar DOOSRI key daal do — quota dugna ho jata hai.";
     if (code === "QUOTA")
       return "Free quota ek minute ke liye bhar gaya hai, " + n + ". Main khud dobara koshish kar rahi hoon — ya " + (hasBackup ? "backup brain" : "Groq ki free key") + " se foran jawab mil jayega.";
     if (code === "SERVER")
@@ -3154,57 +3485,11 @@ async function geminiTry(m, plain){
   return { code: "EMPTY", info: "steps khatam" };
 }
 
-/* --- Provider 2 & 3: OpenAI-compatible (Groq / GitHub Models) — plain chat --- */
-async function openaiCompatChat(provider){
-  var url, key, model, who = provider === "groq" ? "GROQ" : "GITHUB";
-  if (provider === "groq") {
-    if (!settings.groqKey) { DIMAAG.log(who, "KEY_MISSING"); return null; }
-    url = "https://api.groq.com/openai/v1/chat/completions";
-    key = settings.groqKey;
-    model = settings.groqModel || "llama-3.3-70b-versatile";
-  } else {
-    if (!settings.ghKey) { DIMAAG.log(who, "KEY_MISSING"); return null; }
-    url = "https://models.github.ai/inference/chat/completions";
-    key = settings.ghKey;
-    model = "openai/gpt-4o-mini";
-  }
-  if (navigator.onLine === false) { DIMAAG.log(who, "OFFLINE"); return null; }
-  try {
-    var msgs = [{ role: "system", content: sysPrompt() + " NOTE: Ye backup mode hai — phone tools is waqt off hain. Phone ke kaam (open app, alarm, timer) app khud handle karta hai; aap sirf baat cheet aur knowledge ka jawab do, chhota aur doosra." }];
-    DIMAAG.contents(8).forEach(function (c) {
-      msgs.push({ role: c.role === "model" ? "assistant" : "user", content: c.parts[0].text });
-    });
-    var out = null, status = 0, errTxt = "";
-    var payload = JSON.stringify({ model: model, messages: msgs, temperature: 0.7, max_tokens: 300 });
-    DIMAAG.calls++;
-    if (NATIVE && window.MayaBridge.httpPost) {
-      var nr = JSON.parse(window.MayaBridge.httpPost(url, "Bearer " + key, payload));
-      status = nr.status;
-      if (status < 200 || status >= 300) { errTxt = String(nr.body || "").slice(0, 90); }
-      else {
-        var nd = JSON.parse(nr.body || "{}");
-        out = nd.choices && nd.choices[0] && nd.choices[0].message && nd.choices[0].message.content;
-      }
-    } else {
-      var res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
-        body: payload
-      });
-      status = res.status;
-      if (!res.ok) { errTxt = await res.text().then(function (t) { return String(t).slice(0, 90); }).catch(function () { return ""; }); }
-      else {
-        var data = await res.json();
-        out = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-      }
-    }
-    if (out && String(out).trim()) { DIMAAG.ok(who); return String(out).trim(); }
-    var code = status ? DIMAAG.classify(status, { error: { message: errTxt } }) : "EMPTY";
-    DIMAAG.log(who, code, errTxt);
-  } catch (e) {
-    DIMAAG.log(who, "NETWORK", String(e && e.message || e).slice(0, 60));
-  }
-  return null;
+/* --- OpenAI-shakl providers ab BRAIN POOL sambhalta hai --- */
+function brainAsk(p, ki, msgs){
+  return new Promise(function (res) {
+    BRAIN.ask(p, ki, msgs, function (err, out) { res(err ? null : out); });
+  });
 }
 
 /* --- Main: kabhi rukne wala nahi --- */
@@ -3221,26 +3506,24 @@ async function askAI(wasVoice){
       return;
     }
   }
-  /* TURBO: simple baat seedha GROQ (instant) */
-  if (settings.turbo && settings.groqKey && lu && (!needsTools(lu) || DIMAAG.geminiReady())) {
-    try {
-      var tg = await openaiCompatChat("groq");
-      if (tg) {
-        thinking = false; setOrb("idle");
-        pushLog("TURBO (Groq instant)");
-        cachePut(cacheKey(lu), tg);
-        reply(tg, wasVoice);
-        return;
-      }
-    } catch (e) {}
-  }
   thinking = true; setOrb("thinking");
   geminiChat.keyErr = false;
   geminiChat.toolsUsed = false;
+
+  var need = lu ? needsTools(lu) : false;
+  var all = BRAIN.plan(need), keyed = [], keyless = [], i;
+  for (i = 0; i < all.length; i++) (all[i].p.keyless ? keyless : keyed).push(all[i]);
+  /* 4 keyed koshishein, phir keyless teh — jo hamesha zinda hoti hai */
+  var order = keyed.slice(0, 4).concat(keyless);
+  var msgs = DIMAAG.msgs(need);
   var out = null;
-  try { out = await geminiChat(); } catch (e) { DIMAAG.log("GEMINI", "NETWORK", String(e && e.message || e).slice(0, 60)); }
-  if (!out) { try { out = await openaiCompatChat("groq"); } catch (e) {} }
-  if (!out) { try { out = await openaiCompatChat("github"); } catch (e) {} }
+
+  for (i = 0; i < order.length && !out; i++) {
+    var it = order[i];
+    if (it.p.kind === "gemini") { try { out = await geminiChat(); } catch (e) { DIMAAG.log("Gemini", "NETWORK", String(e && e.message || e).slice(0, 60)); } }
+    else { try { out = await brainAsk(it.p, it.ki, msgs); } catch (e) { DIMAAG.log(it.p.name, "NETWORK", String(e && e.message || e).slice(0, 60)); } }
+  }
+
   if (out) {
     askAI._retried = false;
     thinking = false; setOrb("idle");
@@ -3250,15 +3533,17 @@ async function askAI(wasVoice){
   }
   thinking = false; setOrb("idle");
 
-  /* Sirf waqti masla (quota/server) ho to khud dobara koshish — warna waqt zaya na karo */
   var code = DIMAAG.verdict() || DIMAAG.lastCode;
   DIMAAG.lastCode = code;
+  var loc0 = DIMAAG.localAnswer(lu);
+  if (loc0) { DIMAAG.log("LOCAL", null, "offline jawab"); aiState.provider = "LOCAL"; reply(loc0, wasVoice); return; }
+
   var worthRetry = (code === "QUOTA" || code === "SERVER" || code === "NETWORK" || code === "TIMEOUT" || code === "EMPTY");
   if (worthRetry && !askAI._retried && navigator.onLine !== false) {
     askAI._retried = true;
-    var wait = Math.min(Math.max(lastRetryDelay || 45000, 5000), 60000);
+    var wait = Math.min(Math.max(lastRetryDelay || 30000, 5000), 45000);
     aiState.provider = "COOLDOWN";
-    toast("Brains thake hue — " + Math.round(wait / 1000) + "s baad KHUD dobara try");
+    toast("Sab " + order.length + " dimaag thak gaye — " + Math.round(wait / 1000) + "s baad KHUD dobara try karungi");
     pushLog("RETRY IN " + Math.round(wait / 1000) + "s (" + code + ")");
     setTimeout(function(){ askAI(wasVoice); }, wait);
     return;
@@ -3266,9 +3551,6 @@ async function askAI(wasVoice){
   askAI._retried = false;
   aiState.provider = "—";
 
-  /* Khali haath nahi bhejte: pehle local jawab, warna asli wajah + agla qadam */
-  var loc = DIMAAG.localAnswer(lu);
-  if (loc) { DIMAAG.log("LOCAL", null, "offline jawab"); reply(loc, wasVoice); return; }
   reply(DIMAAG.failMessage(), wasVoice);
 }
 
@@ -3702,7 +3984,12 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 /* ---------- SETTINGS TAB ---------- */
 function loadSettingsForm(){
   $("#sName").value = settings.name; $("#sCity").value = settings.city || "Hyderabad"; $("#sKey").value = settings.apikey;
-  $("#sGqKey").value = settings.groqKey; $("#sGqModel").value = settings.groqModel || "llama-3.3-70b-versatile"; $("#sGhKey").value = settings.ghKey; $("#sTtsKey").value = settings.ttsKey || "";
+  $("#sGhKey").value = settings.ghKey; $("#sTtsKey").value = settings.ttsKey || "";
+  $("#sGqKey").value = settings.groqKey || ""; $("#sCerebras").value = settings.cerebrasKey || "";
+  $("#sMistral").value = settings.mistralKey || ""; $("#sOpenRouter").value = settings.orKey || "";
+  $("#sNvidia").value = settings.nvidiaKey || ""; $("#sZai").value = settings.zaiKey || "";
+  $("#sLlm7").value = settings.llm7Key || "";
+  paintPool();
   awaazFillSelects();
   $("#sVoiceEngine").value = settings.voiceEngine || "auto";
   $("#sGVoice").value = settings.gVoice || "Kore";
@@ -3736,12 +4023,19 @@ $("#saveSettings").addEventListener("click", function(){
     toast("Ye GEMINI key thi — Neural Link field mein rakh di ✓");
   }
   if (kGem.indexOf("ghp_") === 0 || kGem.indexOf("github_pat_") === 0) { $("#sGhKey").value = kGem; kGem = settings.apikey || ""; $("#sKey").value = kGem; toast("Ye GITHUB key thi — sahi jagah rakh di ✓"); }
-  kGem = $("#sKey").value.trim().replace(/\s+/g, "");
-  kGrq = $("#sGqKey").value.trim().replace(/\s+/g, "");
-  kGit = $("#sGhKey").value.trim().replace(/\s+/g, "");
-  settings.apikey = kGem;
-  settings.groqKey = kGrq; settings.groqModel = $("#sGqModel").value; settings.ghKey = kGit;
+  /* kai keys: nayi line/tab ko comma bana do, warna ek hi lambi galat key ban jati hai */
+  function multiKey(id){
+    var v = ($(id).value || "").trim().replace(/[\r\n\t;]+/g, ",").replace(/\s*,\s*/g, ",").replace(/^,|,$/g, "");
+    return v.indexOf(",") < 0 ? v.replace(/\s+/g, "") : v;
+  }
+  settings.apikey = multiKey("#sKey");
+  settings.ghKey = multiKey("#sGhKey");
   settings.ttsKey = ($("#sTtsKey").value || "").trim().replace(/\s+/g, "");
+  settings.groqKey = multiKey("#sGqKey");
+  settings.cerebrasKey = multiKey("#sCerebras"); settings.mistralKey = multiKey("#sMistral");
+  settings.orKey = multiKey("#sOpenRouter"); settings.nvidiaKey = multiKey("#sNvidia");
+  settings.zaiKey = multiKey("#sZai"); settings.llm7Key = multiKey("#sLlm7");
+  BRAIN.state = {}; BRAIN.save();     /* nayi keys = sab dimaag ko naya mauka */
   settings.voiceEngine = $("#sVoiceEngine").value || "auto";
   settings.gVoice = $("#sGVoice").value || "Kore";
   settings.voiceMood = $("#sVoiceMood").value || "auto";
@@ -3793,6 +4087,17 @@ function refreshHandsFreeStatus(){
   try { $("#batStatus").textContent = "Status: " + (window.MayaBridge.batteryUnrestricted() ? "✅ SHIELDED (unrestricted)" : "⚠️ NOT shielded — button dabao"); } catch(e){}
   try { $("#asStatus").textContent = "Status: " + (window.MayaBridge.accessibilityEnabled() ? "✅ AUTO-SEND ON" : "OFF — button dabao aur MAYA AutoSend ON karo"); } catch(e){}
 }
+(function(){
+  var pb = $("#poolCheck");
+  if (pb) pb.addEventListener("click", function(){
+    var el = $("#poolOut");
+    el.classList.add("show"); el.style.display = "block";
+    el.textContent = poolReport();
+    paintPool();
+    toast(BRAIN.liveCount() + " dimaag zinda hain");
+  });
+})();
+
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   if (!NATIVE) return toast("Sirf APK mein");
   try { window.MayaBridge.requestBatteryUnrestricted(); toast("Prompt aaya — Allow dabao"); setTimeout(refreshHandsFreeStatus, 1500); } catch(e){}
@@ -3909,7 +4214,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v4.3.0 — DOCTOR REPORT");
+  out.push("MAYA v4.4.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
@@ -3937,6 +4242,10 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
   }
   out.push("WAKE WORD: " + (settings.wakeWord ? "ON" : "OFF") + (NATIVE ? "" : " (sirf APK)"));
   out.push("TTS VOICES: " + (settings._voiceCount != null ? settings._voiceCount : "0") + " available");
+  (function(){
+    out.push("");
+    out.push(poolReport());
+  })();
   (function(){
     var L = DIMAAG.lines();
     out.push("");
@@ -4035,6 +4344,34 @@ function awaazFillSelects(){
     }
   }
 }
+/* ---------- BRAIN POOL ka live naqsha ---------- */
+function paintPool(){
+  try {
+    var live = BRAIN.liveCount();
+    var el = $("#poolLive"); if (el) el.textContent = String(live);
+    var h = $("#poolHint");
+    if (h) h.className = "ui-hint" + (live >= 2 ? " ok" : (live === 1 ? " warn" : ""));
+  } catch (e) {}
+}
+function poolReport(){
+  var st = BRAIN.status(), out = [], i, j;
+  out.push("🧠 BRAIN POOL v" + BRAIN.VER + " — " + BRAIN.liveCount() + " dimaag zinda\n");
+  for (i = 0; i < st.length; i++) {
+    var p = st[i], line = p.icon + " " + p.name;
+    if (p.keyless) line += "  [bina key]";
+    var tags = [];
+    for (j = 0; j < p.rows.length; j++) {
+      var r = p.rows[j];
+      if (r.state === "LIVE") tags.push("✅ key" + (r.ki + 1));
+      else if (r.state === "NO_KEY") tags.push("— key nahi");
+      else tags.push("⏳ key" + (r.ki + 1) + " " + r.state + (r.cool ? " " + r.cool + "s" : ""));
+    }
+    out.push(line + "\n     " + tags.join("  ") + "\n     " + p.free + (p.signup && p.signup !== "—" ? "  ·  " + p.signup : ""));
+  }
+  out.push("\n💡 Kisi bhi key ke saamne comma laga kar doosri key daalo — quota dugna.");
+  return out.join("\n");
+}
+
 function paintAwaaz(){
   try {
     var st = AWAAZ.status();
@@ -4451,8 +4788,8 @@ function startProactive(){
 
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
-try { $("#hudBuild").textContent = "v4.3.0"; } catch(e){}
-try { pushLog("MAYA v4.3.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
+try { $("#hudBuild").textContent = "v4.4.0"; } catch(e){}
+try { pushLog("MAYA v4.4.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
 
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD" runtime   (v4.1.0)
@@ -4711,7 +5048,7 @@ var MayaUI = (function () {
     for (i = 0; i < reopen.length; i++) delCls(reopen[i], "is-open");
 
     var out = [];
-    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v4.3.0");
+    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v4.4.0");
     out.push("WEBVIEW: Chrome " + (window.__webviewMajor || "?") + (window.__oldWebview ? " (PURANA)" : ""));
     out.push("");
     out.push("VISIBLE: " + okc + "   INVISIBLE: " + bad + (bad ? "  \u274C" : "  \u2705"));

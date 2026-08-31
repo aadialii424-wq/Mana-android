@@ -28,9 +28,9 @@ const is = (c, name, info) => {
 const head = (t) => console.log('\n\x1b[1m' + t + '\x1b[0m');
 
 /* ── engine source nikaalo ── */
-const A = HTML.indexOf('var DIMAAG = {');
+const A = HTML.indexOf('var BRAINS = [');
 const B = HTML.indexOf('function openURL(u){');
-if (A < 0 || B < 0 || B < A) { console.error('DIMAAG engine source nahi mila'); process.exit(1); }
+if (A < 0 || B < 0 || B < A) { console.error('BRAIN POOL / DIMAAG source nahi mila'); process.exit(1); }
 const ENGINE = HTML.slice(A, B);
 
 /* ── naqli duniya ── */
@@ -83,9 +83,32 @@ function makeWorld(opts = {}) {
     };
   };
 
+  /* naqli XMLHttpRequest — BRAIN POOL isi se baat karta hai */
+  const pool = opts.pool || (() => ({ status: 0, body: 'network' }));
+  state.pool = [];
+  w.XMLHttpRequest = function () {
+    const self = this;
+    this.open = (m, u) => { self._u = u; };
+    this.setRequestHeader = (k, v) => { if (/^authorization$/i.test(k)) self._auth = v; };
+    this.send = (b) => {
+      let parsed = null; try { parsed = JSON.parse(b); } catch (e) {}
+      state.pool.push({ url: self._u, auth: self._auth || '', body: parsed });
+      const r = pool(state.pool.length, state, { url: self._u, auth: self._auth || '', body: parsed }) || { status: 0, body: '' };
+      setTimeout(() => {
+        self.status = r.status;
+        self.responseText = typeof r.body === 'string' ? r.body : JSON.stringify(r.body || {});
+        if (r.status === 0 && self.onerror) self.onerror();
+        else if (self.onload) self.onload();
+      }, 0);
+    };
+  };
+  try { w.localStorage.clear(); } catch (e) {}
+
   w.eval(ENGINE);
-  return { w, state, D: w.DIMAAG };
+  return { w, state, D: w.DIMAAG, B: w.BRAIN };
 }
+const poolOk = (t) => ({ choices: [{ message: { content: t } }] });
+const poolErr = (m) => ({ error: { message: m } });
 const okBody = (t) => ({ candidates: [{ content: { parts: [{ text: t }] } }] });
 const errBody = (status, message, extra = {}) => ({ error: Object.assign({ code: status, message, status: extra.st || '' }, extra.raw || {}) });
 
@@ -257,24 +280,23 @@ const errBody = (status, message, extra = {}) => ({ error: Object.assign({ code:
   head('8. LADDER — Gemini → Groq → GitHub');
   {
     const { w, D, state } = makeWorld({
-      settings: { apikey: 'K', groqKey: 'G' },
-      plan: (n, s) => /groq/.test(s.fetches[s.fetches.length - 1].url)
-        ? { status: 200, body: { choices: [{ message: { content: 'groq ka jawab' } }] } }
-        : { status: 500, body: errBody(500, 'down') }
+      settings: { apikey: 'AIzaKKKKKKKKKK', groqKey: 'gsk_GGGGGGGGGG' },
+      plan: [{ status: 500, body: errBody(500, 'down') }],
+      pool: (n, st, req) => /groq/.test(req.url) ? { status: 200, body: poolOk('groq ka jawab') } : { status: 0, body: '' }
     });
     await w.askAI(false);
     is(state.replies[0] === 'groq ka jawab', 'Gemini gira to Groq ne sambhala', state.replies[0]);
-    is(D.provider === 'GROQ', 'provider GROQ darj hua');
-    is(D.report.some(r => r.who === 'GEMINI/gemini-2.5-flash' && r.code === 'SERVER'), 'Gemini ki nakami report mein hai');
+    is(/GROQ/i.test(D.provider), 'provider Groq darj hua', D.provider);
+    is(D.report.some(r => /GEMINI/.test(r.who) && r.code === 'SERVER'), 'Gemini ki nakami report mein hai');
   }
   {
-    const { w, state } = makeWorld({ settings: { apikey: 'K', groqKey: 'G', ghKey: 'H' }, plan: (n, s) => {
-      const u = s.fetches[s.fetches.length - 1].url;
-      if (/github/.test(u)) return { status: 200, body: { choices: [{ message: { content: 'github ka jawab' } }] } };
-      return { status: 500, body: errBody(500, 'down') };
-    } });
+    const { w, state } = makeWorld({
+      settings: { apikey: 'AIzaKKKKKKKKKK', groqKey: 'gsk_GGGGGGGGGG', ghKey: 'github_pat_HHHH' },
+      plan: [{ status: 500, body: errBody(500, 'down') }],
+      pool: (n, st, req) => /models\.github\.ai/.test(req.url) ? { status: 200, body: poolOk('github ka jawab') } : { status: 500, body: poolErr('down') }
+    });
     await w.askAI(false);
-    is(state.replies[0] === 'github ka jawab', 'Groq bhi gira to GitHub Models ne sambhala');
+    is(state.replies[0] === 'github ka jawab', 'Groq bhi gira to GitHub Models ne sambhala', state.replies[0]);
   }
 
   /* ─── ASAL SHIKAYAT: "Sab free brains busy" ─── */
@@ -284,7 +306,7 @@ const errBody = (status, message, extra = {}) => ({ error: Object.assign({ code:
     const cases = [
       ['KEY_MISSING', { apikey: '', groqKey: '', ghKey: '' }, /Settings.*API KEYS|key hi nahi/i],
       ['KEY_BAD', { apikey: 'K' }, /key kaam nahi kar rahi|nayi FREE key/i],
-      ['QUOTA_DAY', { apikey: 'K' }, /Aaj ka free .*quota khatam/i],
+      ['QUOTA_DAY', { apikey: 'K' }, /quota khatam.*(cerebras|mistral|comma)/is],
       ['QUOTA', { apikey: 'K' }, /ek minute|dobara koshish/i],
       ['SERVER', { apikey: 'K' }, /server abhi kharab/i],
       ['BAD_REQUEST', { apikey: 'K' }, /history/i],
@@ -370,9 +392,9 @@ const errBody = (status, message, extra = {}) => ({ error: Object.assign({ code:
   head('13. HEADER PILL — ab jhoot nahi bolta');
   {
     const { w, D } = makeWorld({ settings: { apikey: '', groqKey: '', ghKey: '' } });
-    is(D.pill() === 'NO KEY', 'key na ho to NO KEY', D.pill());
+    is(/^AI READY • [1-9]\d* DIMAAG$/.test(D.pill()), 'bina kisi key ke bhi keyless dimaag zinda dikhte hain', D.pill());
     w.settings.apikey = 'K';
-    is(D.pill() === 'AI READY', 'key hai magar abhi koi jawab nahi aaya → AI READY (AI ONLINE nahi)', D.pill());
+    is(/^AI READY/.test(D.pill()) && !/ONLINE/.test(D.pill()), 'key hai magar abhi koi jawab nahi aaya → AI READY (AI ONLINE nahi)', D.pill());
     D.lastOk = Date.now(); D.provider = 'GEMINI';
     is(/^AI ONLINE/.test(D.pill()), 'asli jawab ke baad hi AI ONLINE', D.pill());
     D.lastOk = Date.now() - 1000000; D.lastCode = 'QUOTA';
@@ -395,8 +417,125 @@ const errBody = (status, message, extra = {}) => ({ error: Object.assign({ code:
     is(/KUL CALLS: \d+/.test(L), 'kitni requests gayin ye bhi');
   }
 
+  /* ═══════════════ BRAIN POOL v3 ═══════════════ */
+  head('15. BRAIN POOL — registry aur mare hue model');
+  {
+    const { w } = makeWorld();
+    const ids = w.BRAINS.map(b => b.id);
+    is(ids.length >= 10, 'kam se kam 10 dimaag registry mein', ids.length + ' mile');
+    is(ids.indexOf('groq') >= 0 && ids.indexOf('cerebras') >= 0 && ids.indexOf('mistral') >= 0, 'Groq + Cerebras + Mistral maujood');
+    is(ids.indexOf('llm7') >= 0 && ids.indexOf('pollen') >= 0, 'do keyless dimaag maujood');
+    const keyless = w.BRAINS.filter(b => b.keyless);
+    is(keyless.length >= 2, 'keyless teh mein 2+ provider', keyless.map(b => b.id).join(','));
+    const gq = w.BRAINS.filter(b => b.id === 'groq')[0];
+    is(gq.models.indexOf('llama-3.3-70b-versatile') < 0, 'Groq ka MARA HUA llama-3.3-70b hata diya gaya');
+    is(gq.models.indexOf('llama-3.1-8b-instant') < 0, 'Groq ka MARA HUA llama-3.1-8b hata diya gaya');
+    is(gq.models[0] === 'openai/gpt-oss-120b', 'Groq default ab zinda model hai', gq.models[0]);
+    is(w.BRAINS.every(b => b.keyless || b.keyField), 'har keyed provider ka apna key field hai');
+    is(w.BRAINS.every(b => b.kind !== 'openai' || /^https:\/\//.test(b.url)), 'har openai provider ka https url hai');
+  }
+
+  head('16. KAI KEYS — quota dugna tigna');
+  {
+    const { w, B } = makeWorld({ settings: { groqKey: 'gsk_aaaaaaaaaa, gsk_bbbbbbbbbb\ngsk_cccccccccc' } });
+    const ks = B.keys(w.BRAINS.filter(b => b.id === 'groq')[0]);
+    is(ks.length === 3, 'comma + nayi line se 3 keys nikalin', ks.length + '');
+    is(ks[1] === 'gsk_bbbbbbbbbb', 'doosri key theek se cut hui', ks[1]);
+    const short = B.keys({ keyField: 'ghKey' });
+    is(short.length === 0, 'khaali/chhoti key ginti mein nahi aati');
+    const plan = B.plan(false).filter(x => x.p.id === 'groq');
+    is(plan.length === 3, 'plan mein Groq ki teenon keys alag koshish hain', plan.length + '');
+    B.chill('groq', 0, 60000, 'QUOTA');
+    is(B.plan(false).filter(x => x.p.id === 'groq').length === 2, 'quota wali key plan se nikal gayi');
+    is(B.ready(w.BRAINS.filter(b => b.id === 'groq')[0], 0) === 'QUOTA', 'us key ka halat QUOTA batata hai');
+  }
+
+  head('17. COOLDOWN — app band ho kar khulne par bhi yaad');
+  {
+    const { w, B } = makeWorld({ settings: { groqKey: 'gsk_aaaaaaaaaa' } });
+    B.chill('groq', 0, 3600000, 'QUOTA');
+    const saved = w.localStorage.getItem('maya_brainpool');
+    is(!!saved && /groq/.test(saved), 'cooldown localStorage mein mehfooz hai');
+    B.state = {}; B.load();
+    is(B.cool('groq', 0) > 3000000, 'restart ke baad bhi cooldown yaad raha', Math.round(B.cool('groq', 0) / 1000) + 's');
+    B.free('groq', 0);
+    is(B.cool('groq', 0) === 0, 'free() cooldown khatam kar deta hai');
+  }
+
+  head('18. KEYLESS FLOOR — bina kisi key ke bhi jawab');
+  {
+    const { w, state } = makeWorld({
+      settings: { apikey: '', groqKey: '', ghKey: '' },
+      plan: [{ status: 429, body: errBody(429, 'quota') }],
+      pool: (n, st, req) => /llm7/.test(req.url) ? { status: 200, body: poolOk('bina key ka jawab') } : { status: 0, body: '' }
+    });
+    await w.askAI(false);
+    is(state.replies.length === 1, 'jawab mila');
+    is(/bina key ka jawab/.test(state.replies[0]), 'keyless dimaag ne jawab diya', state.replies[0]);
+    is(state.pool.some(r => /llm7\.io/.test(r.url)), 'LLM7 ko sach much call kiya gaya');
+    is(state.fetches.length === 0, 'key nahi thi to Gemini ko chhera hi nahi');
+  }
+
+  head('19. POOL WALK — ek girta hai to agla uthta hai');
+  {
+    const { w, state, B } = makeWorld({
+      settings: { apikey: '', groqKey: 'gsk_aaaaaaaaaa', cerebrasKey: 'csk_bbbbbbbbbb' },
+      pool: (n, st, req) => {
+        if (/groq/.test(req.url)) return { status: 429, body: poolErr('rate limit') };
+        if (/cerebras/.test(req.url)) return { status: 200, body: poolOk('cerebras bola') };
+        return { status: 0, body: '' };
+      }
+    });
+    await w.askAI(false);
+    is(/cerebras bola/.test(state.replies[0] || ''), 'Groq gira to Cerebras ne uthaya', state.replies[0]);
+    is(state.pool[0] && /groq/.test(state.pool[0].url), 'sab se tez (Groq) ko pehle try kiya');
+    is(B.cool('groq', 0) > 0, 'gire hue Groq ko cooldown mil gaya');
+    is(B.cool('cerebras', 0) === 0, 'kamyab Cerebras azaad hai');
+    is(B.lastUsed === 'cerebras', 'lastUsed sahi provider par set hai', B.lastUsed);
+  }
+
+  head('20. MARA HUA MODEL — khud ko theek kar leta hai');
+  {
+    const { w, B } = makeWorld({ settings: { groqKey: 'gsk_aaaaaaaaaa' } });
+    const gq = w.BRAINS.filter(b => b.id === 'groq')[0];
+    const before = (B.models.groq || gq.models).length;
+    B.dropModel(gq, gq.models[0]);
+    is((B.models.groq || []).length === before - 1, 'mara hua model list se nikla');
+    is((B.models.groq || []).indexOf(gq.models[0]) < 0, 'wo dobara pehla nahi rahega');
+    is(/dropModel/.test(HTML) && /decommission|deprecat/.test(HTML), 'deprecation ka jawab code mein maujood hai');
+  }
+
+  head('21. AUTH + PAYLOAD — provider ko theek shakl mein baat');
+  {
+    const { w, state } = makeWorld({
+      settings: { apikey: '', groqKey: 'gsk_aaaaaaaaaa' },
+      pool: () => ({ status: 200, body: poolOk('ok') })
+    });
+    await w.askAI(false);
+    const r = state.pool[0];
+    is(r.auth === 'Bearer gsk_aaaaaaaaaa', 'Bearer header theek gaya', r.auth);
+    is(Array.isArray(r.body.messages) && r.body.messages[0].role === 'system', 'system message pehle hai');
+    is(r.body.messages.some(m => m.role === 'user'), 'user ka sawal saath gaya');
+    is(!r.body.messages.some(m => m.role === 'model'), 'gemini wala "model" role kabhi nahi bheja');
+    is(r.body.stream === false, 'stream band hai');
+  }
+
+  head('22. STATUS — Settings/Doctor ke liye sacchi tasveer');
+  {
+    const { w, B } = makeWorld({ settings: { apikey: '', groqKey: 'gsk_aaaaaaaaaa' } });
+    const st = B.status();
+    is(st.length === w.BRAINS.length, 'har dimaag ka row hai');
+    const g = st.filter(x => x.id === 'groq')[0];
+    is(g.rows[0].state === 'LIVE', 'key wala dimaag LIVE dikhta hai');
+    const m = st.filter(x => x.id === 'mistral')[0];
+    is(m.rows[0].state === 'NO_KEY', 'bina key wala NO_KEY dikhta hai');
+    is(B.liveCount() >= 3, 'keyless ki wajah se hamesha 3+ zinda', B.liveCount() + '');
+    B.chill('groq', 0, 60000, 'QUOTA');
+    is(B.status().filter(x => x.id === 'groq')[0].rows[0].state === 'QUOTA', 'cooldown status mein nazar aata hai');
+  }
+
   /* ─── SOURCE ─── */
-  head('15. SOURCE — purane bug wapas na aayen');
+  head('23. SOURCE — purane bug wapas na aayen');
   {
     is(!/geminiBadUntil = Date\.now\(\) \+ 600000/.test(HTML), 'purana "400 → 10 min blackout" code nikal gaya');
     is(/res\.status === 400 \|\| res\.status === 403/.test(HTML) === false, 'purani ghalat classify line nikal gayi');
@@ -405,6 +544,12 @@ const errBody = (status, message, extra = {}) => ({ error: Object.assign({ code:
     is(/DIMAAG\.lines\(\)/.test(HTML), 'Doctor DIMAAG report chhapta hai');
     is((HTML.match(/async function askAI/g) || []).length === 1, 'askAI sirf ek dafa');
     is((HTML.match(/async function geminiChat/g) || []).length === 1, 'geminiChat sirf ek dafa');
+    is(!/llama-3\.3-70b-versatile|llama-3\.1-8b-instant/.test(HTML), 'Groq ke mare hue model kahin bache nahi');
+    is(!/function openaiCompatChat/.test(HTML), 'purana openaiCompatChat nikal gaya');
+    is((HTML.match(/var BRAINS = \[/g) || []).length === 1, 'BRAINS registry sirf ek dafa');
+    is(/window\.__httpDone/.test(HTML), 'bridge ka async jawab wala hook maujood hai');
+    is(/httpPostAsync/.test(fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8')), 'Kotlin bridge mein httpPostAsync maujood hai');
+    is(/id="poolCheck"/.test(HTML) && /id="sCerebras"/.test(HTML), 'Settings mein pool panel + naye key fields hain');
   }
 
   console.log('\n\x1b[1m\x1b[36m══════════════════════════════════════════════════════════\x1b[0m');

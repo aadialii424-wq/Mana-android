@@ -70,7 +70,7 @@ var setSection = html.slice(html.indexOf('id="tab-set"'), html.indexOf('</sectio
 var NEEDED_IDS = ['sName', 'sGender', 'sPhone', 'sCity', 'sMusicApp', 'sFavSong', 'sYtChannel',
   'sAssistName', 'sPersona', 'sGf', 'sRemember', 'sConvo', 'sLang', 'sProactive', 'sAuto', 'sWake',
   'sVoiceOn', 'sNotifOn', 'sBatAlert', 'sStt', 'sTts', 'sVoice', 'sPitch', 'sRate', 'sRadius',
-  'sFont', 'sEdgeGlow', 'sKey', 'sModel', 'sGqKey', 'sGqModel', 'sGhKey', 'sTtsKey', 'sTurbo',
+  'sFont', 'sEdgeGlow', 'sKey', 'sModel', 'sGqKey',  'sGhKey', 'sCerebras', 'sMistral', 'sOpenRouter', 'sNvidia', 'sZai', 'sLlm7', 'sTtsKey', 'sTurbo',
   'sVoiceEngine', 'sGVoice', 'sVoiceMood', 'sNeuralWifi', 'sEdgeTts',
   'saveSettings', 'pitchVal', 'rateVal', 'radiusVal', 'fontVal', 'themeGrid', 'accentRow',
   'artistGrid', 'diagOut', 'keyTestOut', 'notifStatus', 'batStatus', 'asStatus', 'uiCheckBtn'];

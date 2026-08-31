@@ -1,9 +1,40 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 4.3.0 "DIMAAG" — 0-Budget Build • Android APK + Web PWA**
+**Version 4.4.0 "BRAIN POOL" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🧠🔥 v4.4.0 — BRAIN POOL ("quota khatam" ka mustaqil ilaj)
+
+**Masla:** Groq ki key daalne ke baad bhi *"Aaj ka free Gemini quota khatam… Backup brain bhi thak gaya."*
+**Asal jarh:** Groq ne **16 Aug 2026** ko apne purane Llama models band kar diye — hamara default wahi tha,
+is liye theek key ke bawajood har Groq call fail ho rahi thi. Doosri jarh: sirf 2 provider = 2 quota ki qaid.
+
+**Ilaj:** ab MAYA ke paas **10 dimaag** hain, teen tehon mein —
+
+| Teh | Dimaag |
+|-----|--------|
+| **KEYED** | 💎 Gemini · ⚡ Groq · 🚀 Cerebras · 🇪🇺 Mistral · 🔀 OpenRouter · 🐙 GitHub · 🟩 NVIDIA · 🇨🇳 Z.ai |
+| **KEYLESS** (koi signup nahi) | 🆓 LLM7 · 🌸 Pollinations |
+| **LOCAL** | waqt · tareekh · hisab · yaad-dasht |
+
+Teen chaabiyan:
+
+1. **Kai keys, ek khana** — har key field comma/nayi line se **kai keys** leta hai.
+   3 Gemini keys = **3 guna quota**. Ek khatam, agli khud chal padti hai.
+2. **Model auto-discovery** — provider "model decommissioned" kahe to app us model ko
+   nikal kar `/models` se **zinda list** le aati hai. **Groq wala hadsa dobara nahi hoga.**
+3. **Keyless farsh** — bilkul khaali Settings par bhi MAYA jawab deti hai.
+
+Saath mein: cooldown `localStorage` mein mehfooz (restart ke baad bhi yaad), APK mein har
+request Kotlin ke **async bridge** se (CORS lagoo nahi, UI kabhi jam nahi), Settings mein
+live **"BRAIN POOL DEKHO"** panel, aur header pill par sach — **`AI READY • 6 DIMAAG`**.
+
+📖 Poori tafseel: [`docs/BRAIN-POOL-ARCHITECTURE.md`](docs/BRAIN-POOL-ARCHITECTURE.md)
+🧪 Saboot: `node tools/test-brain-engine.js` — **155/155**
+
+---
 
 ## 🧠 v4.3.0 — DIMAAG ENGINE v2 ("Sab free brains busy" ka ilaj)
 

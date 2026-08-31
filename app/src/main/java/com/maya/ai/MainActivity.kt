@@ -20,6 +20,7 @@ import android.provider.MediaStore
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.BatteryManager
+import android.util.Base64
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
@@ -962,6 +963,41 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 JSONObject().put("status", 0).put("body", e.message ?: "error").toString()
             }
+        }
+
+        /**
+         * v4.4.0 — BRAIN POOL ke liye async POST.
+         * Sync httpPost() JS thread ko 21 second tak rok deta tha; pool mein 10 provider
+         * ho to app jam jati hai. Ye version alag thread par chalta hai aur jawab
+         * window.__httpDone(reqId, status, base64Body) se wapas deta hai.
+         * base64 is liye ke jawab mein quotes/newlines JS string ko na toren.
+         */
+        @JavascriptInterface
+        fun httpPostAsync(url: String, authHeader: String, body: String, reqId: String, timeoutMs: Int) {
+            Thread {
+                var code = 0
+                var txt = ""
+                try {
+                    val conn = URL(url).openConnection() as HttpURLConnection
+                    conn.requestMethod = "POST"
+                    conn.doOutput = true
+                    conn.connectTimeout = if (timeoutMs > 0) timeoutMs else 12000
+                    conn.readTimeout = if (timeoutMs > 0) timeoutMs else 25000
+                    conn.setRequestProperty("Content-Type", "application/json")
+                    conn.setRequestProperty("Accept", "application/json")
+                    if (authHeader.isNotEmpty()) conn.setRequestProperty("Authorization", authHeader)
+                    conn.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+                    code = conn.responseCode
+                    txt = (if (code in 200..399) conn.inputStream else conn.errorStream)
+                        ?.bufferedReader()?.use { it.readText() } ?: ""
+                    conn.disconnect()
+                } catch (e: Exception) {
+                    code = 0
+                    txt = e.message ?: "network error"
+                }
+                val b64 = Base64.encodeToString(txt.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
+                evalAsync("window.__httpDone && window.__httpDone('" + jsEscape(reqId) + "'," + code + ",'" + b64 + "')")
+            }.start()
         }
 
         @JavascriptInterface
