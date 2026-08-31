@@ -1,9 +1,32 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 4.0.2 "OBSIDIAN" — 0-Budget Build • Android APK + Web PWA**
+**Version 4.1.0 "IRONCLAD" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🆕 v4.1.0 "IRONCLAD" — Settings UI ground-up rebuild
+
+> Patch-work band. Pehle architecture (`docs/SETTINGS-UI-ARCHITECTURE.md`), phir code,
+> phir machine se test. `npm test` green hue baghair kuch push nahi hota.
+
+- 🧱 **UI KIT v5** — Settings ka har control naye sirey se: `ui-group / ui-field /
+  ui-row / ui-slider / ui-sw / ui-btn`. Sirf block/table layout, px sizes aur
+  `var(--token,#hex)` colors — **koi** `color-mix` / `accent-color` / `gap` /
+  `inset` / `grid` / `env()` nahi
+- 🎚️ **Custom sliders** — native `<input type=range>` ab sirf **state** rakhta hai
+  (chhupa hua), dikhne wala slider div se bana hai: track + fill + 28px thumb +
+  **big − / + buttons** (drag na chale to bhi value badal sakti hai)
+- 🔘 **Custom switches** — 54×30, `:checked ~` **aur** JS `is-on` class — do rastay
+- 📏 **Measured layout** — `MayaUI.layout()` screen naap kar `main`/`.tab` ki height
+  px mein set karta hai (resize / rotate / splash ke baad dobara). Scroll ab
+  flexbox ki mehrbani par nahi
+- 🧪 **UI CHECK button** — Settings → Data & Maintenance: har control ko naap kar
+  batata hai "127 visible / 0 invisible" + kaunsa control kahan gayab hai
+- 🐛 **ES6 landmine hataya** — 32 `\u{...}` code-point escapes (Chrome <44 par poora
+  script SyntaxError) surrogate pairs mein badle
+- ✅ **2 automated test** — `npm test`: CSS linter (banned feature = fail) +
+  jsdom functional test (slider/switch/layout/IDs) — **33/33 pass**
 
 ## 🆕 v4.0.2 "OBSIDIAN" — Settings UI Fix (purane WebView par bhi)
 

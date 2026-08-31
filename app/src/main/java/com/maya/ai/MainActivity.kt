@@ -121,7 +121,7 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = MayaWebViewClient()
         setContentView(webView)
         webView.loadUrl("https://$VIRTUAL_HOST/assets/web/index.html")
-        Toast.makeText(this, "MAYA v4.0.2 • Settings UI + WebView compat fix install hua hai", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "MAYA v4.1.0 IRONCLAD • naya Settings UI install hua hai", Toast.LENGTH_LONG).show()
         // WebView zinda hai ya nahi — 8 second baad native check (v4.0.1: onPageFinished/markAlive true karte hain)
         webViewAlive = false
         android.os.Handler(Looper.getMainLooper()).postDelayed({
@@ -266,7 +266,7 @@ class MainActivity : AppCompatActivity() {
     inner class MayaBridge {
 
         @JavascriptInterface
-        fun appVersion(): String = "4.0.2-native"
+        fun appVersion(): String = "4.1.0-native"
 
         /* v4.0.1: index.html boot-guard ye call karta hai — ab native alive flag true hota hai */
         @JavascriptInterface
