@@ -724,3 +724,14 @@ asli amal ka naqsha.
 **Tarteeb ki wajah:** P1/P2 buniyad hain. P3 lagaam — **is se pehle** poora access
 dena khatarnak hai. Phir P4 (sasta + bara dhamaka), P5 (mehnat magar "zinda"),
 P6 (asli khud-mukhtari — jo sirf tab mehfooz hai jab P3 maujood ho).
+
+---
+
+# 📎 SAATH WALI DASTAVEZ
+
+Ye dastavez batati hai **KYA** banega.
+[`AMAL-WORKFLOW.md`](AMAL-WORKFLOW.md) batati hai **KAISE** banega — 7 qanoon,
+8 invariant, shadow mode, feature flags, rollback, aur har phase ka khatra + ilaj.
+
+**Dono sath parhni chahiyen.** Plan bina workflow ke = khatra.
+Workflow bina plan ke = bay-maqsad.
