@@ -498,3 +498,229 @@ Regression budget **0** — maujooda 520 test (CSS · 72 · 293 · 155) green ra
 **P1 mein kya NAHI hoga:** tools abhi bhi sirf Gemini par chalenge. Wo P2 hai.
 
 **Saboot:** ~24 naye sanitizer test + `npm test` green + aap ke device par tasdeeq.
+
+---
+
+# HISSA 6 — 😈 TABAHI LAYER (naqshe se aage: kya aur mumkin hai)
+
+## 6.0 — Pehle ek dariyaft: Kotlin mein taqatein maujood hain jo **kisi tool se judi hi nahi**
+
+`MainActivity.kt` mein ye functions **pehle se likhe hue** hain, magar 33 tools mein
+inka naam tak nahi:
+
+| Kotlin function | Tool bana? | Iska matlab |
+|---|---|---|
+| `takePhoto()` · `pickImage()` | ❌ **nahi** | **Maya ke paas AANKHEIN hain — hum ne use di hi nahi** |
+| `lockScreen()` | ❌ nahi | "Maya phone lock kar do" |
+| `vibrate()` | ❌ nahi | khamosh ishara, raat mein |
+| `notifClear()` | ❌ nahi | "sab notification saaf kar do" |
+| `deviceBrand()` · `appVersion()` | ❌ nahi | khud ki tashkhees |
+| `scheduleTask()` | ⚠️ sirf message ke liye | **kisi bhi tool ko waqt par chala sakta hai** |
+| `notifHistory()` · `notifReply()` | ⚠️ jazvi | poora inbox Maya ke haath mein |
+
+**Yani "nayi taqat" banane se pehle, jo maujood hai wohi khol dena bara faida hai.**
+
+---
+
+## 6.1 — 👁️ AANKHEIN (Vision) · *sab se bara dhamaka, sab se kam kaam*
+
+`takePhoto()` **pehle se hai**. Gemini **multimodal hai**. Groq/OpenRouter par bhi
+vision models muft hain. Yani **Kotlin mein ek line nahi likhni** — bas jorna hai.
+
+```
+"Maya ye dekho"           → camera → tasveer → dimaag → jawab
+"is bill mein total?"     → 👁️ + run_javascript → hisab
+"ye dawa kis liye hai?"   → 👁️ + wiki_search
+"ye likha kya hai?"       → 👁️ → parh kar suna do (Urdu mein tarjuma bhi)
+"ye kaunsa part hai?"     → 👁️ + web_search
+```
+
+Naye tools: `see_camera` (photo le kar dekho) · `see_image` (gallery se) ·
+`read_text` (OCR-jaisa — dimaag khud parhta hai).
+
+> 🟡 ZARD darja — camera khulta hai, aap dekh kar dabate ho. Koi chori-chhupe photo nahi.
+
+**Khatra:** 🟢 kam · **Asar:** ☠️☠️☠️☠️☠️
+
+---
+
+## 6.2 — ⚡ BIJLI MODE · *phone control 50ms mein, LLM se PEHLE*
+
+Aaj: aap bolte ho → **dimaag** sochta hai (2-4 sec) → tool chalta hai.
+Kal: 🟢 SABZ tools ke liye **dimaag ka intezar hi nahi**.
+
+```
+"torch on karo"
+   ├─ 0ms    local intent match (registry ke triggers se)
+   ├─ 40ms   🔦 TORCH ON  ← ho gaya, LLM ne abhi kuch nahi kiya
+   └─ 900ms  Maya: "Ho gaya boss." (dimaag sirf JUMLA banata hai)
+```
+
+- Sirf 🟢 SABZ (torch, brightness, volume, timer, battery, mausam, namaz)
+- Yaqeen (confidence) kam ho to purana raasta — koi andaza nahi
+- **Aur sab se maze ki baat: ye INTERNET ke bina bhi chalta hai.**
+  Airplane mode mein bhi torch, brightness, volume, timer — sab kaam karenge.
+
+**Khatra:** 🟢 kam · **Asar:** ☠️☠️☠️☠️ *(user ko "jadu" mehsoos hoga)*
+
+---
+
+## 6.3 — 🗣️ STREAM + BOLO + ROKO · *Maya "zinda" mehsoos hone lagegi*
+
+Aaj `BRAIN.ask` mein: `stream: false`. Poora jawab aane tak khamoshi.
+
+**Naya:**
+1. **Streaming** — token aate hi pehla **jumla** mukammal ho → **usi waqt** Fish ko de do (~70ms TTFA). Baqi jumle background mein banate raho.
+   *Intezar 4 sec → ~0.8 sec.*
+2. **BARGE-IN (ROKO)** — Maya bol rahi ho aur aap "Maya ruko" / "bas" kaho → foran chup, mic khula. Aaj beech mein rokna mumkin hi nahi.
+3. Jumlon ka prefetch AWAAZ mein **pehle se maujood hai** (`grab(idx+1)`) — bas dimaag ki taraf se stream chahiye.
+
+> ⚠️ Iske liye Kotlin mein **naya streaming bridge** chahiye (SSE — `text/event-stream`).
+> Ye is poori fehrist ka **wahid** hissa hai jisme asli native kaam hai.
+
+**Khatra:** 🟡 darmiyana · **Asar:** ☠️☠️☠️☠️☠️
+
+---
+
+## 6.4 — 📜 AMAL LEDGER + ⟲ WAPAS KARO · *"automatic control" dene ki asal shart*
+
+Har amal darj: **kya · kab · kaunse args · nateeja · kaunse dimaag ne kaha**
+
+```
+"Maya wo wapas karo"      → aakhri amal ulta (brightness 100 → 45 jo pehle thi)
+"aaj kya kya kiya?"       → poora roznamcha
+"kal raat 11 baje kya kiya tha?"
+```
+
+Har 🟢/🟡 tool apna **ulta** bhi register karega (brightness ki purani value yaad rakho).
+
+**Bina is ke "full automatic access" dena andhera mein chhalaang hai.**
+
+**Khatra:** 🟢 kam · **Asar:** ☠️☠️☠️☠️ *(ye "aitmaad" ki buniyad hai)*
+
+---
+
+## 6.5 — 🎓 KHUD-SIKH ROUTER · *BUG 1 hamesha ke liye khatam*
+
+Har dafa Maya samajh na paye → khamoshi se darj ho jaye. Phir Settings mein:
+
+```
+🎓 MAYA KYA NAHI SAMJHI
+
+  "chamak barhao"          × 5 dafa    → ye kya tha?  [💡 brightness] [🔦 torch] [❌]
+  "batti jala do"          × 3 dafa    → ye kya tha?  [🔦 torch]      [💡]      [❌]
+```
+
+Ek tap → wo lafz **hamesha ke liye** us tool ki lughat mein. **Router apni ghaltiyon se seekhta hai.**
+
+**Khatra:** 🟢 kam · **Asar:** ☠️☠️☠️☠️ *(app waqt ke sath behtar hoti jayegi)*
+
+---
+
+## 6.6 — 🕸️ TRIGGERS (agar → to) · *asli khud-mukhtari*
+
+`settings.proactive` maujood hai magar wo sirf bay-maqsad gap-shap hai. Asli cheez:
+
+```
+AGAR battery < 15%          TO  batao + saver on karo
+AGAR Ammi ka message aaye   TO  foran parh kar suna do
+AGAR maghrib se 10 min pehle TO yaad dila do
+AGAR raat 11 baje           TO  brightness 20 + "so jao boss"
+AGAR ghar pohanchun         TO  WiFi wala kaam yaad dila do
+```
+
+Sab tukre **pehle se maujood** hain: `notifHistory()`, `scheduleTask()`, `battery()`,
+`prayer_times`. Bas ek chhota rules engine chahiye — aur Maya khud rule bana sakti hai
+zubani hukm se.
+
+**Khatra:** 🟡 darmiyana · **Asar:** ☠️☠️☠️☠️☠️ *(yehi "fully automatic" hai)*
+
+---
+
+## 6.7 — 🎬 ROUTINES · *ek lafz, kai kaam*
+
+```
+"sone ka waqt"   →  torch off · brightness 15 · volume 20 · alarm 7:00 · "shab bakhair"
+"bahar ja raha"  →  torch off · brightness 80 · battery batao · mausam batao
+"padhai"         →  DND · brightness 70 · 45 min timer
+```
+Aap khud bana sakein, ya Maya se kaho: **"jab main 'sone ka waqt' kahun to ye sab karna"** —
+aur wo `create_skill` (jo pehle se hai) mein mehfooz kar le.
+
+**Khatra:** 🟢 kam · **Asar:** ☠️☠️☠️
+
+---
+
+## 6.8 — 🧭 HAAL (context) · *sasta, magar jawab ka mayaar badal dega*
+
+Har sawal ke sath ek chhota sa haal bhi jaye:
+
+```
+HAAL: raat 11:47 · battery 12% (charge nahi) · WiFi · headphone laga hai
+      · sheher Hyderabad · aakhri amal: brightness 100 (8 min pehle)
+```
+
+Phir "brightness barhao" par Maya keh sakti hai:
+> *"Boss, 12% battery bachi hai — 60% kar doon? Poori karungi to 20 minute mein band ho jayega."*
+
+**Ye woh cheez hai jo "AI" ko "koi apna" bana deti hai.**
+
+**Khatra:** 🟢 bohat kam · **Asar:** ☠️☠️☠️☠️
+
+---
+
+## 6.9 — 📊 LIVE TRACE · *`<think>` wale bug ko FEATURE bana do*
+
+Aap ne soch dekhi thi aur bura laga. Magar log soch **dekhna chahte** hain — bas
+**saaf shakl** mein:
+
+```
+🧠 Cerebras · 340ms    🔧 brightness_control ✅ 45→100 · 38ms    🐟 Fish · 71ms
+```
+
+Jawab ke neeche patli si patti. Dabao to poori tafseel. Bakwas soch **nahi** —
+asli amal ka naqsha.
+
+**Khatra:** 🟢 kam · **Asar:** ☠️☠️☠️ *(dekhne mein bohat mehnga lagta hai)*
+
+---
+
+## 6.10 — 🛡️ SAFETY RAILS · *"tabahi level" ka matlab "be-lagam" nahi*
+
+| Qanoon | Kyun |
+|---|---|
+| 🔴 tools par rate limit (1 call / 60 sec bina ijazat) | loop mein 50 call na lag jayen |
+| Anjaan number par SMS/call = hamesha ijazat | galat number ka hadsa |
+| OTP / password / paisa — **kabhi** message mein na jaye (matn scan) | sab se bara khatra |
+| ⚗️ DRY-RUN mode: "karti to ye karti" — kuch chalta nahi | naye rules test karne ke liye |
+| Kisi bhi amal se pehle 3 sec ka ⟲ **cancel** ka mauqa (zard ke liye) | galti sudharne ka waqt |
+
+**Khatra:** 🟢 kam · **Asar:** ☠️☠️☠️☠️☠️ *(is ke bagair baqi sab khatarnak hai)*
+
+---
+
+## 6.11 — Chhoti magar mazedar cheezein
+
+- **Ek turn mein kai tool** — "torch on karo aur brightness 100" → dono
+- **Ijazat ka khoobsurat card** — 🔴 tools par modal nahi, bubble ke andar `✅ Haan / ❌ Nahi`
+- **Haptic** — `vibrate()` maujood hai: amal mukammal = halka sa "tap" (raat mein khamosh confirmation)
+- **`lock_screen` tool** — "Maya phone lock kar do"
+- **Awaaz se undo** — "nahi nahi wapas karo"
+- **Har amal par AWAAZ mood** — kaam ho gaya = 😄 cheerful, fail = 😌 calm
+
+---
+
+## 6.12 — Nazr-e-sani shuda naqsha (P1 se P6)
+
+| P | Version | Kya | Khatra | Asar |
+|---|---|---|---|---|
+| **P1** | v4.9.0 **SAAF ZUBAAN** | sanitizer · token budget · zubaan ka tazad | 🟢 | ☠️☠️☠️ |
+| **P2** | v5.0.0 **AMAL ENGINE** | universal tools · protocol · router · loop · sach | 🟡 | ☠️☠️☠️☠️☠️ |
+| **P3** | v5.1.0 **IJAZAT + TRACE** | 3 darje · TRUST MODE · ledger + ⟲ undo · safety rails · live trace | 🟢 | ☠️☠️☠️☠️ |
+| **P4** | v5.2.0 **⚡ BIJLI + 👁️ AANKHEIN** | 50ms local amal (offline bhi) · vision · lock/vibrate tools | 🟢 | ☠️☠️☠️☠️☠️ |
+| **P5** | v5.3.0 **🗣️ ZINDA** | streaming + barge-in (naya Kotlin SSE bridge) · HAAL context | 🟡 | ☠️☠️☠️☠️☠️ |
+| **P6** | v5.4.0 **🕸️ KHUD-MUKHTAR** | triggers (agar→to) · routines · khud-sikh router | 🟡 | ☠️☠️☠️☠️☠️ |
+
+**Tarteeb ki wajah:** P1/P2 buniyad hain. P3 lagaam — **is se pehle** poora access
+dena khatarnak hai. Phir P4 (sasta + bara dhamaka), P5 (mehnat magar "zinda"),
+P6 (asli khud-mukhtari — jo sirf tab mehfooz hai jab P3 maujood ho).
