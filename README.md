@@ -1,9 +1,28 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 4.9.0 "SAAF ZUBAAN" — 0-Budget Build • Android APK + Web PWA**
+**Version 4.10.0 "AMAL" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## ⚡ v4.10.0 — AMAL: TOOLS AB HAR DIMAAG KO
+
+**Asli device ke diagnostic se bana release.** Us ne sabit kiya: `tool wale turn : 0 / 12`.
+
+Gemini — Maya ka **wahid** tool-wala dimaag — ka din ka quota khatam tha. Baqi 11 turn
+Groq/Mistral ne diye, aur unhe `tools` bheje **hi nahi** jate the — magar prompt unhen
+tools ka **hukm** deta tha. Isi liye Maya ne kaam ke bajaye kaam ka **bayan** likha, aur
+`play_youtube(query="Funk` matn mein aa gaya.
+
+- ⚡ **1 → 7 tool-wale dimaag** — ek registry, do tarjume (Gemini + OpenAI). Schema case fix (`OBJECT`→`object`)
+- 🔑 **ARG ALIAS** — `level`/`value`/`"100%"`/`song`/`vol`/`state` → sahih naam. *(screenshot wala BUG 8)*
+- 🛡️ Koi provider `tools` par 400 de → **bina tools dobara**, dimaag marta nahi
+- 🧭 **ROUTER** — 33 mein se **12 tools** nazar hi nahi aate the. Ab har tool apne trigger khud deta hai (`britness` bhi) + test ka taala
+- 🩹 **5 device bug**: kata hua tool call · Devanagari "किसने बनाया" · stale "4.1.0" · Gemini day-quota har turn retry · Cerebras 402
+- 📱 Device naya nikla (**Android 14 · WebView 152**) → P5 ka khatra 🔴→🟡
+- 🧪 **646 test** (612 → 646)
+
+📖 [`docs/RELEASE-v4.10.0.md`](docs/RELEASE-v4.10.0.md)
 
 ## 🧪 v4.9.0 — SAAF ZUBAAN · NAAP-TOL · 👑 MALIK
 

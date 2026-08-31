@@ -30,6 +30,15 @@ const LB = HTML.indexOf('var AWAAZ = {');
 if (LA < 0 || LB < 0 || LB < LA) { console.error('MAYA LAB source nahi mila — index.html badal gaya?'); process.exit(1); }
 const LAB = HTML.slice(LA, LB);
 
+/* ⚡ AMAL (P2a) — TOOL_DECLS + execTool ke baad rehta hai */
+const AA = HTML.indexOf('var AMAL = {');
+const AB = HTML.indexOf('/* --- OpenAI-shakl providers ab BRAIN POOL sambhalta hai --- */');
+if (AA < 0 || AB < 0 || AB < AA) { console.error('AMAL source nahi mila'); process.exit(1); }
+const AMALSRC = HTML.slice(AA, AB);
+const TD_A = HTML.indexOf('var TOOL_DECLS = [');
+const TD_B = HTML.indexOf('async function execTool');
+const TOOLSRC = HTML.slice(TD_A, TD_B);
+
 function world(flags) {
   const dom = new JSDOM('<!doctype html><body></body>', { runScripts: 'dangerously', url: 'https://appassets.androidplatform.net/' });
   const w = dom.window;
@@ -39,6 +48,9 @@ function world(flags) {
   w.settings = { name: 'Boss', lang: 'roman-ur' };
   w.sysLogs = [];
   w.eval(LAB);
+  w.eval(TOOLSRC);
+  w.execTool = async function (n, a) { w.__ran = w.__ran || []; w.__ran.push({ n, a }); return { done: true, echo: a }; };
+  w.eval(AMALSRC);
   if (flags) { for (const k in flags) w.FLAGS.set(k, flags[k]); }
   return w;
 }
@@ -312,6 +324,126 @@ Here's a thinking process:
     let ok = true, at = -1, bad = '';
     for (const k of order) { const i = src.indexOf(k); if (i < 0 || i < at) { ok = false; bad = k; break; } at = i; }
     is(ok, '🔑 DHANCHE KA TAALA — saare namespace maujood aur sahih tarteeb mein', bad || 'sab theek');
+  }
+
+
+  /* ═══ 11. ⚡ AMAL — tools ab har dimaag ko (P2a) ═══ */
+  head('11. ⚡ AMAL — asal ilaj: "tool wale turn 0/12"');
+  {
+    const w = world({ poolTools: true });
+    const A = w.AMAL;
+
+    /* ── OpenAI dialect ── */
+    const T = A.openaiTools();
+    is(T.length === w.TOOL_DECLS.length && T.length >= 30,
+      '🔑 saare tools OpenAI shakl mein bhi tayyar', T.length + ' tools');
+    is(T[0].type === 'function' && !!T[0].function.name && !!T[0].function.parameters,
+      'shakl OpenAI wali hai (type/function/parameters)');
+    is(T[0].function.parameters.type === 'object',
+      '🔑 Gemini ka "OBJECT" -> OpenAI ka "object" (warna 400 aata)', T[0].function.parameters.type);
+    const bri = T.filter(x => x.function.name === 'brightness_control')[0];
+    is(!!bri && bri.function.parameters.properties.percent.type === 'integer',
+      'andar ke types bhi chhote harf mein', bri ? bri.function.parameters.properties.percent.type : '-');
+    is(A.openaiTools() === T, 'ek dafa ban kar yaad rehti hai (har request par nahi banti)');
+
+    /* ── kaun tools le sakta hai ── */
+    is(A.poolOn({ id: 'groq', kind: 'openai' }) === true, 'OpenAI-shakl dimaag ko tools milte hain');
+    is(A.poolOn({ id: 'gemini', kind: 'gemini' }) === false, 'Gemini ka apna raasta — dohra nahi');
+    A.markBad('groq', '400 tools unsupported');
+    is(A.poolOn({ id: 'groq', kind: 'openai' }) === false,
+      '🔑 jis ne 400 diya usay dobara nahi mara jata (dimaag marna nahi chahiye)');
+    const off = world({ poolTools: false });
+    is(off.AMAL.poolOn({ id: 'groq', kind: 'openai' }) === false, '🔒 switch OFF → koi tool nahi jata');
+
+    /* ── ARG ALIAS (BUG 8 — screenshot mein level=100 aaya tha) ── */
+    is(A.alias('brightness_control', { level: 100 }).percent === 100,
+      '🔑 level -> percent (screenshot ka asal bug)', 'percent=100');
+    is(A.alias('brightness_control', { value: '80%' }).percent === 80, '"80%" -> 80 (number ban gaya)');
+    is(A.alias('volume_control', { vol: 50 }).percent === 50, 'vol -> percent');
+    is(A.alias('torch_control', { state: 'on' }).on === true, '"on" -> true');
+    is(A.alias('torch_control', { enable: 'band' }).on === false, '"band" -> false');
+    is(A.alias('play_youtube', { song: 'Funk Taka' }).query === 'Funk Taka',
+      '🔑 song -> query (aap ka "Funk Taka" wala hukm)');
+    is(A.alias('brightness_control', { percent: 30, level: 99 }).percent === 30,
+      'asli naam maujood ho to alias use nahi hota');
+    is(JSON.stringify(A.alias('bakwas_tool', { x: 1 })) === '{"x":1}', 'anjaan tool par kuch nahi bigarta');
+
+    /* ── tool sach much chalta hai ── */
+    (async function () {
+      const res = await A.runCalls([
+        { id: 'c1', function: { name: 'brightness_control', arguments: '{"level":100}' } }
+      ]);
+      is(w.__ran.length === 1 && w.__ran[0].n === 'brightness_control' && w.__ran[0].a.percent === 100,
+        '🔑 tool ASAL MEIN chala (alias ke sath)', 'percent=' + w.__ran[0].a.percent);
+      is(res[0].role === 'tool' && res[0].tool_call_id === 'c1' && res[0].name === 'brightness_control',
+        'nateeja OpenAI shakl mein wapas gaya');
+      const bad = await A.runCalls([{ id: 'c2', function: { name: 'x', arguments: 'kachra{{' } }]);
+      is(bad.length === 1, 'kharab arguments par bhi crash nahi');
+    })();
+  }
+
+  /* ═══ 12. 🧭 ROUTER — 33/33 tools ab nazar aate hain ═══ */
+  head('12. 🧭 ROUTER — pehle 12 tools nazar hi nahi aate the');
+  {
+    const w = world({ poolTools: true });
+    const A = w.AMAL;
+    const say = {
+      brightness_control: 'britness barhao 100%', torch_control: 'torch on karo',
+      volume_control: 'awaaz 50 kar do', set_reminder: 'mujhe 20 minute baad yaad dilana',
+      prayer_times: 'maghrib ka waqt kya hai', reply_message: 'Ali ko reply karo theek hai',
+      recall_memory: 'mujhe kya kya yaad hai', search_memory: 'yaad hai maine kya kaha tha',
+      web_search: 'internet par talash karo', web_fetch: 'is website ko parho',
+      create_skill: 'ye tareeqa seekh lo', notify: 'notification bhejo',
+      set_alarm: 'subah 7 baje ka alarm laga do', set_timer: '10 minute ka timer laga do',
+      open_app: 'whatsapp kholo', play_youtube: 'funk taka song lagao',
+      call_contact: 'ammi ko call karo', message_contact: 'Ali ko message karo',
+      get_weather: 'mausam kaisa hai', battery_status: 'battery kitni hai',
+      run_javascript: '150 ka 18 percent kitna hua', wiki_search: 'wikipedia se batao',
+      list_files: 'meri files dikhao', diary_write: 'diary mein likho aaj acha din tha',
+      save_memory: 'yaad rakho meri birthday 5 june', read_messages: 'naye message parho'
+    };
+    const re = A.actionRe();
+    let missed = [];
+    for (const k in say) if (!re.test(say[k])) missed.push(k);
+    is(missed.length === 0, '🔑 HAR hukm ab "kaam" pehchana jata hai', missed.length ? missed.join(',') : Object.keys(say).length + '/' + Object.keys(say).length);
+
+    is(A.guess('britness barhao 100%') === 'brightness_control', 'britness → brightness_control (ghalat spelling bhi)');
+    is(A.guess('torch on karo') === 'torch_control', 'torch → torch_control');
+    is(A.guess('funk taka song lagao') === 'play_youtube', 'song → play_youtube');
+    is(A.guess('maghrib ka waqt') === 'prayer_times', 'maghrib → prayer_times');
+    is(!re.test('hello maya kaise ho'), 'aam gap-shap ko kaam na samjhe');
+
+    /* har tool ke apne trigger hon */
+    const noTrig = [];
+    for (let i = 0; i < w.TOOL_DECLS.length; i++) {
+      const n = w.TOOL_DECLS[i].name;
+      if (!A.TRIGGERS[n] || !A.TRIGGERS[n].length) noTrig.push(n);
+    }
+    is(noTrig.length === 0, '🔑 HAR tool ke apne trigger lafz maujood (BUG 1 ka taala)', noTrig.join(',') || 'sab');
+  }
+
+  /* ═══ 13. 🩹 ASLI DEVICE SE MILE 5 BUG ═══ */
+  head('13. 🩹 aap ke device ke diagnostic se mile bug');
+  {
+    const w = world({ saaf: true, malik: true });
+    is(w.SAAF('play_youtube(query="Funk').trim() === '',
+      '🔑 KATA HUA tool call bhi chhup gaya (band bracket nahi tha)', 'saaf');
+    is(w.SAAF('brightness_control(level=100)').trim() === '', '   → poora tool call bhi');
+    is(w.MALIK.ASK.test('\u092e\u0948\u0902 \u0924\u0941\u092e\u094d\u0939\u0947\u0902 \u0915\u093f\u0938\u0928\u0947 \u092c\u0928\u093e\u092f\u093e'),
+      '🔑 Devanagari "किसने बनाया" ab pakra jata hai (aap ne isi mein poocha tha)');
+    is(w.MALIK.ASK.test('\u062a\u0645\u06c1\u06cc\u06ba \u06a9\u0633 \u0646\u06d2 \u0628\u0646\u0627\u06cc\u0627'), '   → Urdu script bhi');
+    is(w.MALIK.ASK.test('\u0906\u0926\u093f\u0932 \u091a\u093e\u0902\u0921\u093f\u092f\u094b \u0915\u094c\u0928 \u0939\u0948'),
+      '   → "आदिल चांडियो कौन है" bhi');
+    is(w.MALIK.ASK.test('adil chandio kaun hai'), '   → Roman mein bhi');
+    const src = HTML;
+    is(src.indexOf('VERSION 4.1.0 — IRONCLAD SETTINGS EDITION') < 0,
+      '🔑 splash par hard-code "4.1.0" khatam (diagnostic ghalat version dikhata tha)');
+    is(/p\.kind === "gemini"[\s\S]{0,120}dayQuotaUntil[\s\S]{0,20}continue/.test(src),
+      '🔑 Gemini ka DIN ka quota khatam → poora dimaag skip (p90 31s ka sabab)');
+    is(/if \(status === 402\)[\s\S]{0,120}21600000/.test(src),
+      '🔑 402 (paisa maanga) → 6 ghante cooldown (Cerebras ne diya tha)');
+    is(/if \(useTools && \(status === 400 \|\| status === 422\)/.test(src),
+      'tools par 400 → bina tools dobara, dimaag marta nahi');
   }
 
   console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');
