@@ -100,8 +100,6 @@ class WakeWordService : Service() {
     override fun onCreate() {
         super.onCreate()
         running = true
-        attach(this)
-        pausedByApp = false
         startAsForeground()
         try {
             tts = TextToSpeech(this) { st -> ttsReady = st == TextToSpeech.SUCCESS }
@@ -114,7 +112,6 @@ class WakeWordService : Service() {
 
     override fun onDestroy() {
         running = false
-        detach(this)
         stopGate()
         try { MicKit.release() } catch (e: Exception) {}
         handler.removeCallbacksAndMessages(null)
@@ -408,13 +405,13 @@ class WakeWordService : Service() {
         handler.post {
             stopGate()
             try { sr?.cancel() } catch (e: Exception) {}
-            report("sulah", "service pause — app ka mic")
+            report("sulah", "service pause")
         }
     }
     fun softResume() {
         handler.post {
             if (!running) return@post
-            report("sulah", "service wapas — pehra phir se")
+            report("sulah", "service wapas")
             restart(300)
         }
     }
