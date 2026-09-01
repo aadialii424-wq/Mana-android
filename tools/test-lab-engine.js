@@ -31,6 +31,10 @@ if (LA < 0 || LB < 0 || LB < LA) { console.error('MAYA LAB source nahi mila — 
 const LAB = HTML.slice(LA, LB);   /* SUNO bhi isi mein hai (SCHEMA..AWAAZ) */
 
 /* ⚡ AMAL (P2a) — TOOL_DECLS + execTool ke baad rehta hai */
+const PA = HTML.indexOf('var IJAZAT = {');
+const PB = HTML.indexOf('var HAQEEQAT = {');
+if (PA < 0 || PB < 0 || PB < PA) { console.error('P3 source nahi mila'); process.exit(1); }
+const P3SRC = HTML.slice(PA, PB);
 const HA = HTML.indexOf('var HAQEEQAT = {');
 const HB = HTML.indexOf('var AMAL = {');
 if (HA < 0 || HB < 0 || HB < HA) { console.error('HAQEEQAT source nahi mila'); process.exit(1); }
@@ -54,6 +58,10 @@ function world(flags) {
   w.eval(LAB);
   w.eval(TOOLSRC);
   w.execTool = async function (n, a) { w.__ran = w.__ran || []; w.__ran.push({ n, a }); return { done: true, echo: a }; };
+  w.log = w.document.body;
+  w.esc = function (x) { return String(x == null ? '' : x); };
+  w.execTool = w.execTool || (async function(){ return { ok: true }; });
+  w.eval(P3SRC);
   w.eval(HAQSRC);
   w.eval(AMALSRC);
   if (flags) { for (const k in flags) w.FLAGS.set(k, flags[k]); }
@@ -712,6 +720,110 @@ Here's a thinking process:
     is(src.indexOf('id="sFishTemp"') > 0, 'Settings mein lehja ka khana maujood');
     is(/lehja: " \+ \(FISH\.temp\(\) <= 0\.4 \? "sthir" : "jazbaati"\)/.test(src),
       'hint saaf batata hai ke lehja sthir hai ya jazbaati');
+  }
+
+
+  /* ═══ 20. 🛡️ IJAZAT + 📜 LEDGER + ⟲ UNDO + 📊 TRACE  (P3 · LAGAAM) ═══ */
+  head('20. 🛡️ P3 LAGAAM — taqat dene se pehle lagaam');
+  {
+    const w = world({ ijazat: true });
+    const I = w.IJAZAT, L = w.LEDGER, R = w.RAILS, T = w.TRACE;
+
+    /* ── teen darje ── */
+    is(I.tier('brightness_control') === 1 && I.tier('torch_control') === 1 && I.tier('get_weather') === 1,
+      '🟢 SABZ — phone ki setting, foran');
+    is(I.tier('set_alarm') === 2 && I.tier('open_app') === 2 && I.tier('diary_write') === 2,
+      '🟡 ZARD — bata kar karo');
+    is(I.tier('call_contact') === 3 && I.tier('send_sms') === 3 && I.tier('message_contact') === 3,
+      '🔴 SURKH — phone se BAHAR nikal jata hai, wapas nahi hota');
+    is(I.need('call_contact') === true && I.need('brightness_control') === false,
+      '🔑 sirf SURKH par ijazat maangi jati hai');
+    /* har tool ka darja maujood */
+    const noTier = [];
+    for (let i = 0; i < w.TOOL_DECLS.length; i++) {
+      const n = w.TOOL_DECLS[i].name;
+      if (!I.T[n]) noTier.push(n);
+    }
+    is(noTier.length === 0, '🔑 HAR tool ka darja tay hai (naya tool + darja bhoolo = test fail)',
+      noTier.join(',') || w.TOOL_DECLS.length + '/' + w.TOOL_DECLS.length);
+
+    /* ── TRUST MODE ── */
+    w.settings.trustMode = true;
+    is(I.tier('call_contact') === 2 && I.need('call_contact') === false,
+      '⚡ TRUST MODE — surkh bhi zard ban jata hai (faisla aap ka)');
+    w.settings.trustMode = false;
+    is(I.need('call_contact') === true, '   → band karte hi lagaam wapas');
+
+    /* ── insani zubaan ── */
+    is(/CALL/.test(I.what('call_contact', { name: 'Ammi' })) && /Ammi/.test(I.what('call_contact', { name: 'Ammi' })),
+      'ijazat ka sawal saaf likha jata hai', I.what('call_contact', { name: 'Ammi' }));
+    is(/hi/.test(I.what('message_contact', { name: 'Monarch', text: 'hi' })),
+      'message ka matn bhi dikhaya jata hai');
+
+    /* ── 🛡️ RAILS ── */
+    let g = R.check('message_contact', { name: 'x', text: 'mera OTP 483920 hai' });
+    is(g.ok === false && /OTP/.test(g.why),
+      '🔑 OTP/password wala message KABHI nahi jata', g.why.slice(0, 46));
+    is(R.check('message_contact', { name: 'x', text: 'password bhejo' }).ok === false, '   → "password" bhi rukta hai');
+    is(R.check('message_contact', { name: 'x', text: 'kal milte hain' }).ok === true, '✅ aam message bilkul nahi rukta');
+    R.hits = {};
+    is(R.check('call_contact', { name: 'a' }).ok === true, 'pehli call ki ijazat hai');
+    is(R.check('call_contact', { name: 'a' }).ok === false, '🔑 45 sec mein doosri call ROK di (loop mein 50 call nahi lagengi)');
+    is(R.check('brightness_control', { percent: 50 }).ok === true, '✅ sabz tools par koi rate limit nahi');
+
+    /* ── 📜 LEDGER ── */
+    L.list = []; L.known = {};
+    L.push('brightness_control', { percent: 100 }, { ok: true, state: 'done', level: 100 }, 45);
+    L.push('call_contact', { name: 'Ammi' }, { ok: false, state: 'failed' }, undefined);
+    is(L.list.length === 2, 'har amal roznamche mein darj');
+    const rep = L.today();
+    is(/brightness_control/.test(rep) && /call_contact/.test(rep) && /2 amal/.test(rep),
+      '📜 "aaj kya kya kiya" ka jawab', rep.split('\n')[0]);
+    is(/✅/.test(rep) && /❌/.test(rep), '   → kamyabi aur nakami dono saaf');
+    is(String(w.localStorage.getItem('maya_ledger')).indexOf('brightness') > 0, 'roznamcha app band hone par bhi mehfooz');
+
+    /* ── ⟲ UNDO ── */
+    is(L.lastUndoable().n === 'brightness_control', '⟲ aakhri wapas-hone-laiq kaam mil gaya');
+    is(L.lastUndoable().b === 45, '   → us se pehle ki halat bhi yaad (45)');
+    L.list = [];
+    L.push('call_contact', { name: 'x' }, { ok: true }, undefined);
+    is(L.lastUndoable() === null, '✅ call wapas nahi ho sakti — jhoota waada nahi karti');
+    is(L.ASK_UNDO.test('wapas karo') && L.ASK_UNDO.test('undo') && L.ASK_UNDO.test('\u0648\u0627\u067E\u0633 \u06A9\u0631\u0648'),
+      '"wapas karo" har zubaan mein pehchana jata hai');
+    is(L.ASK_TODAY.test('aaj kya kya kiya'), '"aaj kya kya kiya" pehchana jata hai');
+    is(!L.ASK_UNDO.test('brightness barhao'), 'aam hukm ko undo na samjhe');
+
+    /* ── 📊 TRACE ── */
+    T.start();
+    T.tool('brightness_control', { ok: true, state: 'done' });
+    T.tool('message_contact', { ok: false });
+    const tl = T.line();
+    is(/brightness_control/.test(tl) && /message_contact/.test(tl), '📊 trace mein dono tool', tl.slice(0, 60));
+    is(/\u26A0/.test(tl), '   → nakaam tool par nishan bhi');
+
+    /* ── switch OFF ── */
+    const off = world({ ijazat: false });
+    is(off.IJAZAT.need('call_contact') === false, '🔒 switch OFF -> koi ijazat nahi maangi jati (purana rawaiya)');
+    is(off.RAILS.check('message_contact', { text: 'OTP 1234' }).ok === true, '🔒 switch OFF -> rails bhi band');
+    is(off.TRACE.line() === '', '🔒 switch OFF -> trace bhi nahi dikhta');
+
+    /* ── code mein juda ── */
+    const src = HTML;
+    const et = src.slice(src.indexOf('async function execTool'), src.indexOf('async function execTool') + 1800);
+    is(et.indexOf('RAILS.check(name, args)') > 0 &&
+       et.indexOf('IJAZAT.need(name)') > et.indexOf('RAILS.check(name, args)') &&
+       et.indexOf('IJAZAT.ask') > 0,
+      '🔑 amal se PEHLE: pehle RAILS, phir IJAZAT — dono execTool ke shuru mein');
+    is(et.indexOf('LEDGER.snap(name, args)') > et.indexOf('IJAZAT.ask'),
+      '   → undo ki halat ijazat ke BAAD, amal se pehle mehfooz hoti hai');
+    is(/LEDGER\.push\(name, args, out, _before\); TRACE\.tool\(name, out\)/.test(src),
+      '🔑 amal ke BAAD: roznamcha + trace');
+    is(/setTimeout\(function \(\) \{ finish\(false\); \}, 15000\)/.test(src),
+      '🔑 ijazat ka jawab na aaye to 15 sec baad KHUD "NAHI" (workflow ka usool)');
+    is(/LEDGER\.ASK_TODAY\.test\(stripped\)[\s\S]{0,200}LEDGER\.ASK_UNDO\.test\(stripped\)/.test(src),
+      '"aaj kya kiya" aur "wapas karo" — dimaag se poochhne ki zaroorat nahi');
+    is(src.indexOf('id="sTrustMode"') > 0 && src.indexOf('id="labLedger"') > 0,
+      'Settings mein TRUST MODE switch + roznamcha button');
   }
 
   console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');

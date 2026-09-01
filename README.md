@@ -1,9 +1,24 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.2.0 "AWAAZ MEHFOOZ" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.3.0 "IJAZAT" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🛡️ v5.3.0 — P3: IJAZAT · 📜 LEDGER · ⟲ UNDO · 📊 TRACE
+
+**Workflow ka usool: lagaam P4/P6 (zyada taqat) se PEHLE.** Brightness ghalat ho to koi baat nahi — magar Maya "Ali" samajh kar raat 3 baje "Ammi" ko call laga de, **wo wapas nahi hota.**
+
+- 🚦 **Teen darje** — 🟢 SABZ (15 tools, foran) · 🟡 ZARD (12, bata kar) · 🔴 SURKH (6, **pehle ijazat**). *Test ka taala: har tool ka darja lazmi (33/33)*
+- 🔴 **Ijazat ka card** — `📞 Ammi ko CALL lagani hai  [✅ HAAN] [❌ NAHI]`. **15 sec mein jawab na mila → NAHI.** Aur ijazat na mile to Maya ko hukm: *"zid mat karo"*
+- ⚡ **TRUST MODE** — aap chaho to surkh bhi zard. Faisla aap ka
+- 🛡️ **RAILS** — **OTP/password wala message KABHI nahi jata** · surkh tools par 45-sec rate limit (loop mein 50 call na lagen)
+- 📜 **LEDGER** — *"aaj kya kya kiya?"* → waqt, tool, darja, kaamyab/nakaam
+- ⟲ **UNDO** — *"wapas karo"* / *"undo"* / *"واپس کرو"*. **Jhoota waada nahi:** call wapas nahi ho sakti to saaf keh deti hai; purani halat maloom na ho to andaza nahi lagati
+- 📊 **TRACE** — `🧠 Mistral 340ms · 🔧 brightness ✅ · 🗣️ fish`. **`<think>` wala bug ab FEATURE**
+- 🧪 **774 test** (738 → 774)
+
+📖 [`docs/RELEASE-v5.3.0.md`](docs/RELEASE-v5.3.0.md)
 
 ## 🔒 v5.2.0 — AWAAZ MEHFOOZ · 🎯 STHIR LEHJA
 
