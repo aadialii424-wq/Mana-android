@@ -31,6 +31,10 @@ if (LA < 0 || LB < 0 || LB < LA) { console.error('MAYA LAB source nahi mila — 
 const LAB = HTML.slice(LA, LB);   /* SUNO bhi isi mein hai (SCHEMA..AWAAZ) */
 
 /* ⚡ AMAL (P2a) — TOOL_DECLS + execTool ke baad rehta hai */
+const NA = HTML.indexOf('var NAZAR = {');
+const NB = HTML.indexOf('var BIJLI = {');
+if (NA < 0 || NB < 0 || NB < NA) { console.error('NAZAR source nahi mila'); process.exit(1); }
+const NAZSRC = HTML.slice(NA, NB);
 const QA = HTML.indexOf('var BIJLI = {');
 const QB = HTML.indexOf('var IJAZAT = {');
 if (QA < 0 || QB < 0 || QB < QA) { console.error('P4 source nahi mila'); process.exit(1); }
@@ -66,6 +70,7 @@ function world(flags) {
   w.esc = function (x) { return String(x == null ? '' : x); };
   w.execTool = w.execTool || (async function(){ return { ok: true }; });
   w.eval(P3SRC);
+  w.eval(NAZSRC);
   w.eval(P4SRC);
   w.eval(HAQSRC);
   w.eval(AMALSRC);
@@ -966,6 +971,124 @@ Here's a thinking process:
     is(/Groq/.test(T.line()), '   → "-" jaisa bekaar naam use nahi karta');
     is(/TRACE\.brain\(_bn/.test(src) && /TRACE\.brain\("\\u26A1 BIJLI", ms\)/.test(src),
       'dono raaston (dimaag aur BIJLI) par naam darj hota hai');
+  }
+
+
+  /* ═══ 23. 👁️ NAZAR — Maya screen PARH sakti hai (P7a) ═══ */
+  head('23. 👁️ NAZAR — screen parhna (chhuna NAHI)');
+  {
+    const w = world({ nazar: true });
+    const N = w.NAZAR;
+
+    /* naqli screen — Chrome jaisa */
+    const fake = {
+      ok: true, pkg: 'com.android.chrome', n: 7,
+      items: [
+        { i:0, t:'input', x:'Search or type URL', cx:540, cy:180, id:'url_bar', e:1 },
+        { i:1, t:'btn',   x:'Search',            cx:960, cy:180 },
+        { i:2, t:'btn',   x:'New tab',           cx:1000, cy:90, id:'tab_switcher' },
+        { i:3, t:'text',  x:'Agent Arena | AI Agent Performance Leaderboard', cx:540, cy:600 },
+        { i:4, t:'text',  x:'',                  cx:1, cy:1 },
+        { i:5, t:'btn',   x:'Search',            cx:960, cy:180 },
+        { i:6, t:'scroll',x:'',                  cx:540, cy:900, s:1 }
+      ]
+    };
+    w.NATIVE = true;
+    w.MayaBridge = { uiDump: function(){ return JSON.stringify(fake); } };
+
+    is(N.can() === true, 'bridge maujood ho to NAZAR tayyar');
+    const r = N.look(90);
+    is(r.ok === true && r.app === 'Chrome', '🔑 screen parh li — app pehchan liya', r.app);
+
+    /* chhanti */
+    is(r.items.length < fake.items.length, 'dohri chhanti hui', fake.items.length + ' -> ' + r.items.length);
+    is(!r.items.some(x => x.t === 'text' && x.x === '(bay-naam)'),
+      'bina naam wala aam matn phenk diya gaya');
+    const searches = r.items.filter(x => x.x === 'Search');
+    is(searches.length === 1, 'ek jaise element JAMA kar diye gaye (2 "Search" -> 1)');
+    is(searches[0].n === 2, '   → aur ginti bhi likhi (×2)', 'n=' + searches[0].n);
+    is(r.items[0].i === 0 && r.items[1].i === 1, 'har element ka apna number (dimaag isi se tap karega)');
+
+    /* lamba matn kata */
+    const long = { ok:true, pkg:'x', n:1, items:[{ i:0, t:'text', x:'a'.repeat(200), cx:1, cy:1 }] };
+    w.MayaBridge.uiDump = function(){ return JSON.stringify(long); };
+    const r2 = N.look(90);
+    is(r2.items[0].x.length <= N.MAXLABEL + 1, '🔑 lamba matn kata gaya (prompt phate nahi)', r2.items[0].x.length + ' harf');
+
+    /* 40 se zyada nahi */
+    const many = { ok:true, pkg:'x', n:120, items:[] };
+    for (let i = 0; i < 120; i++) many.items.push({ i:i, t:'btn', x:'button ' + i, cx:i, cy:i });
+    w.MayaBridge.uiDump = function(){ return JSON.stringify(many); };
+    const r3 = N.look(200);
+    is(r3.items.length <= N.MAXITEMS, '🔑 40 se zyada element kabhi nahi', r3.items.length + ' items');
+    is(N.tokens(r3) < 700, '🔑 prompt ka budget mehfooz (CHHED 9 ka sabaq)', '~' + N.tokens(r3) + ' token');
+
+    /* dimaag ke liye matn */
+    w.MayaBridge.uiDump = function(){ return JSON.stringify(fake); };
+    N.look(90);
+    const fb = N.forBrain();
+    is(/^SCREEN: Chrome/.test(fb) && /\[0\] input/.test(fb) && /Search or type URL/.test(fb),
+      'dimaag ko saaf, numberon wali fehrist jati hai', fb.split('\n')[1]);
+
+    /* aap ke liye */
+    const fe = N.forEye();
+    is(/SCREEN PAR ABHI/.test(fe) && /Chrome/.test(fe) && /CHHUA nahi/.test(fe),
+      '🔒 aap ko dikhne wali report saaf kehti hai: "Maya ne kuch CHHUA nahi"');
+
+    /* nakami par sach */
+    w.MayaBridge.uiDump = function(){ return JSON.stringify({ ok:false, why:'accessibility band hai' }); };
+    const bad = N.look(90);
+    is(bad.ok === false && /accessibility/.test(bad.why), '❌ accessibility band ho to SAAF batati hai', bad.why);
+    is(/nahi parh saki/.test(N.forEye(bad)), '   → jhoot nahi bolti');
+    w.MayaBridge.uiDump = function(){ return 'kachra{{{'; };
+    is(N.look(90).ok === false, 'kharab jawab par crash nahi');
+    delete w.MayaBridge.uiDump;
+    is(N.can() === false && N.look(90).ok === false, 'bridge na ho to saaf mana');
+
+    /* app ke naam */
+    is(N.appOf('com.instagram.android') === 'Instagram' && N.appOf('com.android.chrome') === 'Chrome',
+      'aam apps naam se pehchani jati hain');
+    is(N.appOf('com.kuch.anjaan') === 'anjaan', 'anjaan app ka bhi kuch naam nikal aata hai');
+  }
+
+  head('23b. 🔒 NAZAR ki hadd — dekhna haan, chhuna NAHI');
+  {
+    const src = HTML;
+    const KT = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/AutoSendService.kt'), 'utf8');
+    const CFG = fs.readFileSync(path.join(ROOT, 'app/src/main/res/xml/autosend_service_config.xml'), 'utf8');
+
+    is(/fun dumpScreen\(max: Int\): String/.test(KT), '🔑 Kotlin mein dumpScreen() maujood');
+    is(!/dumpScreen[\s\S]{0,2200}performAction/.test(KT),
+      '🔑 dumpScreen KUCH CHHUTA NAHI — us mein performAction hai hi nahi');
+    is(/isVisibleToUser/.test(KT) && /r\.width\(\) > 4/.test(KT),
+      'sirf nazar aane wale element (chhupe hue nahi)');
+    is(/depth > 22/.test(KT) && /out\.length\(\) >= cap/.test(KT),
+      '🔑 tree par chalne ki hadd — bara page bhi app ko jam nahi karega');
+    is(/label\.substring\(0, 60\)/.test(KT), 'Kotlin bhi label kaat deta hai (dohri chhanti)');
+
+    /* purana kaam salamat */
+    is(/com\.whatsapp:id\/send/.test(KT) && /fun findAndClick/.test(KT) && /autosend_at/.test(KT),
+      '🔒 purana WhatsApp AutoSend BILKUL salamat (Qanoon 2)');
+
+    /* config */
+    const CFGLIVE = CFG.replace(/<!--[\s\S]*?-->/g, '');   /* comment nikal do */
+    is(!/android:packageNames/.test(CFGLIVE),
+      '🔑 packageNames hata di gayi — ab har app parh sakti hai');
+    is(/packageNames="com\.whatsapp"/.test(CFG),
+      '   → aur comment mein likha hai ke pehle kya tha (kyun badla)');
+    is(/flagReportViewIds/.test(CFG), '🔑 flagReportViewIds — ab view-id bhi milte hain');
+    is(/canPerformGestures="true"/.test(CFG), 'canPerformGestures ON (P7b ke liye — abhi istemal nahi)');
+    is(/dobara jorni parti hai/.test(CFG), 'config mein likha hai ke service dobara ON karni paregi');
+
+    /* JS side */
+    is(/name: "read_screen"/.test(src), 'read_screen ab asli TOOL hai');
+    is(/read_screen: 1,/.test(src), '🟢 SABZ darja — sirf parhta hai, kuch chhuta nahi');
+    is(/read_screen: "info"/.test(src), '🤝 SACH: "info" — koi amal ka daawa nahi');
+    is(src.indexOf('id="labNazarTest"') > 0, 'Settings mein "SCREEN ABHI PARHO" button');
+    is(/is version mein service ka config badla hai/.test(src),
+      '🔑 app khud batati hai ke Accessibility dobara ON karni paregi');
+    const off = world({ nazar: false });
+    is(/NAZAR band hai/.test(src), '🔒 switch OFF ho to tool saaf mana kar deta hai');
   }
 
   console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');

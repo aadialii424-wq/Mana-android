@@ -1147,6 +1147,27 @@ class MainActivity : AppCompatActivity() {
             JSONObject().put("status", 0).put("body", e.message ?: "error").toString()
         }
 
+        /**
+         * 👁️ NAZAR — screen par abhi kya hai? (P7a)
+         *
+         * SIRF PARHTA HAI. Kuch chhuta nahi, kuch dabata nahi.
+         * Accessibility service band ho to saaf keh deta hai — jhoot nahi.
+         */
+        @JavascriptInterface
+        fun uiDump(max: Int): String {
+            return try {
+                val svc = com.maya.ai.AutoSendService.instance
+                if (svc == null)
+                    "{\"ok\":false,\"why\":\"MAYA AutoSend accessibility service band hai\"}"
+                else svc.dumpScreen(max)
+            } catch (e: Exception) {
+                val o = JSONObject()
+                o.put("ok", false)
+                o.put("why", e.message ?: "screen parhne mein masla")
+                o.toString()
+            }
+        }
+
         /** Persistent prefs (boot autostart wake) */
         @JavascriptInterface
         fun setPref(k: String, v: Boolean) { try { prefs().edit().putBoolean(k, v).apply() } catch (e: Exception) {} }

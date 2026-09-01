@@ -1,9 +1,24 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.5.0 "NISHANA" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.6.0 "NAZAR" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 👁️ v5.6.0 — P7a: NAZAR (Maya SCREEN parh sakti hai)
+
+**Forensic:** `AutoSendService.kt` **pehle se** ek asli `AccessibilityService` thi — `rootInActiveWindow`, `performAction(CLICK)`, `performGlobalAction(BACK)` sab maujood. Bas **teen line XML** ne use WhatsApp tak mehdood kar rakha tha.
+
+- 👁️ **NAZAR** — Maya screen ka poora tree parh kar saaf fehrist bana deti hai: `✏️ [0] Search or type URL · 🔘 [1] Search ×2 · ↕️ [4] scroll`
+- 🔧 **Teen line config** badli: `packageNames` hata di · `flagReportViewIds` jora · `canPerformGestures` ON *(P7b ke liye — abhi istemal nahi)*
+- 📉 **Dohri chhanti** — Chrome ke page mein 500+ node hote hain. Kotlin motay tor par chhaanta hai, JS dohre hataata/jama karta/kaatta hai → **≤40 element, ~204 token** *(CHHED 9 ka sabaq)*
+- 🔒 **Is release mein Maya kuch CHHU hi nahi sakti** — test ka taala: `dumpScreen()` ke andar **`performAction` hai hi nahi**. 🟢 SABZ darja, 🤝 `state:"info"`, aur **purana WhatsApp AutoSend bilkul salamat**
+- 🆕 Naya tool `read_screen` (35 → 36)
+- 🧪 **860 test** (825 → 860)
+
+⚠️ **Ek dafa karna parega:** Settings → Accessibility → **MAYA AutoSend → OFF → ON** *(config badla hai)*
+
+📖 [`docs/RELEASE-v5.6.0.md`](docs/RELEASE-v5.6.0.md) · plan: [`docs/P7-HAATH-PLAN.md`](docs/P7-HAATH-PLAN.md)
 
 ## 🎯 v5.5.0 — NISHANA: hukm ab sahih jagah jata hai
 
