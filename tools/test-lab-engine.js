@@ -305,8 +305,10 @@ Here's a thinking process:
   head('8. 🗣️ ZUBAAN — do mutazad hukm ab ek (P1 · BUG 6)');
   {
     const src = HTML;
-    is(/LANGUAGE RULE: SAB SE PEHLE user ki script ki NAQAL karo/.test(src),
-      '🔑 ab MIRROR pehle hai — jo user bole wohi script');
+    is(/LANGUAGE RULE: user ki ZUBAAN aur SCRIPT dono ki naqal karo/.test(src),
+      '🔑 ab ZUBAAN aur SCRIPT dono mirror hote hain');
+    is(/sirf naam ya ek lafz/.test(src) && /ANGREZI mein jawab SIRF tab/.test(src),
+      '🔑 "Maya" jaisa ek lafz likhne par ANGREZI par nahi jati (asli device se mila bug)');
     is(/Agar user ki script saaf pata na chale to: " \+\s*\(LR\[settings\.lang/.test(src),
       'setting sirf FALLBACK hai, hukm nahi');
     is(!/p \+= "\\nLANGUAGE RULE: " \+ \(LR\[settings\.lang/.test(src),
@@ -909,6 +911,61 @@ Here's a thinking process:
     w.NATIVE = false;
     const r = w.AANKH.ask('ye kya hai', 'camera');
     is(r.ok === false && /APK/.test(r.note), 'browser mein saaf sach — camera sirf APK mein');
+  }
+
+
+  /* ═══ 22. 🎯 NISHANA — aap ke device se mile 4 bug ═══ */
+  head('22. 🎯 NISHANA — local hukm ab DIMAAG ka kaam nahi cheenti');
+  {
+    const src = HTML;
+
+    /* ── BUG 1: "Camera khol ke picture lo" -> open_app hijack ── */
+    is(/list mein nahi \u2014 DIMAAG faisla kare/.test(src) || /list mein nahi[\s\S]{0,80}return null;/.test(src),
+      '🔑 app ka naam list mein na ho to ab DIMAAG faisla karta hai (pehle bakwas jawab deti thi)');
+    is(!/meri list mein nahi hai\. Try: WhatsApp/.test(src) ||
+       /return null;[\s\S]{0,40}\}\s*\n\s*\/\* 🎯 NISHANA/.test(src) ||
+       src.indexOf('appOne.length === 1') > 0,
+      '   → "Camera khol ke picture lo" ab see_camera tak pohanchega');
+
+    /* ── BUG 2: "arena agent search karo" -> sirf "karo" dhoonda ── */
+    is(/\^\(\.\{2,60\}\?\)\\s\+\(\?:ko\\s\+\)\?\(\?:search\|khojo/.test(src.replace(/\\\\/g, '\\')) ||
+       src.indexOf('(?:search|khojo|dhoondo|dhundo)\\s*(?:karo|kar do|kar)?\\s*$') > 0,
+      '🔑 "X search karo" wali shakl bhi pakri jati hai (pehle sirf "search X")');
+    is(src.indexOf('STOPQ') > 0 && /if \(sq\.length >= 2 && !STOPQ\.test\(sq\)\)/.test(src),
+      '🔑 bacha hua matn bekaar ho ("karo") to search hota hi nahi — DIMAAG kare');
+    is(/replace\(\/\^\(google\|chrome\|browser/.test(src),
+      '   → "chrome par search karo X" se "chrome par" hat jata hai');
+
+    /* ── BUG 3: bina tool ke daawa (vision hallucination) ── */
+    const w = world({ sach: true, ijazat: true });
+    const H = w.HAQEEQAT, T = w.TRACE;
+    T.start();
+    let fixed = H.check('Aankhein mode activate kar rahi hoon \u2014 bas ek second, screen par nazar rakh');
+    is(H.caught === true && /camera KHOLNA parega/.test(fixed),
+      '🔑 "Aankhein activate kar rahi hoon" (koi tool nahi chala) = JHOOT, pakra gaya', fixed.slice(0, 54));
+    is(/screenshot main abhi nahi le sakti/.test(fixed),
+      '   → aur saaf batati hai ke screenshot nahi le sakti');
+    T.start();
+    fixed = H.check('Boss, screen khol rahi hoon \u2014 photo khich rahi hoon.');
+    is(H.caught === true, '   → "photo khich rahi hoon" bhi pakra gaya');
+    T.start();
+    T.tool('see_camera', { ok: true, state: 'started' });
+    is(H.check('Camera khol rahi hoon, Boss') === 'Camera khol rahi hoon, Boss',
+      '✅ tool SACH MEIN chala ho to jawab bilkul nahi chhua jata');
+    T.cur = null;
+    is(H.check('dekh rahi hoon') === 'dekh rahi hoon', '✅ turn track hi na hua ho to kuch nahi badalta');
+    T.start();
+    is(H.check('Theek hai Boss, bataiye') === 'Theek hai Boss, bataiye', '✅ aam jawab bilkul salamat');
+
+    /* ── BUG 4: 📊 TRACE mein sirf "🧠 —" dikhta tha ── */
+    T.start();
+    is(T.line() === '', '🔑 kuch asli na ho to chip dikhta HI nahi (pehle khali "🧠 —" aata tha)');
+    T.brain('\u26A1 Groq', 340);
+    is(/Groq/.test(T.line()) && /340ms/.test(T.line()), '🔑 dimaag ka naam ab DARJ hota hai, render par nahi parha jata', T.line());
+    T.brain('-', 0);
+    is(/Groq/.test(T.line()), '   → "-" jaisa bekaar naam use nahi karta');
+    is(/TRACE\.brain\(_bn/.test(src) && /TRACE\.brain\("\\u26A1 BIJLI", ms\)/.test(src),
+      'dono raaston (dimaag aur BIJLI) par naam darj hota hai');
   }
 
   console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');

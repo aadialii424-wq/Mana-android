@@ -1,9 +1,22 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.4.0 "BIJLI + AANKHEIN" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.5.0 "NISHANA" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🎯 v5.5.0 — NISHANA: hukm ab sahih jagah jata hai
+
+**v5.4.0 ke asli device diagnostic se bane 5 fix.** *(Pehle jeet: 🤝 SACH ne jhoot rok diya — "type kar diya hai, ab SEND dabao" · ⚡ BIJLI chali · 🎙️ SUNO chala.)*
+
+- 🎯 **Local hukm DIMAAG ka kaam cheen leta tha** — `"Camera khol ke picture lo"` → `khol` dekh kar `"ke picture lo"` ko **app ka naam** samajh liya. Ab app APPS list mein ho to hi local handle kare, warna **DIMAAG faisla kare** (uske paas `see_camera` hai)
+- 🔍 **`"arena agent search karo"` → sirf `"karo"` dhoonda jata tha** (regex `search` ke BAAD wala hissa uthata tha). Ab **dono shaklein** + bekaar matn par search hota hi nahi
+- 🚨 **Bina kuch kiye "kar rahi hoon"** — *"Aankhein mode activate kar rahi hoon 👀"* jabke **koi tool chala hi nahi**. Naya guard: turn track hua + 0 tool + daawa = **JHOOT** → app khud theek karti hai (*"camera KHOLNA parega… screenshot nahi le sakti"*)
+- 📊 **TRACE mein sirf `🧠 —`** dikhta tha — naam ab **jawab aate hi darj** hota hai, aur khali chip dikhta hi nahi
+- 🗣️ **`"Maya"` likha → angrezi jawab** — ab **zubaan bhi mirror**; angrezi sirf tab jab **poora jumla** angrezi ho
+- 🧪 **825 test** (809 → 825)
+
+📖 [`docs/RELEASE-v5.5.0.md`](docs/RELEASE-v5.5.0.md)
 
 ## ⚡ v5.4.0 — P4: BIJLI (50ms) · 👁️ AANKHEIN
 
