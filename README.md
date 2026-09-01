@@ -1,9 +1,22 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.3.0 "IJAZAT" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.4.0 "BIJLI + AANKHEIN" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## ⚡ v5.4.0 — P4: BIJLI (50ms) · 👁️ AANKHEIN
+
+**P3 mein lagaam lag gayi thi. Ab taqat dena mehfooz hai.**
+
+- ⚡ **BIJLI** — 🟢 SABZ kaam **dimaag se PEHLE, ~50ms mein**. `"torch on karo"` → 40ms mein torch ON, phir dimaag sirf jumla banata hai
+- 🌐 **Internet ke bina bhi chalta hai** — airplane mode mein torch/brightness/volume/timer/battery sab kaam karenge, aur Maya khud jumla bana legi
+- 🔒 **Dohri hifazat** — tool `IJAZAT` mein 🟢 SABZ ho **aur** `BIJLI.OK` list mein bhi. 🔴 call/SMS/WhatsApp us list mein **hain hi nahi**. Yaqeen na ho (`sirf "torch"`, value nahi) → dimaag hi kare. Nakaam ho → chup-chaap dimaag ko de deti hai
+- 👁️ **AANKHEIN** — `takePhoto`/`visionAsk` **pehle se maujood** the, magar sirf ek **tang regex** par aur **TOOL nahi** the. Ab `see_camera` + `see_image` asli tools hain (33→35) — dimaag **khud** faisla karta hai ke dekhna parega. `"is bill ka total kitna hai"` ab kaam karta hai
+- 🟡 Camera **ZARD** darja — khulta hai, aap dabate ho. **Chori-chhupe photo nahi.** Aur 🤝 SACH: *"camera khol diya"*, na ke *"dekh liya"*
+- 🧪 **809 test** (774 → 809)
+
+📖 [`docs/RELEASE-v5.4.0.md`](docs/RELEASE-v5.4.0.md)
 
 ## 🛡️ v5.3.0 — P3: IJAZAT · 📜 LEDGER · ⟲ UNDO · 📊 TRACE
 

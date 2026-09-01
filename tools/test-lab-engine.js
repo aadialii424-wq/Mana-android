@@ -31,6 +31,10 @@ if (LA < 0 || LB < 0 || LB < LA) { console.error('MAYA LAB source nahi mila — 
 const LAB = HTML.slice(LA, LB);   /* SUNO bhi isi mein hai (SCHEMA..AWAAZ) */
 
 /* ⚡ AMAL (P2a) — TOOL_DECLS + execTool ke baad rehta hai */
+const QA = HTML.indexOf('var BIJLI = {');
+const QB = HTML.indexOf('var IJAZAT = {');
+if (QA < 0 || QB < 0 || QB < QA) { console.error('P4 source nahi mila'); process.exit(1); }
+const P4SRC = HTML.slice(QA, QB);
 const PA = HTML.indexOf('var IJAZAT = {');
 const PB = HTML.indexOf('var HAQEEQAT = {');
 if (PA < 0 || PB < 0 || PB < PA) { console.error('P3 source nahi mila'); process.exit(1); }
@@ -62,6 +66,7 @@ function world(flags) {
   w.esc = function (x) { return String(x == null ? '' : x); };
   w.execTool = w.execTool || (async function(){ return { ok: true }; });
   w.eval(P3SRC);
+  w.eval(P4SRC);
   w.eval(HAQSRC);
   w.eval(AMALSRC);
   if (flags) { for (const k in flags) w.FLAGS.set(k, flags[k]); }
@@ -824,6 +829,86 @@ Here's a thinking process:
       '"aaj kya kiya" aur "wapas karo" — dimaag se poochhne ki zaroorat nahi');
     is(src.indexOf('id="sTrustMode"') > 0 && src.indexOf('id="labLedger"') > 0,
       'Settings mein TRUST MODE switch + roznamcha button');
+  }
+
+
+  /* ═══ 21. ⚡ BIJLI + 👁️ AANKHEIN  (P4) ═══ */
+  head('21. ⚡ BIJLI — 50ms mein kaam, dimaag se PEHLE');
+  {
+    const w = world({ bijli: true, ijazat: true });
+    const B = w.BIJLI;
+
+    /* ── pehchan ── */
+    let m = B.match('torch on karo');
+    is(m && m.tool === 'torch_control' && m.args.on === true, '🔦 "torch on karo" → torch ON', JSON.stringify(m));
+    is(B.match('torch band karo').args.on === false, '🔦 "torch band karo" → OFF');
+    m = B.match('britness 100 karo');
+    is(m && m.tool === 'brightness_control' && m.args.percent === 100,
+      '🔑 "britness 100 karo" → brightness 100 (ghalat spelling bhi)', JSON.stringify(m && m.args));
+    is(B.match('brightness full karo').args.percent === 100, '"full" → 100');
+    is(B.match('brightness kam karo').args.percent === 20, '"kam" → 20');
+    is(B.match('chamak aadhi kar do').args.percent === 50, '"aadhi" → 50');
+    is(B.match('awaaz 50 kar do').tool === 'volume_control', '🔊 volume');
+    is(B.match('10 minute ka timer laga do').args.seconds === 600, '⏱️ 10 minute → 600 second');
+    is(B.match('30 second ka timer').args.seconds === 30, '⏱️ second bhi');
+    is(B.match('battery kitni hai').tool === 'battery_status', '🔋 battery');
+
+    /* ── kab NAHI chalna chahiye (hifazat) ── */
+    is(B.match('Ammi ko call karo') === null, '🔒 call BIJLI se kabhi nahi (surkh hai)');
+    is(B.match('Monarch ko whatsapp par hi bhejo') === null, '🔒 WhatsApp bhi nahi');
+    is(B.match('alarm laga do 7 baje') === null, '🔒 alarm bhi nahi (zard hai)');
+    is(B.match('torch') === null, '🔒 sirf "torch" — on/off nahi bataya to dimaag hi kare');
+    is(B.match('brightness') === null, '🔒 sirf "brightness" — value nahi to dimaag hi kare');
+    is(B.match('mujhe brightness ke bare mein tafseel se batao ke ye kaam kaise karti hai aur kyun zaroori hai') === null,
+      '🔒 lamba jumla = baat-cheet, hukm nahi');
+    is(B.match('kaise ho maya') === null, '🔒 aam gap-shap par kuch nahi');
+    const off = world({ bijli: false, ijazat: true });
+    is(off.BIJLI.match('torch on karo') === null, '🔒 switch OFF → BIJLI bilkul band');
+
+    /* ── khud jumla bana leta hai (internet ke bina) ── */
+    is(/Torch on/.test(B.say('torch_control', { on: true })), '🌐 internet ke bina bhi jawab banata hai');
+    is(/100/.test(B.say('brightness_control', { percent: 100 }, { level: 100 })), '   → asli value ke sath');
+    is(/\u26A1/.test(B.say('torch_control', { on: true })), '   → ⚡ ka nishan (BIJLI se hua)');
+
+    /* ── ek hukm = ek amal ── */
+    B.mark('torch_control');
+    is(B.dupe('torch_control') === true && B.dupe('brightness_control') === false,
+      '🔒 wohi tool 8 sec mein dobara na chale');
+
+    /* ── code mein juda ── */
+    const src = HTML;
+    is(/BIJLI\.match\(stripped\)[\s\S]{0,900}askAI\(wasVoice\)/.test(src),
+      '🔑 BIJLI dimaag se PEHLE chalti hai, aur nakaam ho to dimaag ko de deti hai');
+    const bj = src.slice(src.indexOf('var BIJLI = {'), src.indexOf('var IJAZAT = {'));
+    is(/OK: \{ torch_control: 1/.test(bj) && bj.indexOf('IJAZAT.T[r.t] !== 1') > 0 && bj.indexOf('!BIJLI.OK[r.t]') > 0,
+      '🔑 dohri hifazat — IJAZAT ka darja SABZ ho AUR BIJLI.OK mein bhi ho');
+    is(bj.indexOf('call_contact') < 0 && bj.indexOf('message_contact') < 0,
+      '   → surkh tools BIJLI ki list mein hain hi nahi');
+  }
+
+  head('21b. 👁️ AANKHEIN — Maya ab DEKH sakti hai');
+  {
+    const src = HTML;
+    is(/name: "see_camera"/.test(src) && /name: "see_image"/.test(src),
+      '🔑 dekhna ab asli TOOL hai (pehle sirf ek tang regex tha)');
+    is(/is bill ka total/.test(src) && /ye likha kya hai/.test(src),
+      '   → tafseel mein likha hai kab dekhna hai (bill, likhai, dawa)');
+    is(/see_camera: 2, see_image: 2/.test(src),
+      '🟡 ZARD darja — camera khulta hai, aap dekh kar dabate ho (chori-chhupe photo nahi)');
+    is(/see_camera:\s*\["ye dekho"/.test(src), 'router ke trigger bhi maujood');
+    is(/see_camera:\s*\{ question:/.test(src), 'arg alias (q/prompt/ask → question)');
+    is(/see_camera: "started", see_image: "started"/.test(src),
+      '🤝 SACH: "camera khol diya" — "dekh liya" ka jhoota daawa nahi');
+    is(/AANKH\.waiting\) \? AANKH\.prompt\(\)/.test(src),
+      '🔑 sawal yaad rehta hai — jawab USI sawal ka aata hai');
+    is(/Tasveer dekh kar jawab do/.test(src) && /hisab maanga gaya hai to hisab karo/.test(src),
+      '   → prompt kehta hai: likha hua parho, hisab maanga ho to hisab karo');
+    is(/AANKH: dekh rahi hoon/.test(src), 'log mein bhi darj hota hai');
+
+    const w = world({});
+    w.NATIVE = false;
+    const r = w.AANKH.ask('ye kya hai', 'camera');
+    is(r.ok === false && /APK/.test(r.note), 'browser mein saaf sach — camera sirf APK mein');
   }
 
   console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');

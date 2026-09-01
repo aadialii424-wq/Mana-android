@@ -536,7 +536,7 @@ nav{padding:8px 10px 10px}
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v5.3.0 — 🛡️ IJAZAT · 📜 LEDGER · ⟲ UNDO · 📊 TRACE</div>
+  <div class="ver">v5.4.0 — ⚡ BIJLI 50ms · 👁️ AANKHEIN</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid #c85050; background:#3c0a0f; border-radius:12px; padding:12px; text-align:left;">
@@ -561,14 +561,14 @@ nav{padding:8px 10px 10px}
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v5.3.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
+  <div class="dfoot">MAYA v5.4.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.3.0 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.4.0 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -729,7 +729,7 @@ nav{padding:8px 10px 10px}
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.3.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.4.0</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -1109,6 +1109,10 @@ nav{padding:8px 10px 10px}
           <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labMalik"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
         </div>
         <div class="ui-row">
+          <div class="ui-row-txt">⚡ BIJLI — <b>50ms mein kaam</b> <small>(torch/brightness/volume/timer — dimaag se PEHLE, aur internet ke bina bhi)</small></div>
+          <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labBijli"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
+        </div>
+        <div class="ui-row">
           <div class="ui-row-txt">🛡️ IJAZAT — <b>lagaam</b> <small>(🔴 call/SMS/WhatsApp par pehle poochho · 📜 roznamcha · ⟲ wapas karo)</small></div>
           <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labIjazat"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
         </div>
@@ -1154,7 +1158,7 @@ nav{padding:8px 10px 10px}
       </div>
 
       <button type="button" class="ui-btn ui-btn-save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v5.3.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v5.4.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -1169,7 +1173,7 @@ nav{padding:8px 10px 10px}
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v5.3.0 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v5.4.0 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -1237,7 +1241,7 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v5.3.0 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v5.4.0 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
@@ -1326,7 +1330,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v5.3.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v5.4.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1533,7 +1537,7 @@ var VOICE_MOODS = [
 var PERSONA_MOOD = { maya:"warm", friday:"pro", jarvis:"pro", venom:"funny", gf:"warm", coach:"hype", teacher:"calm" };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧪  MAYA LAB  —  P0 (NAAP-TOL) + P1 (SAAF ZUBAAN) + 👑 MALIK    (app v5.3.0)
+   🧪  MAYA LAB  —  P0 (NAAP-TOL) + P1 (SAAF ZUBAAN) + 👑 MALIK    (app v5.4.0)
    ---------------------------------------------------------------------------
    Ye block 3 kaam karta hai, aur teeno ALAG SWITCH ke peeche hain:
 
@@ -1573,7 +1577,7 @@ var SCHEMA = {
 /* ───────────────────────── 🧪 FLAGS — har nayi cheez ek switch ke peeche ───── */
 var FLAGS = {
   KEY: "maya_flags",
-  DEF: { naap: true, saaf: false, malik: false, poolTools: false, suno: false, sach: false, boli: false, ijazat: false },  /* naap default ON (bay-zarar) */
+  DEF: { naap: true, saaf: false, malik: false, poolTools: false, suno: false, sach: false, boli: false, ijazat: false, bijli: false, aankh: false },  /* naap default ON (bay-zarar) */
   v: null,
   load: function () {
     if (FLAGS.v) return FLAGS.v;
@@ -2000,7 +2004,7 @@ FLAGS.load();
 NAAP.load();
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🎙️  SUNO  —  MAYA aap ki AWAAZ theek samjhe                  (app v5.3.0)
+   🎙️  SUNO  —  MAYA aap ki AWAAZ theek samjhe                  (app v5.4.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ki apni chat se):
 
@@ -2242,7 +2246,7 @@ var SUNO = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗣️  BOLI  —  LEHJA (accent) ka asal ilaj                      (app v5.3.0)
+   🗣️  BOLI  —  LEHJA (accent) ka asal ilaj                      (app v5.4.0)
    ---------------------------------------------------------------------------
    ASAL MASLA — awaaz ka nahi, MATN ka tha.
 
@@ -4412,6 +4416,27 @@ function handleUserText(text, wasVoice){
     }
   }
 
+  /* ⚡ BIJLI — 🟢 SABZ kaam DIMAAG SE PEHLE, ~50ms mein. Internet ke bina bhi. */
+  if (typeof BIJLI !== "undefined") {
+    var _bm = BIJLI.match(stripped);
+    if (_bm) {
+      (function (m) {
+        var t0 = (new Date()).getTime();
+        BIJLI.mark(m.tool);
+        try { NAAP.mark("tool"); NAAP.cur && (NAAP.cur.tool = m.tool); } catch (e) {}
+        execTool(m.tool, m.args).then(function (out) {
+          var ms = (new Date()).getTime() - t0;
+          pushLog("BIJLI: " + m.tool + " " + ms + "ms (dimaag se pehle)");
+          var okb = !!(out && out.ok !== false && out.done !== false);
+          if (!okb) { askAI(wasVoice); return; }          /* nakaam? dimaag ko de do */
+          try { NAAP.mark("brain"); NAAP.cur && (NAAP.cur.brain = "\u26A1 BIJLI"); } catch (e) {}
+          reply(BIJLI.say(m.tool, m.args, out), wasVoice);
+        }, function () { askAI(wasVoice); });
+      })(_bm);
+      return;
+    }
+  }
+
   /* 👑 MALIK — "tumhe kis ne banaya?" ka jawab dimaag se poochhne ki zaroorat nahi */
   if (typeof MALIK !== "undefined" && FLAGS.on("malik") && MALIK.ASK.test(stripped)) {
     NAAP.mark("brain");
@@ -4900,6 +4925,10 @@ var TOOL_DECLS = [
   { name: "save_memory", description: "Zaroori cheez hamesha ke liye yaad rakhta hai (birthday, appointment, pasand, naam).",
     parameters: { type: "OBJECT", properties: { fact: { type: "STRING" } }, required: ["fact"] } },
   { name: "recall_memory", description: "Yaad rakhi hui sab baatein lauta deta hai.", parameters: { type: "OBJECT", properties: {} } },
+  { name: "see_camera", description: "AANKHEIN: camera khol kar tasveer lo aur usay DEKH kar sawal ka jawab do. Jab user kahe 'ye dekho', 'ye kya hai', 'is bill ka total', 'ye likha kya hai', 'ye dawa kis liye hai' — yani jab jawab ke liye DEKHNA zaroori ho.",
+    parameters: { type: "OBJECT", properties: { question: { type: "STRING", description: "User ka asal sawal — tasveer ke sath yehi poocha jayega" } }, required: ["question"] } },
+  { name: "see_image", description: "AANKHEIN: gallery se tasveer chun kar dekho. Jab user kahe 'gallery wali photo dekho' / 'ye screenshot parho'.",
+    parameters: { type: "OBJECT", properties: { question: { type: "STRING", description: "User ka asal sawal" } }, required: ["question"] } },
   { name: "notify", description: "Turant notification bhejta hai screen par.",
     parameters: { type: "OBJECT", properties: { title: { type: "STRING" }, message: { type: "STRING" } }, required: ["title", "message"] } }
 ];
@@ -5128,6 +5157,9 @@ async function execTool(name, args){
       else out = { saved: false };
     } else if (name === "recall_memory") {
       out = { facts: facts.slice(0, 15), total: facts.length };
+    } else if (name === "see_camera" || name === "see_image") {
+      var vr = AANKH.ask(args.question || args.q || "", name === "see_image" ? "gallery" : "camera");
+      out = vr.ok ? { done: true, state: "started", note: vr.note } : { done: false, note: vr.note };
     } else if (name === "notify") {
       var ttl = String(args.title || "MAYA"), msgn = String(args.message || "");
       var okN = false;
@@ -5197,9 +5229,9 @@ async function resolveModels(){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v5.3.0)
+   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v5.4.0)
    ---------------------------------------------------------------------------
-   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v5.3.0 se pehle Groq
+   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v5.4.0 se pehle Groq
    ne 16 August 2026 ko apne purane Llama 3.x models band kar diye the — hamara
    default wahi tha, is liye "backup brain bhi thak gaya" aata tha.
 
@@ -5550,7 +5582,7 @@ window.__httpDone = function (id, status, b64) {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v5.3.0)
+   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v5.4.0)
    ---------------------------------------------------------------------------
    Purane code ke 3 asli bugs jinki wajah se "Sab free brains busy" bar bar aata tha:
 
@@ -5888,7 +5920,153 @@ async function geminiTry(m, plain){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🛡️  IJAZAT + 📜 LEDGER + ⟲ UNDO + 📊 TRACE            (P3 · app v5.3.0)
+   ⚡  BIJLI  +  👁️  AANKHEIN                              (P4 · app v5.4.0)
+   ═══════════════════════════════════════════════════════════════════════════
+
+   ⚡ BIJLI — phone control 50ms mein, DIMAAG se PEHLE
+   ---------------------------------------------------
+   Aaj:  aap bolte ho -> dimaag sochta hai (2.6s p50, 13.2s p90) -> tool chalta hai
+   Kal:  🟢 SABZ tools ke liye dimaag ka INTEZAR HI NAHI
+
+       "torch on karo"
+          40ms   🔦 TORCH ON        <- ho gaya, LLM ne abhi kuch nahi kiya
+         900ms   "Ho gaya boss."    <- dimaag sirf JUMLA banata hai
+
+   Aur sab se bari baat: ye INTERNET KE BAGAIR bhi chalta hai. Airplane mode
+   mein bhi torch, brightness, volume, timer, battery — sab kaam karenge.
+
+   Hifazat:
+     * sirf 🟢 SABZ tools (IJAZAT ke darje se) — surkh/zard kabhi nahi
+     * yaqeen (confidence) kam ho to kuch na karo, purana raasta chale
+     * ek hukm = ek amal (dimaag ne bhi wohi tool chalaya to dobara na ho)
+     * LEDGER + ⟲ UNDO pehle se maujood hain (P3), yani wapas bhi ho sakta hai
+
+   👁️ AANKHEIN — Maya DEKH sakti hai
+   ----------------------------------
+   Ye taqat pehle se maujood thi magar sirf ek TANG regex par chalti thi
+   (`ye dekho` / `photo khincho`), aur TOOL nahi thi — is liye dimaag khud
+   kabhi camera nahi khol sakta tha. Ab:
+     * `see_camera` aur `see_image` asli TOOLS hain (33 -> 35)
+     * dimaag khud faisla kar sakta hai ke "is bill ka total" ke liye dekhna parega
+     * sawal yaad rehta hai, aur jawab usi sawal ka aata hai
+   ═══════════════════════════════════════════════════════════════════════════ */
+var BIJLI = {
+  /* Sirf ye tools — sab 🟢 SABZ, sab wapas ho sakte hain, sab offline chalte hain */
+  OK: { torch_control: 1, brightness_control: 1, volume_control: 1,
+        set_timer: 1, battery_status: 1 },
+
+  /* Har tool ka apna naqsha: kya pehchanna hai aur args kaise nikalne hain.
+     `re` = hukm ka nishan · `args` = matn se args nikalne wala */
+  RULES: [
+    { t: "torch_control", re: /\b(torch|flash ?light|flash|batti|light)\b/i,
+      args: function (q) {
+        if (/\b(off|band|bujha|bandh|nahi)\b/i.test(q)) return { on: false };
+        if (/\b(on|jala|chalu|karo|kar do|open)\b/i.test(q)) return { on: true };
+        return null;
+      } },
+    { t: "brightness_control", re: /\b(brightness|britness|brightnes|brighness|chamak|roshni|raushni)\b/i,
+      args: function (q) { return BIJLI.pct(q); } },
+    { t: "volume_control", re: /\b(volume|awaaz|awaz|aawaz|sound|vol)\b/i,
+      args: function (q) { return BIJLI.pct(q); } },
+    { t: "set_timer", re: /\b(timer)\b/i,
+      args: function (q) {
+        var m = /(\d{1,3})\s*(minute|min|mint|m\b)/i.exec(q);
+        if (m) return { seconds: parseInt(m[1], 10) * 60 };
+        m = /(\d{1,4})\s*(second|sec|s\b)/i.exec(q);
+        if (m) return { seconds: parseInt(m[1], 10) };
+        return null;
+      } },
+    { t: "battery_status", re: /\b(battery|batri|batery|charge|charging)\b/i,
+      args: function (q) { return /\b(kitni|kitna|status|kya|check|dikhao|bata)\b/i.test(q) ? {} : null; } }
+  ],
+
+  /* "100%" · "50 kar do" · "full" · "poori" · "aadhi" · "kam/zyada" */
+  pct: function (q) {
+    var m = /(\d{1,3})\s*(%|percent|fisad)?/.exec(q);
+    if (m && m[1] !== undefined) {
+      var n = parseInt(m[1], 10);
+      if (n >= 0 && n <= 100) return { percent: n };
+    }
+    if (/\b(full|poori|pura|poora|max|maximum|sab se zyada)\b/i.test(q)) return { percent: 100 };
+    if (/\b(aadhi|aadha|half|beech)\b/i.test(q)) return { percent: 50 };
+    if (/\b(kam|neeche|dheemi|low|min|minimum)\b/i.test(q)) return { percent: 20 };
+    if (/\b(zyada|barhao|barha|upar|tez|high)\b/i.test(q)) return { percent: 90 };
+    return null;
+  },
+
+  /* Hukm se tool + args nikalo. Yaqeen na ho to null — purana raasta chalega. */
+  match: function (text) {
+    if (!FLAGS.on("bijli")) return null;
+    var q = String(text || "");
+    if (q.length > 90) return null;                 /* lamba jumla = baat-cheet, hukm nahi */
+    if (/\?$/.test(q.trim()) && !/battery|kitni/i.test(q)) return null;
+    var i, r, a;
+    for (i = 0; i < BIJLI.RULES.length; i++) {
+      r = BIJLI.RULES[i];
+      if (!r.re.test(q)) continue;
+      a = r.args(q);
+      if (a === null) return null;                  /* tool to mila, magar args nahi — dimaag hi kare */
+      /* dohri hifazat: darja SABZ hi hona chahiye */
+      if (typeof IJAZAT !== "undefined" && IJAZAT.T[r.t] !== 1) return null;
+      if (!BIJLI.OK[r.t]) return null;
+      return { tool: r.t, args: a };
+    }
+    return null;
+  },
+
+  /* jo abhi BIJLI se chala — dimaag dobara na chalaye */
+  last: null,
+  mark: function (tool) { BIJLI.last = { t: tool, at: (new Date()).getTime() }; },
+  dupe: function (tool) {
+    if (!BIJLI.last) return false;
+    if (BIJLI.last.t !== tool) return false;
+    return ((new Date()).getTime() - BIJLI.last.at) < 8000;
+  },
+
+  /* jab internet hi na ho — Maya phir bhi kaam kare aur khud jumla bana le */
+  SAY: {
+    torch_control: function (a, o) { return a.on ? "Torch on kar di." : "Torch band kar di."; },
+    brightness_control: function (a, o) { return "Chamak " + ((o && o.level !== undefined) ? o.level : a.percent) + " kar di."; },
+    volume_control: function (a, o) { return "Awaaz " + ((o && o.level !== undefined) ? o.level : a.percent) + " kar di."; },
+    set_timer: function (a, o) { return (a.seconds >= 60 ? (Math.round(a.seconds / 60) + " minute") : (a.seconds + " second")) + " ka timer laga diya."; },
+    battery_status: function (a, o) { return o && o.percent !== undefined ? ("Battery " + o.percent + " percent hai" + (o.charging ? ", charge ho rahi hai." : ".")) : "Battery ka pata nahi chala."; }
+  },
+  say: function (tool, args, out) {
+    var f = BIJLI.SAY[tool];
+    var base = f ? f(args, out) : "Ho gaya.";
+    var nm = "";
+    try { nm = (settings && settings.name) ? (" " + settings.name) : ""; } catch (e) {}
+    return base.replace(/\.$/, "") + "," + nm + " \u26A1";
+  }
+};
+
+/* ─────────────────────────── 👁️ AANKHEIN ─────────────────────────── */
+var AANKH = {
+  waiting: null,          /* { q: "sawal", at: waqt } */
+  ask: function (q, from) {
+    if (!NATIVE) return { ok: false, note: "camera sirf APK mein" };
+    AANKH.waiting = { q: String(q || ""), at: (new Date()).getTime() };
+    var ok = false;
+    try {
+      if (from === "gallery") { window.MayaBridge.pickImage(); ok = true; }
+      else ok = window.MayaBridge.takePhoto() === true;
+    } catch (e) { ok = false; }
+    if (!ok) { AANKH.waiting = null; return { ok: false, note: "camera nahi khul saka" }; }
+    return { ok: true, state: "started",
+             note: from === "gallery" ? "gallery khul gayi — photo chuno" : "camera khul gaya — photo khincho" };
+  },
+  /* sawal yaad rehta hai taake jawab usi ka aaye */
+  prompt: function () {
+    var q = (AANKH.waiting && AANKH.waiting.q) || "";
+    AANKH.waiting = null;
+    if (!q) return "Ye dekho aur mukhtasir batao ye kya hai \u2014 Roman Urdu mein, 2 jumle.";
+    return q + "\n\n(Tasveer dekh kar jawab do. Roman Urdu mein, mukhtasir \u2014 2-3 jumle. " +
+           "Agar tasveer mein likha hua hai to wo parh kar batao. Agar hisab maanga gaya hai to hisab karo.)";
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🛡️  IJAZAT + 📜 LEDGER + ⟲ UNDO + 📊 TRACE            (P3 · app v5.4.0)
    ---------------------------------------------------------------------------
    AMAL-WORKFLOW.md ka usool: "P3 (LAGAAM) P4/P6 (zyada taqat) se PEHLE."
 
@@ -5917,6 +6095,7 @@ var IJAZAT = {
     set_alarm: 2, set_reminder: 2, open_app: 2, play_youtube: 2, search_web: 2,
     web_fetch: 2, diary_write: 2, save_memory: 2, create_skill: 2,
     open_file: 2, read_messages: 2, schedule_message: 2,
+    see_camera: 2, see_image: 2,          /* 🟡 camera khulta hai, aap dekh kar dabate ho */
     /* 🔴 SURKH — PHONE SE BAHAR nikal jata hai. Wapas NAHI hota. */
     call_contact: 3, call_number: 3, message_contact: 3, send_sms: 3,
     reply_message: 3, share_file: 3
@@ -6160,7 +6339,7 @@ var TRACE = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🤝  HAQEEQAT  —  "SACH BOLO" ka nizam                        (app v5.3.0)
+   🤝  HAQEEQAT  —  "SACH BOLO" ka nizam                        (app v5.4.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ki apni chat se — 5 dafa):
 
@@ -6203,6 +6382,7 @@ var HAQEEQAT = {
     share_file: "typed",
     /* chala diya, natija maloom nahi */
     open_app: "started", play_youtube: "started", search_web: "started",
+    see_camera: "started", see_image: "started",
     open_file: "started", call_contact: "started", call_number: "started",
     /* baad mein */
     set_alarm: "queued", set_timer: "queued", set_reminder: "queued",
@@ -6294,7 +6474,7 @@ var HAQEEQAT = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ⚡  AMAL ENGINE — P2a: TOOLS AB HAR DIMAAG KO                  (app v5.3.0)
+   ⚡  AMAL ENGINE — P2a: TOOLS AB HAR DIMAAG KO                  (app v5.4.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ke apne device se sabit):
 
@@ -6409,7 +6589,9 @@ var AMAL = {
     message_contact:    { name: ["contact", "person", "to"], message: ["text", "msg", "body"] },
     notify:             { text: ["message", "msg", "body", "title"] },
     run_javascript:     { code: ["js", "script", "expression"] },
-    web_fetch:          { url: ["link", "site", "address"] }
+    web_fetch:          { url: ["link", "site", "address"] },
+    see_camera:         { question: ["q", "prompt", "text", "ask", "query"] },
+    see_image:          { question: ["q", "prompt", "text", "ask", "query"] }
   },
   alias: function (name, args) {
     var map = AMAL.ALIAS[name];
@@ -6475,7 +6657,9 @@ var AMAL = {
     read_messages:      ["message parho", "kya message", "naye message", "whatsapp dekho"],
     schedule_message:   ["baad mein bhejna", "baad message"],
     create_skill:       ["seekh lo", "ye tareeqa", "aaindah aise"],
-    notify:             ["notification", "notify", "screen par dikha"]
+    notify:             ["notification", "notify", "screen par dikha"],
+    see_camera:         ["ye dekho", "yeh dekho", "ye kya hai", "camera khol", "photo khincho", "is bill", "ye likha", "parh kar batao", "dekh kar batao", "ye dawa"],
+    see_image:          ["gallery", "gallary", "screenshot", "gallery wali", "photo dekho"]
   },
   _re: null,
   actionRe: function () {
@@ -6641,12 +6825,16 @@ async function visionAsk(prompt, b64){
   return null;
 }
 window.__photoTaken = async function(b64){
-  if (!settings.apikey) { reply("Photo samajhne ke liye Gemini key chahiye, " + settings.name + ".", true); return; }
-  addBubble("ai", "\uD83D\uDCF8 Photo mili — dekh rahi hoon...");
-  pushLog("VISION: analyze...");
-  var out = await visionAsk(pendingVisionPrompt, b64);
+  if (!settings.apikey) { reply("Photo dekhne ke liye Gemini key chahiye, " + settings.name + " \u2014 wahi key jo dimaag ke liye hai.", true); return; }
+  addBubble("ai", "\uD83D\uDC41\uFE0F Tasveer mil gayi \u2014 dekh rahi hoon...");
+  pushLog("AANKH: dekh rahi hoon...");
+  /* 👁️ sawal AANKH yaad rakhti hai (tool se aaya ho ya purane fast-path se) */
+  var q = (typeof AANKH !== "undefined" && AANKH.waiting) ? AANKH.prompt() : (pendingVisionPrompt || "");
   pendingVisionPrompt = null;
-  reply(out || "Photo samajh nahi aa paayi ya network ka masla hua, " + settings.name + ".", true);
+  var t0 = (new Date()).getTime();
+  var out = await visionAsk(q, b64);
+  pushLog("AANKH: " + ((new Date()).getTime() - t0) + "ms");
+  reply(out || "Tasveer samajh nahi aayi \u2014 ya to roshni kam thi ya network ka masla hua, " + settings.name + ".", true);
 };
 
 /* ---------- NAMAZ TIMES (Aladhan — free, Pakistan method) ---------- */
@@ -7006,7 +7194,7 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 
 /* ---------- SETTINGS TAB ---------- */
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v5.3.0)
+   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v5.4.0)
    ---------------------------------------------------------------------------
    Purana bug (user ne pakda): "girlfriend mode on karta hun, groq key lagata
    hun — thori der baad wo option khud band ho jata hai."
@@ -7251,6 +7439,7 @@ function labPaint(){
   n = $("#labSach");  if (n) n.checked = f.sach === true;
   n = $("#labBoli");  if (n) n.checked = f.boli === true;
   n = $("#labIjazat"); if (n) n.checked = f.ijazat === true;
+  n = $("#labBijli"); if (n) n.checked = f.bijli === true;
   h = $("#labHint");
   if (h) {
     var on = [];
@@ -7262,6 +7451,7 @@ function labPaint(){
     if (f.sach) on.push("🤝 sach");
     if (f.boli) on.push("🗣️ boli");
     if (f.ijazat) on.push("🛡️ ijazat");
+    if (f.bijli) on.push("⚡ bijli");
     h.className = "ui-hint" + (on.length ? " ok" : "");
     h.textContent = on.length ? ("Chalu: " + on.join(" · ") + "   •   " + NAAP.hist.length + " turn naape ja chuke")
                               : "Sab band — Maya bilkul purane tareeqe par chal rahi hai.";
@@ -7285,6 +7475,7 @@ function labPaint(){
   sw("labSach",  "sach", "🤝 jhoot band");
   sw("labBoli",  "boli", "🗣️ hamare lehje mein");
   sw("labIjazat","ijazat", "🛡️ lagaam");
+  sw("labBijli", "bijli", "⚡ 50ms amal");
 
   function show(txt){
     var el = $("#labOut");
@@ -7651,7 +7842,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v5.3.0 — DOCTOR REPORT");
+  out.push("MAYA v5.4.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
@@ -8235,7 +8426,7 @@ document.querySelectorAll(".setgrp-head").forEach(function(h){
   h.addEventListener("click", function(){ h.parentElement.classList.toggle("open"); });
 });
 
-/* NOTE: loadV4Form / doosra saveSettings handler v5.3.0 mein khatam.
+/* NOTE: loadV4Form / doosra saveSettings handler v5.4.0 mein khatam.
    Ab SETFORM (upar) hi settings ka wahid darwaza hai — dekho SET_FIELDS.
    Sliders live update karte hain, baqi sab SAVE par ek hi tarteeb se. */
 try { $("#sRadius").addEventListener("input", function(){ $("#radiusVal").textContent = this.value; settings.radius = parseInt(this.value,10) || 18; saveSettings(); applyTheme(); }); } catch(e){}
@@ -8326,8 +8517,8 @@ function startProactive(){
 
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
-try { $("#hudBuild").textContent = "v5.3.0"; } catch(e){}
-try { pushLog("MAYA v5.3.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
+try { $("#hudBuild").textContent = "v5.4.0"; } catch(e){}
+try { pushLog("MAYA v5.4.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
 
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD" runtime   (v4.1.0)
@@ -8586,7 +8777,7 @@ var MayaUI = (function () {
     for (i = 0; i < reopen.length; i++) delCls(reopen[i], "is-open");
 
     var out = [];
-    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v5.3.0");
+    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v5.4.0");
     out.push("WEBVIEW: Chrome " + (window.__webviewMajor || "?") + (window.__oldWebview ? " (PURANA)" : ""));
     out.push("");
     out.push("VISIBLE: " + okc + "   INVISIBLE: " + bad + (bad ? "  \u274C" : "  \u2705"));
