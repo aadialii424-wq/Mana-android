@@ -617,6 +617,70 @@ Here's a thinking process:
       '🧭 agent loop 2 -> 4 qadam (kai-qadam wale hukm ke liye)');
   }
 
+
+  /* ═══ 17. 🗣️ BOLI — LEHJA ka asal ilaj ═══ */
+  head('17. 🗣️ BOLI — "Maya hamare accent mein nahi bol rahi"');
+  {
+    const w = world({ boli: true });
+    const B = w.BOLI;
+
+    is(B.deva('karo') === '\u0915\u0930\u094B', 'karo -> करो', B.deva('karo'));
+    is(B.deva('theek') === '\u0920\u0940\u0915', 'theek -> ठीक', B.deva('theek'));
+    is(/[\u0900-\u097F]/.test(B.deva('kya')), 'kya -> Devanagari', B.deva('kya'));
+    is(B.deva('brightness') === '\u092C\u094D\u0930\u093E\u0907\u091F\u0928\u0947\u0938',
+      'brightness -> ब्राइटनेस (lughat se)', B.deva('brightness'));
+    is(/[\u0900-\u097F]/.test(B.deva('sundar')), 'lughat mein na ho to bhi harf-ba-harf', B.deva('sundar'));
+
+    const line = B.say('Ho gaya boss, brightness set kar di', 'hi-IN');
+    is(/[\u0900-\u097F]/.test(line) && !/Ho gaya/.test(line),
+      '🔑 Maya ka asli jawab -> Devanagari (yehi lehja theek karta hai)', line);
+
+    const br = B.say('WhatsApp par Monarch ko message bhejo', 'hi-IN');
+    is(/WhatsApp/.test(br) && /Monarch/.test(br),
+      '🔑 brand ke naam Latin hi rahe (Fish inhen theek parhta hai)', br);
+    is(/[\u0900-\u097F]/.test(br), '   → magar baqi matn Devanagari — lehja Hindustani');
+
+    const ur = B.say('theek hai boss', 'ur-PK');
+    is(/[\u0600-\u06FF]/.test(ur) && !/[\u0900-\u097F]/.test(ur), 'ur-PK par saaf Urdu script', ur);
+
+    is(B.say('hello how are you', 'en-US') === 'hello how are you', '✅ English par bilkul nahi chhua jata');
+    is(B.say('\u092F\u0947 \u0939\u093F\u0902\u0926\u0940 \u0939\u0948', 'hi-IN') === '\u092F\u0947 \u0939\u093F\u0902\u0926\u0940 \u0939\u0948',
+      '✅ pehle se Devanagari ho to dobara nahi badla jata');
+    is(B.say('', 'hi-IN') === '' && B.say(null, 'hi-IN') === '', 'khali par crash nahi');
+    const off = world({ boli: false });
+    is(off.BOLI.say('theek hai', 'hi-IN') === 'theek hai', '🔒 switch OFF -> matn bilkul nahi chhua');
+
+    const src = HTML;
+    is(/text: FISH\.styled\(\(typeof BOLI[\s\S]{0,90}BOLI\.say\(text, s\.tts\)/.test(src),
+      '🔑 Fish ko ab BOLA hua matn jata hai');
+    is(/var spoken = \(typeof BOLI[\s\S]{0,70}BOLI\.say\(text, EDGE_TTS\.langOf/.test(src),
+      'Edge ko bhi bola hua matn jata hai');
+    is(!/addBubble[\s\S]{0,90}BOLI\.say/.test(src),
+      '✅ BUBBLE par BOLI nahi lagti — screen par Roman Urdu hi rahega (aap ki farmaish)');
+  }
+
+  /* ═══ 18. 🎀 PYARI — Kore jaisi awaaz dhoondna ═══ */
+  head('18. 🎀 PYARI — meethi zanana awaazein saamne lao');
+  {
+    const src = HTML;
+    const sw = /SWEET: (\/.*?\/i),/.exec(src);
+    const ml = /MALEISH: (\/.*?\/i),/.exec(src);
+    is(!!sw && !!ml, 'zanana/mardana pehchan ki dono kasautiyan maujood');
+    const SWEET = eval(sw[1]), MALEISH = eval(ml[1]);
+    is(SWEET.test('Sweet Indian Girl') && SWEET.test('soft female hindi') && SWEET.test('pyari ladki'),
+      'zanana/meethi awaaz pehchani jati hai');
+    is(MALEISH.test('Deep Male Voice') && !MALEISH.test('Sweet Girl'), 'mardana awaaz alag pehchani jati hai');
+    is(/pyari: function \(cb\)/.test(src), '🎀 PYARI ka darwaza maujood');
+    is(/qs = \["hindi", "urdu", "female", "indian", "girl"\]/.test(src),
+      '🔑 paanch talash ek sath (hindi/urdu/female/indian/girl)');
+    is(/sc \+= 60[\s\S]{0,140}sc -= 80/.test(src), 'zanana ko + , mardana ko − (meethi awaaz upar)');
+    is(/language=" \+ lg/.test(src), '🔑 Fish ki LANGUAGE filter istemal ho rahi hai');
+    is(src.indexOf('id="fishPyari"') > 0, 'Settings mein 🎀 button maujood');
+    is(/Fish ke paas <b>pitch<\/b> ka option hai hi nahi/.test(src),
+      '🔑 saaf likha hai ke pitch Fish par asar nahi karta (aap ne 1.3 kiya tha)');
+    is(/tags: \(m\.tags \|\| \[\]\)/.test(src), 'library ab tags bhi laati hai');
+  }
+
   console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');
   if (fail === 0) console.log('\x1b[1m\x1b[32m✅ SAB TEST PASS — ' + pass + '/' + pass + '\x1b[0m');
   else console.log('\x1b[1m\x1b[31m❌ ' + fail + ' TEST FAIL — ' + pass + '/' + (pass + fail) + ' pass\x1b[0m');

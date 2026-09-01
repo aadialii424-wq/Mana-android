@@ -1,9 +1,26 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.0.0 "SACH" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.1.0 "BOLI" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🗣️ v5.1.0 — BOLI: hamare LEHJE mein · 🎀 pyari awaazein
+
+User: *"Maya hamare accent mein nahi bol rahi."* **Asal wajah awaaz ki nahi — MATN ki thi.**
+
+Fish ki dastavez: *"The model **detects the language of the input text**."* Aur hum bhejte the
+`"Ho gaya boss, brightness set kar di"` — **Latin harf → Fish samajhta hai angrezi → angrezi lehja.**
+
+- 🗣️ **BOLI** — screen par **Roman Urdu hi**, magar **bolne** ke liye Devanagari/Urdu:
+  `Ho gaya boss…` → `हो गया बॉस, ब्राइटनेस सेट कर दी` · `theek hai` → `ٹھیک ہے`
+  **Brand ke naam Latin hi rehte hain** (WhatsApp/Monarch/YouTube)
+  *(SUNO ka bilkul ulta: SUNO = Urdu→Roman likhne ke liye, BOLI = Roman→Urdu bolne ke liye)*
+- 🎀 **PYARI** — 5 talash ek sath (hindi/urdu/female/indian/girl) + chhaanti: zanana +60 · mardana −80 · Hindi/Urdu +40. **Fish ki `language` filter** ab istemal ho rahi hai
+- ⚠️ **Sach:** Fish ke paas **pitch ka option hai hi nahi** — user ka pitch 1.3 zaya ja raha tha. Ab Settings mein saaf likha hai
+- 🧪 **725 test** (699 → 725)
+
+📖 [`docs/RELEASE-v5.1.0.md`](docs/RELEASE-v5.1.0.md)
 
 ## 🤝 v5.0.0 — SACH: Maya ab jhoot nahi bolti  *(P2 MUKAMMAL)*
 

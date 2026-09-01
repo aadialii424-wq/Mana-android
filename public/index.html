@@ -536,7 +536,7 @@ nav{padding:8px 10px 10px}
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v5.0.0 — 🤝 SACH: MAYA AB JHOOT NAHI BOLTI</div>
+  <div class="ver">v5.1.0 — 🗣️ BOLI: HAMARE LEHJE MEIN 🎀</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid #c85050; background:#3c0a0f; border-radius:12px; padding:12px; text-align:left;">
@@ -561,14 +561,14 @@ nav{padding:8px 10px 10px}
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v5.0.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
+  <div class="dfoot">MAYA v5.1.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.0.0 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.1.0 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -729,7 +729,7 @@ nav{padding:8px 10px 10px}
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.0.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.1.0</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -910,9 +910,11 @@ nav{padding:8px 10px 10px}
             <select class="ui-input ui-select" id="sFishVoice"></select>
             <div class="ui-row" style="margin-top:8px">
               <button type="button" class="ui-btn ui-btn-ghost" id="fishLib">📚 AWAAZ LIBRARY LAO</button>
+              <button type="button" class="ui-btn ui-btn-ghost" id="fishPyari">🎀 PYARI ZANANA AWAAZEIN DHOONDO</button>
               <button type="button" class="ui-btn ui-btn-ghost" id="fishTest">🐟 FISH AWAAZ SUNO</button>
             </div>
             <div class="ui-hint" id="fishHint">—</div>
+            <div class="ui-hint">⚠️ Fish ke paas <b>pitch</b> ka option hai hi nahi — Settings ka pitch slider Fish par asar nahi karta (Edge aur phone par karta hai). Awaaz patli/pyari chahiye to <b>awaaz badlo</b>, pitch nahi.</div>
           </div>
           <button type="button" class="ui-btn ui-btn-ghost" id="fishDoctor">🩺 FISH CHECK KARO — muft daur zinda hai ya nahi</button>
           <div class="ui-hint">Fish se KHUD poochh kar batata hai: 200 = zinda, 402 = muft window band, 401 = key ghalat. Andaza nahi — Fish ka apna jawab.</div>
@@ -1102,6 +1104,10 @@ nav{padding:8px 10px 10px}
           <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labMalik"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
         </div>
         <div class="ui-row">
+          <div class="ui-row-txt">🗣️ BOLI — <b>hamare lehje mein bolo</b> <small>(screen par Roman, bolne ke liye Devanagari/Urdu — Fish matn se zubaan pehchanta hai)</small></div>
+          <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labBoli"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
+        </div>
+        <div class="ui-row">
           <div class="ui-row-txt">🤝 SACH — <b>jhoot band</b> <small>("bhej diya" tab hi jab SACH MEIN bheja ho + kai-qadam wale hukm)</small></div>
           <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labSach"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
         </div>
@@ -1134,7 +1140,7 @@ nav{padding:8px 10px 10px}
       </div>
 
       <button type="button" class="ui-btn ui-btn-save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v5.0.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v5.1.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -1149,7 +1155,7 @@ nav{padding:8px 10px 10px}
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v5.0.0 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v5.1.0 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -1217,7 +1223,7 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v5.0.0 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v5.1.0 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
@@ -1306,7 +1312,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v5.0.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v5.1.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1513,7 +1519,7 @@ var VOICE_MOODS = [
 var PERSONA_MOOD = { maya:"warm", friday:"pro", jarvis:"pro", venom:"funny", gf:"warm", coach:"hype", teacher:"calm" };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧪  MAYA LAB  —  P0 (NAAP-TOL) + P1 (SAAF ZUBAAN) + 👑 MALIK    (app v5.0.0)
+   🧪  MAYA LAB  —  P0 (NAAP-TOL) + P1 (SAAF ZUBAAN) + 👑 MALIK    (app v5.1.0)
    ---------------------------------------------------------------------------
    Ye block 3 kaam karta hai, aur teeno ALAG SWITCH ke peeche hain:
 
@@ -1553,7 +1559,7 @@ var SCHEMA = {
 /* ───────────────────────── 🧪 FLAGS — har nayi cheez ek switch ke peeche ───── */
 var FLAGS = {
   KEY: "maya_flags",
-  DEF: { naap: true, saaf: false, malik: false, poolTools: false, suno: false, sach: false },  /* naap default ON (bay-zarar) */
+  DEF: { naap: true, saaf: false, malik: false, poolTools: false, suno: false, sach: false, boli: false },  /* naap default ON (bay-zarar) */
   v: null,
   load: function () {
     if (FLAGS.v) return FLAGS.v;
@@ -1980,7 +1986,7 @@ FLAGS.load();
 NAAP.load();
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🎙️  SUNO  —  MAYA aap ki AWAAZ theek samjhe                  (app v5.0.0)
+   🎙️  SUNO  —  MAYA aap ki AWAAZ theek samjhe                  (app v5.1.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ki apni chat se):
 
@@ -2217,6 +2223,163 @@ var SUNO = {
     var out = SUNO.fix(SUNO.roman(raw));
     SUNO.last = { raw: raw, out: out, alts: list.length };
     return out;
+  },
+  last: null
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🗣️  BOLI  —  LEHJA (accent) ka asal ilaj                      (app v5.1.0)
+   ---------------------------------------------------------------------------
+   ASAL MASLA — awaaz ka nahi, MATN ka tha.
+
+   Fish Audio ki apni dastavez:
+       "The model DETECTS THE LANGUAGE of the input text and generates
+        audio in that language."
+
+   Aur hum Fish ko ye bhejte the:
+       text: "Ho gaya boss, brightness set kar di"
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              LATIN harf -> Fish samajhta hai ANGREZI -> ANGREZI LEHJA
+
+   Awaaz (voice) chahe kitni bhi Hindustani ho, matn Latin hoga to lehja
+   angrezi hi rahega. Yehi wajah thi ke "hamare accent mein nahi bol rahi".
+
+   ILAJ: SCREEN par Roman Urdu hi rahega (aap ne yehi maanga tha), magar
+   BOLNE ke liye matn Devanagari (hi-IN) ya Urdu script (ur-PK) mein badla
+   jayega. Ye SUNO ka bilkul ulta hai:
+
+       SUNO :  Urdu script  ->  Roman     (aap ki awaaz ko likhne ke liye)
+       BOLI :  Roman        ->  Devanagari/Urdu  (Maya ke bolne ke liye)
+
+   Brand ke naam (WhatsApp, YouTube, Monarch) Latin hi rehte hain — Fish
+   unhen theek parhta hai, aur baqi matn Devanagari hone ki wajah se poora
+   jumla Hindustani lehje mein aata hai.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var BOLI = {
+  /* Latin hi rehne dena — inhen badla to Fish inhen bhi bigar dega */
+  KEEP: /^(whatsapp|youtube|instagram|telegram|facebook|gmail|chrome|google|maps|playstore|spotify|netflix|snapchat|twitter|tiktok|daraz|messenger|reels|monarch|mrbeast|maya|wifi|bluetooth|ok|hi|sms|app|link|url|pdf|mp3|ai|api|tv|pc|gb|mb|km|kg|am|pm)$/i,
+
+  /* ─── Aam Roman Urdu lafz -> Devanagari (yehi 90% matn dhaant lete hain) ─── */
+  D: {
+    "ho":"हो","hai":"है","hain":"हैं","hun":"हूँ","hoon":"हूँ","hu":"हूँ","tha":"था","thi":"थी","the":"थे",
+    "kar":"कर","karo":"करो","karna":"करना","kar di":"कर दी","kardi":"कर दी","kardiya":"कर दिया",
+    "kiya":"किया","ki":"की","ka":"का","ke":"के","ko":"को","se":"से","par":"पर","mein":"में","me":"में",
+    "aur":"और","ya":"या","nahi":"नहीं","na":"ना","haan":"हाँ","han":"हाँ","ji":"जी","bilkul":"बिल्कुल",
+    "ab":"अब","abhi":"अभी","phir":"फिर","pehle":"पहले","baad":"बाद","aaj":"आज","kal":"कल","raat":"रात",
+    "subah":"सुबह","sham":"शाम","waqt":"वक़्त","din":"दिन",
+    "main":"मैं","mai":"मैं","mera":"मेरा","meri":"मेरी","mere":"मेरे","mujhe":"मुझे","mujh":"मुझ",
+    "aap":"आप","aapka":"आपका","aapki":"आपकी","aapko":"आपको","tum":"तुम","tumhara":"तुम्हारा","tumhein":"तुम्हें",
+    "hum":"हम","hamara":"हमारा","hamari":"हमारी","wo":"वो","woh":"वो","ye":"ये","yeh":"ये","us":"उस","is":"इस",
+    "kya":"क्या","kyun":"क्यों","kyu":"क्यों","kaise":"कैसे","kaisa":"कैसा","kaisi":"कैसी",
+    "kahan":"कहाँ","kaun":"कौन","kab":"कब","kitna":"कितना","kitni":"कितनी","kitne":"कितने",
+    "acha":"अच्छा","accha":"अच्छा","achi":"अच्छी","theek":"ठीक","thik":"ठीक","sahi":"सही","galat":"ग़लत",
+    "chalo":"चलो","chal":"चल","chalao":"चलाओ","chala":"चला","raha":"रहा","rahi":"रही","rahe":"रहे",
+    "gaya":"गया","gayi":"गई","gaye":"गए","diya":"दिया","di":"दी","do":"दो","de":"दे","dena":"देना",
+    "lo":"लो","le":"ले","liya":"लिया","laga":"लगा","lagao":"लगाओ","lagi":"लगी",
+    "bhejo":"भेजो","bhej":"भेज","bheja":"भेजा","bheji":"भेजी","bhejta":"भेजता",
+    "kholo":"खोलो","khol":"खोल","khula":"खुला","khuli":"खुली","band":"बंद",
+    "batao":"बताओ","bata":"बता","bataya":"बताया","bolo":"बोलो","bol":"बोल","bola":"बोला",
+    "suno":"सुनो","sun":"सुन","suna":"सुना","dekho":"देखो","dekh":"देख","dekha":"देखा",
+    "samajh":"समझ","samjha":"समझा","pata":"पता","malum":"मालूम","yaad":"याद",
+    "chahiye":"चाहिए","chahta":"चाहता","chahti":"चाहती","zaroori":"ज़रूरी","zaroor":"ज़रूर",
+    "sab":"सब","kuch":"कुछ","koi":"कोई","har":"हर","bhi":"भी","sirf":"सिर्फ़","bas":"बस","phir se":"फिर से",
+    "bohat":"बहुत","bahut":"बहुत","thora":"थोड़ा","thoda":"थोड़ा","zyada":"ज़्यादा","kam":"कम",
+    "sath":"साथ","liye":"लिए","wala":"वाला","wali":"वाली","wale":"वाले",
+    "boss":"बॉस","sir":"सर","jaan":"जान","yaar":"यार","bhai":"भाई","dost":"दोस्त",
+    "shukriya":"शुक्रिया","sorry":"सॉरी","please":"प्लीज़","maaf":"माफ़",
+    "salam":"सलाम","assalam":"अस्सलाम","alaikum":"अलैकुम","namaste":"नमस्ते",
+    "awaaz":"आवाज़","awaz":"आवाज़","gana":"गाना","gaana":"गाना","song":"सॉन्ग","video":"वीडियो",
+    "message":"मैसेज","msg":"मैसेज","call":"कॉल","phone":"फ़ोन","number":"नंबर","naam":"नाम",
+    "alarm":"अलार्म","timer":"टाइमर","battery":"बैटरी","mausam":"मौसम","garmi":"गर्मी","sardi":"सर्दी",
+    "brightness":"ब्राइटनेस","volume":"वॉल्यूम","torch":"टॉर्च","screen":"स्क्रीन","light":"लाइट",
+    "search":"सर्च","open":"ओपन","send":"सेंड","type":"टाइप","save":"सेव","set":"सेट",
+    "kaam":"काम","madad":"मदद","masla":"मसला","koshish":"कोशिश","tayyar":"तैयार",
+    "khatam":"ख़त्म","shuru":"शुरू","poora":"पूरा","aadha":"आधा",
+    "paani":"पानी","khana":"खाना","ghar":"घर","bahar":"बाहर","andar":"अंदर","upar":"ऊपर","neeche":"नीचे",
+    "namaz":"नमाज़","fajr":"फ़ज्र","zuhr":"ज़ुहर","asr":"अस्र","maghrib":"मग़रिब","isha":"इशा"
+  },
+
+  /* ─── Harf ba harf (jab lafz lughat mein na ho) ─── */
+  CONS: [
+    ["chh","छ"],["sh","श"],["ch","च"],["kh","ख"],["gh","घ"],["th","थ"],["dh","ध"],["ph","फ"],
+    ["bh","भ"],["jh","झ"],["zh","ज़"],["ng","ंग"],["ny","न्य"],
+    ["k","क"],["q","क़"],["g","ग"],["j","ज"],["z","ज़"],["t","त"],["d","द"],["n","न"],["p","प"],
+    ["f","फ़"],["b","ब"],["m","म"],["y","य"],["r","र"],["l","ल"],["v","व"],["w","व"],["s","स"],
+    ["h","ह"],["x","क्स"],["c","क"]
+  ],
+  VOW: [
+    ["aa","आ","ा"],["ai","ऐ","ै"],["au","औ","ौ"],["ee","ई","ी"],["oo","ऊ","ू"],
+    ["a","अ",""],["i","इ","ि"],["u","उ","ु"],["e","ए","े"],["o","ओ","ो"]
+  ],
+
+  deva: function (word) {
+    var w = String(word || "").toLowerCase();
+    if (BOLI.D[w]) return BOLI.D[w];
+    var out = "", i = 0, j, hit, prevCons = false;
+    while (i < w.length) {
+      hit = null;
+      for (j = 0; j < BOLI.VOW.length; j++) {
+        if (w.substr(i, BOLI.VOW[j][0].length) === BOLI.VOW[j][0]) { hit = BOLI.VOW[j]; break; }
+      }
+      if (hit) {
+        out += prevCons ? hit[2] : hit[1];
+        i += hit[0].length; prevCons = false; continue;
+      }
+      hit = null;
+      for (j = 0; j < BOLI.CONS.length; j++) {
+        if (w.substr(i, BOLI.CONS[j][0].length) === BOLI.CONS[j][0]) { hit = BOLI.CONS[j]; break; }
+      }
+      if (hit) {
+        if (prevCons) out += "\u094D";                    /* do consonant lagataar -> virama */
+        out += hit[1];
+        i += hit[0].length; prevCons = true; continue;
+      }
+      out += w.charAt(i); i++; prevCons = false;
+    }
+    return out;
+  },
+
+  /* Devanagari -> Urdu script (ur-PK ke liye) */
+  DU: {
+    "अ":"ا","आ":"آ","इ":"ا","ई":"ای","उ":"ا","ऊ":"او","ए":"ای","ऐ":"ای","ओ":"او","औ":"او",
+    "क":"ک","ख":"کھ","ग":"گ","घ":"گھ","च":"چ","छ":"چھ","ज":"ج","झ":"جھ","ट":"ٹ","ठ":"ٹھ",
+    "ड":"ڈ","ढ":"ڈھ","त":"ت","थ":"تھ","द":"د","ध":"دھ","न":"ن","प":"پ","फ":"پھ","ब":"ب",
+    "भ":"بھ","म":"م","य":"ی","र":"ر","ल":"ل","व":"و","श":"ش","ष":"ش","स":"س","ह":"ہ",
+    "ज़":"ز","फ़":"ف","क़":"ق","ग़":"غ","ख़":"خ","ड़":"ڑ","ढ़":"ڑھ",
+    "ा":"ا","ि":"","ी":"ی","ु":"","ू":"و","े":"ے","ै":"ے","ो":"و","ौ":"و","ं":"ں","ँ":"ں","्":"","ः":"",
+    "ऑ":"آ","ॉ":"و","ऍ":"ا","ॅ":"","़":"","ृ":"ر","ऋ":"ر"
+  },
+  urdu: function (word) {
+    var d = BOLI.deva(word), out = "", i = 0, two;
+    while (i < d.length) {
+      two = d.substr(i, 2);
+      if (BOLI.DU[two] !== undefined) { out += BOLI.DU[two]; i += 2; continue; }
+      var c = d.charAt(i);
+      out += (BOLI.DU[c] !== undefined) ? BOLI.DU[c] : c;
+      i++;
+    }
+    return out;
+  },
+
+  /* ═══ WAHID DARWAZA — bolne wala matn ═══
+     lang: "hi-IN" -> Devanagari · "ur-PK" -> Urdu script · warna jyun ka tyun */
+  say: function (text, lang) {
+    var t = String(text || "");
+    if (!FLAGS.on("boli")) return t;
+    var L = String(lang || "");
+    if (!/^hi|^ur/.test(L)) return t;
+    if (!/[A-Za-z]/.test(t)) return t;                  /* pehle se Devanagari/Urdu hai */
+    var toUrdu = /^ur/.test(L);
+    var parts = t.split(/([^A-Za-z']+)/), out = [], i, w;
+    for (i = 0; i < parts.length; i++) {
+      w = parts[i];
+      if (!/[A-Za-z]/.test(w)) { out.push(w); continue; }
+      if (BOLI.KEEP.test(w)) { out.push(w); continue; }   /* brand ka naam Latin hi rahe */
+      out.push(toUrdu ? BOLI.urdu(w) : BOLI.deva(w));
+    }
+    var res = out.join("");
+    BOLI.last = { from: t, to: res, lang: L };
+    return res;
   },
   last: null
 };
@@ -2754,7 +2917,8 @@ var AWAAZ = {
     var s = (typeof settings === "object" && settings) ? settings : {};
     var v = EDGE_TTS.pick();
     AWAAZ.edgeVoiceUsed = v;
-    edgeTTS_speak(text, v, EDGE_TTS.langOf(v), EDGE_TTS.rateStr(s.rate), EDGE_TTS.pitchStr(s.pitch),
+    var spoken = (typeof BOLI !== "undefined") ? BOLI.say(text, EDGE_TTS.langOf(v)) : text;
+    edgeTTS_speak(spoken, v, EDGE_TTS.langOf(v), EDGE_TTS.rateStr(s.rate), EDGE_TTS.pitchStr(s.pitch),
       function () { if (gen === AWAAZ.gen) { AWAAZ.edgeSpoke++; onDone(); } },
       function (code) { if (gen === AWAAZ.gen) onFail(code || "NETWORK"); });
   },
@@ -3635,7 +3799,10 @@ var FISH = {
   body: function (text, mood) {
     var s = (typeof settings === "object" && settings) ? settings : {};
     var o = {
-      text: FISH.styled(text, mood),
+      /* 🗣️ LEHJA: Fish matn se zubaan pehchanta hai. Latin bhejenge to
+         ANGREZI lehja aayega. Is liye bolne ke liye Devanagari/Urdu bhejte
+         hain — screen par Roman hi rehta hai. */
+      text: FISH.styled((typeof BOLI !== "undefined" ? BOLI.say(text, s.tts) : text), mood),
       format: "mp3",
       mp3_bitrate: 128,
       latency: "balanced",
@@ -3788,11 +3955,51 @@ var FISH = {
     } catch (e) {}
   },
 
+  /* 🎀 PYARI — kai talash ek sath, phir zanana/Hindi-Urdu wali oopar
+     (user ko Gemini ki "Kore" jaisi meethi zanana awaaz chahiye) */
+  SWEET: /(female|woman|girl|ladki|aurat|zanana|sweet|soft|cute|warm|gentle|meethi|pyari|didi|behen|lady|she|her|anchor|rj)/i,
+  MALEISH: /(male|man|boy|ladka|mard|deep|bass|guy|bhai|sir\b|uncle)/i,
+  pyari: function (cb) {
+    var qs = ["hindi", "urdu", "female", "indian", "girl"], got = [], seen = {}, left = qs.length, err = "";
+    function done() {
+      if (--left > 0) return;
+      /* score: zanana + pasand + Hindi/Urdu zubaan */
+      var i, v, sc;
+      for (i = 0; i < got.length; i++) {
+        v = got[i];
+        sc = 0;
+        if (FISH.SWEET.test(v.title + " " + (v.tags || ""))) sc += 60;
+        if (FISH.MALEISH.test(v.title + " " + (v.tags || ""))) sc -= 80;
+        if (/hi|ur|hin|urd/.test(String(v.langs || ""))) sc += 40;
+        sc += Math.min(30, Math.round((v.likes || 0) / 10));
+        v.sc = sc;
+      }
+      got.sort(function (a, b) { return b.sc - a.sc; });
+      FISH.lib = got.slice(0, 40);
+      cb(FISH.lib, got.length ? "" : (err || "kuch nahi mila"));
+    }
+    var k;
+    for (k = 0; k < qs.length; k++) {
+      (function (term) {
+        FISH.library(term, function (L, code) {
+          if (!L) { err = code || err; return done(); }
+          var i;
+          for (i = 0; i < L.length; i++) if (!seen[L[i].id]) { seen[L[i].id] = 1; got.push(L[i]); }
+          done();
+        });
+      })(qs[k]);
+    }
+  },
+
   /* ─── awaaz ki library (public voices) ─── */
   library: function (q, cb) {
     if (!FISH.key()) { cb(null, "KEY_MISSING"); return; }
     if (!FISH.native()) { cb(null, "BROWSER"); return; }
+    /* Fish ki API `language` filter deti hai — ab Hindi/Urdu awaazein saamne aayengi */
+    var s0 = (typeof settings === "object" && settings) ? settings : {};
+    var lg = /^ur/.test(String(s0.tts || "")) ? "ur" : (/^hi/.test(String(s0.tts || "")) ? "hi" : "en");
     var url = FISH.LIB + "?page_size=40&page_number=1&sort_by=score" +
+              "&language=" + lg + (lg === "ur" ? "&language=hi" : "") +
               (q ? ("&title=" + encodeURIComponent(q)) : "");
     FISH.req("GET", url, JSON.stringify({ "Authorization": "Bearer " + FISH.key() }), "", function (status, b64, ctype, err) {
       var c = FISH.code(status);
@@ -3810,6 +4017,7 @@ var FISH = {
             id: m._id,
             title: String(m.title || "bay-naam"),
             langs: (m.languages || []).join("/"),
+            tags: (m.tags || []).join(" ").toLowerCase(),
             likes: +m.like_count || 0
           });
         }
@@ -4892,9 +5100,9 @@ async function resolveModels(){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v5.0.0)
+   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v5.1.0)
    ---------------------------------------------------------------------------
-   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v5.0.0 se pehle Groq
+   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v5.1.0 se pehle Groq
    ne 16 August 2026 ko apne purane Llama 3.x models band kar diye the — hamara
    default wahi tha, is liye "backup brain bhi thak gaya" aata tha.
 
@@ -5245,7 +5453,7 @@ window.__httpDone = function (id, status, b64) {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v5.0.0)
+   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v5.1.0)
    ---------------------------------------------------------------------------
    Purane code ke 3 asli bugs jinki wajah se "Sab free brains busy" bar bar aata tha:
 
@@ -5583,7 +5791,7 @@ async function geminiTry(m, plain){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🤝  HAQEEQAT  —  "SACH BOLO" ka nizam                        (app v5.0.0)
+   🤝  HAQEEQAT  —  "SACH BOLO" ka nizam                        (app v5.1.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ki apni chat se — 5 dafa):
 
@@ -5717,7 +5925,7 @@ var HAQEEQAT = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ⚡  AMAL ENGINE — P2a: TOOLS AB HAR DIMAAG KO                  (app v5.0.0)
+   ⚡  AMAL ENGINE — P2a: TOOLS AB HAR DIMAAG KO                  (app v5.1.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ke apne device se sabit):
 
@@ -6429,7 +6637,7 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 
 /* ---------- SETTINGS TAB ---------- */
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v5.0.0)
+   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v5.1.0)
    ---------------------------------------------------------------------------
    Purana bug (user ne pakda): "girlfriend mode on karta hun, groq key lagata
    hun — thori der baad wo option khud band ho jata hai."
@@ -6668,6 +6876,7 @@ function labPaint(){
   n = $("#labPool");  if (n) n.checked = f.poolTools === true;
   n = $("#labSuno");  if (n) n.checked = f.suno === true;
   n = $("#labSach");  if (n) n.checked = f.sach === true;
+  n = $("#labBoli");  if (n) n.checked = f.boli === true;
   h = $("#labHint");
   if (h) {
     var on = [];
@@ -6677,6 +6886,7 @@ function labPaint(){
     if (f.poolTools) on.push("⚡ amal");
     if (f.suno) on.push("🎙️ suno");
     if (f.sach) on.push("🤝 sach");
+    if (f.boli) on.push("🗣️ boli");
     h.className = "ui-hint" + (on.length ? " ok" : "");
     h.textContent = on.length ? ("Chalu: " + on.join(" · ") + "   •   " + NAAP.hist.length + " turn naape ja chuke")
                               : "Sab band — Maya bilkul purane tareeqe par chal rahi hai.";
@@ -6698,6 +6908,7 @@ function labPaint(){
   sw("labPool",  "poolTools", "⚡ tools har dimaag ko");
   sw("labSuno",  "suno", "🎙️ awaaz Roman Urdu mein");
   sw("labSach",  "sach", "🤝 jhoot band");
+  sw("labBoli",  "boli", "🗣️ hamare lehje mein");
 
   function show(txt){
     var el = $("#labOut");
@@ -6755,6 +6966,35 @@ function labPaint(){
       fishFillVoices();
       if (h) { h.className = "ui-hint ok"; h.textContent = "✅ " + list.length + " awaazein aa gayin — upar se chuno, phir SUNO dabao, phir SAVE."; }
       pushLog("FISH LIBRARY: " + list.length + " awaazein");
+    });
+  });
+
+  /* 🎀 pyari zanana awaazein */
+  var pb = $("#fishPyari");
+  if (pb) pb.addEventListener("click", function () {
+    if (pb.disabled) return;
+    var h = $("#fishHint");
+    var blk = FISH.block();
+    if (blk === "KEY_MISSING" || blk === "BROWSER") {
+      if (h) { h.className = "ui-hint warn"; h.textContent = "⚠️ " + FISH.why(blk); }
+      return;
+    }
+    pb.disabled = true;
+    var old = pb.textContent;
+    pb.textContent = "🎀 DHOOND RAHI HOON…";
+    if (h) { h.className = "ui-hint"; h.textContent = "🎀 Hindi/Urdu ki zanana awaazein dhoondi ja rahi hain… (5 talash)"; }
+    FISH.pyari(function (list, code) {
+      pb.disabled = false; pb.textContent = old;
+      if (!list || !list.length) {
+        if (h) { h.className = "ui-hint warn"; h.textContent = "❌ " + (code || "kuch nahi mila") + " — " + (FISH.lastErr || ""); }
+        return;
+      }
+      fishFillVoices();
+      if (h) {
+        h.className = "ui-hint ok";
+        h.textContent = "🎀 " + list.length + " awaazein — sab se pyari sab se upar. Ek chuno → 🐟 SUNO dabao → pasand aaye to SAVE.";
+      }
+      pushLog("FISH PYARI: " + list.length + " awaazein");
     });
   });
 
@@ -7023,7 +7263,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v5.0.0 — DOCTOR REPORT");
+  out.push("MAYA v5.1.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
@@ -7582,7 +7822,7 @@ document.querySelectorAll(".setgrp-head").forEach(function(h){
   h.addEventListener("click", function(){ h.parentElement.classList.toggle("open"); });
 });
 
-/* NOTE: loadV4Form / doosra saveSettings handler v5.0.0 mein khatam.
+/* NOTE: loadV4Form / doosra saveSettings handler v5.1.0 mein khatam.
    Ab SETFORM (upar) hi settings ka wahid darwaza hai — dekho SET_FIELDS.
    Sliders live update karte hain, baqi sab SAVE par ek hi tarteeb se. */
 try { $("#sRadius").addEventListener("input", function(){ $("#radiusVal").textContent = this.value; settings.radius = parseInt(this.value,10) || 18; saveSettings(); applyTheme(); }); } catch(e){}
@@ -7673,8 +7913,8 @@ function startProactive(){
 
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
-try { $("#hudBuild").textContent = "v5.0.0"; } catch(e){}
-try { pushLog("MAYA v5.0.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
+try { $("#hudBuild").textContent = "v5.1.0"; } catch(e){}
+try { pushLog("MAYA v5.1.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
 
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD" runtime   (v4.1.0)
@@ -7933,7 +8173,7 @@ var MayaUI = (function () {
     for (i = 0; i < reopen.length; i++) delCls(reopen[i], "is-open");
 
     var out = [];
-    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v5.0.0");
+    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v5.1.0");
     out.push("WEBVIEW: Chrome " + (window.__webviewMajor || "?") + (window.__oldWebview ? " (PURANA)" : ""));
     out.push("");
     out.push("VISIBLE: " + okc + "   INVISIBLE: " + bad + (bad ? "  \u274C" : "  \u2705"));
