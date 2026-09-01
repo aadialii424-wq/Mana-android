@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = MayaWebViewClient()
         setContentView(webView)
         webView.loadUrl("https://$VIRTUAL_HOST/assets/web/index.html")
-        Toast.makeText(this, "MAYA v4.1.0 IRONCLAD • naya Settings UI install hua hai", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "MAYA v5.9.0 • SUKOON — awaaz kabhi nahi kategi, mic-kranti suljh gayi", Toast.LENGTH_LONG).show()
         // WebView zinda hai ya nahi — 8 second baad native check (v4.0.1: onPageFinished/markAlive true karte hain)
         webViewAlive = false
         android.os.Handler(Looper.getMainLooper()).postDelayed({
@@ -267,7 +267,15 @@ class MainActivity : AppCompatActivity() {
     inner class MayaBridge {
 
         @JavascriptInterface
-        fun appVersion(): String = "4.3.0-native"
+        fun appVersion(): String = "5.9.0-native"
+
+        /* 🎚️ P9 SUKOON — JS (SUKOON) har awaaz/mic ki HAAL yahan bhejti hai.
+           KHALI | BOL_RAHI | APP_SUN — WakeWordService har mic-darwaze par isi
+           ko poochhti hai. Isi se awaaz-katna + mic-larai dono khatam hain. */
+        @JavascriptInterface
+        fun setHaal(h: String) {
+            try { WakeWordService.setHaal(h) } catch (e: Exception) {}
+        }
 
         /* v4.0.1: index.html boot-guard ye call karta hai — ab native alive flag true hota hai */
         @JavascriptInterface
@@ -348,6 +356,10 @@ class MainActivity : AppCompatActivity() {
                     return@runOnUiThread
                 }
                 stopRecognizer()
+                /* 🤝 P9 MIC SULAH — app ka tap-to-speak sab se pehle. Wake service
+                   apna mic chhor degi (do recognizer kabhi ek saath nahi chal sakte —
+                   wahi jang v5.8.0 tak har tap-to-speak ko mar okat deti thi). */
+                try { WakeWordService.pauseForApp() } catch (e: Exception) {}
                 val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                     putExtra(
                         RecognizerIntent.EXTRA_LANGUAGE_MODEL,

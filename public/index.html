@@ -536,7 +536,7 @@ nav{padding:8px 10px 10px}
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v5.8.0 — 🚪 "MAYA" ke bagair KUCH NAHI · 🎤 qareebi awaaz</div>
+  <div class="ver">v5.9.0 — 🎚️ SUKOON — awaaz kabhi nahi kategi · mic-larai khatam · wake word sach mein zinda</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid #c85050; background:#3c0a0f; border-radius:12px; padding:12px; text-align:left;">
@@ -561,14 +561,14 @@ nav{padding:8px 10px 10px}
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v5.8.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
+  <div class="dfoot">MAYA v5.9.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.8.0 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.9.0 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -729,7 +729,7 @@ nav{padding:8px 10px 10px}
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.8.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.9.0</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -1136,6 +1136,10 @@ nav{padding:8px 10px 10px}
           <div class="ui-row-txt">⚡ AMAL — <b>tools har dimaag ko</b> <small>(pehle sirf Gemini ko milte the — isi liye brightness/YouTube nahi chalte the)</small></div>
           <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labPool"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
         </div>
+        <div class="ui-row">
+          <div class="ui-row-txt">🎚️ SUKOON — <b>awaaz kabhi nahi kategi</b> <small>(default ON — bugfix: mic aur awaaz ki ladai khatam · "Maya online" poora sunai dega · wake switch kabhi khud nahi mitega. Sirf masla ho to OFF karo)</small></div>
+          <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labSukoon"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
+        </div>
         <div class="ui-hint" id="labHint">—</div>
 
         <div class="ui-row">
@@ -1183,7 +1187,7 @@ nav{padding:8px 10px 10px}
       </div>
 
       <button type="button" class="ui-btn ui-btn-save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v5.8.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v5.9.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -1198,7 +1202,7 @@ nav{padding:8px 10px 10px}
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v5.8.0 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v5.9.0 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -1266,7 +1270,7 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v5.8.0 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v5.9.0 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
@@ -1355,7 +1359,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v5.8.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v5.9.0 — SYSTEMS ONLINE  (SUKOON: audio referee)");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1428,12 +1432,12 @@ document.addEventListener("visibilitychange", function(){ if (document.visibilit
 /* ---------- NATIVE BRIDGE (APK build — window.MayaBridge) ---------- */
 var NATIVE = !!(window.MayaBridge);
 var lastWasVoice = false;
-window.__nativeTtsDone = function(){ speaking = false; afterSpeak(lastWasVoice); };
+window.__nativeTtsDone = function(){ speaking = false; try { SUKOON.bolEnd(); } catch (e) {} afterSpeak(lastWasVoice); };
 /* 🎙️ Android ab SAARE andaze bhejta hai (pehle sirf pehla aata tha).
    SUNO un mein se behtareen chunta hai, Roman Urdu banata hai, aur
    pise hue naam (Monarch / Instagram / Funk Taka) theek karta hai. */
 window.__nativeSpeech = function(text, altsJson){
-  listening = false; setOrb("idle");
+  listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle");
   var alts = [];
   try { if (altsJson) alts = JSON.parse(altsJson); } catch (e) { alts = []; }
   if (!alts.length && text) alts = [text];
@@ -1462,7 +1466,7 @@ window.__nativeRms = function(db){
   } catch(e){}
 };
 window.__nativeSpeechErr = function(code){
-  listening = false; setOrb("idle"); interimEl.textContent = "";
+  listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle"); interimEl.textContent = "";
   var m = { 1:"Network timeout", 2:"Network error", 3:"Mic masla", 4:"Recognizer busy", 5:"Voice service error", 6:"Koi awaz nahi mili", 7:"Mic permission nahi" }[code] || "Voice error";
   toast(m);
   addBubble("ai", m + ". " + (code === 5 || code === 2 ? "Google app / voice service check karo aur dobara try karo." : "Dobara try karo, " + settings.name + "."));
@@ -1569,7 +1573,7 @@ var VOICE_MOODS = [
 var PERSONA_MOOD = { maya:"warm", friday:"pro", jarvis:"pro", venom:"funny", gf:"warm", coach:"hype", teacher:"calm" };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧪  MAYA LAB  —  P0 (NAAP-TOL) + P1 (SAAF ZUBAAN) + 👑 MALIK    (app v5.8.0)
+   🧪  MAYA LAB  —  P0 (NAAP-TOL) + P1 (SAAF ZUBAAN) + 👑 MALIK    (app v5.9.0)
    ---------------------------------------------------------------------------
    Ye block 3 kaam karta hai, aur teeno ALAG SWITCH ke peeche hain:
 
@@ -1609,7 +1613,7 @@ var SCHEMA = {
 /* ───────────────────────── 🧪 FLAGS — har nayi cheez ek switch ke peeche ───── */
 var FLAGS = {
   KEY: "maya_flags",
-  DEF: { naap: true, saaf: false, malik: false, poolTools: false, suno: false, sach: false, boli: false, ijazat: false, bijli: false, aankh: false, nazar: false },  /* naap default ON (bay-zarar) */
+  DEF: { naap: true, saaf: false, malik: false, poolTools: false, suno: false, sach: false, boli: false, ijazat: false, bijli: false, aankh: false, nazar: false, sukoon: true },  /* naap + sukoon default ON (bay-zarar / bugfix) */
   v: null,
   load: function () {
     if (FLAGS.v) return FLAGS.v;
@@ -1953,6 +1957,9 @@ var DIAG = {
       add("  suna " + KAAN.heard + " \u00b7 JAAGI " + KAAN.woke + " \u00b7 nakami " + KAAN.errs +
           " \u00b7 mic chala " + KAAN.starts +
           (KAAN.lastErr ? ("  (aakhri err " + KAAN.lastErr + " \u2014 " + (KAAN.ERRNAME[KAAN.lastErr] || "?") + ")") : ""));
+      /* 🎚️ P9 — audio referee ki halat + skipping saboot */
+      add("  HAAL: " + safe(function () { return SUKOON.haal; }, "?") +
+          " \u00b7 roka " + KAAN.skips + " \u00b7 err8 maaf " + KAAN.err8);
       for (i = 0; i < KAAN.log.length && i < 8; i++) add("  " + KAAN.log[i].k + ": " + KAAN.log[i].d);
       add("");
     }
@@ -2044,7 +2051,7 @@ FLAGS.load();
 NAAP.load();
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🎙️  SUNO  —  MAYA aap ki AWAAZ theek samjhe                  (app v5.8.0)
+   🎙️  SUNO  —  MAYA aap ki AWAAZ theek samjhe                  (app v5.9.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ki apni chat se):
 
@@ -2306,7 +2313,7 @@ var SUNO = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗣️  BOLI  —  LEHJA (accent) ka asal ilaj                      (app v5.8.0)
+   🗣️  BOLI  —  LEHJA (accent) ka asal ilaj                      (app v5.9.0)
    ---------------------------------------------------------------------------
    ASAL MASLA — awaaz ka nahi, MATN ka tha.
 
@@ -4261,13 +4268,14 @@ function speak(text, wasVoice) {
   var clean = cleanSpeech(text);
   lastWasVoice = wasVoice;
   if (!clean) { AWAAZ.stop(); afterSpeak(wasVoice); return; }
+  try { SUKOON.bolStart(); } catch (e) {}   /* 🎚️ fetch ki 1-2s bhi cover — mic abhi nahi khul sakta */
   AWAAZ.speak(clean, {
     onStart: function (eng) {
-      speaking = true; setOrb("speaking");
+      speaking = true; try { SUKOON.bolStart(); } catch (e) {} setOrb("speaking");
       try { NAAP.mark("voice"); NAAP.cur && (NAAP.cur.engine = eng || AWAAZ.engine); } catch (e) {}   /* 📊 P0 */
     },
     onDone: function () {
-      speaking = false;
+      speaking = false; try { SUKOON.bolEnd(); } catch (e) {}
       try { NAAP.end({ engine: AWAAZ.engine, saaf: (NAAP.cur && NAAP.cur.saafHit) || 0 }); } catch (e) {}  /* 📊 P0 */
       afterSpeak(wasVoice);
     }
@@ -4279,8 +4287,8 @@ function nativeSpeak(clean, wasVoice) {
   lastWasVoice = wasVoice;
   AWAAZ.stop(); AWAAZ.gen++;
   AWAAZ.setEngine("device");
-  speaking = true; setOrb("speaking");
-  AWAAZ.device(String(clean || ""), function () { speaking = false; afterSpeak(wasVoice); });
+  speaking = true; try { SUKOON.bolStart(); } catch (e) {} setOrb("speaking");
+  AWAAZ.device(String(clean || ""), function () { speaking = false; try { SUKOON.bolEnd(); } catch (e) {} afterSpeak(wasVoice); });
 }
 
 function afterSpeak(wasVoice){
@@ -4318,12 +4326,12 @@ function testMayaVoice() {
                " hoon, aap ki apni AI. Ye meri awaaz hai — " + vId + ". Kaisi lagi?";
   AWAAZ.speak(sample, {
     onStart: function (eng) {
-      speaking = true; setOrb("speaking");
+      speaking = true; try { SUKOON.bolStart(); } catch (e) {} setOrb("speaking");
       toast(eng === "fish" ? "🐟 Fish Audio..." : (eng === "neural" ? "🎭 Neural awaaz aa rahi hai..." : (eng === "edge" ? "🌊 Edge TTS..." : "📱 Phone ki awaaz")));
       pushLog("VOICE TEST: " + eng + " / " + vId + " / " + mId);
     },
     onDone: function () {
-      speaking = false; setOrb("idle");
+      speaking = false; try { SUKOON.bolEnd(); } catch (e) {} setOrb("idle");
       var st = AWAAZ.status();
       if (st.engine === "neural") toast("🎭 NEURAL bola — " + vLabel);
       else toast("📱 PHONE ki awaaz — " + (st.why || "neural abhi maujood nahi"));
@@ -4340,9 +4348,9 @@ function startListening(){
     if (listening) { stopListening(); return; }
     if (thinking) return;
     ensureAudio(); chime(660, 0.08);
-    listening = true; setOrb("listening"); interimEl.textContent = "🎧 Native mic sun raha hai...";
+    listening = true; try { SUKOON.sunStart(); } catch (e) {} setOrb("listening"); interimEl.textContent = "🎧 Native mic sun raha hai...";
     try { window.MayaBridge.listen(settings.stt); }
-    catch(e){ listening = false; setOrb("idle"); toast("Mic start nahi ho saka"); }
+    catch(e){ listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle"); toast("Mic start nahi ho saka"); }
     return;
   }
   if (!SR) { reply("Sir, is browser mein voice input support nahi — Chrome try karo. Filhaal type kar ke baat kar sakte hain.", false); return; }
@@ -4351,7 +4359,7 @@ function startListening(){
   ensureAudio(); chime(660, 0.08);
   try { rec = new SR(); } catch(e){ return; }
   rec.lang = settings.stt; rec.interimResults = true; rec.maxAlternatives = 1;
-  listening = true; setOrb("listening"); interimEl.textContent = "";
+  listening = true; try { SUKOON.sunStart(); } catch (e) {} setOrb("listening"); interimEl.textContent = "";
   rec.onresult = function(e){
     var fin = "", intr = "";
     for (var i = e.resultIndex; i < e.results.length; i++) {
@@ -4362,7 +4370,7 @@ function startListening(){
     if (fin && fin.trim()) { interimEl.textContent = ""; handleUserText(fin.trim(), true); }
   };
   rec.onerror = function(e){
-    listening = false; setOrb("idle"); interimEl.textContent = "";
+    listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle"); interimEl.textContent = "";
     var m = {
       "not-allowed": "Mic ki permission nahi mili — browser settings mein microphone allow karo (page HTTPS par hona chahiye).",
       "service-not-allowed": "Mic service blocked — page ko Chrome mein HTTPS par kholo.",
@@ -4372,13 +4380,13 @@ function startListening(){
     }[e.error] || "Voice error — dobara try karo.";
     if (m) { addBubble("ai", m); pushLog("MIC ERROR: " + e.error); }
   };
-  rec.onend = function(){ listening = false; interimEl.textContent = ""; if (!speaking) setOrb("idle"); };
-  try { rec.start(); } catch(e){ listening = false; }
+  rec.onend = function(){ listening = false; try { SUKOON.sunEnd(); } catch (e) {} interimEl.textContent = ""; if (!speaking) setOrb("idle"); };
+  try { rec.start(); } catch(e){ listening = false; try { SUKOON.sunEnd(); } catch (e) {} }
 }
 function stopListening(){
   if (NATIVE) { try { window.MayaBridge.stopListen(); } catch(e){} }
   if (rec) { try { rec.stop(); } catch(e){} }
-  listening = false; setOrb("idle");
+  listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle");
 }
 
 /* ---------- ORB / STATUS ---------- */
@@ -4454,7 +4462,7 @@ function addBubble(who, text, link){
     var txt = BUBBLE_SAY[parseInt(i, 10)];
     if (!txt) return;
     if (t.getAttribute("data-on") === "1") {           /* dobara dabao = rok do */
-      AWAAZ.stop(); speaking = false; setOrb("idle"); t.textContent = "🔊"; t.removeAttribute("data-on"); return;
+      AWAAZ.stop(); speaking = false; try { SUKOON.bolEnd(); } catch (e) {} setOrb("idle"); t.textContent = "🔊"; t.removeAttribute("data-on"); return;
     }
     var prev = log.querySelector(".say-btn[data-on='1']");
     if (prev) { prev.textContent = "🔊"; prev.removeAttribute("data-on"); }
@@ -5334,9 +5342,9 @@ async function resolveModels(){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v5.8.0)
+   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v5.9.0)
    ---------------------------------------------------------------------------
-   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v5.8.0 se pehle Groq
+   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v5.9.0 se pehle Groq
    ne 16 August 2026 ko apne purane Llama 3.x models band kar diye the — hamara
    default wahi tha, is liye "backup brain bhi thak gaya" aata tha.
 
@@ -5687,7 +5695,7 @@ window.__httpDone = function (id, status, b64) {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v5.8.0)
+   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v5.9.0)
    ---------------------------------------------------------------------------
    Purane code ke 3 asli bugs jinki wajah se "Sab free brains busy" bar bar aata tha:
 
@@ -6025,7 +6033,7 @@ async function geminiTry(m, plain){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   👁️  NAZAR  —  Maya screen PARH sakti hai                     (P7a · v5.8.0)
+   👁️  NAZAR  —  Maya screen PARH sakti hai                     (P7a · v5.9.0)
    ---------------------------------------------------------------------------
    Ye P7 ka PEHLA qadam hai: Maya screen ko DEKHTI hai, magar CHHUTI NAHI.
 
@@ -6165,7 +6173,7 @@ var NAZAR = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ⚡  BIJLI  +  👁️  AANKHEIN                              (P4 · app v5.8.0)
+   ⚡  BIJLI  +  👁️  AANKHEIN                              (P4 · app v5.9.0)
    ═══════════════════════════════════════════════════════════════════════════
 
    ⚡ BIJLI — phone control 50ms mein, DIMAAG se PEHLE
@@ -6311,7 +6319,7 @@ var AANKH = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🛡️  IJAZAT + 📜 LEDGER + ⟲ UNDO + 📊 TRACE            (P3 · app v5.8.0)
+   🛡️  IJAZAT + 📜 LEDGER + ⟲ UNDO + 📊 TRACE            (P3 · app v5.9.0)
    ---------------------------------------------------------------------------
    AMAL-WORKFLOW.md ka usool: "P3 (LAGAAM) P4/P6 (zyada taqat) se PEHLE."
 
@@ -6593,7 +6601,7 @@ var TRACE = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🤝  HAQEEQAT  —  "SACH BOLO" ka nizam                        (app v5.8.0)
+   🤝  HAQEEQAT  —  "SACH BOLO" ka nizam                        (app v5.9.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ki apni chat se — 5 dafa):
 
@@ -6758,7 +6766,7 @@ var HAQEEQAT = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ⚡  AMAL ENGINE — P2a: TOOLS AB HAR DIMAAG KO                  (app v5.8.0)
+   ⚡  AMAL ENGINE — P2a: TOOLS AB HAR DIMAAG KO                  (app v5.9.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ke apne device se sabit):
 
@@ -7337,7 +7345,7 @@ async function ytPlay(query){
 
 /* ---------- WAKE WORD ('Maya' / 'Boss') ---------- */
 /* ═══════════════════════════════════════════════════════════════════════════
-   👂  KAAN  —  wake word ka asal ilaj                          (v5.8.0)
+   👂  KAAN  —  wake word ka asal ilaj                          (v5.9.0)
    ---------------------------------------------------------------------------
    User: "background mein mic on/off hota hai, magar 'Maya' bolne par kuch
           nahi hota."
@@ -7360,10 +7368,56 @@ async function ytPlay(query){
    Ab Kotlin BEWAQOOF hai (sirf report karta hai) aur faisla YAHAN hota hai —
    yani aage tuning ke liye NAYI APK nahi banani paregi.
    ═══════════════════════════════════════════════════════════════════════════ */
+/* ═══════════ 🎚️ SUKOON (P9) — audio referee: ek waqt mein EK cheez ═══════════
+   Char jang-boot jo ye sulhaata hai:
+   (1) mic khulte hi Android AUDIO FOCUS le leta hai -> Maya ki awaaz KAT-ti
+       thi (greeting "MAYA onl—" wala masla). Kotlin ko pata hi nahi tha ke
+       Maya bol rahi hai (speaking flag sirf JS mein tha).
+   (2) wake service ka aur tap-to-speak ka SpeechRecognizer LADTE the —
+       mic ek waqt mein ek hi hota hai -> mic on/off strobe.
+   (3) wohi jang error 8 (RECOGNIZER_BUSY) deti thi -> service khud ko maar
+       kar AAP KA WAKE SWITCH bhi mita deti thi. Ab err8 = sirf 2s sukoon.
+   (4) speaker se Maya ki awaaz VAD ko lagti -> self-wake loop ka khatra.
+   Hal: HAAL — KHALI / BOL_RAHI / APP_SUN — bridge se Kotlin tak, aur
+   Kotlin ka mic HAAR darwaze par pehle HAAL poochhta hai (restart,
+   actuallyStart, VAD gate, watchdog). */
+var SUKOON = {
+  haal: "KHALI",
+  tailMs: 550,          /* echo tail — WakeWordService.ECHO_TAIL_MS se match */
+  _tailT: null,
+  _native: function (h) {
+    try { if (window.MayaBridge && window.MayaBridge.setHaal) window.MayaBridge.setHaal(h); } catch (e) {}
+    try { if (typeof KAAN !== "undefined" && KAAN.push) KAAN.push("haal", h); } catch (e) {}
+  },
+  set: function (h) {
+    if (SUKOON.haal === h) return;
+    SUKOON.haal = h;
+    SUKOON._native(h);
+  },
+  /* Aawaaz SHURU — fetch ki 1-2 second bhi cover (waise mic kaat sakta hai) */
+  bolStart: function () {
+    if (SUKOON._tailT) { clearTimeout(SUKOON._tailT); SUKOON._tailT = null; }
+    SUKOON.set("BOL_RAHI");
+  },
+  /* Aawaaz khatam — speaker ki goonj ka 550ms tail, phir KHALI.
+     Magar isi dauran mic khul gaya ho to haath mat ghumao. */
+  bolEnd: function () {
+    if (SUKOON._tailT) clearTimeout(SUKOON._tailT);
+    SUKOON._tailT = setTimeout(function () {
+      if (SUKOON.haal === "BOL_RAHI") SUKOON.set("KHALI");
+    }, SUKOON.tailMs);
+  },
+  sunStart: function () {
+    if (SUKOON._tailT) { clearTimeout(SUKOON._tailT); SUKOON._tailT = null; }
+    SUKOON.set("APP_SUN");
+  },
+  sunEnd: function () { SUKOON.set("KHALI"); }
+};
+
 var KAAN = {
   MAX: 40,
   log: [],
-  heard: 0, woke: 0, errs: 0, starts: 0,
+  heard: 0, woke: 0, errs: 0, starts: 0, skips: 0, err8: 0,
   lastErr: 0, lastAt: 0,
 
   /* "Maya" ki har mumkin shakl — Roman, Urdu, Devanagari */
@@ -7420,6 +7474,8 @@ var KAAN = {
     if (KAAN.log.length > KAAN.MAX) KAAN.log.length = KAAN.MAX;
     KAAN.lastAt = (new Date()).getTime();
     if (kind === "err") { KAAN.errs++; KAAN.lastErr = parseInt(String(data).split("|")[0], 10) || 0; }
+    if (kind === "err8") KAAN.err8++;                 /* 🕊️ P9 — mic-masroof ki ginti (ab khatarnak nahi) */
+    if (kind === "skip") KAAN.skips++;                /* 🎚️ P9 — HAAL ki wajah se roka gaya mic */
     if (kind === "start") KAAN.starts++;
     if (kind === "heard") KAAN.heard++;
     if (kind === "wake") KAAN.woke++;
@@ -7450,6 +7506,10 @@ var KAAN = {
     L.push("  JAAGI       : " + KAAN.woke + " dafa");
     L.push("  nakami      : " + KAAN.errs + (KAAN.lastErr ? ("   (aakhri: " + KAAN.lastErr + " \u2014 " + (KAAN.ERRNAME[KAAN.lastErr] || "?") + ")") : ""));
     L.push("  mic chala   : " + KAAN.starts + " dafa");
+    /* 🎚️ P9 SUKOON — ab NAZAR aata hai mic ne kyun nahi khula (andha nahi rahenge) */
+    L.push("  HAAL        : " + (typeof SUKOON !== "undefined" ? SUKOON.haal : "?") +
+           "   (awaaz kabhi nahi kategi — sirf KHALI par mic khulta hai)");
+    L.push("  roka gaya   : " + KAAN.skips + " dafa (Maya bol rahi thi / app ka mic)  ·  err8 maaf: " + KAAN.err8);
     L.push("");
     if (!KAAN.log.length) {
       L.push("  \u26A0\uFE0F Service se ABHI TAK KUCH NAHI aaya.");
@@ -7457,7 +7517,7 @@ var KAAN = {
       L.push("  Iska matlab ya to:");
       L.push("   \u2022 wake word switch OFF hai, ya");
       L.push("   \u2022 mic ki ijazat nahi mili, ya");
-      L.push("   \u2022 purani APK hai (v5.8.0 se pehle diagnostics thi hi nahi)");
+      L.push("   \u2022 purani APK hai (v5.9.0 se pehle diagnostics thi hi nahi)");
       return L.join("\n");
     }
     L.push("  \u2500\u2500 aakhri " + Math.min(KAAN.log.length, 22) + " waqiat \u2500\u2500");
@@ -7559,7 +7619,7 @@ var KAAN = {
   }
 };
 
-/* Kotlin ki har report yahan aati hai (v5.8.0) */
+/* Kotlin ki har report yahan aati hai (v5.9.0) */
 window.__wakeLog = function (kind, data) {
   try { KAAN.push(String(kind || "?"), data); } catch (e) {}
 };
@@ -7627,9 +7687,11 @@ window.__wakeHeard = function (payload) {
 };
 
 window.__wakeErr = function(code){
-  toast("Wake word masla (code " + code + ") — service band kar rahi hoon");
-  settings.wakeWord = false; saveSettings(); paintQuick(); hudRefresh();
-  var sw = $("#sWake"); if (sw) sw.checked = false;
+  /* 🕊️ P9 — user ka wake switch KABHI khud mat mitao. Pehle yahan
+     settings.wakeWord = false ho jata tha — isi liye "wake ON karo to baad
+     mein apne aap band mila" karta tha. Ab: sirf batao, faisla aap ka. */
+  pushLog("WAKE ALERT: code " + code + " — LAB mein KAAN DOCTOR dekho");
+  toast("Wake word masla (code " + code + ") — 🩺 KAAN DOCTOR par wajah likhi hai");
 };
 
 /* ---------- HUD ---------- */
@@ -7761,7 +7823,7 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 
 /* ---------- SETTINGS TAB ---------- */
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v5.8.0)
+   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v5.9.0)
    ---------------------------------------------------------------------------
    Purana bug (user ne pakda): "girlfriend mode on karta hun, groq key lagata
    hun — thori der baad wo option khud band ho jata hai."
@@ -8011,6 +8073,7 @@ function labPaint(){
   n = $("#labIjazat"); if (n) n.checked = f.ijazat === true;
   n = $("#labBijli"); if (n) n.checked = f.bijli === true;
   n = $("#labNazar"); if (n) n.checked = f.nazar === true;
+  n = $("#labSukoon"); if (n) n.checked = f.sukoon === true;
   h = $("#labHint");
   if (h) {
     var on = [];
@@ -8049,6 +8112,16 @@ function labPaint(){
   sw("labIjazat","ijazat", "🛡️ lagaam");
   sw("labBijli", "bijli", "⚡ 50ms amal");
   sw("labNazar", "nazar", "👁️ screen parhna");
+  /* 🎚️ P9 SUKOON — gate Kotlin mein yeh pref LIVE parhta hai: toggle par turant mirror */
+  sw("labSukoon", "sukoon", "🎚️ awaaz+mic sukoon");
+  var labSukoonMirror = function () {
+    try {
+      if (window.MayaBridge && window.MayaBridge.setPref) window.MayaBridge.setPref("sukoon", FLAGS.on("sukoon"));
+    } catch (e) {}
+  };
+  labSukoonMirror();                                       /* boot par */
+  var lsk = $("#labSukoon");
+  if (lsk) lsk.addEventListener("change", labSukoonMirror); /* toggle par */
 
   function show(txt){
     var el = $("#labOut");
@@ -8218,10 +8291,10 @@ function labPaint(){
     var sample = "Assalam-o-alaikum " + ((settings && settings.name) || "Boss") + "! Main " +
                  ((settings && settings.assistName) || "Maya") +
                  " hoon. Ye Fish Audio ki awaaz hai — aur ab main andaaz bhi badal sakti hoon.";
-    speaking = true; setOrb("speaking");
+    speaking = true; try { SUKOON.bolStart(); } catch (e) {} setOrb("speaking");
     FISH.speak(sample, mood,
       function () {
-        speaking = false; setOrb("idle");
+        speaking = false; try { SUKOON.bolEnd(); } catch (e) {} setOrb("idle");
         tb.disabled = false; tb.textContent = old;
         if (gen !== AWAAZ.gen) return;
         if (h) {
@@ -8233,7 +8306,7 @@ function labPaint(){
         fishPaintHint();
       },
       function (code) {
-        speaking = false; setOrb("idle");
+        speaking = false; try { SUKOON.bolEnd(); } catch (e) {} setOrb("idle");
         tb.disabled = false; tb.textContent = old;
         if (gen !== AWAAZ.gen) return;
         if (h) {
@@ -8289,11 +8362,11 @@ function labPaint(){
     var sample = "Assalam-o-alaikum " + ((settings && settings.name) || "Boss") + "! Main " +
                  ((settings && settings.assistName) || "Maya") +
                  " hoon. Ye Edge TTS ki awaaz hai — bilkul muft, aur is ki koi rozana hadd nahi.";
-    speaking = true; setOrb("speaking");
+    speaking = true; try { SUKOON.bolStart(); } catch (e) {} setOrb("speaking");
     edgeTTS_speak(sample, v, EDGE_TTS.langOf(v),
       EDGE_TTS.rateStr(settings && settings.rate), EDGE_TTS.pitchStr(settings && settings.pitch),
       function () {
-        speaking = false; setOrb("idle");
+        speaking = false; try { SUKOON.bolEnd(); } catch (e) {} setOrb("idle");
         eb.disabled = false; eb.textContent = old;
         if (gen !== AWAAZ.gen) return;
         if (h) { h.className = "ui-hint ok"; h.textContent = "✅ Bol diya — " + v + "  •  " + ((Date.now() - t0) / 1000).toFixed(1) + " sec  •  koi key nahi lagi"; }
@@ -8301,7 +8374,7 @@ function labPaint(){
         edgePaintHint();
       },
       function (code) {
-        speaking = false; setOrb("idle");
+        speaking = false; try { SUKOON.bolEnd(); } catch (e) {} setOrb("idle");
         eb.disabled = false; eb.textContent = old;
         if (gen !== AWAAZ.gen) return;
         var why = AWAAZ.why(code) || code;
@@ -8415,6 +8488,7 @@ function setWakeService(on){
   try {
     window.MayaBridge.setPrefString && (window.MayaBridge.setPrefString('wake_lang', settings.stt || 'en-IN'),
       window.MayaBridge.setPrefString('mic_zoom', String(settings.micZoom === undefined ? 0.8 : settings.micZoom)),
+      window.MayaBridge.setPref('sukoon', FLAGS.on('sukoon')),
       window.MayaBridge.setPref('mic_near', settings.micNear !== false)), window.MayaBridge.wakeService(on);
     if (on) { try { if (!window.MayaBridge.batteryUnrestricted()) window.MayaBridge.requestBatteryUnrestricted(); } catch(e){} }
     toast(on ? "\uD83D\uDC42 Wake word ON — ab 'Maya' ya 'Boss' bolo" : "Wake word OFF");
@@ -8465,7 +8539,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v5.8.0 — DOCTOR REPORT");
+  out.push("MAYA v5.9.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
@@ -8547,7 +8621,7 @@ $("#qStop").addEventListener("click", function(){
   geminiTTS_stop();
   if (NATIVE) { try { window.MayaBridge.stopSpeak(); } catch(e){} }
   if (synth) try { synth.cancel(); } catch(e){}
-  speaking = false; thinking = false; setOrb("idle");
+  speaking = false; try { SUKOON.bolEnd(); } catch (e) {} thinking = false; setOrb("idle");
 });
 $("#qAuto").addEventListener("click", function(){
   settings.autoListen = !settings.autoListen; saveSettings(); paintQuick();
@@ -8557,7 +8631,7 @@ $("#qAuto").addEventListener("click", function(){
 });
 $("#qMute").addEventListener("click", function(){
   settings.voiceOn = !settings.voiceOn; saveSettings(); paintQuick(); paintAwaaz();
-  if (!settings.voiceOn) { AWAAZ.stop(); speaking = false; setOrb("idle"); }
+  if (!settings.voiceOn) { AWAAZ.stop(); speaking = false; try { SUKOON.bolEnd(); } catch (e) {} setOrb("idle"); }
 });
 function paintQuick(){
   var a = $("#qAuto"), mu = $("#qMute");
@@ -9056,7 +9130,7 @@ document.querySelectorAll(".setgrp-head").forEach(function(h){
   h.addEventListener("click", function(){ h.parentElement.classList.toggle("open"); });
 });
 
-/* NOTE: loadV4Form / doosra saveSettings handler v5.8.0 mein khatam.
+/* NOTE: loadV4Form / doosra saveSettings handler v5.9.0 mein khatam.
    Ab SETFORM (upar) hi settings ka wahid darwaza hai — dekho SET_FIELDS.
    Sliders live update karte hain, baqi sab SAVE par ek hi tarteeb se. */
 try { $("#sRadius").addEventListener("input", function(){ $("#radiusVal").textContent = this.value; settings.radius = parseInt(this.value,10) || 18; saveSettings(); applyTheme(); }); } catch(e){}
@@ -9147,8 +9221,8 @@ function startProactive(){
 
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
-try { $("#hudBuild").textContent = "v5.8.0"; } catch(e){}
-try { pushLog("MAYA v5.8.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
+try { $("#hudBuild").textContent = "v5.9.0"; } catch(e){}
+try { pushLog("MAYA v5.9.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
 
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD" runtime   (v4.1.0)
@@ -9407,7 +9481,7 @@ var MayaUI = (function () {
     for (i = 0; i < reopen.length; i++) delCls(reopen[i], "is-open");
 
     var out = [];
-    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v5.8.0");
+    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v5.9.0");
     out.push("WEBVIEW: Chrome " + (window.__webviewMajor || "?") + (window.__oldWebview ? " (PURANA)" : ""));
     out.push("");
     out.push("VISIBLE: " + okc + "   INVISIBLE: " + bad + (bad ? "  \u274C" : "  \u2705"));

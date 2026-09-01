@@ -1,9 +1,29 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.8.0 "DARWAZA" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.9.0 "SUKOON" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🎚️ v5.9.0 — SUKOON: awaaz kabhi nahi kategi · mic-larai khatam *(P9)*
+
+**📵 Ek waqt mein EK cheez — Maya ya BOL rahi hai, ya SUN rahi hai. Kabhi dono ek saath nahi.**
+
+Teen live masle, EK jang-boot: mic aur awaaz do kore hain jo ek hi badan (audio system) par lar rahe the.
+
+| Aap ne dekha | Jadbahad | Ilaj |
+|---|---|---|
+| 🔊 "MAYA onl—" — aawaaz beech mein katna | Mic khulne par Android audio-focus mic ko de deta tha; Kotlin ko pata hi nahi tha Maya bol rahi hai (`speaking` sirf JS mein tha) | **L1 HAAL bridge** — JS ke 25 hook se `BOL_RAHI/APP_SUN` lamhe mein Kotlin tak; **L2 mic ke CHAAR darwaze** pehle HAAL poochchte hain |
+| 🎤 Mic ka bulb on/off (wake + tap-to-speak dono) | Do recognizer ek mic ki jang + do pending restarts ek saath | **L4 MIC SULAH** (tap-to-speak hamesha jeetta hai) + **L6 RACE TOKEN** (`pendingGen`) |
+| 👂 "Maya" nahi jaagti; wake switch apne aap band | **Error 8 par service khud ko maar rahi thi aur aap ka switch mita rahi thi** | **L5 ERR-8 MERCY** — na stopSelf, na switch chhedna; sirf 2s sukoon |
+
+Aur: **L3** 550ms echo tail (tail timer mic ko stomp nahi karta) · **L7** SELF-WAKE SHIELD (apni awaaz par jaagna imkan-harab) · 60s stale-pause recovery · escape hatch switch (LAB → 🎚️ SUKOON, default ON).
+
+📖 [`docs/RELEASE-v5.9.0.md`](docs/RELEASE-v5.9.0.md) · usool: [`docs/SUKOON-AUDIO-ARBITRATION.md`](docs/SUKOON-AUDIO-ARBITRATION.md)
+
+🧪 **970 test** (932 → 970)
+
+---
 
 ## 🚪 v5.8.0 — "MAYA" ke bagair KUCH NAHI · 🎤 qareebi awaaz  *(P8a+b+c)*
 

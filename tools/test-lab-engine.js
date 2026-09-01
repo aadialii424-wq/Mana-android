@@ -1336,9 +1336,152 @@ Here's a thinking process:
       '🔑 kam yaqeen par ghalat kaam karne ke bajaye POOCHH leti hai');
   }
 
-  console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');
-  if (fail === 0) console.log('\x1b[1m\x1b[32m✅ SAB TEST PASS — ' + pass + '/' + pass + '\x1b[0m');
-  else console.log('\x1b[1m\x1b[31m❌ ' + fail + ' TEST FAIL — ' + pass + '/' + (pass + fail) + ' pass\x1b[0m');
-  console.log('\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m\n');
-  process.exit(fail === 0 ? 0 : 1);
+  /* ═══ 26. 🎚️ SUKOON (P9) — audio referee: awaaz kabhi nahi kategi ═══ */
+  head('26. 🎚️ SUKOON — ek waqt mein EK cheez (mic-larai khatam)');
+  {
+    const WS = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/WakeWordService.kt'), 'utf8');
+    const MA = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8');
+
+    /* ── L1 HAAL bridge: JS ka dil Kotlin tak ── */
+    is(/fun setHaal\(h: String\)/.test(MA) && /WakeWordService\.setHaal\(h\)/.test(MA),
+      '🔑 setHaal bridge — JS ki HAAL seedha wake service tak');
+    is(HTML.indexOf('var SUKOON = {') > 0 && HTML.indexOf('SUKOON.bolStart') > 0,
+      'SUKOON module maujood hai (JS taraf ka referee)');
+    is(/MayaBridge\.setHaal/.test(HTML), '🌉 SUKOON har HAAL Kotlin ko bhejta hai');
+
+    /* ── speak/listen ke SAARE raaste cover ── */
+    is((HTML.match(/try \{ SUKOON\.bolStart/g) || []).length >= 6 &&
+       (HTML.match(/try \{ SUKOON\.bolEnd/g) || []).length >= 11 &&
+       (HTML.match(/try \{ SUKOON\.sunStart/g) || []).length >= 2 &&
+       (HTML.match(/try \{ SUKOON\.sunEnd/g) || []).length >= 7,
+      '🧲 speaking/listening ke 25 jagah SUKOON ke hook lage (koi raasta nahi chhoota)');
+    is(/function speak\(text, wasVoice\) \{[\s\S]{0,420}?SUKOON\.bolStart/.test(HTML),
+      '🔑 speak() CALL ke waqt hi bolStart — fetch ki 1-2s mein bhi mic nahi khulta');
+
+    /* ── L2 Kotlin gates: mic ke 4 darwaze HAAL se poochchte hain ── */
+    is((WS.match(/haalBlock\(\)/g) || []).length >= 5,
+      '🔑 restart + actuallyStart + VAD-gate + watchdog — HAR mic-darwaza HAAL se poochhta hai (' + (WS.match(/haalBlock\(\)/g) || []).length + ' jagah)');
+    is(/if \(haal == "BOL_RAHI"\) return "Maya bol rahi hai"/.test(WS) &&
+       /if \(haal == "APP_SUN"\) return "app ka mic chal raha hai"/.test(WS),
+      'Maya bol rahi ho YA app ka mic chal raha ho -> mic BAND rahega');
+
+    /* ── L4 MIC SULAH: tap-to-speak hamesha jeetta hai ── */
+    is(/fun pauseForApp\(\)/.test(WS) && /fun resumeFromApp\(\)/.test(WS) &&
+       /WakeWordService\.pauseForApp\(\)/.test(MA),
+      '🤝 MIC SULAH — tap-to-speak se pehle wake service apna mic chhor deti hai');
+    is(/pausedByApp && System\.currentTimeMillis\(\) - pausedAt > 60000/.test(WS),
+      '🔒 WebView mar bhi jaye to 60s baad pause KHUD-BA-KHUD azad (wake hamesha ke liye nahi sota)');
+
+    /* ── L5 ERR-8 MERCY: service khud ko nahi marti, aap ka switch nahi mita ── */
+    const E8 = WS.slice(WS.indexOf('8 -> {'), WS.indexOf('8 -> {') + 900);
+    is(E8.indexOf('stopSelf()') === -1 && /restart\(2000\)/.test(E8) && /err8/.test(E8),
+      '🕊️ error 8 ab service ko NAHI marta — sirf 2s sukoon (nakami-kahti mauth khatam)');
+    const WE = HTML.slice(HTML.indexOf('window.__wakeErr = function'), HTML.indexOf('window.__wakeErr = function') + 900);
+    is(WE.indexOf('settings.wakeWord = false;') === -1,
+      '🔑🔑 aap ka WAKE SWITCH ab KABHI khud nahi mitega — faisla sirf aap ka');
+
+    /* ── L6 RACE TOKEN: pending restart murda ── */
+    is(/val gen = \+\+pendingGen/.test(WS) && /if \(gen != pendingGen\) return@postDelayed/.test(WS),
+      '🎫 har schedule ka apna duct-ticket — purana pending restart MURDA (mic strobe ka ilaj)');
+
+    /* ── L7 SELF-WAKE SHIELD ── */
+    is(/pehra khamosh/.test(WS) && /while \(gateOn && running\)[\s\S]{0,800}?haalBlock/.test(WS),
+      '🛡️ Maya ke bolte waqt VAD pehra bhi khamosh — apni awaaz par jaagne ka loop IMKAN-HARAB');
+
+    /* ── echo tail: JS aur Kotlin MILTE HAIN ── */
+    is(/ECHO_TAIL_MS = 550L/.test(WS) && /tailMs: 550/.test(HTML),
+      '📏 echo tail JS aur Kotlin mein DONO 550ms (ek ka 300, doosre ka 800 nahi)');
+
+    /* ── watchdog bhi gate ka hukam maanta hai ── */
+    is(/watchdogRuns = 0[\s\S]{0,300}?if \(haalBlock\(\) == null\)/.test(WS),
+      '🔑 har-12-minute wala recognizer-reset ab HAAL poochhta hai (awaaz kaatne ka scheduled chance khatam)');
+
+    /* ── instance lifecycle ── */
+    is(/attach\(this\)/.test(WS) && /detach\(this\)/.test(WS) && /@Volatile var instance/.test(WS),
+      'companion ke paas ZINDA instance hota hai (static call se bhi mic control)');
+
+    /* ── escape hatch + nazaarat ── */
+    is(/getBoolean\("sukoon", true\)/.test(WS) && /sukoon: true/.test(HTML),
+      'SUKOON default ON (ye bugfix hai — band karna ho to LAB mein switch hai)');
+    is(HTML.indexOf('id="labSukoon"') > 0 && /sw\("labSukoon", "sukoon"/.test(HTML),
+      'LAB mein SUKOON ka apna switch — aap ke haath mein');
+    is(/setPref\('sukoon', FLAGS\.on\('sukoon'\)\)/.test(HTML) && /labSukoonMirror/.test(HTML),
+      '🔑 switch ka nateeja TURANT SharedPrefs tak pahunchta hai — ubharna nahi parta');
+    is(/skips: 0, err8: 0/.test(HTML) && /if \(kind === "skip"\) KAAN\.skips\+\+;/.test(HTML),
+      'KAAN v3 — skipping ka saboot ginita hai (andha nahi rahenge)');
+    is(HTML.indexOf('HAAL        : ') > 0 && HTML.indexOf('roka gaya') > 0,
+      '👁️ KAAN report mein HAAL + roko ki ginti nazar aati hai');
+
+    /* ── version qanoon ── */
+    is(/appVersion\(\): String = "5\.9\.0-native"/.test(MA) && MA.indexOf('4.3.0-native') === -1,
+      '🩹 BONUS — appVersion() ka purana 4.3.0 jhoot bhi ab qatl');
+    is(fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8').indexOf('maya-v5.9.0') > 0 &&
+       /versionCode 69/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')),
+      '🏷️ poore app mein VERSION v5.9.0 (cache saaf, splash saaf, APK saaf)');
+    is(HTML.indexOf('5.8.0') === -1, 'kahi purana 5.8.0 version nazar nahi aata');
+  }
+
+  /* ── 26b. ASLI behavior — time ke saath (550ms tail) ── */
+  (async function () {
+    await new Promise(function (r) { setTimeout(r, 60); });  /* pehle ke floating async apna hisaab poora kar lein */
+
+    head('26b. 🎭 SUKOON ka AMAL — asli waqt mein chal kar');
+    const SB = HTML.indexOf('var SUKOON = {');
+    const SE = HTML.indexOf('var KAAN = {');
+    const dom2 = new JSDOM('<!doctype html><body></body>', { runScripts: 'dangerously' });
+    const w2 = dom2.window;
+    const calls = [];
+    w2.MayaBridge = { setHaal: function (h) { calls.push(h); } };
+    w2.KAAN = { push: function () {} };
+    w2.eval(HTML.slice(SB, SE));
+    const S = w2.SUKOON;
+    const sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+
+    is(S && S.haal === 'KHALI', 'SUKOON module KHALI halat se uthta hai');
+
+    /* (1) bolna shuru -> Kotlin ko BOL_RAHI gaya */
+    S.bolStart();
+    is(S.haal === 'BOL_RAHI' && calls.length === 1 && calls[0] === 'BOL_RAHI',
+      '🔑 bolte hi HAAL = BOL_RAHI, aur Kotlin ko LAMHE mein pata chal gaya');
+
+    /* (2) same HAAL dobara -> native spam nahi */
+    S.set('BOL_RAHI');
+    is(calls.length === 1, 'same HAAL dubara native par nahi jata (bridge spam nahi)');
+
+    /* (3) bolEnd — furan KHALI nahi, tail ke baad */
+    S.bolEnd();
+    is(S.haal === 'BOL_RAHI', 'bolEnd ke furan baad BOL_RAHI hi — speaker ki goonj ka tail zinda');
+    await sleep(700);
+    is(S.haal === 'KHALI' && calls[calls.length - 1] === 'KHALI',
+      '🔑 550ms tail ke baad KHALI — ab mic khol sakta hai (awaaz ke beech NAHI)');
+
+    /* (4) tail, mic-sunne per STOMP nahi karta — sab se khatarnak race */
+    S.bolStart(); S.bolEnd();   /* tail start */
+    await sleep(200);
+    S.sunStart();               /* tail ke bich app ka mic khul gaya */
+    is(S.haal === 'APP_SUN', 'bolne ke tail ke beech mic khule to APP_SUN maana gaya');
+    await sleep(500);           /* tail ka poora waqt guzar gaya */
+    is(S.haal === 'APP_SUN', '🔑 tail ka timer sunne ki HAAL ko KHALI karke BARBAD nahi karta');
+
+    /* (5) sunEnd -> wapas KHALI */
+    S.sunEnd();
+    is(S.haal === 'KHALI' && calls[calls.length - 1] === 'KHALI',
+      'mic band -> wapas KHALI (wake pehra phir se zinda ho sakta hai)');
+
+    /* (6) tore-dhaage sequence — greeting ke poora kat-jaane wala scene */
+    calls.length = 0;
+    S.bolStart();               /* greeting shuru */
+    is(S.haal === 'BOL_RAHI', 'scene: greeting shuru -> BOL_RAHI');
+    S.bolEnd(); await sleep(50); S.bolStart();  /* doosra jumla turant */
+    is(S.haal === 'BOL_RAHI', 'scene: agla jumla aa gaya to tail cancel — ab bhi BOL_RAHI');
+    S.bolEnd(); await sleep(700);
+    is(S.haal === 'KHALI' && calls.join('>') === 'BOL_RAHI>KHALI',
+      '🔑 POORA POOD: sirf 2 HAAL badle (BOL>KHALI) — awaaz ke beech mic kabhi nahi khula');
+
+    console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');
+    if (fail === 0) console.log('\x1b[1m\x1b[32m✅ SAB TEST PASS — ' + pass + '/' + pass + '\x1b[0m');
+    else console.log('\x1b[1m\x1b[31m❌ ' + fail + ' TEST FAIL — ' + pass + '/' + (pass + fail) + ' pass\x1b[0m');
+    console.log('\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m\n');
+    process.exit(fail === 0 ? 0 : 1);
+  })();
 })();
