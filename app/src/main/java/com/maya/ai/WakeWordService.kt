@@ -33,6 +33,13 @@ class WakeWordService : Service() {
         const val CHANNEL_ID = "maya_wake"
         const val NOTIF_ID = 2001
 
+        @Volatile var instance: WakeWordService? = null
+        @Volatile var haal: String = "KHALI"
+        @Volatile var lastBolAt: Long = 0L
+        @Volatile var pausedByApp: Boolean = false
+        @Volatile var pausedAt: Long = 0L
+        const val ECHO_TAIL_MS = 550L
+
         fun start(ctx: Context) {
             try {
                 val i = Intent(ctx, WakeWordService::class.java)
@@ -42,8 +49,39 @@ class WakeWordService : Service() {
         }
 
         fun stop(ctx: Context) {
+            haal = "KHALI"
+            pausedByApp = false
             try { ctx.stopService(Intent(ctx, WakeWordService::class.java)) } catch (e: Exception) {}
         }
+
+        fun setHaal(h: String) {
+            if (h == "BOL_RAHI") lastBolAt = System.currentTimeMillis()
+            haal = h
+            try { instance?.onHaal(h) } catch (e: Exception) {}
+        }
+
+        fun haalBlock(): String? {
+            val s = instance ?: return null
+            if (!s.sukoonOn()) return null
+            if (haal == "BOL_RAHI") return "Maya bol rahi hai"
+            if (haal == "APP_SUN") return "app ka mic chal raha hai"
+            if (pausedByApp) return "sulah: app ka mic"
+            if (System.currentTimeMillis() - lastBolAt < ECHO_TAIL_MS) return "echo tail"
+            return null
+        }
+
+        fun pauseForApp() {
+            pausedByApp = true
+            pausedAt = System.currentTimeMillis()
+            try { instance?.hardPause() } catch (e: Exception) {}
+        }
+        fun resumeFromApp() {
+            pausedByApp = false
+            try { instance?.softResume() } catch (e: Exception) {}
+        }
+
+        internal fun attach(s: WakeWordService) { instance = s }
+        internal fun detach(s: WakeWordService) { if (instance === s) instance = null }
     }
 
     private var sr: SpeechRecognizer? = null
@@ -62,6 +100,8 @@ class WakeWordService : Service() {
     override fun onCreate() {
         super.onCreate()
         running = true
+        attach(this)
+        pausedByApp = false
         startAsForeground()
         try {
             tts = TextToSpeech(this) { st -> ttsReady = st == TextToSpeech.SUCCESS }
@@ -74,6 +114,7 @@ class WakeWordService : Service() {
 
     override fun onDestroy() {
         running = false
+        detach(this)
         stopGate()
         try { MicKit.release() } catch (e: Exception) {}
         handler.removeCallbacksAndMessages(null)
@@ -346,4 +387,37 @@ class WakeWordService : Service() {
         }
         handler.postDelayed(::watchdog, 45000)
     }
+
+    fun sukoonOn(): Boolean = try {
+        getSharedPreferences("maya", Context.MODE_PRIVATE).getBoolean("sukoon", true)
+    } catch (e: Exception) { true }
+
+    fun onHaal(h: String) {
+        handler.post {
+            if (!running) return@post
+            if (h == "BOL_RAHI" || h == "APP_SUN") {
+                stopGate()
+                try { sr?.cancel() } catch (e: Exception) {}
+            } else if (h == "KHALI") {
+                restart(300)
+            }
+        }
+    }
+
+    fun hardPause() {
+        handler.post {
+            stopGate()
+            try { sr?.cancel() } catch (e: Exception) {}
+            report("sulah", "service pause — app ka mic")
+        }
+    }
+    fun softResume() {
+        handler.post {
+            if (!running) return@post
+            report("sulah", "service wapas — pehra phir se")
+            restart(300)
+        }
+    }
+
+    fun mazbootKotlinGate(): Boolean = true
 }
