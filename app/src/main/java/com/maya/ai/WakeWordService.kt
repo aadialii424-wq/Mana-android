@@ -49,7 +49,25 @@ class WakeWordService : Service() {
         }
 
         fun stop(ctx: Context) {
+            haal = "KHALI"
+            pausedByApp = false
             try { ctx.stopService(Intent(ctx, WakeWordService::class.java)) } catch (e: Exception) {}
+        }
+
+        fun setHaal(h: String) {
+            if (h == "BOL_RAHI") lastBolAt = System.currentTimeMillis()
+            haal = h
+            try { instance?.onHaal(h) } catch (e: Exception) {}
+        }
+
+        fun haalBlock(): String? {
+            val s = instance ?: return null
+            if (!s.sukoonOn()) return null
+            if (haal == "BOL_RAHI") return "Maya bol rahi hai"
+            if (haal == "APP_SUN") return "app ka mic chal raha hai"
+            if (pausedByApp) return "sulah: app ka mic"
+            if (System.currentTimeMillis() - lastBolAt < ECHO_TAIL_MS) return "echo tail"
+            return null
         }
     }
 
@@ -370,3 +388,4 @@ class WakeWordService : Service() {
         }
     }
 }
+/* bisect determinism probe 2 */
