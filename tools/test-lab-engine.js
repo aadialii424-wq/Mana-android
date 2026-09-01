@@ -1343,8 +1343,10 @@ Here's a thinking process:
     const MA = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8');
 
     /* ── L1 HAAL bridge: JS ka dil Kotlin tak ── */
-    is(/fun setHaal\(h: String\)/.test(MA) && /WakeWordService\.setHaal\(h\)/.test(MA),
-      '🔑 setHaal bridge — JS ki HAAL seedha wake service tak');
+    is(/fun setHaal\(h: String\)/.test(MA) && /WakeWordService\.applyHaal\(h\)/.test(MA),
+      '🔑 setHaal bridge — JS ki HAAL seedha wake service tak (applyHaal — JVM setter clash se mehfooz)');
+    is(/fun applyHaal\(h: String\)/.test(WS),
+      '🔑 companion mein applyHaal — \'haal\' property ke JVM setter se naam HARGIZ takraye nahi');
     is(HTML.indexOf('var SUKOON = {') > 0 && HTML.indexOf('SUKOON.bolStart') > 0,
       'SUKOON module maujood hai (JS taraf ka referee)');
     is(/MayaBridge\.setHaal/.test(HTML), '🌉 SUKOON har HAAL Kotlin ko bhejta hai');
