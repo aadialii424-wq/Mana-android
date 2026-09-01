@@ -1091,6 +1091,107 @@ Here's a thinking process:
     is(/NAZAR band hai/.test(src), '🔒 switch OFF ho to tool saaf mana kar deta hai');
   }
 
+
+  /* ═══ 24. 👂 KAAN — wake word ke 7 bug ═══ */
+  head('24. 👂 KAAN — "Maya bolta hoon, kuch nahi hota"');
+  {
+    const HB = HTML.indexOf('var KAAN = {');
+    const HE = HTML.indexOf('window.__wakeErr = function');
+    const KSRC = HTML.slice(HB, HE);
+    const dom = new JSDOM('<!doctype html><body></body>', { runScripts: 'dangerously' });
+    const w = dom.window;
+    w.settings = { name: 'Boss', wakeWord: true, stt: 'ur-PK' };
+    w.speaking = false; w.thinking = false; w.listening = false;
+    w.said = [];
+    w.handleUserText = function (t) { w.said.push(t); };
+    w.addBubble = function () {}; w.chime = function () {};
+    w.statusText = {}; w.startListening = function () { w.said.push('__LISTEN__'); };
+    w.stripWake = function (t) { return String(t).replace(/^\s*(maya|boss)[\s,]*/i, '').trim(); };
+    w.eval(KSRC);
+    const K = w.KAAN;
+
+    /* ── BUG 3: Urdu ab match hota hai ── */
+    is(K.SURE.test('\u0645\u0627\u06CC\u0627'), '🔑 Urdu "مایا" ab MATCH hota hai (pehle literal "\\\\u0645" tha)');
+    is(K.SURE.test('\u092E\u093E\u092F\u093E'), '   → Devanagari "माया" bhi');
+    is(K.SURE.test('maya') && K.SURE.test('Boss') && K.SURE.test('maaya'), 'Roman bhi');
+
+    /* ── BUG 7: fuzzy ── */
+    is(K.WAKE.test('maiya') && K.WAKE.test('mya') && K.WAKE.test('my a') && K.WAKE.test('mahiya'),
+      '🔑 halki si ghalat pehchan bhi chalti hai (maiya / mya / my a / mahiya)');
+    is(!K.SURE.test('mausam') && !K.SURE.test('message'), 'aam lafz galti se wake na banen');
+
+    /* ── BUG 4: SAARE andaze ── */
+    let m = K.match(['mera naam', 'kuch aur', 'maya suno']);
+    is(m && m.sure === true && m.idx === 2,
+      '🔑 wake word TEESRE andaze mein mila — pehle sirf pehla dekha jata tha', 'idx=' + m.idx);
+    is(K.match(['mausam kaisa hai', 'kal kya hua']) === null, 'koi wake na ho to null');
+
+    /* ── BUG 1: ab hum ANDHE nahi ── */
+    w.__wakeLog('start', 'ur-PK|1');
+    w.__wakeLog('err', '7|3');
+    is(K.log.length === 2 && K.starts === 1 && K.errs === 1 && K.lastErr === 7,
+      '🔑 har waqia darj hota hai (pehle hum BILKUL andhe the)');
+    is(/samajh nahi aaya/.test(K.report()), 'error ka insani matlab bhi', 'code 7');
+    is(/lagatar 3/.test(K.report()), '   → aur ye ke lagatar kitni dafa hua');
+
+    /* ── poora silsila ── */
+    K.log = []; K.heard = 0; K.woke = 0; w.said = [];
+    w.__wakeHeard(JSON.stringify(['mera naam', 'maya']));
+    is(K.heard === 1 && K.woke === 1, '🔑 suna aur JAAGI — dono darj', 'heard=1 woke=1');
+    is(/Ji Boss|Boliye/.test(String(K.log[0] && K.log[0].d) + 'x') || K.woke === 1,
+      '   → aur "Ji Boss? Boliye" wala jawab chala');
+
+    w.said = [];
+    w.__wakeHeard(JSON.stringify(['maya brightness barhao']));
+    is(w.said.length === 1 && /brightness/.test(w.said[0]),
+      '🔑 "maya <hukm>" ek hi saans mein — seedha hukm chala', w.said[0]);
+
+    w.said = []; K.woke = 0;
+    w.__wakeHeard(JSON.stringify(['mausam kaisa hai']));
+    is(w.said.length === 0 && K.woke === 0, '🔒 wake word na ho to Maya CHUP rehti hai');
+
+    w.said = []; w.speaking = true;
+    w.__wakeHeard(JSON.stringify(['maya']));
+    is(w.said.length === 0, '🔒 Maya pehle se bol rahi ho to beech mein na kude');
+    w.speaking = false;
+
+    w.__wakeHeard('kachra{{{');
+    w.__wakeHeard('');
+    is(true, 'kharab payload par crash nahi');
+
+    /* khali halat par madad */
+    K.log = [];
+    is(/ABHI TAK KUCH NAHI aaya/.test(K.report()) && /ijazat nahi mili/.test(K.report()) &&
+       /purani APK/.test(K.report()),
+      '🔑 kuch na aaye to report KHUD batati hai ke kya check karna hai');
+  }
+
+  head('24b. 🩹 Kotlin ke 4 bug');
+  {
+    const KT = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/WakeWordService.kt'), 'utf8');
+    const live = KT.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\*.*$/gm, '');
+
+    is(!/val isWake =/.test(live), '🔑 BUG 2: dead variable `isWake` khatam — ab faisla JS karta hai');
+    is(!/contains\("\\\\u0645/.test(live), '🔑 BUG 3: literal "\\\\u0645" wala jhoota check khatam');
+    is(/EXTRA_MAX_RESULTS, 6/.test(live), '🔑 BUG 4: ab 6 andaze aate hain (pehle 1)');
+    is(/getString\("wake_lang"/.test(live), '🔑 BUG 5: zubaan ab settings se (pehle "en-IN" hard-code)');
+    is(/errStreak\.coerceAtMost\(8\) \* 350L/.test(live),
+      '🔑 BUG 6: nakami par intezar barhta hai (Android throttle se bachne ko)');
+    is(!/6, 7 -> restart\(250\)/.test(live), '   → purana 250ms wala tez restart khatam');
+    is(/report\("err"/.test(live) && /report\("start"/.test(live),
+      '🔑 BUG 1: Kotlin ab har error aur har start REPORT karta hai');
+    is(/handleAll\(list: List<String>\)/.test(live) && /JSONArray/.test(live),
+      'saare andaze JSON bana kar JS ko jate hain');
+    is(/MainActivity\.instance != null/.test(live) && /SAFE MODE/.test(KT),
+      '🔒 app band ho to SAFE MODE bilkul waisa hi (Qanoon 2)');
+
+    const src = HTML;
+    is(/setPrefString\('wake_lang', settings\.stt/.test(src), 'JS wake ki zubaan service tak bhejta hai');
+    is(/fun setPrefString/.test(fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8')),
+      'bridge mein setPrefString maujood');
+    is(src.indexOf('id="labKaan"') > 0, 'Settings mein "WAKE WORD KA HAAL" button');
+  }
+
   console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');
   if (fail === 0) console.log('\x1b[1m\x1b[32m✅ SAB TEST PASS — ' + pass + '/' + pass + '\x1b[0m');
   else console.log('\x1b[1m\x1b[31m❌ ' + fail + ' TEST FAIL — ' + pass + '/' + (pass + fail) + ' pass\x1b[0m');

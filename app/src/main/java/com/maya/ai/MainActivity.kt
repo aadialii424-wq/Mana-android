@@ -1178,6 +1178,12 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface
         fun getPrefString(k: String): String = try { prefs().getString(k, "") ?: "" } catch (e: Exception) { "" }
 
+        /** v5.7.0 — wake word ki zubaan JS se service tak pohanchane ke liye */
+        @JavascriptInterface
+        fun setPrefString(k: String, v: String) {
+            try { prefs().edit().putString(k, v).apply() } catch (e: Exception) {}
+        }
+
         @JavascriptInterface
         fun clearPref(k: String) { try { prefs().edit().remove(k).apply() } catch (e: Exception) {} }
 

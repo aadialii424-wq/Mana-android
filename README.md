@@ -1,9 +1,27 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.6.0 "NAZAR" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.7.0 "KAAN" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 👂 v5.7.0 — KAAN: wake word ab sach mein jaagti hai
+
+User: *"Background mein mic on/off hota hai, magar 'Maya' bolne par kuch nahi hota."* **7 bug mile.**
+
+1. 🚨 **Hum ANDHE the** — service kabhi nahi batati thi ke usne kya suna ya kya error aaya. **Ab har waqia darj** + `👂 WAKE WORD KA HAAL` button
+2. 🚨 `val isWake = …` **dead variable** — bana kar chhor diya jata tha, kabhi use hi nahi hua
+3. 🚨 `contains("\\u0645\\u0627…")` — **double backslash** = literal matn, Urdu **kabhi match ho hi nahi sakta tha**
+4. 🚨 `EXTRA_MAX_RESULTS = 1` — sirf pehla andaza. **SUNO (v4.11.0) ne sikhaya tha ke sahih jawab aksar doosre/teesre mein hota hai.** Ab **6**, aur har ek check hota hai
+5. 🚨 Zubaan `"en-IN"` **hard-code** jabke user ka `stt: ur-PK` — ab settings se
+6. 🚨 `NO_MATCH → restart(250ms)` — Android 11+ background mic ko **throttle** karta hai. **Yehi "mic on/off" ki wajah thi.** Ab backoff `0.7s → 3.5s`
+7. 🚨 Matching sakht — ab `maiya · mahiya · my a · مایا · माया`, aur *"maya brightness barhao"* ek hi saans mein
+
+🏗️ **Aur bara faisla:** Kotlin ab **bewaqoof** hai (sirf saare andaze forward karta hai), faisla JS mein — yani **aage tuning ke liye nayi APK nahi chahiye**
+
+🧪 **889 test** (860 → 889)
+
+📖 [`docs/RELEASE-v5.7.0.md`](docs/RELEASE-v5.7.0.md)
 
 ## 👁️ v5.6.0 — P7a: NAZAR (Maya SCREEN parh sakti hai)
 

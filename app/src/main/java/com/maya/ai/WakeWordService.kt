@@ -15,6 +15,7 @@ import android.os.Looper
 import android.content.pm.ServiceInfo
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
+import org.json.JSONArray
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import androidx.core.app.NotificationCompat
@@ -52,6 +53,9 @@ class WakeWordService : Service() {
     @Volatile private var running = false
     private var watchdogRuns = 0
     private var lastWakeAt = 0L
+    private var errStreak = 0
+    private var lastErr = 0
+    private var starts = 0
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -158,23 +162,32 @@ class WakeWordService : Service() {
                 override fun onBufferReceived(buffer: ByteArray?) {}
                 override fun onEndOfSpeech() {}
                 override fun onError(error: Int) {
-                    when (error) {
-                        6, 7 -> restart(250)
-                        1, 2 -> restart(2000)
-                        4 -> restart(1200)
+                    /* v5.7.0 — pehle NO_MATCH par sirf 250ms baad dobara shuru
+                       hota tha. Android 11+ background mic ko THROTTLE karta hai
+                       aur itni tez restart par Google ka recognizer chup ho jata
+                       hai — yehi "mic on hota hai band hota hai" ki wajah thi.
+                       Ab har lagatar nakami par intezar barhta jata hai. */
+                    errStreak++
+                    lastErr = error
+                    report("err", error.toString() + "|" + errStreak)
+                    val back = when (error) {
+                        6, 7 -> 700L + (errStreak.coerceAtMost(8) * 350L)   /* 0.7s -> 3.5s */
+                        1, 2 -> 3000L
+                        4 -> 1500L
                         8 -> {
                             evalToApp("window.__wakeErr && window.__wakeErr(8)")
                             stopSelf()
+                            return
                         }
-                        else -> restart(900)
+                        else -> 1200L
                     }
+                    restart(back)
                 }
                 override fun onResults(results: Bundle?) {
-                    val text = results
-                        ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                        ?.firstOrNull() ?: ""
-                    if (text.isNotBlank()) handle(text)
-                    restart(200)
+                    val all = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                        ?: arrayListOf()
+                    if (all.isNotEmpty()) { handleAll(all); errStreak = 0 }
+                    restart(400)
                 }
                 override fun onPartialResults(partialResults: Bundle?) {}
                 override fun onEvent(eventType: Int, params: Bundle?) {}
@@ -182,20 +195,32 @@ class WakeWordService : Service() {
         }
     }
 
-    /** ASLI DIMAAG: app khula ho to JS ko; band ho to khud kaam karo */
-    private fun handle(text: String) {
-        val t = text.lowercase()
-        val isWake = t.contains("maya") || t.contains("maywa") || t.contains("mya") ||
-            t.contains("maaya") || t.contains("boss") || t.contains("\\u0645\\u0627\\u06CC\\u0627")
-        val appAlive = MainActivity.instance != null
-        if (appAlive) {
-            evalToApp("window.__wakeHeard && window.__wakeHeard('" + jsEsc(text) + "')")
-            return
-        }
-        /* SAFE MODE (v2.12.1): app band ho to KUCH NA KARO —
-           v2.10.0 ka khud-app-kholna engine hi black screen ka mujrim nikla.
-           App khuli ho to wake word poora kaam karta hai. */
+    /**
+     * v5.7.0 — Kotlin ab FAISLA NAHI karta, sirf REPORT karta hai.
+     *
+     * Pehle yahan `isWake` bana kar CHHOR diya jata tha (dead variable), aur
+     * Urdu ka check "\\u0645..." tha — yani literal matn, kabhi match hi nahi
+     * hota tha. Ab saare andaze JS ko jate hain aur wahan faisla hota hai.
+     *
+     * Faida: aage wake-word ki tuning ke liye NAYI APK nahi banani paregi.
+     */
+    private fun report(kind: String, payload: String) {
+        evalToApp("window.__wakeLog && window.__wakeLog('" + jsEsc(kind) + "','" + jsEsc(payload) + "')")
     }
+
+    private fun handleAll(list: List<String>) {
+        val arr = JSONArray()
+        for (i in list.indices) { if (i >= 6) break; arr.put(list[i]) }
+        val payload = arr.toString()
+        if (MainActivity.instance != null) {
+            evalToApp("window.__wakeHeard && window.__wakeHeard('" + jsEsc(payload) + "')")
+        } else {
+            /* SAFE MODE: app band ho to KUCH NA KARO — v2.10.0 ka khud-app-kholna
+               engine hi black screen ka mujrim nikla tha. */
+            lastHeardOffline = payload
+        }
+    }
+    private var lastHeardOffline = ""
 
     private fun restart(delay: Long) {
         handler.postDelayed({ actuallyStart() }, delay)
@@ -204,12 +229,24 @@ class WakeWordService : Service() {
     private fun actuallyStart() {
         if (!running) return
         try {
+            /* v5.7.0 — do badlaav:
+               1. MAX_RESULTS 1 -> 6. SUNO ka sabaq: sahih jawab aksar doosre ya
+                  teesre andaze mein hota hai. Wake word par ye aur zyada ahem hai.
+               2. Zubaan ab settings se aati hai (pehle "en-IN" hard-code thi,
+                  jabke user Urdu bolta hai). */
+            val lang = try {
+                getSharedPreferences("maya", Context.MODE_PRIVATE)
+                    .getString("wake_lang", "en-IN") ?: "en-IN"
+            } catch (e: Exception) { "en-IN" }
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-IN")
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang)
                 putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
-                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 6)
+                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false)
             }
+            starts++
+            report("start", lang + "|" + starts)
             sr?.startListening(intent)
         } catch (e: Exception) {}
     }
