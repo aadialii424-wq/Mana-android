@@ -862,8 +862,12 @@ const u16 = (b, o) => b[o] | (b[o + 1] << 8);
     /* ── 18a. MOOD -> [bracket] : yehi asal maqsad hai ── */
     {
       const { FISH, w } = fishWorld();
-      is(FISH.BRACKET.warm.indexOf('warmly') >= 0 && FISH.BRACKET.warm.indexOf('friend') >= 0,
-        'Warm mood ka wohi matlab jo Gemini ko bheja jata tha', FISH.BRACKET.warm);
+      is(/warm/i.test(FISH.BRACKET.warm) && FISH.BRACKET.warm.length <= 14,
+        '🔑 Warm mood ka ishara CHHOTA hai (lamba angrezi ishara Devanagari ko angrezi bana deta tha)',
+        FISH.BRACKET.warm + ' — ' + FISH.BRACKET.warm.length + ' harf');
+      var longest = 0, bk;
+      for (bk in FISH.BRACKET) if (FISH.BRACKET[bk].length > longest) longest = FISH.BRACKET[bk].length;
+      is(longest <= 14, '   → har ishara 14 harf se chhota (lehja mehfooz)', longest + ' harf sab se lamba');
       is(/whisper/i.test(FISH.BRACKET.whisper), 'Whisper mood zinda hai', FISH.BRACKET.whisper);
       is(/excited|energy/i.test(FISH.BRACKET.hype) && /playful|teasing/i.test(FISH.BRACKET.funny),
         'Hype aur Funny bhi zinda');
@@ -893,7 +897,7 @@ const u16 = (b, o) => b[o] | (b[o + 1] << 8);
       is(c.hdrs.Authorization === 'Bearer fk_test_key_123456', 'Bearer key sahih');
       is(c.json.format === 'mp3' && c.json.mp3_bitrate === 128, 'MP3 manga gaya');
       is(c.json.reference_id === 'voice_abc123', 'chuni hui awaaz bheji gayi', c.json.reference_id);
-      is(c.json.text.indexOf('[warmly') === 0 && c.json.text.indexOf('Assalam') > 0,
+      is(c.json.text.indexOf('[warm]') === 0 && c.json.text.indexOf('Assalam') > 0,
         'matn ke sath andaaz ka ishara bhi gaya', c.json.text.slice(0, 40));
       is(c.json.prosody.speed === 1.25, 'settings ka rate prosody.speed ban gaya', String(c.json.prosody.speed));
       is(c.timeoutMs > 0, 'native ko timeout diya gaya', c.timeoutMs + 'ms');

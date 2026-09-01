@@ -1,9 +1,27 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.1.0 "BOLI" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.2.0 "AWAAZ MEHFOOZ" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🔒 v5.2.0 — AWAAZ MEHFOOZ · 🎯 STHIR LEHJA
+
+User: *"awaaz chuni, achi lagi, app band ki — setting reset ho gayi"* aur *"alag alag accents choose kar rahi hai"*. **Dono asli bug the.**
+
+**BUG A — awaaz kho jati thi (do wajahen):**
+- `SETFORM.load()` → `el.value = settings.fishVoice`, magar option select mein hota hi nahi tha (library sirf memory mein) → browser chup-chaap `""` rakh deta → agla **SAVE** awaaz **mita** deta 💀
+- 🐟 SUNO `settings.fishVoice` bajata tha, **dropdown ki nahi** → nayi awaaz chun kar sunte to **purani** bajti
+
+**Ilaj:** settings ab sach hai (dropdown nahi) · awaaz chunte hi **foran mehfooz** (SAVE ka intezar nahi) · `fishVoice` `SETFORM` se **bahar** · library `localStorage` mein · **🎤 naam dikhta hai, hex nahi** · SUNO ab dropdown wali awaaz bajata hai
+
+**BUG B — har turn alag lehja (do wajahen):**
+- `temperature: 0.7` — Fish docs: *"higher is more **varied**, lower is more **consistent**"*. Hum Fish ko jaan-boojh kar har dafa alag bolne ko keh rahe the → ab **0.35** + slider
+- 🔑 Mood ka ishara **BOLI ko tor raha tha**: `[warmly, affectionately, like a close friend]` = **45 angrezi harf jumle ke shuru mein** → Fish phir se angrezi samajh leta. Ab **`[warm]`** (test: har ishara ≤14 harf)
+
+🧪 **738 test** (725 → 738) — Section 19 mein 12 taale
+
+📖 [`docs/RELEASE-v5.2.0.md`](docs/RELEASE-v5.2.0.md)
 
 ## 🗣️ v5.1.0 — BOLI: hamare LEHJE mein · 🎀 pyari awaazein
 

@@ -536,7 +536,7 @@ nav{padding:8px 10px 10px}
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v5.1.0 — 🗣️ BOLI: HAMARE LEHJE MEIN 🎀</div>
+  <div class="ver">v5.2.0 — 🔒 AWAAZ MEHFOOZ • 🎯 STHIR LEHJA</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid #c85050; background:#3c0a0f; border-radius:12px; padding:12px; text-align:left;">
@@ -561,14 +561,14 @@ nav{padding:8px 10px 10px}
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v5.1.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
+  <div class="dfoot">MAYA v5.2.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.1.0 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.2.0 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -729,7 +729,7 @@ nav{padding:8px 10px 10px}
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.1.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.2.0</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -914,6 +914,11 @@ nav{padding:8px 10px 10px}
               <button type="button" class="ui-btn ui-btn-ghost" id="fishTest">🐟 FISH AWAAZ SUNO</button>
             </div>
             <div class="ui-hint" id="fishHint">—</div>
+            <div class="ui-field" style="margin-top:8px">
+              <div class="ui-label">🎯 LEHJA KITNA STHIR? <small>(kam = har dafa wohi awaaz · zyada = jazbaati magar badalta hua)</small></div>
+              <input class="ui-input" id="sFishTemp" type="number" min="0.1" max="0.9" step="0.05" value="0.35">
+              <div class="ui-hint">0.35 = sthir (mashwara) · 0.7 = jazbaati. Pehle 0.7 tha — isi liye har turn ka lehja badal jata tha.</div>
+            </div>
             <div class="ui-hint">⚠️ Fish ke paas <b>pitch</b> ka option hai hi nahi — Settings ka pitch slider Fish par asar nahi karta (Edge aur phone par karta hai). Awaaz patli/pyari chahiye to <b>awaaz badlo</b>, pitch nahi.</div>
           </div>
           <button type="button" class="ui-btn ui-btn-ghost" id="fishDoctor">🩺 FISH CHECK KARO — muft daur zinda hai ya nahi</button>
@@ -1140,7 +1145,7 @@ nav{padding:8px 10px 10px}
       </div>
 
       <button type="button" class="ui-btn ui-btn-save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v5.1.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v5.2.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -1155,7 +1160,7 @@ nav{padding:8px 10px 10px}
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v5.1.0 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v5.2.0 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -1223,11 +1228,11 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v5.1.0 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v5.2.0 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
-var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", ghKey:"", cerebrasKey:"", mistralKey:"", orKey:"", nvidiaKey:"", zaiKey:"", llm7Key:"", ttsKey:"", voiceEngine:"auto", gVoice:"Kore", voiceMood:"auto", neuralWifiOnly:false, neuralMaxChars:1400, edgeTTS:true, edgeVoice:"", fishKey:"", fishVoice:"", fishOn:true, ttsModel:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"maya", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true, gender:"male", phone:"", musicApp:"youtube", favSong:"", ytChannel:"", assistName:"Maya", gfMode:false, persona:"maya", remember:true, convoMode:false, lang:"roman-ur", proactive:false, theme:"obsidian", accent:"#FF7A1A", radius:18, fontScale:1, edgeGlow:false };
+var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", ghKey:"", cerebrasKey:"", mistralKey:"", orKey:"", nvidiaKey:"", zaiKey:"", llm7Key:"", ttsKey:"", voiceEngine:"auto", gVoice:"Kore", voiceMood:"auto", neuralWifiOnly:false, neuralMaxChars:1400, edgeTTS:true, edgeVoice:"", fishKey:"", fishVoice:"", fishVoiceName:"", fishTemp:0.35, fishOn:true, ttsModel:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"maya", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true, gender:"male", phone:"", musicApp:"youtube", favSong:"", ytChannel:"", assistName:"Maya", gfMode:false, persona:"maya", remember:true, convoMode:false, lang:"roman-ur", proactive:false, theme:"obsidian", accent:"#FF7A1A", radius:18, fontScale:1, edgeGlow:false };
 var settings = Object.assign({}, DEFAULTS);
 try {
   var s1 = JSON.parse(localStorage.getItem("maya_settings") || "null");
@@ -1312,7 +1317,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v5.1.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v5.2.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1519,7 +1524,7 @@ var VOICE_MOODS = [
 var PERSONA_MOOD = { maya:"warm", friday:"pro", jarvis:"pro", venom:"funny", gf:"warm", coach:"hype", teacher:"calm" };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧪  MAYA LAB  —  P0 (NAAP-TOL) + P1 (SAAF ZUBAAN) + 👑 MALIK    (app v5.1.0)
+   🧪  MAYA LAB  —  P0 (NAAP-TOL) + P1 (SAAF ZUBAAN) + 👑 MALIK    (app v5.2.0)
    ---------------------------------------------------------------------------
    Ye block 3 kaam karta hai, aur teeno ALAG SWITCH ke peeche hain:
 
@@ -1986,7 +1991,7 @@ FLAGS.load();
 NAAP.load();
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🎙️  SUNO  —  MAYA aap ki AWAAZ theek samjhe                  (app v5.1.0)
+   🎙️  SUNO  —  MAYA aap ki AWAAZ theek samjhe                  (app v5.2.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ki apni chat se):
 
@@ -2228,7 +2233,7 @@ var SUNO = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗣️  BOLI  —  LEHJA (accent) ka asal ilaj                      (app v5.1.0)
+   🗣️  BOLI  —  LEHJA (accent) ka asal ilaj                      (app v5.2.0)
    ---------------------------------------------------------------------------
    ASAL MASLA — awaaz ka nahi, MATN ka tha.
 
@@ -3717,18 +3722,40 @@ var FISH = {
   cool: 0,            /* 429 / 402 ke baad thori der haath na lagao */
   COOL: 300000,
   lib: null,          /* awaaz ki library (jab mangwai jaye) */
+  loadLib: function () {
+    if (FISH.lib) return FISH.lib;
+    try {
+      var d = JSON.parse(localStorage.getItem("maya_fishlib") || "null");
+      if (d && d.length) FISH.lib = d;
+    } catch (e) {}
+    return FISH.lib;
+  },
+  /* chuni hui awaaz ka NAAM (hex id nahi) */
+  voiceName: function () {
+    var s = (typeof settings === "object" && settings) ? settings : {};
+    var id = String(s.fishVoice || "");
+    if (!id) return "";
+    if (s.fishVoiceName) return s.fishVoiceName;
+    var L = FISH.loadLib() || [], i;
+    for (i = 0; i < L.length; i++) if (L[i].id === id) return L[i].title;
+    return id.slice(0, 8) + "\u2026";
+  },
 
   /* ─── MOOD -> Fish ka [bracket] ishara ───
      Yehi wo pul hai jo aap ke purane 9 mood zinda rakhta hai. */
+  /* ⚠️ Ishare CHHOTE rakhe gaye hain. Pehle "[warmly, affectionately, like a
+     close friend]" tha — 45 ANGREZI harf, jumle ke bilkul shuru mein. BOLI ke
+     baad matn Devanagari hota hai, magar itna lamba angrezi ishara Fish ki
+     zubaan-pehchan ko WAPAS ANGREZI par le ja sakta tha. Ab 1-2 lafz. */
   BRACKET: {
-    warm:     "[warmly, affectionately, like a close friend]",
-    cheerful: "[cheerful, bright, smiling]",
-    calm:     "[calm, soft tone, relaxed pace]",
-    pro:      "[crisp, confident, professional]",
-    hype:     "[excited, high energy]",
-    whisper:  "[whispers softly and gently]",
-    news:     "[clear news anchor tone]",
-    funny:    "[playful, teasing, amused]"
+    warm:     "[warm]",
+    cheerful: "[cheerful]",
+    calm:     "[calm, soft]",
+    pro:      "[confident]",
+    hype:     "[excited]",
+    whisper:  "[whisper]",
+    news:     "[news tone]",
+    funny:    "[playful]"
   },
 
   /* har code ka insani matlab — DOCTOR aur status yehi bolte hain */
@@ -3788,6 +3815,16 @@ var FISH = {
     return tag ? (tag + " " + t) : t;
   },
 
+  /* 🎯 awaaz kitni STHIR (0.25) ya JAZBAATI (0.8) */
+  temp: function () {
+    var s = (typeof settings === "object" && settings) ? settings : {};
+    var v = parseFloat(s.fishTemp);
+    if (isNaN(v)) v = 0.35;
+    if (v < 0.1) v = 0.1;
+    if (v > 0.9) v = 0.9;
+    return Math.round(v * 100) / 100;
+  },
+
   /* settings ka rate 1.0 -> speed 1.0 ; hadd 0.5 se 2.0 */
   speed: function (r) {
     var n = +r || 1;
@@ -3808,7 +3845,10 @@ var FISH = {
       latency: "balanced",
       chunk_length: 300,
       normalize: true,
-      temperature: 0.7,
+      /* 🎯 Fish docs: "temperature — higher is more VARIED, lower is more
+         CONSISTENT". 0.7 par har turn ka lehja badal jata tha ("alag alag
+         accent"). Ab default 0.35 = wohi awaaz, wohi lehja, har dafa. */
+      temperature: FISH.temp(),
       top_p: 0.7,
       prosody: { speed: FISH.speed(s.rate), volume: 0, normalize_loudness: true }
     };
@@ -4023,6 +4063,8 @@ var FISH = {
         }
       } catch (e) { cb(null, "DECODE"); return; }
       FISH.lib = out;
+      /* 🔒 list mehfooz — restart ke baad bhi awaaz ka NAAM dikhe, hex id nahi */
+      try { localStorage.setItem("maya_fishlib", JSON.stringify(out.slice(0, 60))); } catch (e) {}
       cb(out, "");
     });
   },
@@ -5100,9 +5142,9 @@ async function resolveModels(){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v5.1.0)
+   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v5.2.0)
    ---------------------------------------------------------------------------
-   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v5.1.0 se pehle Groq
+   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v5.2.0 se pehle Groq
    ne 16 August 2026 ko apne purane Llama 3.x models band kar diye the — hamara
    default wahi tha, is liye "backup brain bhi thak gaya" aata tha.
 
@@ -5453,7 +5495,7 @@ window.__httpDone = function (id, status, b64) {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v5.1.0)
+   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v5.2.0)
    ---------------------------------------------------------------------------
    Purane code ke 3 asli bugs jinki wajah se "Sab free brains busy" bar bar aata tha:
 
@@ -5791,7 +5833,7 @@ async function geminiTry(m, plain){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🤝  HAQEEQAT  —  "SACH BOLO" ka nizam                        (app v5.1.0)
+   🤝  HAQEEQAT  —  "SACH BOLO" ka nizam                        (app v5.2.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ki apni chat se — 5 dafa):
 
@@ -5925,7 +5967,7 @@ var HAQEEQAT = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ⚡  AMAL ENGINE — P2a: TOOLS AB HAR DIMAAG KO                  (app v5.1.0)
+   ⚡  AMAL ENGINE — P2a: TOOLS AB HAR DIMAAG KO                  (app v5.2.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ke apne device se sabit):
 
@@ -6637,7 +6679,7 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 
 /* ---------- SETTINGS TAB ---------- */
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v5.1.0)
+   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v5.2.0)
    ---------------------------------------------------------------------------
    Purana bug (user ne pakda): "girlfriend mode on karta hun, groq key lagata
    hun — thori der baad wo option khud band ho jata hai."
@@ -6691,7 +6733,10 @@ var SET_FIELDS = [
   { id: "sEdgeVoice",   key: "edgeVoice",     t: "sel",   def: "" },
   { id: "sFishOn",      key: "fishOn",        t: "check", def: true },
   { id: "sFishKey",     key: "fishKey",       t: "text",  def: "" },
-  { id: "sFishVoice",   key: "fishVoice",     t: "sel",   def: "" },
+  /* 🔒 fishVoice SETFORM se BAHAR hai — wo apne change par foran mehfooz hota
+     hai. Pehle yahan hone ki wajah se boot par khali dropdown SAVE karte hi
+     awaaz ko mita deta tha. */
+  { id: "sFishTemp",    key: "fishTemp",      t: "num",   def: 0.35 },
   { id: "sStt",         key: "stt",           t: "sel",   def: "ur-PK" },
   { id: "sTts",         key: "tts",           t: "sel",   def: "ur-PK" },
   { id: "sRate",        key: "rate",          t: "num",   def: 1,    out: "rateVal",  dp: 2 },
@@ -7012,7 +7057,14 @@ function labPaint(){
     var old = tb.textContent;
     tb.textContent = "🐟 AA RAHI HAI…";
     var mood = AWAAZ.moodId();
-    if (h) { h.className = "ui-hint"; h.textContent = "🐟 " + mood + " andaaz mein awaaz mangwai ja rahi hai…"; }
+    /* 🔊 jo awaaz DROPDOWN mein chuni hai wohi sunao (pehle purani bajti thi) */
+    var sel = $("#sFishVoice");
+    if (sel && sel.value !== settings.fishVoice) {
+      settings.fishVoice = sel.value || "";
+      settings.fishVoiceName = (sel.options[sel.selectedIndex] || {}).textContent || "";
+      saveSettings();
+    }
+    if (h) { h.className = "ui-hint"; h.textContent = "🐟 " + (FISH.voiceName() || "auto") + " \u2014 " + mood + " andaaz…"; }
     AWAAZ.stop(); AWAAZ.gen++;
     var gen = AWAAZ.gen, t0 = Date.now();
     var sample = "Assalam-o-alaikum " + ((settings && settings.name) || "Boss") + "! Main " +
@@ -7026,8 +7078,8 @@ function labPaint(){
         if (gen !== AWAAZ.gen) return;
         if (h) {
           h.className = "ui-hint ok";
-          h.textContent = "✅ Bol diya — " + (FISH.voice() || "default") + "  •  " + mood +
-                          " andaaz  •  " + ((Date.now() - t0) / 1000).toFixed(1) + " sec";
+          h.textContent = "✅ Bol diya — 🎤 " + (FISH.voiceName() || "auto") + "  •  " + mood +
+                          " andaaz  •  " + ((Date.now() - t0) / 1000).toFixed(1) + " sec  •  mehfooz ✓";
         }
         pushLog("FISH OK: " + mood + " / " + (FISH.voice() || "default") + " (" + (Date.now() - t0) + "ms)");
         fishPaintHint();
@@ -7263,7 +7315,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v5.1.0 — DOCTOR REPORT");
+  out.push("MAYA v5.2.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
@@ -7436,8 +7488,11 @@ function edgePaintHint(){
 function fishFillVoices(){
   var fs = $("#sFishVoice"), i, o, L;
   if (!fs || typeof FISH !== "object" || !FISH) return;
-  var keep = fs.value || ((typeof settings === "object" && settings) ? (settings.fishVoice || "") : "");
-  L = FISH.lib || [];
+  /* 🔒 settings hamesha SACH hai — dropdown nahi. (Pehle boot ke waqt dropdown
+     khali hota tha aur SAVE dabate hi fishVoice "" ho kar KHO jati thi.) */
+  var sv = (typeof settings === "object" && settings) ? settings : {};
+  var keep = sv.fishVoice || fs.value || "";
+  L = FISH.loadLib() || [];
   fs.innerHTML = "";
   o = document.createElement("option");
   o.value = ""; o.textContent = "🪄 Default awaaz (Fish khud chunta hai)";
@@ -7454,11 +7509,31 @@ function fishFillVoices(){
     for (i = 0; i < fs.options.length; i++) if (fs.options[i].value === keep) { found = true; break; }
     if (!found) {
       o = document.createElement("option");
-      o.value = keep; o.textContent = "🎙️ " + keep + "  (mehfooz)";
+      o.value = keep;
+      o.textContent = "🎙️ " + (sv.fishVoiceName || (keep.slice(0, 8) + "\u2026")) + "   (mehfooz)";
       fs.appendChild(o);
     }
   }
   fs.value = keep;
+  if (fs.value !== keep) fs.value = keep;
+
+  /* 🔒 awaaz chunte hi FORAN mehfooz — SAVE dabane ka intezar nahi.
+     (User ne awaaz chuni, app band ki, aur setting kho gayi — yehi bug tha.) */
+  if (!fs.__wired) {
+    fs.__wired = true;
+    fs.addEventListener("change", function () {
+      var id = fs.value || "";
+      var nm = "";
+      var LL = FISH.loadLib() || [], z;
+      for (z = 0; z < LL.length; z++) if (LL[z].id === id) { nm = LL[z].title; break; }
+      settings.fishVoice = id;
+      settings.fishVoiceName = nm;
+      saveSettings();
+      pushLog("FISH AWAAZ: " + (nm || id || "auto") + " (mehfooz)");
+      toast(id ? ("\uD83C\uDFA4 " + (nm || "awaaz") + " \u2014 mehfooz \u2713") : "\uD83E\uDE84 Auto awaaz");
+      fishPaintHint();
+    });
+  }
   fishPaintHint();
 }
 
@@ -7469,8 +7544,10 @@ function fishPaintHint(){
   var st = FISH.status();
   if (st.ready) {
     h.className = "ui-hint ok";
-    h.textContent = "✅ Tayyar hai" + (st.spoke ? ("  •  " + st.spoke + " dafa bol chuki") : "") +
-                    (st.ms ? ("  •  aakhri " + st.ms + " ms") : "") + "  •  koi rozana hadd nahi";
+    var vn = FISH.voiceName();
+    h.textContent = "✅ Tayyar" + (vn ? ("  •  🎤 " + vn) : "  •  🪄 auto awaaz") +
+                    (st.spoke ? ("  •  " + st.spoke + " dafa boli") : "") +
+                    "  •  lehja: " + (FISH.temp() <= 0.4 ? "sthir" : "jazbaati");
   } else {
     h.className = "ui-hint warn";
     h.textContent = "⚠️ " + FISH.why(st.block || "KEY_MISSING");
@@ -7822,7 +7899,7 @@ document.querySelectorAll(".setgrp-head").forEach(function(h){
   h.addEventListener("click", function(){ h.parentElement.classList.toggle("open"); });
 });
 
-/* NOTE: loadV4Form / doosra saveSettings handler v5.1.0 mein khatam.
+/* NOTE: loadV4Form / doosra saveSettings handler v5.2.0 mein khatam.
    Ab SETFORM (upar) hi settings ka wahid darwaza hai — dekho SET_FIELDS.
    Sliders live update karte hain, baqi sab SAVE par ek hi tarteeb se. */
 try { $("#sRadius").addEventListener("input", function(){ $("#radiusVal").textContent = this.value; settings.radius = parseInt(this.value,10) || 18; saveSettings(); applyTheme(); }); } catch(e){}
@@ -7913,8 +7990,8 @@ function startProactive(){
 
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
-try { $("#hudBuild").textContent = "v5.1.0"; } catch(e){}
-try { pushLog("MAYA v5.1.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
+try { $("#hudBuild").textContent = "v5.2.0"; } catch(e){}
+try { pushLog("MAYA v5.2.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
 
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD" runtime   (v4.1.0)
@@ -8173,7 +8250,7 @@ var MayaUI = (function () {
     for (i = 0; i < reopen.length; i++) delCls(reopen[i], "is-open");
 
     var out = [];
-    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v5.1.0");
+    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v5.2.0");
     out.push("WEBVIEW: Chrome " + (window.__webviewMajor || "?") + (window.__oldWebview ? " (PURANA)" : ""));
     out.push("");
     out.push("VISIBLE: " + okc + "   INVISIBLE: " + bad + (bad ? "  \u274C" : "  \u2705"));

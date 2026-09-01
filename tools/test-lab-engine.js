@@ -681,6 +681,39 @@ Here's a thinking process:
     is(/tags: \(m\.tags \|\| \[\]\)/.test(src), 'library ab tags bhi laati hai');
   }
 
+
+  /* ═══ 19. 🔒 AWAAZ MEHFOOZ — "setting reset ho gayi" ═══ */
+  head('19. 🔒 AWAAZ MEHFOOZ + 🎯 STHIR LEHJA');
+  {
+    const src = HTML;
+
+    /* ── BUG A: awaaz kho jati thi ── */
+    is(/var keep = sv\.fishVoice \|\| fs\.value/.test(src),
+      '🔑 SETTINGS ab sach hai, dropdown nahi (boot par khali dropdown SAVE karta to awaaz mit jati thi)');
+    is(/fs\.__wired[\s\S]{0,420}settings\.fishVoice = id[\s\S]{0,120}saveSettings\(\)/.test(src),
+      '🔑 awaaz chunte hi FORAN mehfooz — SAVE dabane ka intezar nahi');
+    is(/fishVoice SETFORM se BAHAR hai/.test(src) && !/{ id: "sFishVoice",   key: "fishVoice"/.test(src),
+      '🔑 fishVoice ab SETFORM se bahar — khali dropdown use mita nahi sakta');
+    is(/localStorage\.setItem\("maya_fishlib"/.test(src) && /loadLib: function/.test(src),
+      '🔒 awaaz ki poori list mehfooz — restart par bhi NAAM dikhega');
+    is(/voiceName: function/.test(src) && /fishVoiceName/.test(src),
+      '🎤 hex id nahi, awaaz ka NAAM dikhta hai');
+    is(/fishVoiceName:""/.test(src.replace(/\s/g, '')), 'naya khana DEFAULTS mein maujood');
+
+    /* ── BUG B: SUNO purani awaaz bajata tha ── */
+    is(/jo awaaz DROPDOWN mein chuni hai wohi sunao/.test(src),
+      '🔑 🐟 SUNO ab DROPDOWN wali awaaz bajata hai (pehle purani bajti thi)');
+
+    /* ── lehja sthir ── */
+    is(/temperature: FISH\.temp\(\)/.test(src), '🎯 temperature ab setting se aata hai');
+    is(/temp: function \(\)[\s\S]{0,220}v = 0\.35/.test(src),
+      '🔑 default 0.35 (pehle 0.7 tha — isi liye har turn ka lehja badalta tha)');
+    is(/fishTemp:0\.35/.test(src.replace(/\s/g, '')), 'sthirta DEFAULTS mein');
+    is(src.indexOf('id="sFishTemp"') > 0, 'Settings mein lehja ka khana maujood');
+    is(/lehja: " \+ \(FISH\.temp\(\) <= 0\.4 \? "sthir" : "jazbaati"\)/.test(src),
+      'hint saaf batata hai ke lehja sthir hai ya jazbaati');
+  }
+
   console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');
   if (fail === 0) console.log('\x1b[1m\x1b[32m✅ SAB TEST PASS — ' + pass + '/' + pass + '\x1b[0m');
   else console.log('\x1b[1m\x1b[31m❌ ' + fail + ' TEST FAIL — ' + pass + '/' + (pass + fail) + ' pass\x1b[0m');
