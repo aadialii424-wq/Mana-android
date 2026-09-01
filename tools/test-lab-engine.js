@@ -531,8 +531,12 @@ Here's a thinking process:
 
     /* ── Kotlin ab saare andaze bhejta hai ── */
     const KT = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8');
-    is(/RESULTS_RECOGNITION[\s\S]{0,200}JSONArray/.test(KT),
+    is(/RESULTS_RECOGNITION[\s\S]{0,420}JSONArray/.test(KT),
       '🔑 Kotlin ab SAARE andaze bhejta hai (pehle sirf firstOrNull)');
+    is(/CONFIDENCE_SCORES/.test(KT) && /o\.put\("c", conf\[i\]/.test(KT),
+      '🔑 P8b: har andaze ka YAQEEN (confidence) bhi JS ko jata hai');
+    is(/EXTRA_MAX_RESULTS, 6\)/.test(KT.slice(KT.indexOf('fun listen'), KT.indexOf('fun listen') + 2000)),
+      '🔑 P8b: MAIN MIC ke andaze 1 -> 6 (SUNO ki taqat ab zinda)');
     is(/__nativeSpeech\('" \+ jsEscape\(text\) \+\s*"','" \+ jsEscape\(arr\.toString\(\)\)/.test(KT.replace(/\s+/g, ' ')),
       'dono cheezein JS ko jati hain: pehla andaza + poori list');
   }
@@ -1107,6 +1111,8 @@ Here's a thinking process:
     w.addBubble = function () {}; w.chime = function () {};
     w.statusText = {}; w.startListening = function () { w.said.push('__LISTEN__'); };
     w.stripWake = function (t) { return String(t).replace(/^\s*(maya|boss)[\s,]*/i, '').trim(); };
+    w.FLAGS = { on: function () { return true; } };
+    w.SUNO = { pick: function (a) { return String((a && a[0]) || ''); } };
     w.eval(KSRC);
     const K = w.KAAN;
 
@@ -1147,6 +1153,7 @@ Here's a thinking process:
       '🔑 "maya <hukm>" ek hi saans mein — seedha hukm chala', w.said[0]);
 
     w.said = []; K.woke = 0;
+    K.DARWAZA.close();                      /* P8a: darwaza band karo, warna wo raasta khula hai */
     w.__wakeHeard(JSON.stringify(['mausam kaisa hai']));
     is(w.said.length === 0 && K.woke === 0, '🔒 wake word na ho to Maya CHUP rehti hai');
 
@@ -1190,6 +1197,143 @@ Here's a thinking process:
     is(/fun setPrefString/.test(fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8')),
       'bridge mein setPrefString maujood');
     is(src.indexOf('id="labKaan"') > 0, 'Settings mein "WAKE WORD KA HAAL" button');
+  }
+
+
+  /* ═══ 25. 🚪 SAKHT DARWAZA + 🎤 QAREEB  (P8a/b/c) ═══ */
+  head('25. 🚪 "Maya" ke bagair KUCH NAHI');
+  {
+    const HB = HTML.indexOf('var KAAN = {');
+    const HE = HTML.indexOf('window.__wakeErr = function');
+    const dom = new JSDOM('<!doctype html><body></body>', { runScripts: 'dangerously' });
+    const w = dom.window;
+    w.settings = { name: 'Boss', wakeWord: true, wakeDoor: 15, micZoom: 0.8 };
+    w.speaking = false; w.thinking = false; w.listening = false;
+    w.said = []; w.bub = [];
+    w.handleUserText = function (t) { w.said.push(t); };
+    w.addBubble = function (a, b) { w.bub.push(b); };
+    w.chime = function () {}; w.statusText = {}; w.startListening = function () {};
+    w.stripWake = function (t) { return String(t).replace(/^\s*(maya|maaya|boss)[\s,]*/i, '').trim(); };
+    w.FLAGS = { on: function () { return true; } };
+    w.SUNO = { pick: function (a) { return String((a && a[0]) || ''); } };
+    w.eval(HTML.slice(HB, HE));
+    const K = w.KAAN, D = w.KAAN.DARWAZA;
+
+    /* ── wake word SHURU mein hona chahiye ── */
+    is(K.atStart('maya brightness barhao') === true, '"Maya yeh karo" → shuru mein ✅');
+    is(K.atStart('maya') === true, 'akela "Maya" bhi');
+    is(K.atStart('chalo maya yeh karo') === false, '🔑 "chalo Maya yeh karo" → NAHI (Maya shuru mein nahi)');
+    is(K.atStart('brightness barhao maya') === false, '🔑 aakhir mein Maya → NAHI');
+    is(K.atStart('yeh karo') === false, '🔑 bilkul Maya nahi → NAHI');
+
+    /* ── ASAL FARMAISH: "yeh karo" par KUCH NA HO ── */
+    D.close(); w.said = []; K.woke = 0;
+    w.__wakeHeard(JSON.stringify(['yeh karo']));
+    is(w.said.length === 0 && K.woke === 0, '🔑🔑 "yeh karo" → BILKUL KUCH NAHI (aap ki asal farmaish)');
+    w.__wakeHeard(JSON.stringify(['brightness barhao']));
+    w.__wakeHeard(JSON.stringify(['mausam kaisa hai']));
+    w.__wakeHeard(JSON.stringify(['open whatsapp']));
+    is(w.said.length === 0 && K.woke === 0, '   → 4 aam hukm, ek bhi nahi chala ✅');
+
+    /* ── "Maya yeh karo" → chale ── */
+    w.said = [];
+    w.__wakeHeard(JSON.stringify(['maya brightness barhao']));
+    is(w.said.length === 1 && /brightness/.test(w.said[0]), '✅ "Maya yeh karo" → seedha kaam', w.said[0]);
+    is(D.isOpen() === true, '   → aur DARWAZA khul gaya');
+
+    /* ── darwaza khula: ab bina Maya bhi chale ── */
+    w.said = [];
+    w.__wakeHeard(JSON.stringify(['aur volume bhi']));
+    is(w.said.length === 1, '🚪 darwaza khula → bina "Maya" bhi chala', w.said[0]);
+
+    /* ── darwaza band → phir kuch nahi ── */
+    D.close(); w.said = [];
+    w.__wakeHeard(JSON.stringify(['aur volume bhi']));
+    is(w.said.length === 0, '🔒 darwaza band → phir "Maya" chahiye');
+
+    /* ── "bas" par foran band ── */
+    D.open();
+    w.__wakeHeard(JSON.stringify(['bas']));
+    is(D.isOpen() === false, '🔑 "bas" kehte hi darwaza foran band');
+    D.open();
+    w.__wakeHeard(JSON.stringify(['theek hai']));
+    is(D.isOpen() === false, '   → "theek hai" bhi');
+
+    /* ── 0 = har baar Maya ── */
+    w.settings.wakeDoor = 0;
+    D.close(); w.said = [];
+    w.__wakeHeard(JSON.stringify(['maya torch on karo']));
+    is(w.said.length === 1 && D.isOpen() === false,
+      '🔑 darwaza 0 sec → kaam chala magar darwaza khula HI NAHI (har baar Maya)');
+    w.settings.wakeDoor = 15;
+
+    /* ── hadd ── */
+    w.settings.wakeDoor = 999;
+    is(D.secs() === 60, 'darwaza 60 sec se zyada nahi');
+    w.settings.wakeDoor = -5;
+    is(D.secs() === 0, 'aur 0 se kam nahi');
+    w.settings.wakeDoor = 15;
+
+    /* ── afterSpeak ka bug ── */
+    const src = HTML;
+    is(/YEHI wo bug tha/.test(src) && /KAAN\.DARWAZA\.isOpen\(\)/.test(src),
+      '🔑 afterSpeak: wake mode mein khud-sunna ab sirf DARWAZA khula ho tab');
+    is(!/if \(\(settings\.autoListen \|\| settings\.wakeWord\) && wasVoice\) setTimeout\(startListening/.test(src),
+      '   → purana bay-shart khud-sunna khatam');
+  }
+
+  head('25b. 🎤 QAREEB — nazdeeki awaaz, background rad');
+  {
+    const KT = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MicKit.kt'), 'utf8');
+    const WS = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/WakeWordService.kt'), 'utf8');
+    const MA = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8');
+    const src = HTML;
+
+    is(/setPreferredMicrophoneFieldDimension/.test(KT),
+      '🔑 MIC ZOOM — Android ka apna "background rad karo" wala API');
+    is(/MIC_DIRECTION_TOWARDS_USER/.test(KT), '🔑 mic ka rukh AAP ki taraf');
+    is(/AudioSource\.VOICE_RECOGNITION/.test(KT), 'ASR ke liye bana audio source (+AGC)');
+    is(/NoiseSuppressor/.test(KT) && /AutomaticGainControl/.test(KT) && /AcousticEchoCanceler/.test(KT),
+      'shor-kush + auto-gain + echo canceler (Maya apni awaaz na sune)');
+    is(/fxZoom = false/.test(KT) && /o\.put\("zoom", fxZoom\)/.test(KT),
+      '🔑 har effect ka natija YAAD rakha jata hai — DOCTOR sach dikhata hai (andaza nahi)');
+    is(/Build\.VERSION\.SDK_INT >= 29/.test(KT), 'purane Android par crash nahi (API guard)');
+    is(/fun test\(ms: Int, zoom: Float\)/.test(KT) && /snr/.test(KT), '🧪 MIC TEST: shor, awaaz aur SNR naapta hai');
+
+    /* VAD */
+    is(/KHAMOSHI KA PEHRA/.test(WS) && /gateOn/.test(WS), '🎧 khamoshi ka pehra (VAD) maujood');
+    is(/if \(vadEnabled\(\)\) startGate\(\) else actuallyStart\(\)/.test(WS),
+      '🔑 sannate mein recognizer BILKUL nahi chalta ("mic on/off" ka ilaj)');
+    is(/rec\.release\(\)[\s\S]{0,120}MicKit\.release\(\)[\s\S]{0,140}actuallyStart/.test(WS),
+      '🔒 mic pehle CHHORA jata hai, phir recognizer (dono ek sath nahi)');
+    is(/over > 14\.0/.test(WS) && /loud >= 3/.test(WS),
+      '📏 door ki dheemi awaaz rad — sirf qareebi buland awaaz par jaage');
+
+    /* recognizer seerhi */
+    is(/isOnDeviceRecognitionAvailable/.test(MA) && /createOnDeviceSpeechRecognizer/.test(MA),
+      '🎯 Android 12+ ka on-device recognizer (offline)');
+    is(/googlequicksearchbox[\s\S]{0,200}GoogleRecognitionService/.test(MA),
+      '🎯 warna Google ka recognizer ZABARDASTI (AiAi bug ka ilaj)');
+    is(/lastRecognizerKind/.test(MA) && /MainActivity\.instance\?\.makeRecognizer\(\)/.test(WS),
+      'wake service bhi wahi seerhi istemal karti hai');
+
+    /* doctor */
+    is(/voice_recognition_service/.test(MA), '🩺 DOCTOR phone ka voice-input service ka NAAM parhta hai');
+    is(/o\.put\("aiai"/.test(MA), '   → aur AiAi ho to pehchan leta hai');
+    is(/fun openSetting/.test(MA) && /ACTION_VOICE_INPUT_SETTINGS/.test(MA),
+      '🔑 seedha sahih settings screen khol deta hai (menu mein bhatakna khatam)');
+    is(/YEHI SAB SE BARA MASLA HAI/.test(src), 'DOCTOR saaf batata hai ke AiAi hi mujrim hai');
+    is(src.indexOf('id="labKaanDoc"') > 0 && src.indexOf('id="labMicTest"') > 0,
+      'Settings mein DOCTOR + MIC TEST dono button');
+    is(src.indexOf('id="sWakeDoor"') > 0 && src.indexOf('id="sMicZoom"') > 0,
+      'darwaza aur zoom dono aap ke haath mein');
+
+    /* confidence */
+    is(/norm: function \(alts\)/.test(src) && /typeof a === "string"/.test(src),
+      '🔒 purani APK (sirf matn) bhi chalti rahegi — Qanoon 2');
+    is(/weak: function \(\)[\s\S]{0,90}0\.35/.test(src), 'kam yaqeen ka paimana');
+    is(/Theek se sunai nahi diya/.test(src),
+      '🔑 kam yaqeen par ghalat kaam karne ke bajaye POOCHH leti hai');
   }
 
   console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');

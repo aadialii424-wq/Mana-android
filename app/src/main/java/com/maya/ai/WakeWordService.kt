@@ -74,6 +74,8 @@ class WakeWordService : Service() {
 
     override fun onDestroy() {
         running = false
+        stopGate()
+        try { MicKit.release() } catch (e: Exception) {}
         handler.removeCallbacksAndMessages(null)
         try { sr?.destroy(); sr = null } catch (e: Exception) {}
         try { tts?.stop(); tts?.shutdown() } catch (e: Exception) {}
@@ -140,6 +142,77 @@ class WakeWordService : Service() {
         } catch (e: Exception) {}
     }
 
+    /* ═══════════════════════════════════════════════════════════════════
+       🎧 KHAMOSHI KA PEHRA (VAD) — P8c
+       -------------------------------------------------------------------
+       Pehle recognizer SANNATE mein bhi har 1-3 second chalta rehta tha.
+       Android 11+ background mic ko throttle karta hai -> "mic on/off".
+
+       Ab: sasta AudioRecord chalta hai (mic zoom + shor-kush ke sath).
+       Sannata -> recognizer BILKUL band. Awaaz aayi -> mic chhor kar
+       recognizer chalao. Jawab aaya -> wapas pehre par.
+
+       Mic ek waqt mein ek hi cheez ke paas ho sakta hai — is liye pehra
+       aur recognizer kabhi ek sath nahi chalte.
+       ═══════════════════════════════════════════════════════════════════ */
+    @Volatile private var gateOn = false
+    private var gateThread: Thread? = null
+    private var floorDb = 0.0
+
+    private fun vadEnabled(): Boolean = try {
+        getSharedPreferences("maya", Context.MODE_PRIVATE).getBoolean("mic_near", true)
+    } catch (e: Exception) { true }
+
+    private fun micZoom(): Float = try {
+        getSharedPreferences("maya", Context.MODE_PRIVATE).getString("mic_zoom", "0.8")!!.toFloat()
+    } catch (e: Exception) { 0.8f }
+
+    private fun startGate() {
+        if (gateOn) return
+        gateOn = true
+        gateThread = Thread {
+            val rec = MicKit.open(micZoom())
+            if (rec == null) {
+                gateOn = false
+                report("gate", "mic nahi khula \u2014 seedha recognizer")
+                handler.post { actuallyStart() }
+                return@Thread
+            }
+            report("gate", "pehra shuru  zoom:" + (if (MicKit.fxZoom) "\u2713" else "\u2717") +
+                   " ns:" + (if (MicKit.fxNs) "\u2713" else "\u2717"))
+            val buf = ShortArray(1600)
+            var quiet = 0
+            var loud = 0
+            floorDb = 0.0
+            try {
+                rec.startRecording()
+                while (gateOn && running) {
+                    val n = rec.read(buf, 0, buf.size)
+                    if (n <= 0) continue
+                    val d = MicKit.db(buf, n)
+                    if (floorDb <= 0.0) floorDb = d
+                    if (d < floorDb) floorDb = floorDb * 0.9 + d * 0.1     /* farsh dheere dheere seekho */
+                    val over = d - floorDb
+                    if (over > 14.0) { loud++; quiet = 0 } else { quiet++; if (quiet > 3) loud = 0 }
+                    if (loud >= 3) {                                       /* ~300ms qareebi awaaz */
+                        report("voice", "awaaz " + Math.round(d) + "dB  farsh " + Math.round(floorDb) + "dB")
+                        break
+                    }
+                }
+                rec.stop()
+            } catch (e: Exception) {
+                report("gate", "pehra nakaam: " + (e.message ?: "?"))
+            }
+            try { rec.release() } catch (e: Exception) {}
+            MicKit.release()
+            gateOn = false
+            if (running) handler.post { actuallyStart() }                  /* ab recognizer ki baari */
+        }
+        gateThread?.start()
+    }
+
+    private fun stopGate() { gateOn = false }
+
     private fun startLoop() {
         handler.post {
             if (!SpeechRecognizer.isRecognitionAvailable(this)) {
@@ -154,7 +227,10 @@ class WakeWordService : Service() {
 
     private fun resetRecognizer() {
         try { sr?.destroy() } catch (e: Exception) {}
-        sr = SpeechRecognizer.createSpeechRecognizer(this).apply {
+        /* 🎯 P8b — wahi seerhi jo MainActivity mein hai: on-device -> Google -> aam.
+           Android 12+ par default AiAi ho sakta hai jo kaam hi nahi karta. */
+        sr = (MainActivity.instance?.makeRecognizer()
+              ?: SpeechRecognizer.createSpeechRecognizer(this)).apply {
             setRecognitionListener(object : RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) {}
                 override fun onBeginningOfSpeech() {}
@@ -223,7 +299,12 @@ class WakeWordService : Service() {
     private var lastHeardOffline = ""
 
     private fun restart(delay: Long) {
-        handler.postDelayed({ actuallyStart() }, delay)
+        /* P8c — seedha recognizer nahi; pehle KHAMOSHI KA PEHRA. Sannate mein
+           recognizer bilkul nahi chalega -> "mic on/off" khatam. */
+        handler.postDelayed({
+            if (!running) return@postDelayed
+            if (vadEnabled()) startGate() else actuallyStart()
+        }, delay)
     }
 
     private fun actuallyStart() {

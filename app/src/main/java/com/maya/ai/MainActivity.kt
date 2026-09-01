@@ -355,11 +355,15 @@ class MainActivity : AppCompatActivity() {
                     )
                     putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang)
                     putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
-                    putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+                    /* 🎙️ P8b — pehle 1 tha! SUNO ka poora nizam "kai andazon mein se
+                       behtareen chuno" par khara hai, aur main mic use SIRF EK andaza
+                       deta tha — yani wo feature asal mic par kabhi chala hi nahi.
+                       ("Funk Taka" -> "اس لاوا فنک" ki yehi wajah thi.) */
+                    putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 6)
                     putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
                     putExtra("android.speech.extra.SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS", 700)
                 }
-                recognizer = SpeechRecognizer.createSpeechRecognizer(this@MainActivity).apply {
+                recognizer = makeRecognizer().apply {
                     setRecognitionListener(object : RecognitionListener {
                         override fun onReadyForSpeech(params: Bundle?) {}
                         override fun onBeginningOfSpeech() {}
@@ -381,8 +385,18 @@ class MainActivity : AppCompatActivity() {
                             val all = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                                 ?: arrayListOf()
                             val text = all.firstOrNull() ?: ""
+                            val conf = try {
+                                results?.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)
+                            } catch (e: Exception) { null }
                             val arr = JSONArray()
-                            for (i in 0 until minOf(all.size, 6)) arr.put(all[i])
+                            for (i in 0 until minOf(all.size, 6)) {
+                                /* har andaze ke sath uska yaqeen (0..1). Pehle ye kabhi
+                                   parha hi nahi jata tha — ab SUNO isay bhi dekhta hai. */
+                                val o = JSONObject()
+                                o.put("t", all[i])
+                                if (conf != null && i < conf.size) o.put("c", conf[i].toDouble())
+                                arr.put(o)
+                            }
                             evalAsync(
                                 "window.__nativeSpeech && window.__nativeSpeech('" + jsEscape(text) +
                                 "','" + jsEscape(arr.toString()) + "')"
@@ -1178,6 +1192,89 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface
         fun getPrefString(k: String): String = try { prefs().getString(k, "") ?: "" } catch (e: Exception) { "" }
 
+        /**
+         * 🩺 KAAN DOCTOR (P8b) — kaan ka poora haal, andaza nahi.
+         * Sab se ahem: phone ka default voice-input service ka NAAM.
+         */
+        @JavascriptInterface
+        fun micDoctor(): String {
+            val o = JSONObject()
+            try {
+                o.put("mic", ContextCompat.checkSelfPermission(
+                    this@MainActivity, Manifest.permission.RECORD_AUDIO
+                ) == PackageManager.PERMISSION_GRANTED)
+                o.put("avail", SpeechRecognizer.isRecognitionAvailable(this@MainActivity))
+
+                /* YEHI asal mujrim ho sakta hai */
+                val svc = try {
+                    Settings.Secure.getString(contentResolver, "voice_recognition_service") ?: ""
+                } catch (e: Exception) { "" }
+                o.put("svc", svc)
+                o.put("aiai", svc.contains("AiAi", true) || svc.contains("SystemIntelligence", true)
+                        || svc.contains("systemui", true))
+
+                var onDev = false
+                if (Build.VERSION.SDK_INT >= 31) {
+                    onDev = try { SpeechRecognizer.isOnDeviceRecognitionAvailable(this@MainActivity) }
+                            catch (e: Exception) { false }
+                }
+                o.put("ondevice", onDev)
+                o.put("using", lastRecognizerKind)
+
+                /* Google ki speech app maujood aur chalu hai? */
+                var g = "nahi"
+                try {
+                    val ai = packageManager.getApplicationInfo("com.google.android.tts", 0)
+                    g = if (ai.enabled) "enabled" else "DISABLED"
+                } catch (e: Exception) { g = "nahi" }
+                o.put("gtts", g)
+
+                o.put("battOk", try { batteryUnrestricted() } catch (e: Exception) { false })
+                o.put("wakeOn", try { prefs().getBoolean("wake", false) } catch (e: Exception) { false })
+                o.put("sdk", Build.VERSION.SDK_INT)
+            } catch (e: Exception) {
+                o.put("err", e.message ?: "?")
+            }
+            return o.toString()
+        }
+
+        /**
+         * 🧪 MIC TEST (P8c) — kamre ka shor, aap ki awaaz, farq (SNR),
+         * aur kaunsa effect is device par SACH MEIN chala.
+         */
+        @JavascriptInterface
+        fun micTest(ms: Int, zoom: Double): String {
+            if (ContextCompat.checkSelfPermission(
+                    this@MainActivity, Manifest.permission.RECORD_AUDIO
+                ) != PackageManager.PERMISSION_GRANTED) {
+                requestMicPermission()
+                return "{\"ok\":false,\"why\":\"mic ki ijazat nahi\"}"
+            }
+            return try { MicKit.test(ms, zoom.toFloat()) }
+            catch (e: Exception) { "{\"ok\":false,\"why\":\"" + (e.message ?: "?") + "\"}" }
+        }
+
+        /** Zaroori settings ke seedhe darwaze (menu mein bhatakna khatam) */
+        @JavascriptInterface
+        fun openSetting(which: String): Boolean {
+            return try {
+                val act = when (which) {
+                    "voice" -> Settings.ACTION_VOICE_INPUT_SETTINGS
+                    "tts" -> "com.android.settings.TTS_SETTINGS"
+                    "input" -> Settings.ACTION_INPUT_METHOD_SETTINGS
+                    "battery" -> Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+                    else -> Settings.ACTION_SETTINGS
+                }
+                startActivity(Intent(act).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                true
+            } catch (e: Exception) {
+                try {
+                    startActivity(Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                    true
+                } catch (e2: Exception) { false }
+            }
+        }
+
         /** v5.7.0 — wake word ki zubaan JS se service tak pohanchane ke liye */
         @JavascriptInterface
         fun setPrefString(k: String, v: String) {
@@ -1205,6 +1302,50 @@ class MainActivity : AppCompatActivity() {
 
     private fun evalAsync(js: String) {
         webView.post { webView.evaluateJavascript(js, null) }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       🎯 RECOGNIZER KI SEERHI  (P8b)
+       -------------------------------------------------------------------
+       Android 12+ par bohat phones (khaas kar TECNO/HiOS) ka default voice
+       input "Android System Intelligence" (AiAi) hota hai — aur wo
+       SpeechRecognizer API ke sath THEEK KAAM NAHI KARTA. Nateeja: mic
+       chalta hai, band hota hai, aur kuch nahi hota.
+
+       Is liye ab teen darje:
+         1. Android 12+ ka ON-DEVICE recognizer (isi kaam ke liye bana, offline)
+         2. Google ka recognizer ZABARDASTI (ComponentName se)
+         3. aam wala (jo ab tak istemal ho raha tha)
+       Aur jo chala, uska naam yaad rakha jata hai — DOCTOR usay dikhata hai.
+       ═══════════════════════════════════════════════════════════════════ */
+    var lastRecognizerKind: String = "-"
+
+    fun makeRecognizer(): SpeechRecognizer {
+        if (Build.VERSION.SDK_INT >= 31) {
+            try {
+                if (SpeechRecognizer.isOnDeviceRecognitionAvailable(this)) {
+                    lastRecognizerKind = "on-device"
+                    return SpeechRecognizer.createOnDeviceSpeechRecognizer(this)
+                }
+            } catch (e: Exception) {}
+        }
+        try {
+            val cn = android.content.ComponentName(
+                "com.google.android.googlequicksearchbox",
+                "com.google.android.voicesearch.serviceapi.GoogleRecognitionService"
+            )
+            val pm = packageManager
+            val intent = Intent(android.speech.RecognitionService.SERVICE_INTERFACE)
+            val list = pm.queryIntentServices(intent, 0)
+            for (ri in list) {
+                if (ri.serviceInfo != null && ri.serviceInfo.packageName == cn.packageName) {
+                    lastRecognizerKind = "google"
+                    return SpeechRecognizer.createSpeechRecognizer(this, cn)
+                }
+            }
+        } catch (e: Exception) {}
+        lastRecognizerKind = "default"
+        return SpeechRecognizer.createSpeechRecognizer(this)
     }
 
     private fun jsEscape(s: String): String = s

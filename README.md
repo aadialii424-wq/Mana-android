@@ -1,9 +1,25 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.7.0 "KAAN" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.8.0 "DARWAZA" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🚪 v5.8.0 — "MAYA" ke bagair KUCH NAHI · 🎤 qareebi awaaz  *(P8a+b+c)*
+
+**🔒 SAKHT DARWAZA** — `"yeh karo"` → ⛔ bilkul kuch nahi · `"chalo Maya yeh karo"` → ⛔ (Maya **shuru** mein honi chahiye) · `"Maya yeh karo"` → ✅ seedha kaam.
+Jarh: `afterSpeak()` mein `if ((autoListen || wakeWord) && wasVoice) startListening()` — **"Maya" ki koi shart hi nahi thi.** Ab sirf jab 🚪 darwaza khula ho.
+🚪 **Darwaza** — jaagne ke baad 15 sec bina "Maya" baat chale, har jawab par waqt dobara; **"bas"/"theek hai"** par foran band. Slider `0` (har baar Maya) … `60`.
+
+**🩺 KAAN DOCTOR** — phone ka **voice-input service ka naam** parh kar batata hai (`Android System Intelligence` = **yehi masla**), aur **seedha wahi settings screen kholta hai**. 🎯 **Recognizer ki seerhi:** on-device (Android 12+) → **Google zabardasti** (AiAi bug ka ilaj) → aam.
+
+**💀 Aur chhupa bug:** `MainActivity: EXTRA_MAX_RESULTS = 1` — **SUNO ka poora "kai andazon mein se behtareen chuno" wala nizam main mic par kabhi chala hi nahi tha.** Ab **6 andaze + `CONFIDENCE_SCORES`** *(kabhi parhe hi nahi gaye the)*. Kam yaqeen par ghalat kaam nahi — **poochh leti hai**.
+
+**🎤 QAREEB** — `setPreferredMicrophoneFieldDimension(+0.8)` *(-1 poora kamra … +1 sirf qareeb)* · `MIC_DIRECTION_TOWARDS_USER` · `VOICE_RECOGNITION` · NS/AGC/AEC. **🎧 VAD:** sannate mein recognizer **bilkul band** — *"mic on/off"* ka asal ilaj. **🧪 MIC TEST** batata hai shor/awaaz/SNR aur **kaunsa effect is device par sach mein chala**.
+
+🧪 **932 test** (889 → 932)
+
+📖 [`docs/RELEASE-v5.8.0.md`](docs/RELEASE-v5.8.0.md) · plan: [`docs/P8-KAAN-v2-PLAN.md`](docs/P8-KAAN-v2-PLAN.md)
 
 ## 👂 v5.7.0 — KAAN: wake word ab sach mein jaagti hai
 
