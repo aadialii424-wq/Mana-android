@@ -1,9 +1,29 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 4.11.0 "SUNO" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.0.0 "SACH" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🤝 v5.0.0 — SACH: Maya ab jhoot nahi bolti  *(P2 MUKAMMAL)*
+
+User ne **paanch dafa** kaha *"nhi hua"* — Maya har dafa boli *"bhej diya"*. Jarh code mein saaf likhi thi:
+
+```js
+out = { done: true, how: "chat khul gaya message type ho chuka" }
+//           ^^^^        aur khud iqrar ke sirf TYPE hua
+```
+Aur `grep "never claim | kamyabi ka daawa"` → **0**. Prompt mein sach ka qanoon tha hi nahi.
+
+- 🤝 **HAQEEQAT** — har tool ke jawab mein `sure`: *"kya kaam SACH MEIN hua?"*
+  `done`/`queued`/`info` = ✅ · **`typed`** (WhatsApp/SMS — likha, bheja nahi) aur `started` (app khola) = ❌
+- ⚖️ **Prompt ka qanoon** — daawa sirf `sure:true` par
+- 🔑 **POST-CHECK** — *model par bharosa nahi, JAANCH*. Jawab bahar jane se pehle app khud dekhti hai; jhoot ho to **khud theek** kar deti hai: *"type kar diya — ab SEND dabao"*. Test mein user ki chat ke **saaton** jhoot pakre gaye (Roman + Devanagari + Urdu)
+- ✅ Sacha jawab kabhi nahi chhua jata
+- 🧭 **Agent loop 2 → 4 qadam** — *"play store kholo **aur** messenger search karo"*
+- 🧪 **699 test** (677 → 699)
+
+📖 [`docs/RELEASE-v5.0.0.md`](docs/RELEASE-v5.0.0.md)
 
 ## 🎙️ v4.11.0 — SUNO: Maya ab aap ki AWAAZ theek samajhti hai
 

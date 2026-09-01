@@ -31,6 +31,10 @@ if (LA < 0 || LB < 0 || LB < LA) { console.error('MAYA LAB source nahi mila — 
 const LAB = HTML.slice(LA, LB);   /* SUNO bhi isi mein hai (SCHEMA..AWAAZ) */
 
 /* ⚡ AMAL (P2a) — TOOL_DECLS + execTool ke baad rehta hai */
+const HA = HTML.indexOf('var HAQEEQAT = {');
+const HB = HTML.indexOf('var AMAL = {');
+if (HA < 0 || HB < 0 || HB < HA) { console.error('HAQEEQAT source nahi mila'); process.exit(1); }
+const HAQSRC = HTML.slice(HA, HB);
 const AA = HTML.indexOf('var AMAL = {');
 const AB = HTML.indexOf('/* --- OpenAI-shakl providers ab BRAIN POOL sambhalta hai --- */');
 if (AA < 0 || AB < 0 || AB < AA) { console.error('AMAL source nahi mila'); process.exit(1); }
@@ -50,6 +54,7 @@ function world(flags) {
   w.eval(LAB);
   w.eval(TOOLSRC);
   w.execTool = async function (n, a) { w.__ran = w.__ran || []; w.__ran.push({ n, a }); return { done: true, echo: a }; };
+  w.eval(HAQSRC);
   w.eval(AMALSRC);
   if (flags) { for (const k in flags) w.FLAGS.set(k, flags[k]); }
   return w;
@@ -525,6 +530,91 @@ Here's a thinking process:
       '🔑 SAVE button ka background ab shorthand se transparent nahi hota (UI CHECK ne pakra tha)');
     is(/#send,#saveSettings\{[\s\S]{0,220}background-color:var\(--accent/.test(src),
       '   → solid rang ka fallback maujood (purane WebView par bhi dikhega)');
+  }
+
+
+  /* ═══ 16. 🤝 HAQEEQAT — "bhej diya" ka jhoot khatam (P2 · TEH 6) ═══ */
+  head('16. 🤝 SACH — aap ne 5 dafa kaha "nhi hua", Maya har dafa boli "bhej diya"');
+  {
+    const w = world({ sach: true });
+    const H = w.HAQEEQAT;
+
+    /* ── har tool ka sach ── */
+    let r = H.wrap('message_contact', { done: true, how: 'chat khul gaya message type ho chuka' });
+    is(r.ok === true && r.state === 'typed' && r.sure === false,
+      '🔑 WhatsApp: ok=true magar sure=FALSE (type hua, bheja nahi)', r.state + '/sure=' + r.sure);
+    is(/BHEJA NAHI/.test(r.sach), '   → jawab mein SAAF likha hai "BHEJA NAHI"');
+    r = H.wrap('torch_control', { done: true });
+    is(r.sure === true && r.state === 'done', '✅ torch: sach mein hua, sure=true');
+    r = H.wrap('brightness_control', { done: true, level: 100 });
+    is(r.sure === true, '✅ brightness: sure=true (asli level wapas aata hai)');
+    r = H.wrap('open_app', { done: true });
+    is(r.state === 'started' && r.sure === false, '⚠️ app kholna: sirf "chala diya", yaqeen nahi');
+    r = H.wrap('set_alarm', { done: true });
+    is(r.state === 'queued' && r.sure === true, '✅ alarm: set ho gaya, yaqeen hai');
+    r = H.wrap('get_weather', { temp: 30 });
+    is(r.state === 'info' && r.sure === true, '✅ mausam: sirf maloomat');
+    r = H.wrap('message_contact', { done: false, note: 'contact nahi mila' });
+    is(r.ok === false && r.state === 'failed' && /NAKAAM/.test(r.sach),
+      '❌ nakami: saaf NAKAAM, aur wajah bhi');
+    r = H.wrap('x', { error: 'boom' });
+    is(r.ok === false && /boom/.test(r.sach), 'error bhi nakami hi hai');
+
+    /* ── POST-CHECK: asli jhoot pakro (aap ki chat ke jumle) ── */
+    const LIES = [
+      'Monarch ke WhatsApp par "hi" send ho gaya.',
+      'abhi turant send kar diya',
+      '\u2713 Bhej diya, Sir!',
+      'link Monarch ko WhatsApp par bhej di gayi hai',
+      'Sir, "Funk Taka" song ab YouTube par chal raha hai.',
+      '\u092d\u0947\u091c \u0926\u093f\u092f\u093e \u0939\u0948',
+      '\u0628\u06BE\u06CC\u062C \u062F\u06CC\u0627 \u06C1\u06D2'
+    ];
+    let caught = 0;
+    for (let i = 0; i < LIES.length; i++) {
+      H.wrap('message_contact', { done: true });
+      const fixed = H.check(LIES[i]);
+      if (H.caught && fixed !== LIES[i]) caught++;
+    }
+    is(caught === LIES.length,
+      '🔑 aap ki chat ke SAARE jhoot pakre gaye (Roman + Devanagari + Urdu)', caught + '/' + LIES.length);
+
+    H.wrap('message_contact', { done: true });
+    const fx = H.check('Bhej diya, Sir!');
+    is(/SEND ka button/.test(fx) && /AutoSend/.test(fx),
+      '🔑 aur jhoot ki jagah SACH aata hai — "SEND ka button dabana hoga"', fx.slice(0, 62));
+
+    /* ── sacha jawab kabhi nahi badla jata ── */
+    H.wrap('torch_control', { done: true });
+    is(H.check('Torch on kar di, Boss!') === 'Torch on kar di, Boss!',
+      '✅ sure=true wala kaam? jawab bilkul nahi chhua jata');
+    H.wrap('message_contact', { done: true });
+    is(H.check('Chat khol kar type kar diya, ab send dabao') !== undefined && !H.caught,
+      '✅ jo pehle se sach bol raha ho, wo bhi nahi chhua jata');
+    H.clear();
+    is(H.check('bhej diya') === 'bhej diya', '✅ koi amal hi na hua ho to kuch nahi badalta');
+
+    /* ── purana amal ab is jawab se muta\'alliq nahi ── */
+    H.wrap('message_contact', { done: true });
+    H.pending.at = (new Date()).getTime() - 60000;
+    is(H.check('bhej diya') === 'bhej diya', '✅ 30 sec purana amal naye jawab par nahi lagta');
+
+    /* ── switch OFF ── */
+    const off = world({ sach: false });
+    off.HAQEEQAT.wrap('message_contact', { done: true });
+    is(off.HAQEEQAT.check('bhej diya') === 'bhej diya', '🔒 switch OFF -> jawab bilkul nahi chhua');
+    is(off.HAQEEQAT.rule() === '', '🔒 switch OFF -> prompt mein qanoon nahi jata');
+
+    /* ── prompt ka qanoon ── */
+    is(/sure:true/.test(H.rule()) && /JHOOT/.test(H.rule()), 'prompt mein sach ka qanoon saaf likha hai');
+    is(H.rule().length < 600, 'qanoon chhota hai (prompt phoolta nahi)', H.rule().length + ' harf');
+
+    /* ── code mein juda hua hai ── */
+    const src = HTML;
+    is(/HAQEEQAT\.wrap\(name, out\)/.test(src), 'har tool ka jawab HAQEEQAT se guzarta hai');
+    is(/text = HAQEEQAT\.check\(text\)/.test(src), '🔑 har jawab bahar jane se PEHLE jaancha jata hai');
+    is(/step < 4\)/.test(src) && /FLAGS\.on\("sach"\) \? 4 : 2/.test(src),
+      '🧭 agent loop 2 -> 4 qadam (kai-qadam wale hukm ke liye)');
   }
 
   console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');

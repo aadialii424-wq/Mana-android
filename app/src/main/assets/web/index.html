@@ -536,7 +536,7 @@ nav{padding:8px 10px 10px}
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v4.11.0 — 🎙️ SUNO: AWAAZ AB THEEK SAMAJH AATI HAI</div>
+  <div class="ver">v5.0.0 — 🤝 SACH: MAYA AB JHOOT NAHI BOLTI</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid #c85050; background:#3c0a0f; border-radius:12px; padding:12px; text-align:left;">
@@ -561,14 +561,14 @@ nav{padding:8px 10px 10px}
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v4.11.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
+  <div class="dfoot">MAYA v5.0.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v4.11.0 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.0.0 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -729,7 +729,7 @@ nav{padding:8px 10px 10px}
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v4.11.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.0.0</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -1102,6 +1102,10 @@ nav{padding:8px 10px 10px}
           <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labMalik"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
         </div>
         <div class="ui-row">
+          <div class="ui-row-txt">🤝 SACH — <b>jhoot band</b> <small>("bhej diya" tab hi jab SACH MEIN bheja ho + kai-qadam wale hukm)</small></div>
+          <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labSach"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
+        </div>
+        <div class="ui-row">
           <div class="ui-row-txt">🎙️ SUNO — <b>awaaz Roman Urdu mein likho</b> <small>(aur pise hue naam theek karo — Monarch, Instagram)</small></div>
           <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labSuno"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
         </div>
@@ -1130,7 +1134,7 @@ nav{padding:8px 10px 10px}
       </div>
 
       <button type="button" class="ui-btn ui-btn-save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v4.11.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v5.0.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -1145,7 +1149,7 @@ nav{padding:8px 10px 10px}
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v4.11.0 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v5.0.0 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -1213,7 +1217,7 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v4.11.0 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v5.0.0 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
@@ -1302,7 +1306,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v4.11.0 — SYSTEMS ONLINE");
+    pushLog("MAYA v5.0.0 — SYSTEMS ONLINE");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1509,7 +1513,7 @@ var VOICE_MOODS = [
 var PERSONA_MOOD = { maya:"warm", friday:"pro", jarvis:"pro", venom:"funny", gf:"warm", coach:"hype", teacher:"calm" };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧪  MAYA LAB  —  P0 (NAAP-TOL) + P1 (SAAF ZUBAAN) + 👑 MALIK    (app v4.11.0)
+   🧪  MAYA LAB  —  P0 (NAAP-TOL) + P1 (SAAF ZUBAAN) + 👑 MALIK    (app v5.0.0)
    ---------------------------------------------------------------------------
    Ye block 3 kaam karta hai, aur teeno ALAG SWITCH ke peeche hain:
 
@@ -1549,7 +1553,7 @@ var SCHEMA = {
 /* ───────────────────────── 🧪 FLAGS — har nayi cheez ek switch ke peeche ───── */
 var FLAGS = {
   KEY: "maya_flags",
-  DEF: { naap: true, saaf: false, malik: false, poolTools: false, suno: false },  /* naap default ON (bay-zarar) */
+  DEF: { naap: true, saaf: false, malik: false, poolTools: false, suno: false, sach: false },  /* naap default ON (bay-zarar) */
   v: null,
   load: function () {
     if (FLAGS.v) return FLAGS.v;
@@ -1976,7 +1980,7 @@ FLAGS.load();
 NAAP.load();
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🎙️  SUNO  —  MAYA aap ki AWAAZ theek samjhe                  (app v4.11.0)
+   🎙️  SUNO  —  MAYA aap ki AWAAZ theek samjhe                  (app v5.0.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ki apni chat se):
 
@@ -3962,6 +3966,9 @@ function afterSpeak(wasVoice){
 }
 
 function reply(text, wasVoice, link){
+  /* 🤝 SACH — model par bharosa nahi, JAANCH. Aakhri amal sure:false tha aur
+     jawab mein "bhej diya / ho gaya" likha hai? To app KHUD theek kar degi. */
+  try { if (typeof HAQEEQAT !== "undefined") text = HAQEEQAT.check(text); } catch (e) {}
   addBubble("ai", text, link);
   chatHist.push({ role:"model", text:text }); persistChat();
   speak(text, wasVoice);
@@ -4122,6 +4129,7 @@ function handleUserText(text, wasVoice){
   /* 🎙️ jo naam aap KHUD likhte ho (Monarch, Funk Taka…) wo hamesha ke liye yaad —
      agli dafa awaaz se bologe to SUNO unhen pehchan lega */
   try { if (typeof SUNO !== "undefined" && !wasVoice) SUNO.learn(stripped); } catch (e) {}
+  try { if (typeof HAQEEQAT !== "undefined") HAQEEQAT.clear(); } catch (e) {}
   if (typeof NAAP !== "undefined") NAAP.start(wasVoice ? "voice" : "text");   /* 📊 P0 */
 
   /* 👑 MALIK — "tumhe kis ne banaya?" ka jawab dimaag se poochhne ki zaroorat nahi */
@@ -4827,6 +4835,8 @@ async function execTool(name, args){
       out = { error: "unknown tool: " + name };
     }
   } catch (e) { out = { error: String(e && e.message || e) }; }
+  /* 🤝 SACH: har tool ke jawab mein `sure` jur jata hai — kya kaam SACH MEIN hua? */
+  try { if (typeof HAQEEQAT !== "undefined" && FLAGS.on("sach")) out = HAQEEQAT.wrap(name, out); } catch (e) {}
   return out;
 }
 
@@ -4882,9 +4892,9 @@ async function resolveModels(){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v4.11.0)
+   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v5.0.0)
    ---------------------------------------------------------------------------
-   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v4.11.0 se pehle Groq
+   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v5.0.0 se pehle Groq
    ne 16 August 2026 ko apne purane Llama 3.x models band kar diye the — hamara
    default wahi tha, is liye "backup brain bhi thak gaya" aata tha.
 
@@ -5079,7 +5089,8 @@ var BRAIN = {
       model: model, messages: msgs, temperature: 0.7, max_tokens: BRAIN.budget(model), stream: false
     };
     /* ⚡ P2a — ab is dimaag ko bhi TOOLS milte hain (pehle sirf Gemini ko milte the) */
-    var useTools = (typeof AMAL === "object" && AMAL && AMAL.poolOn(p) && step < 2);
+    /* 🧭 kai-qadam wale hukm ("play store kholo AUR search karo") ke liye 4 qadam */
+    var useTools = (typeof AMAL === "object" && AMAL && AMAL.poolOn(p) && step < 4);
     if (useTools) { reqBody.tools = AMAL.openaiTools(); reqBody.tool_choice = "auto"; }
     var payload = JSON.stringify(reqBody);
     var auth = key ? ("Bearer " + key) : "";
@@ -5234,7 +5245,7 @@ window.__httpDone = function (id, status, b64) {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v4.11.0)
+   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v5.0.0)
    ---------------------------------------------------------------------------
    Purane code ke 3 asli bugs jinki wajah se "Sab free brains busy" bar bar aata tha:
 
@@ -5510,16 +5521,17 @@ async function geminiTry(m, plain){
   var url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + encodeURIComponent(settings.apikey);
   var contents = plain ? [{ role: "user", parts: [{ text: DIMAAG.lastUser() }] }] : DIMAAG.contents(8);
   if (!contents.length) return { code: "BAD_REQUEST", info: "khali history" };
-  var maxSteps = (_activeSkill && _activeSkill.deep) ? 4 : 2;
+  /* 🧭 kai-qadam wale hukm ("play store kholo AUR search karo") — 2 se 4 qadam */
+  var maxSteps = (_activeSkill && _activeSkill.deep) ? 5 : (FLAGS.on("sach") ? 4 : 2);
 
-  for (var step = 0; step < 3; step++) {
+  for (var step = 0; step < maxSteps + 1; step++) {
     var body = {
       systemInstruction: { parts: [{ text: sysPrompt() }] },
       contents: contents,
       generationConfig: { temperature: 0.7, maxOutputTokens: 280 }
     };
     if (/2\.5|gemini-3/.test(m)) body.generationConfig.thinkingConfig = { thinkingBudget: 0 };
-    if (!plain && step < 2) body.tools = [{ functionDeclarations: TOOL_DECLS }];
+    if (!plain && step < maxSteps) body.tools = [{ functionDeclarations: TOOL_DECLS }];
 
     var res, data = {};
     DIMAAG.calls++;
@@ -5571,7 +5583,141 @@ async function geminiTry(m, plain){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ⚡  AMAL ENGINE — P2a: TOOLS AB HAR DIMAAG KO                  (app v4.11.0)
+   🤝  HAQEEQAT  —  "SACH BOLO" ka nizam                        (app v5.0.0)
+   ---------------------------------------------------------------------------
+   ASAL MASLA (aap ki apni chat se — 5 dafa):
+
+     AAP : "Hi send karo jaake"
+     MAYA: "Done, Sir! ... 'Hi' type ho chuka hai."
+     AAP : "Hi type NAHI karna, SEND karna hai"
+     MAYA: "abhi turant send kar diya"        <- JHOOT
+     AAP : "Nhi hua"   ... (paanch dafa)
+
+   JARH — code mein saaf likhi hui thi:
+
+     out = { done: true, how: "chat khul gaya message type ho chuka" }
+                  ^^^^        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                  jhoot        aur khud IQRAR ke sirf TYPE hua
+
+   Aur Kotlin ka openWhatsAppDraft() `true` lautata hai jab INTENT chal jaye —
+   na ke jab message BHEJ diya jaye. Tool ne dimaag se jhoot bola, dimaag ne
+   aap se. Aur prompt mein sach bolne ka koi qanoon tha hi nahi (grep = 0).
+
+   ILAJ — teen tehen:
+     1. HAQEEQAT.wrap()  har tool ke jawab mein `sure` jorta hai
+                         (kya hum YAQEEN se keh sakte hain ke KAAM HO GAYA?)
+     2. Prompt ka qanoon  sure:false -> kamyabi ka daawa MANA
+     3. POST-CHECK        jawab bahar jane se PEHLE app KHUD jaanchti hai.
+                          Model par bharosa nahi — jaanch.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var HAQEEQAT = {
+  /* Har tool ka sach. `sure` = "kaam HO GAYA" ka yaqeen.
+       done    -> ho gaya, yaqeen hai            (torch jal gayi, brightness set)
+       typed   -> likha gaya, BHEJA NAHI         (WhatsApp / SMS ka draft)
+       started -> chala diya, natija maloom nahi (app khola, video chalayi)
+       queued  -> baad mein hoga                 (alarm, reminder, schedule)
+       info    -> sirf maloomat                  (mausam, battery, search) */
+  STATE: {
+    /* yaqeen wale — inka nateeja hum khud dekh lete hain */
+    torch_control: "done", volume_control: "done", brightness_control: "done",
+    save_memory: "done", diary_write: "done", create_skill: "done", notify: "done",
+    /* likha gaya, BHEJA NAHI — yehi sab se bara jhoot tha */
+    message_contact: "typed", reply_message: "typed", send_sms: "typed",
+    share_file: "typed",
+    /* chala diya, natija maloom nahi */
+    open_app: "started", play_youtube: "started", search_web: "started",
+    open_file: "started", call_contact: "started", call_number: "started",
+    /* baad mein */
+    set_alarm: "queued", set_timer: "queued", set_reminder: "queued",
+    schedule_message: "queued",
+    /* sirf maloomat */
+    get_weather: "info", battery_status: "info", prayer_times: "info",
+    web_search: "info", wiki_search: "info", web_fetch: "info",
+    run_javascript: "info", list_files: "info", diary_search: "info",
+    search_memory: "info", recall_memory: "info", read_messages: "info"
+  },
+  SURE: { done: true, info: true, queued: true, typed: false, started: false },
+
+  /* insani zubaan mein — model isi ko dohrata hai */
+  SAY: {
+    typed:   "LIKHA GAYA hai magar BHEJA NAHI. User ko batao ke chat khul gayi aur matn type ho gaya, ab SEND ka button dabana hoga.",
+    started: "CHALA DIYA hai magar tasdeeq nahi ke sach much khula/chala. 'Ho gaya' mat kaho — 'khol raha hoon / chala raha hoon' kaho.",
+    done:    "SACH MEIN HO GAYA — yaqeen se bata sakte ho.",
+    queued:  "SET HO GAYA hai, waqt par khud chalega.",
+    info:    "Sirf maloomat hai."
+  },
+
+  wrap: function (name, out) {
+    var o = (out && typeof out === "object") ? out : { done: !!out };
+    var st = HAQEEQAT.STATE[name] || "started";
+    var failed = (o.error !== undefined) || (o.done === false) || (o.ok === false);
+    if (failed) {
+      o.ok = false; o.state = "failed"; o.sure = true;
+      o.sach = "NAKAAM. " + (o.note || o.error || "wajah maloom nahi") +
+               " — user ko SAAF batao ke ye kaam NAHI hua aur kyun. Kamyabi ka daawa bilkul MANA hai.";
+      return o;
+    }
+    o.ok = true;
+    o.state = st;
+    o.sure = HAQEEQAT.SURE[st] === true;
+    o.sach = HAQEEQAT.SAY[st] || HAQEEQAT.SAY.started;
+    if (!o.sure) HAQEEQAT.pending = { name: name, state: st, at: (new Date()).getTime() };
+    return o;
+  },
+  pending: null,
+
+  /* ─── POST-CHECK: model par bharosa nahi, JAANCH ───
+     Aakhri amal `sure:false` tha aur jawab mein "bhej diya / ho gaya" likha hai?
+     To ye jhoot hai — app khud theek kar degi. */
+  LIE: /(bhej\s*d[iy]|bhej\s*chuk|send\s*(kar\s*)?d[iy]|sent\b|ho\s*gaya\s*hai|ho\s*ga?ya\b|kar\s*d[iy]a\b|kar\s*di\b|chal\s*rah[ai]\s*hai|lag\s*gay[ai]|khul\s*gay[ai]|set\s*kar\s*d[iy]|done\b|\u092d\u0947\u091c\s*\u0926|\u0939\u094b\s*\u0917\u092f|\u0915\u0930\s*\u0926\u093f|\u0628\u06BE\u06CC\u062C\s*\u062F|\u06C1\u0648\s*\u06AF\u06CC)/i,
+
+  FIX: {
+    typed: function (n) {
+      return "Chat khol kar matn type kar diya hai, " + n + " \u2014 ab screen par SEND ka button dabana hoga. " +
+             "Ya Settings mein AutoSend ON kar do, phir main khud bhej diya karungi.";
+    },
+    started: function (n) {
+      return "Khol raha hoon, " + n + " \u2014 screen par dekh lo. Agar na khule to phir se bolna.";
+    },
+    failed: function (n, why) {
+      return "Ye kaam nahi hua, " + n + (why ? (" \u2014 " + why) : "") + ". Dobara koshish karun?";
+    }
+  },
+
+  /* jawab bahar jane se pehle: jhoot to nahi? */
+  check: function (text) {
+    HAQEEQAT.caught = false;
+    if (!FLAGS.on("sach")) return text;
+    var p = HAQEEQAT.pending;
+    if (!p) return text;
+    /* purana amal (30 sec se zyada) ab is jawab se muta'alliq nahi */
+    if ((new Date()).getTime() - p.at > 30000) { HAQEEQAT.pending = null; return text; }
+    var t = String(text || "");
+    if (!HAQEEQAT.LIE.test(t)) return t;                 /* koi daawa hi nahi — theek hai */
+    var nm = "";
+    try { nm = (settings && settings.name) || "Boss"; } catch (e) { nm = "Boss"; }
+    HAQEEQAT.caught = true;
+    HAQEEQAT.pending = null;
+    if (typeof pushLog === "function") pushLog("SACH: jhoota daawa pakra (" + p.name + "/" + p.state + ")");
+    try { NAAP.cur && (NAAP.cur.lie = p.name); } catch (e) {}
+    return (HAQEEQAT.FIX[p.state] || HAQEEQAT.FIX.started)(nm);
+  },
+  caught: false,
+  clear: function () { HAQEEQAT.pending = null; },
+
+  /* prompt mein jane wala qanoon (~70 token) */
+  rule: function () {
+    if (!FLAGS.on("sach")) return "";
+    return "\n\u2696\uFE0F SACH KA QANOON (sab se ahem): kisi bhi kaam ki KAMYABI ka daawa " +
+           "SIRF tab karo jab tool ka jawab sure:true ho. Agar sure:false ho to us ke 'sach' " +
+           "field mein likhi baat HU-BA-HU maano \u2014 misaal ke tor par WhatsApp/SMS ka matn " +
+           "sirf TYPE hota hai, BHEJA NAHI JATA. 'bhej diya' / 'ho gaya' kehna JHOOT hai. " +
+           "Sach bolna kabhi buri baat nahi \u2014 jhoot bolna hamesha buri baat hai.";
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⚡  AMAL ENGINE — P2a: TOOLS AB HAR DIMAAG KO                  (app v5.0.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ke apne device se sabit):
 
@@ -6283,7 +6429,7 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 
 /* ---------- SETTINGS TAB ---------- */
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v4.11.0)
+   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v5.0.0)
    ---------------------------------------------------------------------------
    Purana bug (user ne pakda): "girlfriend mode on karta hun, groq key lagata
    hun — thori der baad wo option khud band ho jata hai."
@@ -6521,6 +6667,7 @@ function labPaint(){
   n = $("#labMalik"); if (n) n.checked = f.malik === true;
   n = $("#labPool");  if (n) n.checked = f.poolTools === true;
   n = $("#labSuno");  if (n) n.checked = f.suno === true;
+  n = $("#labSach");  if (n) n.checked = f.sach === true;
   h = $("#labHint");
   if (h) {
     var on = [];
@@ -6529,6 +6676,7 @@ function labPaint(){
     if (f.malik) on.push("👑 malik");
     if (f.poolTools) on.push("⚡ amal");
     if (f.suno) on.push("🎙️ suno");
+    if (f.sach) on.push("🤝 sach");
     h.className = "ui-hint" + (on.length ? " ok" : "");
     h.textContent = on.length ? ("Chalu: " + on.join(" · ") + "   •   " + NAAP.hist.length + " turn naape ja chuke")
                               : "Sab band — Maya bilkul purane tareeqe par chal rahi hai.";
@@ -6549,6 +6697,7 @@ function labPaint(){
   sw("labMalik", "malik", "👑 malik profile");
   sw("labPool",  "poolTools", "⚡ tools har dimaag ko");
   sw("labSuno",  "suno", "🎙️ awaaz Roman Urdu mein");
+  sw("labSach",  "sach", "🤝 jhoot band");
 
   function show(txt){
     var el = $("#labOut");
@@ -6874,7 +7023,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v4.11.0 — DOCTOR REPORT");
+  out.push("MAYA v5.0.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
@@ -7258,6 +7407,7 @@ sysPrompt = function(){
     if (settings.favSong) p += "\nUser's FAVORITE SONG: " + settings.favSong + " — 'mera favorite gaana' par yehi chalao.";
     if (settings.musicApp && settings.musicApp !== "youtube") p += "\nMusic app preference: " + settings.musicApp + ".";
     if (typeof MALIK !== "undefined") p += MALIK.block();   /* \uD83D\uDC51 P1 */
+    if (typeof HAQEEQAT !== "undefined") p += HAQEEQAT.rule();   /* \uD83E\uDD1D P3 */
     if (settings.convoMode) p += "\nCONVERSATION MODE: thora zyada emotional/expressive tone — real insaan jaisi feel.";
   } catch(e){}
   return p;
@@ -7432,7 +7582,7 @@ document.querySelectorAll(".setgrp-head").forEach(function(h){
   h.addEventListener("click", function(){ h.parentElement.classList.toggle("open"); });
 });
 
-/* NOTE: loadV4Form / doosra saveSettings handler v4.11.0 mein khatam.
+/* NOTE: loadV4Form / doosra saveSettings handler v5.0.0 mein khatam.
    Ab SETFORM (upar) hi settings ka wahid darwaza hai — dekho SET_FIELDS.
    Sliders live update karte hain, baqi sab SAVE par ek hi tarteeb se. */
 try { $("#sRadius").addEventListener("input", function(){ $("#radiusVal").textContent = this.value; settings.radius = parseInt(this.value,10) || 18; saveSettings(); applyTheme(); }); } catch(e){}
@@ -7523,8 +7673,8 @@ function startProactive(){
 
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
-try { $("#hudBuild").textContent = "v4.11.0"; } catch(e){}
-try { pushLog("MAYA v4.11.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
+try { $("#hudBuild").textContent = "v5.0.0"; } catch(e){}
+try { pushLog("MAYA v5.0.0 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
 
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD" runtime   (v4.1.0)
@@ -7783,7 +7933,7 @@ var MayaUI = (function () {
     for (i = 0; i < reopen.length; i++) delCls(reopen[i], "is-open");
 
     var out = [];
-    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v4.11.0");
+    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v5.0.0");
     out.push("WEBVIEW: Chrome " + (window.__webviewMajor || "?") + (window.__oldWebview ? " (PURANA)" : ""));
     out.push("");
     out.push("VISIBLE: " + okc + "   INVISIBLE: " + bad + (bad ? "  \u274C" : "  \u2705"));
