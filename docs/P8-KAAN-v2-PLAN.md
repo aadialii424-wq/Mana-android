@@ -257,3 +257,157 @@ Ye **ek minute** ka kaam hai aur shayad sab kuch hal kar de:
 > **Ye kar ke bata dein — is se pata chal jayega ke P8c ki zaroorat hai bhi ya nahi.**
 
 **Aap ka "haan" aane tak ek line bhi nahi likhunga.** 👑
+
+---
+
+# HISSA 7 — 🎤 QAREEB: "sab se nazdeek wali awaaz suno, background ignore karo"
+
+> **Aap ki nayi farmaish.** Aur tehqeeq ne do cheezein nikalin: Android mein **bilkul
+> wahi API maujood hai** jo aap maang rahe ho — aur hum **ek bhi** istemal nahi kar rahe.
+
+## 7.1 🔬 Forensic
+
+```
+$ grep -c "NoiseSuppressor|AutomaticGainControl|AcousticEchoCanceler|
+           VOICE_RECOGNITION|CONFIDENCE_SCORES|MicrophoneDirection|FieldDimension"
+
+  MainActivity.kt      0  ❌
+  WakeWordService.kt   0  ❌
+  (baqi sab)           0  ❌
+```
+**Saaton mein se ek bhi nahi.**
+
+### 💀 Aur ek chhupa hua bug — SUNO ki taqat **mari hui** hai
+
+```
+WakeWordService.kt : EXTRA_MAX_RESULTS = 6    ✅ (maine v5.7.0 mein theek kiya)
+MainActivity.kt    : EXTRA_MAX_RESULTS = 1    ❌ ← MAIN MIC
+```
+
+**SUNO (v4.11.0) ka poora nizam "kai andazon mein se behtareen chuno" par khara hai —
+aur main mic use sirf EK andaza deta hai.** Yani wo feature banaya to gaya, magar
+**asal mic par kabhi chala hi nahi.**
+
+*(Isi liye `"Funk Taka"` → `"اس لاوا فنک"` ho jata tha — sahih jawab shayad andaza #3 mein tha, magar hum ne maanga hi nahi.)*
+
+---
+
+## 7.2 🎤 Android ka apna **MIC ZOOM** (API 29+ · aap Android 14 par hain)
+
+```kotlin
+setPreferredMicrophoneFieldDimension(zoom: Float)
+   -1.0  = wide angle     (poora kamra)
+    0.0  = aam
+   +1.0  = MAXIMUM ZOOM   (sirf qareeb ki awaaz — background RAD)   ← YE
+
+setPreferredMicrophoneDirection(MIC_DIRECTION_TOWARDS_USER)
+   phone ke us taraf ka mic jo AAP ki taraf hai
+```
+
+> Android ki apni dastavez: *"the desired field dimension of microphone capture.
+> Range is from **-1 (wide angle)**, through 0, to **+1 (maximum zoom)**."*
+
+**Ye lafz-ba-lafz wahi hai jo aap ne maanga: "qareebi awaaz par gaur karo, background ignore karo."**
+
+---
+
+## 7.3 🏗️ Ilaj — teen tehen
+
+### 🎯 T1 — **JO SUNA, US MEIN SE BEHTAREEN CHUNO** *(foran, sab se sasta)*
+
+| | Pehle | Ab |
+|---|---|---|
+| Main mic ke andaze | **1** | **6** |
+| Confidence scores | parhe hi nahi jate | **har andaze ka score JS ko** |
+| Chunne ka tareeqa | pehla, aankh band kar ke | **score × jaane-pehchane naam** *(SUNO ka lexicon)* |
+| Kam yaqeen par | ghalat kaam kar deti thi | **"samajh nahi aayi, dobara bolo"** |
+
+```kotlin
+results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)   // abhi bilkul istemal nahi
+```
+
+> **Ye akela `"Funk Taka"` aur `"Monarch"` wale masle bohat kam kar dega** —
+> aur is mein **koi khatra nahi**, sirf ek number 1 se 6 karna hai.
+
+### 🎤 T2 — **MIC KA ZOOM** *(VAD ke sath, P8c)*
+
+```kotlin
+AudioRecord(AudioSource.VOICE_RECOGNITION, …)      // ASR ke liye bana source + AGC
+   .setPreferredMicrophoneDirection(MIC_DIRECTION_TOWARDS_USER)
+   .setPreferredMicrophoneFieldDimension(1.0f)     // 🔍 MAXIMUM ZOOM
+NoiseSuppressor.create(sessionId)                  // shor kam
+AutomaticGainControl.create(sessionId)             // awaaz barabar
+AcousticEchoCanceler.create(sessionId)             // Maya ki apni awaaz na sune ⚠️
+```
+
+**⚠️ Imaandari:** ye **darkhwast** hain, hukm nahi — har device support nahi karta.
+Har call `true`/`false` lautati hai. **Is liye 🩺 DOCTOR mein saaf likha jayega ke
+aap ke TECNO par kaunsi chali aur kaunsi nahi.** *(Andaza nahi — saboot.)*
+
+### 📏 T3 — **NAZDEEKI KA PAIMANA** *(asal "background ignore")*
+
+Qareeb ki awaaz **buland** hoti hai, TV/doosra kamra **dheema**. To:
+
+```
+1. KHAMOSHI ka farsh naapo      → kamre ka aam shor kitna hai
+2. Aap ki awaaz ka paimana seekho → "Boliye: Maya" (ek dafa, calibration)
+3. Har awaaz par:
+      awaaz − shor  =  SNR
+      SNR kam?  →  ⛔ ye door ki awaaz hai. RAD.
+      SNR theek? →  ✅ ye AAP ho. Suno.
+```
+
+> **Aur ye khud seekhta rahega** — jaise jaise aap bolte jayenge, paimana behtar hota jayega.
+
+**Aur ek zaroori faida:** 🔇 **Maya apni hi awaaz nahi sunegi.** Jab wo bol rahi ho,
+mic ka darwaza band *(+ echo canceler)* — warna wo apne hi jumle par jaag jati hai.
+
+---
+
+## 7.4 🎛️ Aur ye sab **aap ke haath mein**
+
+```
+🎤 MIC KA ZOOM
+   wide ──────────●─── max
+   (poora kamra)      (sirf qareeb)     Abhi: +0.8
+
+📏 KITNI DOOR TAK SUNO
+   sirf paas ●──────────── door tak     Abhi: qareeb
+
+🔇 Maya apni awaaz na sune            [ ON ]
+🧪 [ MIC TEST — 5 second boliye ]
+```
+
+**🧪 MIC TEST** kya batayega:
+```
+🎤 MIC TEST
+
+  Kamre ka shor      : 38 dB   (khamosh)
+  Aap ki awaaz       : 67 dB   (buland aur saaf)
+  Farq (SNR)         : 29 dB   ✅ behtareen
+  Mic zoom           : ✅ chala (+0.8)
+  Noise suppressor   : ✅ chala
+  Echo canceler      : ❌ is device par nahi
+  Andaze mile        : 5   (behtareen: "Maya" — 0.94 yaqeen)
+
+  👉 Aap ki awaaz saaf pohanch rahi hai.
+```
+
+---
+
+## 7.5 📅 Naya naqsha
+
+| | Kya | Kotlin? | Khatra | Faida |
+|---|---|---|---|---|
+| **P8a** | 🔒 SAKHT DARWAZA + 🚪 slider | ❌ **sirf JS** | 🟢 | aap ki farmaish |
+| **P8b** | 🩺 KAAN DOCTOR + 🎯 recognizer ki seerhi | ✅ chhota | 🟢 | asal wajah |
+| **P8b+** | 🎯 **T1 — 6 andaze + confidence** | ✅ **bohat chhota** | 🟢 | **SUNO zinda ho jayegi** |
+| **P8c** | 🎧 VAD + 🎤 **T2 mic zoom** + 📏 T3 SNR | ✅ | 🟡 | background ignore |
+
+> **T1 (6 andaze + confidence) ko main P8b ke sath hi kar dunga** — ye sirf ek number
+> badalna hai aur **iska faida foran nazar aayega**.
+
+## 7.6 🧪 Naye test (~20 aur, kul ~954)
+
+har andaze ka confidence · kam yaqeen par "dobara bolo" · SNR se door ki awaaz rad ·
+Maya apni awaaz par na jaage · mic zoom nakaam ho to bhi sab chale · MIC TEST ki report
