@@ -53,11 +53,10 @@
         <intent>
             <action android:name="android.settings.INPUT_METHOD_SETTINGS" />
         </intent>
+        <!-- "Digital assistant" wali screen: Settings > Apps > Default apps
+             (AOSP ka asal action — public constant is ka hai hi nahi) -->
         <intent>
-            <action android:name="android.settings.ASSISTANT_SETTINGS" />
-        </intent>
-        <intent>
-            <action android:name="android.settings.MANAGE_DEFAULT_ASSISTANT" />
+            <action android:name="android.settings.MANAGE_DEFAULT_APPS_SETTINGS" />
         </intent>
         <intent>
             <action android:name="android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS" />

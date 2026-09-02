@@ -2016,6 +2016,38 @@ Here's a thinking process:
       is(d.indexOf('[ON-DEVICE] dabao') === -1, '🔑 jhoota bracket-button ka hawala ab bhi gayab (v5.9.1 ka sabak yaad hai)');
     }
 
+    /* ── 28d. 🧯 CI ki teen COMPILER galtiyaan dobara na hon (2 Sep 2026 ka sabak) ──
+       Run 33660254877 ne saaf bataya:
+         e: …MainActivity.kt:1368 Unresolved reference: ACTION_ASSISTANT_SETTINGS
+         e: …MainActivity.kt:1369 Unresolved reference: ACTION_MANAGE_DEFAULT_ASSISTANT
+         e: …MainActivity.kt:1436 Type mismatch: inferred type is MayaBridge but Context was expected
+       (GitHub ke "cache service responded with 400" warnings RED HERRING the —
+        asal wajah compile error thi, aur log blob sandbox se download nahi ho
+        raha tha is liye pehle andaza ghalat nikla.) */
+    {
+      const MA2 = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8');
+      is(!/Settings\.ACTION_ASSISTANT_SETTINGS|Settings\.ACTION_MANAGE_DEFAULT_ASSISTANT/.test(MA2),
+        '🔑🆕 jo Settings constants PUBLIC API mein HAIN HI NAHI wo dobara na aayen (CI yehi par tooti thi) — ab asal action string literal');
+      is(/go\(act\("android\.settings\.MANAGE_DEFAULT_APPS_SETTINGS"\)\)/.test(MA2),
+        '   → us ki jagah AOSP ka asal action (literal hamesha compile hota hai; na mile to go() null)');
+      /* MayaBridge ke ANDAR ka hissa: wahan `this` = MayaBridge, Context NAHI.
+         makeRecognizer() bridge ke BAHAR hai — wahan `this` = MainActivity, jo jayaz hai. */
+      const BR = MA2.slice(MA2.indexOf('inner class MayaBridge'), MA2.indexOf('fun makeRecognizer'));
+      is(BR.length > 5000 && (BR.match(/isOnDeviceRecognitionAvailable\((?!this@MainActivity)/g) || []).length === 0,
+        '🔑🆕 bridge ke andar isOnDeviceRecognitionAvailable ko hamesha Context do — `this` MayaBridge hai (CI: Type mismatch)');
+      is((BR.match(/isOnDeviceRecognitionAvailable\(this@MainActivity\)/g) || []).length === 2 &&
+         (BR.match(/Build\.VERSION\.SDK_INT >= 33/g) || []).length === 2,
+        '🔑🆕 method API 33 se hai — dono jagah guard 33 (pehle 31 tha: API 31/32 par crash)');
+      is((MA2.match(/catch \(e: Throwable\)/g) || []).length >= 2,
+        '🛡️🆕 NoSuchMethodError ek ERROR hai, Exception nahi — is liye catch (Throwable) (warna purane phone par bridge mar jata)');
+      is(/Intent\(Settings\.ACTION_APPLICATION_DETAILS_SETTINGS, Uri\.parse\("package:\$GBOARD"\)\)/.test(MA2),
+        '🔑🆕 app-info screen ko package: DATA URI chahiye — sirf setPackage() se wo rung bekaar jata tha');
+      const MFX = fs.readFileSync(path.join(ROOT, 'app/src/main/AndroidManifest.xml'), 'utf8');
+      is(!/ASSISTANT_SETTINGS|MANAGE_DEFAULT_ASSISTANT/.test(MFX) &&
+         /MANAGE_DEFAULT_APPS_SETTINGS/.test(MFX),
+        '📄 manifest ke <queries> bhi wahi asal action par (jo cheez khulti hi nahi us ki query bekaar)');
+    }
+
     console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');
     if (fail === 0) console.log('\x1b[1m\x1b[32m✅ SAB TEST PASS — ' + pass + '/' + pass + '\x1b[0m');
     else console.log('\x1b[1m\x1b[31m❌ ' + fail + ' TEST FAIL — ' + pass + '/' + (pass + fail) + ' pass\x1b[0m');

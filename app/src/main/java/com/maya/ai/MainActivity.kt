@@ -1227,9 +1227,12 @@ class MainActivity : AppCompatActivity() {
                         || svc.contains("systemui", true))
 
                 var onDev = false
-                if (Build.VERSION.SDK_INT >= 31) {
+                /* API 33+ (method se pehle maujood nahi). `catch (Exception)`
+                   NoSuchMethodError ko NAHI pakadta (wo Error hai) — is liye
+                   Throwable, warna API 31/32 phone par bridge crash karta. */
+                if (Build.VERSION.SDK_INT >= 33) {
                     onDev = try { SpeechRecognizer.isOnDeviceRecognitionAvailable(this@MainActivity) }
-                            catch (e: Exception) { false }
+                            catch (e: Throwable) { false }
                 }
                 o.put("ondevice", onDev)
                 o.put("using", lastRecognizerKind)
@@ -1354,8 +1357,8 @@ class MainActivity : AppCompatActivity() {
                 /* ⌨️ keyboard ki aam settings */
                 "gboard" ->
                     go(act(Settings.ACTION_INPUT_METHOD_SETTINGS))
-                        ?: go(act(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, GBOARD))
-                        ?: go(act(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, GBOARD_GO))
+                        ?: go(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$GBOARD")))
+                        ?: go(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$GBOARD_GO")))
 
                 /* 🎙️ speech services — TTS + default voice input */
                 "voiceservices" ->
@@ -1363,10 +1366,13 @@ class MainActivity : AppCompatActivity() {
                         ?: go(act(Settings.ACTION_VOICE_INPUT_SETTINGS))
                         ?: go(act(Settings.ACTION_SETTINGS))
 
-                /* 🤖 digital assistant (ab SIRF tab jab user KHUD ye maange) */
+                /* 🤖 digital assistant (ab SIRF tab jab user KHUD ye maange).
+                   NOTE: "ACTION_ASSISTANT_SETTINGS" jaisa koi PUBLIC Settings
+                   constant hai hi nahi (v5.10.1 ki pehli CI isi par tooti), is liye AOSP ka
+                   asal action string literal se — literal hamesha compile hota hai,
+                   aur phone par na mile to go() saaf null wapas karta hai. */
                 "assistant" ->
-                    go(act(Settings.ACTION_ASSISTANT_SETTINGS))
-                        ?: go(act(Settings.ACTION_MANAGE_DEFAULT_ASSISTANT))
+                    go(act("android.settings.MANAGE_DEFAULT_APPS_SETTINGS"))
                         ?: go(act(Settings.ACTION_VOICE_INPUT_SETTINGS))
                         ?: go(act(Settings.ACTION_SETTINGS))
 
@@ -1430,11 +1436,14 @@ class MainActivity : AppCompatActivity() {
                 o.put("goog", goog)
                 o.put("aiai", aiai)
 
-                /* 2. on-device recognizer (Android 12+) */
+                /* 2. on-device recognizer — API 33+ (pehle ye method maujood hi
+                      nahi: API 31/32 par NoSuchMethodError phenkta, jo Exception
+                      NAHI hota → is liye guard 33 aur catch Throwable).
+                      `this` MayaBridge hai, Context nahi → this@MainActivity. */
                 var onDev = false
-                if (Build.VERSION.SDK_INT >= 31) {
-                    onDev = try { SpeechRecognizer.isOnDeviceRecognitionAvailable(this) }
-                    catch (e: Exception) { false }
+                if (Build.VERSION.SDK_INT >= 33) {
+                    onDev = try { SpeechRecognizer.isOnDeviceRecognitionAvailable(this@MainActivity) }
+                    catch (e: Throwable) { false }
                 }
                 o.put("ondevice", onDev)
 

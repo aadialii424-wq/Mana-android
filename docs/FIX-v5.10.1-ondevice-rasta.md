@@ -117,7 +117,7 @@ JS ka naya panel (`KAAN.onDevice()` + `#labOnDeviceBox`) isi fehrist se banta ha
 
 ## 4. 🧪 Saboot
 
-`npm test` = **1115/1115 PASS** (1066 → 1115)
+`npm test` = **1123/1123 PASS** (v5.10.0 par 1081 tha → **+42**)
 
 | Suite | Pehle | Ab |
 |---|---|---|
@@ -125,7 +125,7 @@ JS ka naya panel (`KAAN.onDevice()` + `#labOnDeviceBox`) isi fehrist se banta ha
 | settings-ui | 84 | **95** (+11: Section 13 — asli DOM mein panel + button click) |
 | voice | 294 | 294 |
 | brain | 155 | 155 |
-| lab | 548 | **572** (+24: Section 28a/b/c) |
+| lab | 548 | **579** (+31: Section 28a/b/c/d) |
 
 Naye test kya lock karte hain:
 
@@ -140,30 +140,37 @@ Naye test kya lock karte hain:
 * **ui-13:** poori page boot kar ke — `labOnDeviceBox` · button click · bridge ka naam wapas
   · screen na khuli to *"maujood nahi"* + manual raasta **mehfooz** (toast 2 sec mein urr jata hai)
 
-**Kotlin compile:** CI (`Build MAYA APK`) har push par — magar **2 Sep 2026 ko CI khud toota hua
-mila** (humare code ki wajah se nahi):
+**Kotlin compile — CI ne teen galtiyaan PAKDI, aur wo theek kar di gayin:**
+
+Pehle main ne socha ke CI khud toota hua hai (har run par `Restore Gradle distribution
+8.7 failed: Error: Cache service responded with 400` aa raha tha). **Wo RED HERRING tha** —
+gradle chala tha, aur `:app:compileDebugKotlin` 1m16s mein FAIL hua tha. Asal log
+(sandbox se blob download nahi ho raha tha) nikala to ye mila:
 
 ```
-warning: Restore Gradle distribution 8.7 failed: Error: Cache service responded with 400
-step "4. APK BUILD" → 2 SECOND mein exit 1   (gradle binary hi PATH par nahi aayi)
-run ka log bhi download nahi ho saka: results blob → EOF
+e: …/MainActivity.kt:1368:37 Unresolved reference: ACTION_ASSISTANT_SETTINGS
+e: …/MainActivity.kt:1369:44 Unresolved reference: ACTION_MANAGE_DEFAULT_ASSISTANT
+e: …/MainActivity.kt:1436:83 Type mismatch: inferred type is MainActivity.MayaBridge but Context was expected
 ```
 
-Do run (33659273564, 33659834324) bilkul ek jaisi alamat ke sath mare. Iska matlab:
-**compile ka saboot abhi CI se nahi mil saka** — Kotlin ki 245 nayi lines par nazar
-dobara padhi gayi (imports, braces 425/425 barabar, koi non-local return nahi) magar
-wo saboot ke barabar nahi. Jab cache service wapas aaye, agla push ✅ dega.
+| Galti | Wajah | Ilaj |
+|---|---|---|
+| `Settings.ACTION_ASSISTANT_SETTINGS` | Aisa koi **public constant hai hi nahi** (na `ACTION_MANAGE_DEFAULT_ASSISTANT`) | AOSP ka asal action **string literal**: `"android.settings.MANAGE_DEFAULT_APPS_SETTINGS"` — literal hamesha compile hota hai, phone par na mile to `go()` saaf `null` deta hai |
+| `isOnDeviceRecognitionAvailable(this)` | `this` = **MayaBridge** (inner class), Context nahi | `this@MainActivity` |
+| *(sath nikla latent bug)* `if (SDK_INT >= 31)` | Method **API 33** se hai → API 31/32 par `NoSuchMethodError`, jo `Error` hai, `Exception` **nahi** → `catch (Exception)` pakadta nahi → **bridge crash** | Dono jagah guard `>= 33` + `catch (e: Throwable)` (ye `micDoctor()` mein v5.10.0 se pehle se tha — ab pakda gaya) |
+| *(bonus)* `act(ACTION_APPLICATION_DETAILS_SETTINGS, pkg)` | App-info screen ko `setPackage` nahi, **`package:` data URI** chahiye → rung bekaar jata | `Intent(action, Uri.parse("package:$GBOARD"))` |
 
-**Ilaj taiyar hai magar lagane ki ijazat chahiye:** Arena ke GitHub App ke paas
-`workflows` permission NAHI hai, is liye `.github/workflows/build-apk.yml` main push
-nahi kar sakta (`refusing to allow a GitHub App to create or update workflow …
-without 'workflows' permission`). Sakht workflow ka patch yahan rakha hai:
-[`docs/CI-FIX-gradle-cache-400.patch`](CI-FIX-gradle-cache-400.patch) — is mein
-(a) `setup-gradle` optional (cache toote to ZIP se Gradle khud utarta hai) aur
-(b) build ka poora log `BUILD-LOG` artifact banta hai, taake agli nakami ki wajah
-2 minute mein mil jaye, 25 minute ke andhere ke baad andaza nahi.
+Teeno (charo) ab **test mein lock** hain — Section **28d**: *"jo Settings constants public API
+mein hain hi nahi wo dobara na aayen"*, *"bridge ke andar `this` Context nahi"*, *"guard 33 +
+catch Throwable"*, *"app-info ko data URI"*. Yani agli dafa koi wahi galti likhe to test pehle
+bol dega, CI nahi.
 
----
+**Note:** `.github/workflows/build-apk.yml` ko sakht banane ka patch
+([`docs/CI-FIX-gradle-cache-400.patch`](CI-FIX-gradle-cache-400.patch)) taiyar hai — us se build
+ka log **artifact** ban jata (aaj wo log nikalne ke liye proxy se blob uthana para). Magar
+Arena ke GitHub App ke paas `workflows` permission nahi, is liye main use push nahi kar sakta:
+`refusing to allow a GitHub App to create or update workflow … without 'workflows' permission`.
+Ye **optional** hai — build khud us ke bagair bhi chal jata hai.
 
 ## 5. Kya NAHI badla
 

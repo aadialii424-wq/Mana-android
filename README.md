@@ -25,7 +25,7 @@ button banata hai (Gboard nahi → us ka jhoota button bhi nahi) · assistant sc
 Panel ab ye **saaf keh deta hai** (jhooti umeed nahi): wake **online** chalegi, behtar ke STT
 `English (India)` rakho (Urdu decoder "مایا" ko "ہے" parh leta hai).
 
-🧪 **+49 test** (1066 → **1115**) — Section 28 (Kotlin + JS locks) aur ui-13 (asli DOM mein panel + button).
+🧪 **+42 test** (1081 → **1123**) — lab Section 28 (Kotlin + JS locks, +31) aur settings-ui Section 13 (asli DOM mein panel + button, +11). CI ne 3 Kotlin compile errors pakde — theek kiye, aur unhein test mein **lock** kar diya (28d).
 
 📖 [`docs/FIX-v5.10.1-ondevice-rasta.md`](docs/FIX-v5.10.1-ondevice-rasta.md)
 
