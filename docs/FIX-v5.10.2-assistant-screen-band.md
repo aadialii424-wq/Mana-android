@@ -112,7 +112,7 @@ Play Store na ho to `market:` button nahi · AiAi wale phone par khush-khabri ·
 
 **CI:** `Build MAYA APK` — v5.10.2 ka pehla run do `Type mismatch` par toota
 (`act(action, pkg: String?)` ko `Uri.parse(...)` thons diya tha) — theek kar ke dobara push kiya;
-natija PR #6 par ✅/❌. v5.10.1 ka aakhri run ✅ green tha (APK artifact `MAYA-APK`).
+dusra run **✅ GREEN** (run `33667553462`, step *"4. APK BUILD"* success, APK artifact `MAYA-APK` bani).
 
 ---
 
