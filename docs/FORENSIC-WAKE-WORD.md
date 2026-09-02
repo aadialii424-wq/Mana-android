@@ -1104,7 +1104,7 @@ dono band. Isi tarah error 12/13 par zubaan badalna (F12 ka ilaj) aur 10 par bac
 | F41 | 🟡 | WebView lifecycle (`onPause/onResume`) bilkul nahi → F36/F06 ke qudrati hooks ganwaye | grep = 0 results |
 | F42 | 🟡 | **Concurrent capture**: app ka recognizer (doosra UID: Google service) chalu ho to hamara gate **silence** padh sakta hai → floor ~0 latch → mic khulte hi foran false trigger | `MicKit.kt:65-73` + Android 10+ capture rules; log mein `farsh 28`/`farsh 62` ka flip |
 
-**Qul: 42 flaws** (pass 1: F01–F24 · pass 2: F25–F42). Severity: **8 🔴 · 12 🟠 · 12 🟡 · 6 ⚪**
+**Qul: 43 flaws** (pass 1: F01–F24 · pass 2: F25–F42 · F43 auto-update §17 mein). Severity: **8 🔴 · 13 🟠 · 12 🟡 · 6 ⚪**
 *(F42 ko pass 2 mein hi shamil kiya gaya — ye F15 ke floor-latch ko trigger karne wala mehroz hai.)*
 
 ---
@@ -1245,6 +1245,102 @@ honest instrumentation hoga.
 | Kya hamara test-suite bharosemand hai? | **Adhoora.** 1153 asserts source-grep hain (code *likha* hai ya nahi) — runtime wiring nahi. F01 iska saboot hai. Har phase mein **wiring-level** locks + ek JSON fixture corpus (JS/Kotlin shared) add honge. |
 | Kya instrumentation/Robolectric tests hain? | **Nahi** (sirf JVM source-grep). Phase 2 ke baad kam-az-kam `WakeBrain` ke liye unit tests (pure Kotlin, JVM par chal sakte hain) — ye sab se sasta high-value addition hai. |
 | Agla sab se bara risk? | Fix kar ke bhi "kaam nahi kiya" lagna — agar **F38 (pref drift)** aur **F25 (native counters)** sath na hon. Is liye dono Phase 0/2 mein zaroori hain. |
+
+---
+
+## 17. 🔁 AUTO-UPDATE — jo bana hua hai, jo nahi, aur kyun ye wake ke liye zaroori hai
+
+Aap ne poocha tha *"auto update wali baat yaad hai na?"* — forensic ke dauran isay bhi microscope
+par rakha gaya. Jawaab teen hisson mein:
+
+### 17.1 ✅ Jo BANA hua hai — web/PWA ka auto-update
+
+| Cheez | Saboot |
+|---|---|
+| Service worker: HTML **network-first** ("so updates apply immediately"), assets cache-first | `sw.js:1-3` |
+| Cache version har release par bump: `maya-v5.10.3` | `sw.js:4` + `public/sw.js:4` |
+| `install` → `skipWaiting()`; `activate` → purane caches **delete** + `clients.claim()` | `sw.js:16-31` |
+| Registration (sirf `https:` par) | `index.html:8736-8737` |
+| **Version-bump discipline** — paanchon jagah ek saath | `build.gradle:14-15` · `package.json:3` · `sw.js:4` · `MainActivity.kt:132` (boot toast) · `MainActivity.kt:286` (`appVersion()`) |
+| WebView update **nudge** (v4.0.1) — purana WebView detect → "Play Store se update karo" | `MainActivity.kt:139`, `index.html:1378-1382`, `9648` |
+
+Yaani **getmaya.online / PWA users ko naya version khud-ba-khud mil jata hai.**
+
+### 17.2 ❌ Jo NAHI bana — APK ka in-app auto-update
+
+```
+$ grep -n "releases/latest|api.github.com|checkUpdate|latestVersion|downloadApk|
+           installApk|DownloadManager|REQUEST_INSTALL_PACKAGES|package-archive"  → 0 hits
+$ grep -rn "FileProvider" --include=*.kt  → MainActivity.kt:961 (sirf photo/file SHARE)
+```
+
+Aaj APK update ka rasta: **CI run → MAYA-APK artifact → manual download → manual install.**
+
+### 17.3 🔗 Ye wake forensic se kyun juda hai (F43)
+
+1. **Wake word SIRF APK mein hai** — `index.html:9590`: *"Wake word sirf APK version mein hai"*.
+   Yaani jo feature sab se zyada fixes maangta hai, wo us raste par **nahi** jata jo auto-update
+   hota hai. **Structural be-taali.**
+2. Iska natija hum ne apni aankh se dekha: KAAN panel ka apna message *"purani APK hai (v5.10.0 se
+   pehle diagnostics thi hi nahi)"*, aur `ERRNAME` ka `"?"`. Aap ke phone par kaun si APK hai, ye
+   batane ka koi **automated** rasta nahi (sirf boot toast).
+3. **F38 (pref-drift) jaisa trap:** fix ban gaya magar phone tak pohancha nahi → "kaam nahi kiya"
+   lagta hai. Auto-update ke bagair humara har forensic adhoora rahega.
+4. **Phase 4 (local KWS) isi channel par khara hoga:** ~40MB ka model runtime download + SHA-256
+   verify + unpack — ye poora nizam updater ke infrastructure ka hissa hai. Is liye auto-update
+   "nice-to-have" nahi, **Phase 4 ki zaroorat** hai.
+
+> **F43 (🟠, register mein izafa): APK ka koi update-channel nahi** — wake fixes user tak sirf
+> manual install se pohanchte hain, aur version-mismatch pakadne ka koi zariya nahi.
+
+### 17.4 Design (0-budget, jo cheez pehle se hai usi par)
+
+```
+[version.json]  { "versionCode": 75, "versionName": "5.11.0", "url": "…/maya.apk",
+                  "sha256": "…", "notes": "…", "minRequired": 74 }
+        │  (HTTPS GET, 24 ghante mein ek + app khulne par ek)
+        ▼
+native compare: BuildConfig.VERSION_CODE  vs  versionCode      ← JS se NAHI (F13 ka sabaq)
+        │ naya mila
+        ▼
+notification + HUD/LAB par "🆕 NAYA VERSION 5.11.0"  →  user dabaye
+        │
+        ▼
+DownloadManager (HTTPS, Wi-Fi-only default)  →  SHA-256 verify  →  FileProvider URI
+        │
+        ▼
+ACTION_VIEW (application/vnd.android.package-archive) + FLAG_GRANT_READ_URI_PERMISSION
+        │  (Android 8+: REQUEST_INSTALL_PACKAGES permission)
+        ▼
+user khud "Install" dabata hai  ← FORCE UPDATE KABHI NAHI
+```
+
+**Qawaneen (jo is project ke usoolon se milti hain):**
+1. **Force update kabhi nahi** — sirf notification + button. User ka faisla (P9 ka wada).
+2. Compare **native `versionCode`** se ho, JS `settings` se nahi.
+3. **SHA-256 verify** lazmi — warna adhoora/corrupt APK install ho sakta hai.
+4. Download ke dauran wake service ko koi naya haal na dena pare (mic ka koi talluq nahi) —
+   magar notification **live state** wali ho (F31 ka ilaj isi mein fit hota hai).
+5. `minRequired` se neeche ki APK par **warning** (na ke zabardasti).
+6. Purani APK ke sath **backward compatible**: naya JS purane native bridge par bhi chale
+   (`if (window.MayaBridge.checkUpdate)` guard — jaise aaj `wakeState` ke sath kiya gaya).
+
+### 17.5 Channel ka faisla — **aap ke do raaste**
+
+| Option | Kaise | 0-budget? | Kaun karega | Meri raye |
+|---|---|---|---|---|
+| **A** | CI ko `contents: write` de kar workflow mein `gh release create` + APK asset; updater `releases/latest` padhe | ✅ | **Aap** — `.github/workflows/*` push karne ki permission is sandbox mein effective nahi (azmaya ja chuka) | behtar automation, magar rukawat aap ki taraf |
+| **B** | APK ko **getmaya.online** par upload + ek chhoti `version.json`; updater usay padhe | ✅ | Aap APK upload karein; **`version.json` main commit kar sakta hun** | ✅ **tajweez** — koi permission issue nahi, host pehle se maujood, aur release ka aadha kaam automated |
+
+### 17.6 Phase plan mein kahan
+
+**Phase 2.5 — "APK ka apna rasta"** (Phase 2 ke baad, Phase 3 se pehle):
+
+* `version.json` + `checkUpdate()`/`downloadUpdate()` bridge + notification action.
+* Manifest: `REQUEST_INSTALL_PACKAGES` (+ FileProvider paths mein `filesDir/apk`).
+* Test-locks: compare native `versionCode` se · SHA-256 verify maujood · **force-update ka koi
+  code path nahi** · purani APK guard (`if (bridge.checkUpdate)`) · Wi-Fi-only default.
+* Qubooliyat: purani APK → notification → download → install → boot par `MAYA v5.11.0` toast.
 
 ---
 

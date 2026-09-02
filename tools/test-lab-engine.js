@@ -1266,11 +1266,19 @@ Here's a thinking process:
       '🔑 BUG 1: Kotlin ab har error aur har start REPORT karta hai');
     is(/handleAll\(list: List<String>\)/.test(live) && /JSONArray/.test(live),
       'saare andaze JSON bana kar JS ko jate hain');
-    is(/MainActivity\.instance != null/.test(live) && /SAFE MODE/.test(KT),
-      '🔒 app band ho to SAFE MODE bilkul waisa hi (Qanoon 2)');
+    /* 🔬 v5.10.3 (F25/F27) — delivery ab `evalPublicOk()` se hoti hai (murda WebView
+       par JS nahi thonsi jati), magar SAFE MODE ka qanoon wahi: app band = kuch na karo. */
+    is(/val act = MainActivity\.instance/.test(live) && /act != null && act\.evalPublicOk/.test(live) &&
+       /SAFE MODE/.test(KT) && /lastHeardOffline = payload/.test(live),
+      '🔒 app band ho to SAFE MODE bilkul waisa hi (Qanoon 2) — ab delivery-check ke sath');
 
     const src = HTML;
-    is(/setPrefString\('wake_lang', settings\.stt/.test(src), 'JS wake ki zubaan service tak bhejta hai');
+    /* 🔬 v5.10.3 (F12) — ye assert PEHLE `settings.stt` ko sahih kehta tha, halanke
+       wahi bug tha: Urdu decoder "مایا" ko "ہے" parh leta hai (hamara apna DOCTOR
+       ye kehta tha). Ab wake ki zubaan STT se AZAD hai. */
+    is(/setPrefString\('wake_lang', settings\.wakeLang/.test(src) &&
+       !/setPrefString\('wake_lang', settings\.stt/.test(src),
+      '🔑 F12: wake ki zubaan ab settings.wakeLang (default en-IN) — STT se azad');
     is(/fun setPrefString/.test(fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8')),
       'bridge mein setPrefString maujood');
     is(src.indexOf('id="labKaan"') > 0, 'Settings mein "WAKE WORD KA HAAL" button');
@@ -1448,11 +1456,17 @@ Here's a thinking process:
     is(/fun pauseForApp\(\)/.test(WS) && /fun resumeFromApp\(\)/.test(WS) &&
        /WakeWordService\.pauseForApp\(\)/.test(MA),
       '🤝 MIC SULAH — tap-to-speak se pehle wake service apna mic chhor deti hai');
-    is(/pausedByApp && System\.currentTimeMillis\(\) - pausedAt > 60000/.test(WS),
-      '🔒 WebView mar bhi jaye to 60s baad pause KHUD-BA-KHUD azad (wake hamesha ke liye nahi sota)');
+    /* 🔬 v5.10.3 (F05) — 60s sirf "hamesha ke liye nahi sota" wala wada nibhata tha,
+       magar har SUNO ke baad wake ek poore MINUTE ke liye murda rehti thi. Ab 10s,
+       AUR app ka mic asal mein khali ho tab hi (blind release = mic jang). */
+    is(/pausedByApp && System\.currentTimeMillis\(\) - pausedAt > STALE_PAUSE_MS/.test(WS) &&
+       /const val STALE_PAUSE_MS = 10000L/.test(WS) && /appMicBusy\(\)/.test(WS),
+      '🔒 F05: stale-pause 60s → 10s + appMicBusy() check (wake foran wapas, mic jang nahi)');
 
     /* ── L5 ERR-8 MERCY: service khud ko nahi marti, aap ka switch nahi mita ── */
-    const E8 = WS.slice(WS.indexOf('8 -> {'), WS.indexOf('8 -> {') + 900);
+    /* 🔬 v5.10.3 — onError ka `when` ab `if (error == 8)` block hai (escalation ki wajah se) */
+    const E8A = WS.indexOf('if (error == 8) {');
+    const E8 = WS.slice(E8A, E8A + 900);
     is(E8.indexOf('stopSelf()') === -1 && /restart\(2000\)/.test(E8) && /err8/.test(E8),
       '🕊️ error 8 ab service ko NAHI marta — sirf 2s sukoon (nakami-kahti mauth khatam)');
     const WE = HTML.slice(HTML.indexOf('window.__wakeErr = function'), HTML.indexOf('window.__wakeErr = function') + 900);
@@ -1488,16 +1502,20 @@ Here's a thinking process:
       '🔑 switch ka nateeja TURANT SharedPrefs tak pahunchta hai — ubharna nahi parta');
     is(/skips: 0, err8: 0/.test(HTML) && /if \(kind === "skip"\) KAAN\.skips\+\+;/.test(HTML),
       'KAAN v3 — skipping ka saboot ginita hai (andha nahi rahenge)');
-    is(HTML.indexOf('HAAL        : ') > 0 && HTML.indexOf('roka gaya') > 0,
-      '👁️ KAAN report mein HAAL + roko ki ginti nazar aati hai');
+    /* 🔬 v5.10.3 (F04) — panel ab JS AUR Kotlin DONO ka HAAL dikhata hai. Pehle sirf
+       JS ka tha, aur "HAAL: KHALI" likh kar humein galat raaste par bhejta tha jabke
+       Kotlin mein pausedByApp=true phansa tha. */
+    is(HTML.indexOf('HAAL (JS)   : ') > 0 && HTML.indexOf('HAAL (Kotlin): ') > 0 &&
+       HTML.indexOf('roka gaya') > 0,
+      '👁️ KAAN report mein HAAL (JS) + HAAL (Kotlin) + roko ki ginti nazar aati hai');
 
     /* ── version qanoon ── */
-    is(/appVersion\(\): String = "5\.10\.2-native"/.test(MA) && MA.indexOf('4.3.0-native') === -1,
+    is(/appVersion\(\): String = "5\.10\.3-native"/.test(MA) && MA.indexOf('4.3.0-native') === -1,
       '🩹 BONUS — appVersion() ka purana 4.3.0 jhoot bhi ab qatl');
-    is(fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8').indexOf('maya-v5.10.2') > 0 &&
-       /versionCode 73/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')) &&
-       /versionName "5\.10\.2"/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')),
-      '🏷️ poore app mein VERSION v5.10.2 (cache saaf, splash saaf, APK saaf)');
+    is(fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8').indexOf('maya-v5.10.3') > 0 &&
+       /versionCode 74/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')) &&
+       /versionName "5\.10\.3"/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')),
+      '🏷️ poore app mein VERSION v5.10.3 (cache saaf, splash saaf, APK saaf)');
     is(HTML.indexOf('5.8.0') === -1, 'kahi purana 5.8.0 version nazar nahi aata');
 
     /* ── v5.9.1 hotfix — doctor ka jhoota button ab ASAL hai ── */
@@ -2150,6 +2168,132 @@ Here's a thinking process:
       is(r.btns.some(function (b) { return b.k === 'appinfo:com.google.android.as'; }),
         '📦 AiAi ki app-info bhi (packs/storage dekhne ke liye)');
     }
+
+  /* ═══ 30. 🔬 v5.10.3 — WAKE ZINDA (docs/FORENSIC-WAKE-WORD.md ke fixes) ═══
+     USOOL: har assert WIRING par hai, DECLARATION par nahi.
+     F01 ka sabaq: `resumeFromApp()` likhi hui thi (is liye purana test GREEN tha)
+     magar CALL kahin nahi hoti thi — wake har SUNO ke baad 60 second murda rehti thi. */
+  head('30. 🔬 v5.10.3 — WAKE ZINDA: forensic ke fixes (wiring-level locks)');
+  {
+    const WS = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/WakeWordService.kt'), 'utf8');
+    const MA = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8');
+    const IH = fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/index.html'), 'utf8');
+    const PUB = fs.readFileSync(path.join(ROOT, 'public/index.html'), 'utf8');
+    const GR = fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8');
+    const PK = fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8');
+    const SW = fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8');
+
+    /* ── F01: pauseForApp() ki WAPSI (sab se bara mujrim) ── */
+    is((MA.match(/WakeWordService\.resumeFromApp\(\)/g) || []).length >= 4,
+      '🔑 F01: resumeFromApp() ab KAM AZ KAM 4 jagah CALL hoti hai (pehle 0 thi)',
+      (MA.match(/WakeWordService\.resumeFromApp\(\)/g) || []).length + ' call sites');
+    const SRA = MA.indexOf('private fun stopRecognizer()');
+    is(/resumeFromApp\(\)/.test(MA.slice(SRA, SRA + 700)),
+      '🔑 F01: stopRecognizer() ke ANDAR resume — wiring, sirf declaration nahi');
+    const ERA = MA.indexOf('override fun onError(error: Int) {');
+    is(/resumeFromApp\(\)/.test(MA.slice(ERA, ERA + 500)),
+      '🔑 F01: app ka mic NAKAM ho to bhi wake wapas (pehle ye rasta khali tha)');
+    const RRA = MA.indexOf('override fun onResults(results: Bundle?) {');
+    is(/resumeFromApp\(\)/.test(MA.slice(RRA, RRA + 500)),
+      '🔑 F01: nateeja milte hi wake wapas');
+
+    /* ── F03: skip-spam par lagam ── */
+    is(/private fun reportSkip\(why: String\)/.test(WS) &&
+       /const val SKIP_REPORT_MS = 15000L/.test(WS) &&
+       (WS.match(/reportSkip\(/g) || []).length >= 4,
+      '🧹 F03: skip ab rate-limited — pehle har 700ms report ne KAAN ka 40-entry log bhar diya tha',
+      (WS.match(/reportSkip\(/g) || []).length + ' jagah');
+    is(/const val BLOCKED_POLL_MS = 3000L/.test(WS) && WS.indexOf('restart(700)') === -1,
+      '🧹 F03: blocked poll 700ms → 3000ms (restart(700) kahin nahi bacha)');
+    is(/private fun skipReset\(\)/.test(WS) && (WS.match(/skipReset\(\)/g) || []).length >= 3,
+      '🧹 F03: darwaza khulte hi ginti saaf (agli rukawat nayi ginti se)');
+
+    /* ── F09/F10/F35: retry policy ab policy hai, aadat nahi ── */
+    is(/10 -> 5000L/.test(WS) && /11 -> 1500L/.test(WS) && /12, 13 -> 8000L/.test(WS),
+      '⏱️ F09: error 10/11/12/13 ke APNE backoff (pehle sab `else -> 1200L` = 1.2s hammer)');
+    is(/1L shl \(errStreak - 1\)\.coerceAtMost\(4\)/.test(WS) && /coerceAtMost\(30000L\)/.test(WS),
+      '⏱️ F09: escalation x1→x16 + 30s cap (lagatar 15 hamle khatam)');
+    is(/if \(errStreak >= 3\) \{ try \{ resetRecognizer\(\)/.test(WS),
+      '🔧 F09: 3 lagatar nakami par recognizer fresh (connection khud mar chuka hota hai)');
+    is(/if \(errStreak == 5\)/.test(WS) && /report\("dead"/.test(WS) && /__wakeErr/.test(WS),
+      '☠️ F10: CIRCUIT OPEN par user ko khabar — chup-chaap marna band');
+    const CBA = WS.indexOf('errStreak == 5');
+    is(WS.slice(CBA, CBA + 400).indexOf('stopSelf()') === -1,
+      '🕊️ F10: circuit open par service khud ko NAHI marti (L5 mercy barqarar)');
+    is(/if \(error == 9\)/.test(WS) && /restart\(60000\)/.test(WS),
+      '🔑 F35: mic permission (err 9) par hammer nahi — 60s + saaf alert');
+
+    /* ── F11: ERRNAME + ERRFIX ── */
+    is(/11: "server se connection toota"/.test(IH) && /13: "zubaan ka pack download nahi hua"/.test(IH) &&
+       /10: "bohot request/.test(IH) && /15: "model-download events support nahi"/.test(IH),
+      '📛 F11: ERRNAME ab 1..15 poori — panel "?" nahi chhapta (aakhri err 11 — ?)');
+    is(/ERRFIX: \{/.test(IH) && /KAAN\.ERRFIX\[K\.lastErr\]/.test(IH),
+      '💡 F11+: har code ka ILAJ bhi — sirf naam nahi, rasta bhi');
+
+    /* ── F12: wake ki zubaan STT se azad ── */
+    is(/wakeLang:"en-IN"/.test(IH.replace(/\s/g, '')) && IH.indexOf('id="sWakeLang"') > 0 &&
+       /key: "wakeLang"/.test(IH),
+      '🗣️ F12: settings.wakeLang (default en-IN) + LAB mein apna select');
+    is(/getString\("wake_lang", "en-IN"\)/.test(WS),
+      '🗣️ F12: Kotlin ka default bhi en-IN (purani pref na ho to bhi Urdu nahi)');
+
+    /* ── F18: watchdog ka gate guard ── */
+    is(/if \(!gateOn\) actuallyStart\(\)/.test(WS),
+      '🛡️ F18: 12-min watchdog ab gate chalu hote hue recognizer mic par NAHI thons ta');
+
+    /* ── F25/F27/F04: NATIVE INSTRUMENT (ab instrument mareez ke sath nahi marta) ── */
+    is(/fun record\(kind: String, payload: String\)/.test(WS) &&
+       /private val evBuf = ArrayList<String>\(\)/.test(WS) && /fun drainEvents\(\)/.test(WS),
+      '🧠 F25: Kotlin-side ring buffer + drainEvents() — counters UI ki maut se azad');
+    is(/record\(kind, payload\)/.test(WS) && /record\("heard", payload\)/.test(WS),
+      '🧠 F25: har report AUR har suni hui baat PEHLE native darj — `suna 0` ka ambiguity khatam');
+    is(/fun evalPublicOk\(js: String\): Boolean/.test(MA) && /if \(!webViewAlive\)/.test(MA) &&
+       /evalPublicOk\(js\)/.test(WS),
+      '🧠 F27: murda WebView par JS nahi thonsi jati + delivery ka hisab (sent/dropped)');
+    is(/fun wakeState\(\): String/.test(MA) && /fun wakeEvents\(\): String/.test(MA) &&
+       /fun stateBits\(\): String/.test(WS),
+      '🌉 F04/F25: naye bridge — wakeState() (Kotlin ka sach) + wakeEvents() (native buffer)');
+    is(/HAAL \(Kotlin\)/.test(IH) && /MISMATCH/.test(IH) && /flushNative: function/.test(IH) &&
+       /KAAN\.flushNative\(\)/.test(IH),
+      '🔎 F04: panel ab JS AUR Kotlin dono ka HAAL + MISMATCH pakadta hai + boot par native flush');
+    is(/heardOffline/.test(WS) && /heardOffline/.test(IH),
+      '🔎 F25: "kitni wake UI mare hone ki wajah se zaya huin" ab nazar aata hai');
+
+    /* ── F38: pref drift (ye fix ko "kaam nahi kiya" dikhane wala trap tha) ── */
+    is(/function pushNativePrefs\(\)/.test(IH) &&
+       /saveSettings\(\)\{[\s\S]{0,160}pushNativePrefs\(\)/.test(IH),
+      '🔧 F38: har settings-save par native prefs tazaa (pehle SIRF wake-toggle par push hote the)');
+    is((IH.match(/pushNativePrefs\(\)/g) || []).length >= 3,
+      '🔧 F38: pushNativePrefs definition + saveSettings + setWakeService — teeno jagah');
+
+    /* ── F39: switch ka jhoot ── */
+    is(/wakeService\(on\) !== false/.test(IH) && /Wake ON nahi hui/.test(IH) &&
+       /settings\.wakeWord = false; saveSettings\(\);/.test(IH),
+      '🔒 F39: wakeService() ka jawab AB parha jata hai — ijazat na ho to switch OFF + saaf toast');
+
+    /* ── F05: app mic ka asal haal ── */
+    is(/fun appMicBusy\(\): Boolean/.test(MA) && /appMicOn = true/.test(MA) &&
+       (MA.match(/appMicOn = false/g) || []).length >= 3,
+      '🎯 F05: appMicBusy() — blind release ki jagah asal haal');
+
+    /* ── 🔖 version bump + mirror discipline ── */
+    is(/versionCode 74/.test(GR) && /versionName "5\.10\.3"/.test(GR) &&
+       /"version": "5\.10\.3"/.test(PK) && /maya-v5\.10\.3/.test(SW) &&
+       /5\.10\.3-native/.test(MA) && /MAYA v5\.10\.3/.test(MA),
+      '🔖 v5.10.3 ka bump paanchon jagah (gradle vc74 + package.json + sw.js + appVersion + toast)');
+    is(PUB.indexOf('pushNativePrefs') > 0 && PUB.indexOf('sWakeLang') > 0 &&
+       PUB.indexOf('HAAL (Kotlin)') > 0,
+      '🪞 public/ mirror tazaa hai (npm run build) — assets aur web ek jaise');
+
+    /* ── 🔒 P9 ke wade barqarar (regression guard) ── */
+    is(/fun pauseForApp\(\)/.test(WS) && /fun resumeFromApp\(\)/.test(WS) &&
+       /fun haalBlock\(\)/.test(WS) && (WS.match(/haalBlock\(\)/g) || []).length >= 5,
+      '🔒 SUKOON/HAAL ka nizam barqarar — har mic-darwaza HAAL se poochhta hai',
+      (WS.match(/haalBlock\(\)/g) || []).length + ' darwaze');
+    is(/if \(error == 8\)/.test(WS) && /report\("err8"/.test(WS) &&
+       WS.slice(WS.indexOf('if (error == 8)'), WS.indexOf('if (error == 8)') + 400).indexOf('stopSelf()') === -1,
+      '🕊️ L5 ERR-8 MERCY barqarar — na stopSelf, na switch haath mein');
+  }
 
     console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');
     if (fail === 0) console.log('\x1b[1m\x1b[32m✅ SAB TEST PASS — ' + pass + '/' + pass + '\x1b[0m');

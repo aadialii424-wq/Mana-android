@@ -79,6 +79,12 @@ class MainActivity : AppCompatActivity() {
     private var tts: TextToSpeech? = null
     private var ttsReady = false
     private var recognizer: SpeechRecognizer? = null
+    /* 🔬 v5.10.3 (F05) — app ka mic asal mein CHALU hai ya nahi. WakeWordService
+       ka stale-pause watchdog isi se poochhta hai: pehle wo 60s baad AANKH BAND
+       kar ke pause azad kar deta tha (aur mic jang shuru). Ab 10s + ye check. */
+    @Volatile private var appMicOn = false
+
+    fun appMicBusy(): Boolean = appMicOn
 
     /* ================= LIFECYCLE ================= */
 
@@ -123,7 +129,7 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = MayaWebViewClient()
         setContentView(webView)
         webView.loadUrl("https://$VIRTUAL_HOST/assets/web/index.html")
-        Toast.makeText(this, "MAYA v5.10.2 • 🗣️ ON-DEVICE: ghalat (assistant) screen ab khulti hi nahi", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "MAYA v5.10.3 • 👂 WAKE ZINDA: SUNO ke baad foran wapas + err-11 hammer band", Toast.LENGTH_LONG).show()
         // WebView zinda hai ya nahi — 8 second baad native check (v4.0.1: onPageFinished/markAlive true karte hain)
         webViewAlive = false
         android.os.Handler(Looper.getMainLooper()).postDelayed({
@@ -164,6 +170,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        appMicOn = false
+        try { WakeWordService.resumeFromApp() } catch (e: Exception) {}   /* 🔬 F01 */
         instance = null
         stopRecognizer()
         try { tts?.stop(); tts?.shutdown() } catch (e: Exception) {}
@@ -261,6 +269,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun stopRecognizer() {
         try { recognizer?.destroy(); recognizer = null } catch (e: Exception) {}
+        appMicOn = false
+        /* 🔬 v5.10.3 (F01) — pauseForApp() ki WAPSI. Pehle `resumeFromApp()` poori
+           codebase mein KAHIN call nahi hoti thi (sirf 60s ka stale-watchdog
+           bachata tha): har SUNO ke baad wake ek poore minute ke liye MURDA, aur
+           us dauran har 700ms ek skip-report = 67 dafa "sulah: app ka mic" spam
+           jis ne KAAN ka 40-entry log bhar kar asal tareekh mita di thi. */
+        try { WakeWordService.resumeFromApp() } catch (e: Exception) {}
     }
 
     /* ================= JS BRIDGE ================= */
@@ -268,7 +283,7 @@ class MainActivity : AppCompatActivity() {
     inner class MayaBridge {
 
         @JavascriptInterface
-        fun appVersion(): String = "5.10.2-native"
+        fun appVersion(): String = "5.10.3-native"
 
         /* 🎚️ P9 SUKOON — JS (SUKOON) har awaaz/mic ki HAAL yahan bhejti hai.
            KHALI | BOL_RAHI | APP_SUN — WakeWordService har mic-darwaze par isi
@@ -276,6 +291,24 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface
         fun setHaal(h: String) {
             try { WakeWordService.applyHaal(h) } catch (e: Exception) {}
+        }
+
+        /* 🔬 v5.10.3 (F04) — KOTLIN KA SACH. Panel pehle sirf JS ka haal dikhata
+           tha aur "HAAL: KHALI" likh kar humein galat raaste par bhejta tha jabke
+           asli mujrim `pausedByApp=true` tha. Ab dono taraf ka haal nazar aata hai
+           aur JS/Kotlin beech ka MISMATCH pakda jata hai. */
+        @JavascriptInterface
+        fun wakeState(): String {
+            return try { WakeWordService.stateJson() } catch (e: Exception) { "{\"err\":1}" }
+        }
+
+        /* 🔬 v5.10.3 (F25) — native ring buffer. UI mare hue daur ke waqiat bhi
+           yahan mehfooz rehte hain aur app khulte hi ek dafa mein JS ko mil jate
+           hain. Isi se `suna 0` ka ambiguity khatam: ab pata chalta hai ke
+           recognizer ne suna tha magar report zaya hui, ya suna hi nahi tha. */
+        @JavascriptInterface
+        fun wakeEvents(): String {
+            return try { WakeWordService.drainEvents() } catch (e: Exception) { "[]" }
         }
 
         /* v4.0.1: index.html boot-guard ye call karta hai — ab native alive flag true hota hai */
@@ -361,6 +394,7 @@ class MainActivity : AppCompatActivity() {
                    apna mic chhor degi (do recognizer kabhi ek saath nahi chal sakte —
                    wahi jang v5.8.0 tak har tap-to-speak ko mar okat deti thi). */
                 try { WakeWordService.pauseForApp() } catch (e: Exception) {}
+                appMicOn = true
                 val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                     putExtra(
                         RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -388,9 +422,16 @@ class MainActivity : AppCompatActivity() {
                         override fun onBufferReceived(buffer: ByteArray?) {}
                         override fun onEndOfSpeech() { evalAsync("window.__nativePartial && window.__nativePartial('')") }
                         override fun onError(error: Int) {
+                            /* 🔬 v5.10.3 (F01) — app ka mic khatam: wake ko foran wapas
+                               bulao. Pehle ye rasta KHALI tha; wake 60s tak soti rehti thi. */
+                            appMicOn = false
+                            try { WakeWordService.resumeFromApp() } catch (e: Exception) {}
                             evalAsync("window.__nativeSpeechErr && window.__nativeSpeechErr($error)")
                         }
                         override fun onResults(results: Bundle?) {
+                            /* 🔬 v5.10.3 (F01) — nateeja mil gaya, mic khali: wake wapas */
+                            appMicOn = false
+                            try { WakeWordService.resumeFromApp() } catch (e: Exception) {}
                             /* 🎙️ Android 3-5 andaze deta hai. Pehle sirf pehla liya jata tha
                                aur baqi phenk diye jate the — isi liye "Monarch" -> "منار" ban
                                jata tha. Ab SAARE andaze JS ko jate hain; SUNO un mein se wo
@@ -1558,6 +1599,22 @@ class MainActivity : AppCompatActivity() {
     /* ================= HELPERS ================= */
 
     fun evalAsyncPublic(js: String) { evalAsync(js) }
+
+    /* 🔬 v5.10.3 (F27) — murda WebView par JS thonsna band.
+       `webViewAlive` flag PEHLE SE maujood tha (markAlive + onPageFinished), magar
+       evalAsync usay dekhta hi nahi tha — is liye WakeWordService ko lagta tha ke
+       report pohanch gayi, halanke WebView khatam ho chuka hota tha. Ab delivery
+       ka SABOOT milta hai (sent/dropped counters panel par nazar aate hain). */
+    fun evalPublicOk(js: String): Boolean {
+        return try {
+            if (!webViewAlive) {
+                false
+            } else {
+                evalAsync(js)
+                true
+            }
+        } catch (e: Exception) { false }
+    }
 
     private fun prefs() = getSharedPreferences("maya", Context.MODE_PRIVATE)
 

@@ -1151,6 +1151,15 @@ nav{padding:8px 10px 10px}
           <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="sTrustMode"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
         </div>
         <div class="ui-field">
+          <div class="ui-label">👂 WAKE KI ZUBAAN <small>(wake word "Maya" kis decoder se sune — STT se ALAG. Urdu decoder "مایا" ko aksar "ہے" parh leta hai)</small></div>
+          <select class="ui-input ui-select" id="sWakeLang">
+            <option value="en-IN">English (India) — sab se pukhta (default)</option>
+            <option value="hi-IN">हिंदी Hindi (India)</option>
+            <option value="ur-PK">اردو Urdu (Pakistan) — "Maya" aksar ghalat parha jata hai</option>
+          </select>
+          <div class="ui-hint">Ye SIRF wake word ki zubaan hai — aap ki baat (STT) aur Maya ki awaaz (TTS) apni jagah wahi rahengi jo upar chuni hui hain.</div>
+        </div>
+        <div class="ui-field">
           <div class="ui-label">🚪 "MAYA" KEHNE KE BAAD DARWAZA KITNI DER KHULA <small>(0 = har baar "Maya" kehna paregi · 60 = lambi baat-cheet)</small></div>
           <input class="ui-input" id="sWakeDoor" type="number" min="0" max="60" step="5" value="15">
           <div class="ui-hint">Us waqt ke andar bina "Maya" kahe baat chalti rahegi. Har jawab par waqt dobara shuru. "bas" ya "theek hai" kaho to foran band.</div>
@@ -1286,14 +1295,31 @@ try { document.getElementById("dbgBadge").textContent = "v5.10.2 OK \u2713"; } c
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
-var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", ghKey:"", cerebrasKey:"", mistralKey:"", orKey:"", nvidiaKey:"", zaiKey:"", llm7Key:"", ttsKey:"", voiceEngine:"auto", gVoice:"Kore", voiceMood:"auto", neuralWifiOnly:false, neuralMaxChars:1400, edgeTTS:true, edgeVoice:"", fishKey:"", fishVoice:"", fishVoiceName:"", fishTemp:0.35, fishOn:true, trustMode:false, wakeDoor:15, micZoom:0.8, micNear:true, ttsModel:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"maya", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true, gender:"male", phone:"", musicApp:"youtube", favSong:"", ytChannel:"", assistName:"Maya", gfMode:false, persona:"maya", remember:true, convoMode:false, lang:"roman-ur", proactive:false, theme:"obsidian", accent:"#FF7A1A", radius:18, fontScale:1, edgeGlow:false };
+var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", ghKey:"", cerebrasKey:"", mistralKey:"", orKey:"", nvidiaKey:"", zaiKey:"", llm7Key:"", ttsKey:"", voiceEngine:"auto", gVoice:"Kore", voiceMood:"auto", neuralWifiOnly:false, neuralMaxChars:1400, edgeTTS:true, edgeVoice:"", fishKey:"", fishVoice:"", fishVoiceName:"", fishTemp:0.35, fishOn:true, trustMode:false, wakeDoor:15, micZoom:0.8, micNear:true, ttsModel:"", city:"Hyderabad", wakeLang:"en-IN", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"maya", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true, gender:"male", phone:"", musicApp:"youtube", favSong:"", ytChannel:"", assistName:"Maya", gfMode:false, persona:"maya", remember:true, convoMode:false, lang:"roman-ur", proactive:false, theme:"obsidian", accent:"#FF7A1A", radius:18, fontScale:1, edgeGlow:false };
 var settings = Object.assign({}, DEFAULTS);
 try {
   var s1 = JSON.parse(localStorage.getItem("maya_settings") || "null");
   var s0 = JSON.parse(localStorage.getItem("jarvisSettings") || "null"); // v1 se upgrade
   [s0, s1].forEach(function(src){ if (src) Object.keys(src).forEach(function(k){ settings[k] = src[k]; }); });
 } catch(e){}
-function saveSettings(){ localStorage.setItem("maya_settings", JSON.stringify(settings)); }
+function saveSettings(){ localStorage.setItem("maya_settings", JSON.stringify(settings)); try { pushNativePrefs(); } catch(e){} }
+
+/* 🔬 v5.10.3 (F38) — PREF DRIFT ka ilaj.
+   PEHLE: wake_lang / mic_zoom / mic_near / sukoon SIRF tab Kotlin ko jate the jab
+   wake switch TOGGLE hota tha (setWakeService akela push-point tha). Yani Settings
+   mein zubaan ya mic zoom badlo → service PURANI qeematon par chalti rehti thi,
+   aur ek sahih fix bhi "kaam nahi kiya" lagta tha. Ab har save par prefs tazaa. */
+function pushNativePrefs(){
+  if (typeof NATIVE === "undefined" || !NATIVE || !window.MayaBridge) return;
+  try { if (window.MayaBridge.setPrefString) {
+    window.MayaBridge.setPrefString('wake_lang', settings.wakeLang || 'en-IN');
+    window.MayaBridge.setPrefString('mic_zoom', String(settings.micZoom === undefined ? 0.8 : settings.micZoom));
+  } } catch(e){}
+  try { if (window.MayaBridge.setPref) {
+    if (typeof FLAGS !== "undefined" && FLAGS && FLAGS.on) window.MayaBridge.setPref('sukoon', FLAGS.on('sukoon'));
+    window.MayaBridge.setPref('mic_near', settings.micNear !== false);
+  } } catch(e){}
+}
 
 /* ---------- MEMORY ---------- */
 var facts = [];
@@ -8286,6 +8312,32 @@ var KAAN = {
     if (kind === "wake") KAAN.woke++;
   },
 
+  /* 🔬 v5.10.3 (F25) — NATIVE BUFFER FLUSH.
+     Kotlin ab har waqia PEHLE apne ring buffer mein darj karta hai, phir UI ko bhejta
+     hai. Is liye UI ke mare hue daur (screen off / app swipe / OEM kill) ke waqiat bhi
+     yahan pohanch jate hain — "suna 0" ka ambiguity khatam: ab pata chalta hai ke
+     recognizer behra tha, ya report raste mein giri thi. */
+  flushNative: function () {
+    var got = 0;
+    try {
+      if (!window.MayaBridge || !window.MayaBridge.wakeEvents) return 0;
+      var arr = JSON.parse(window.MayaBridge.wakeEvents() || "[]");
+      for (var i = 0; i < arr.length; i++) {
+        var ev = arr[i];
+        if (!ev || !ev.k) continue;
+        KAAN.log.push({ t: ev.t || (new Date()).getTime(), k: String(ev.k),
+                        d: String(ev.d || "").slice(0, 90), nat: 1 });
+        got++;
+      }
+      if (got) {
+        KAAN.log.sort(function (a, b) { return b.t - a.t; });
+        if (KAAN.log.length > KAAN.MAX) KAAN.log.length = KAAN.MAX;
+        KAAN.lastAt = (new Date()).getTime();
+      }
+    } catch (e) {}
+    return got;
+  },
+
   /* saare andazon mein se koi wake word hai? */
   match: function (alts) {
     var i, a;
@@ -8300,11 +8352,25 @@ var KAAN = {
     return null;
   },
 
+  /* 🔬 v5.10.3 (F11) — 10..15 PEHLE MAUJOOD HI NAHI the, is liye panel
+     "aakhri err 11 — ?" chhapta tha. AOSP ki qanooni fehrist poori ki gayi. */
   ERRNAME: { 1: "network timeout", 2: "network", 3: "audio", 4: "server", 5: "client",
              6: "koi awaaz nahi (khamoshi)", 7: "samajh nahi aaya", 8: "recognizer busy",
-             9: "permission nahi" },
+             9: "permission nahi",
+             10: "bohot request (hamara hi hammer)", 11: "server se connection toota",
+             12: "ye zubaan is recognizer ko supported nahi",
+             13: "zubaan ka pack download nahi hua",
+             14: "service support check ki ijazat nahi deti",
+             15: "model-download events support nahi" },
+  /* har code ka ILAJ — sirf naam nahi, rasta bhi */
+  ERRFIX: { 9: "Mic ki ijazat dein: Settings \u2192 Apps \u2192 MAYA \u2192 Permissions \u2192 Microphone",
+            10: "Wake ne bohot tezi se koshish ki \u2014 ab sust ho gayi hai (thik hai)",
+            11: "Google ki speech service toot rahi hai \u2014 internet check karein, ya LAB \u2192 wake ki zubaan 'English (India)' karein",
+            12: "Ye zubaan is phone ki service ko aati hi nahi \u2014 LAB \u2192 WAKE KI ZUBAAN badlein",
+            13: "Zubaan ka offline pack download nahi hua \u2014 \uD83D\uDDE3\uFE0F ON-DEVICE LANGUAGE dabayein" },
 
   report: function () {
+    try { KAAN.flushNative(); } catch (e0) {}   /* 🔬 F25 — UI ke mare daur ke waqiat bhi */
     var L = ["\uD83D\uDC42 WAKE WORD ka haal", ""], i, e, d;
     L.push("  switch      : " + ((settings && settings.wakeWord) ? "ON" : "OFF"));
     L.push("  suna        : " + KAAN.heard + " dafa");
@@ -8312,9 +8378,42 @@ var KAAN = {
     L.push("  nakami      : " + KAAN.errs + (KAAN.lastErr ? ("   (aakhri: " + KAAN.lastErr + " \u2014 " + (KAAN.ERRNAME[KAAN.lastErr] || "?") + ")") : ""));
     L.push("  mic chala   : " + KAAN.starts + " dafa");
     /* 🎚️ P9 SUKOON — ab NAZAR aata hai mic ne kyun nahi khula (andha nahi rahenge) */
-    L.push("  HAAL        : " + (typeof SUKOON !== "undefined" ? SUKOON.haal : "?") +
+    L.push("  HAAL (JS)   : " + (typeof SUKOON !== "undefined" ? SUKOON.haal : "?") +
            "   (awaaz kabhi nahi kategi — sirf KHALI par mic khulta hai)");
-    L.push("  roka gaya   : " + KAAN.skips + " dafa (Maya bol rahi thi / app ka mic)  ·  err8 maaf: " + KAAN.err8);
+    L.push("  roka gaya   : " + KAAN.skips + " dafa report · err8 maaf: " + KAAN.err8);
+    /* 🔬 v5.10.3 (F04) — KOTLIN KA SACH. PEHLE panel sirf JS ka haal dikhata tha:
+       "HAAL: KHALI" likh kar humein galat raaste par bhejta tha, jabke Kotlin mein
+       `pausedByApp = true` phansa hua tha (asal mujrim). Ab dono taraf ka haal +
+       MISMATCH ki pakad + delivery ka hisab (kitni reports UI tak pohanchin). */
+    var K = null;
+    try { if (window.MayaBridge && window.MayaBridge.wakeState) K = JSON.parse(window.MayaBridge.wakeState() || "null"); } catch (ek) { K = null; }
+    if (K) {
+      L.push("  HAAL (Kotlin): " + (K.haal || "?") +
+             (K.pausedByApp ? ("  ·  SULAH " + Math.round((K.pausedFor || 0) / 1000) + "s se") : "") +
+             (K.block ? ("  ·  RUKAWAT: " + K.block) : ""));
+      var jsH = (typeof SUKOON !== "undefined") ? SUKOON.haal : "";
+      if (String(K.haal || "") !== String(jsH || "") || (K.pausedByApp && jsH === "KHALI")) {
+        L.push("  ⚠️ MISMATCH: JS aur Kotlin ka HAAL alag — wake isi liye phansi thi (ab pakda gaya)");
+      }
+      L.push("  service      : " + (K.alive ? ("ZINDA · " + Math.round((K.uptime || 0) / 60) + " min se") : "☠️ MURDA (service chal hi nahi rahi)"));
+      L.push("  wake zubaan  : " + (K.lang || "?") + "   ·  recognizer: " + (K.using || "?") +
+             "   ·  gate: " + (K.gate ? "KHULA" : "band") + "   ·  farsh: " + (K.floor || 0) + "dB");
+      L.push("  KOTLIN ginti : suna " + (K.nHeard || 0) + " · mic chala " + (K.nStart || 0) +
+             " · nakami " + (K.nErr || 0) + " · roka " + (K.nSkip || 0) +
+             ((K.nDead || 0) ? ("  ·  ☠️ dead " + K.nDead) : "") +
+             ((K.errStreak || 0) ? ("  ·  lagatar " + K.errStreak + " (err " + (K.lastErr || 0) + ")") : ""));
+      L.push("  delivery     : UI ko bheje " + (K.sent || 0) + "  ·  GIRE " + (K.dropped || 0) +
+             ((K.heardOffline || 0) ? ("  ⚠ " + K.heardOffline + " wake UI mare hone ki wajah se zaya (Phase 3 mein ilaj)") : ""));
+      if ((K.errStreak || 0) >= 5) {
+        L.push("  ☠️ CIRCUIT OPEN: 5 lagatar nakami — koshishen sust kar di gayi hain (30s cap)");
+        var f = KAAN.ERRFIX[K.lastErr];
+        if (f) L.push("     💡 ILAJ: " + f);
+      } else if (K.lastErr && KAAN.ERRFIX[K.lastErr]) {
+        L.push("  💡 aakhri err ka ilaj: " + KAAN.ERRFIX[K.lastErr]);
+      }
+    } else {
+      L.push("  HAAL (Kotlin): ? — purani APK (wakeState bridge v5.10.3 se hai)");
+    }
     L.push("");
     if (!KAAN.log.length) {
       L.push("  \u26A0\uFE0F Service se ABHI TAK KUCH NAHI aaya.");
@@ -8602,13 +8701,15 @@ var KAAN = {
       L.push("     MAGAR Maya ki WAKE abhi online recognizer se hoti hai (internet zaroori):");
       L.push("     Maya abhi EXTRA_PREFER_OFFLINE istemal nahi karti \u2014 ye jaan boojh kar");
       L.push("     nahi kiya gaya, taake bina pack wale phone par wake toote na.");
-      L.push("     Behtar natija: \u2699\uFE0F Settings mein STT 'English (India)' rakho \u2014 Urdu");
-      L.push("     decoder \"\u0645\u0627\u06CC\u0627\" ko aksar \"\u06C1\u06D2\" jaisa parh leta hai.");
+      L.push("     \u2705 v5.10.3 se WAKE KI ZUBAAN ka APNA switch hai (STT se azad) \u2014 LAB mein");
+      L.push("     '\uD83D\uDC42 WAKE KI ZUBAAN' = English (India) default. Urdu decoder \"\u0645\u0627\u06CC\u0627\" ko");
+      L.push("     aksar \"\u06C1\u06D2\" jaisa parh leta tha; ab STT Urdu rahegi, wake English sune gi.");
     } else {
       L.push("  \uD83E\uDD1D SACH: is phone par offline (on-device) wake mumkin NAHI lagta \u2014 na AiAi");
       L.push("     hai na Google ka speech service. Maya \"Maya\" ONLINE recognizer se sunegi");
-      L.push("     (internet zaroori). Behtar: STT 'English (India)' rakho \u2014 Urdu decoder");
-      L.push("     \"\u0645\u0627\u06CC\u0627\" ko aksar \"\u06C1\u06D2\" jaisa parh leta hai. Wake phir bhi chalegi.");
+      L.push("     (internet zaroori). \u2705 v5.10.3: wake ki zubaan ka APNA switch hai \u2014 LAB");
+      L.push("     mein '\uD83D\uDC42 WAKE KI ZUBAAN' (default English-India). Urdu decoder \"\u0645\u0627\u06CC\u0627\"");
+      L.push("     ko aksar \"\u06C1\u06D2\" parh leta tha; STT Urdu reh kar bhi wake theek sunegi.");
     }
     btns.push({ t: "\uD83D\uDD0E Kyun? KAAN DOCTOR ki poori report", k: "__doctor" });
     btns.push({ t: "\uD83E\uDD16 Digital assistant settings (ye on-device zubaan ke liye NAHI)", k: "assistant",
@@ -8881,6 +8982,10 @@ var SET_FIELDS = [
   { id: "sFishTemp",    key: "fishTemp",      t: "num",   def: 0.35 },
   { id: "sTrustMode",   key: "trustMode",     t: "check", def: false },
   { id: "sWakeDoor",    key: "wakeDoor",      t: "num",   def: 15 },
+  /* 🔬 v5.10.3 (F12) — wake ki zubaan AB STT se AZAD. Urdu decoder "\u0645\u0627\u06CC\u0627"
+     ko aksar "\u06C1\u06D2" parh leta tha — hamara apna DOCTOR ye kehta tha, magar code
+     mein wake_lang = settings.stt bandha tha. */
+  { id: "sWakeLang",    key: "wakeLang",      t: "sel",   def: "en-IN" },
   { id: "sMicZoom",     key: "micZoom",       t: "num",   def: 0.8 },
   { id: "sMicNear",     key: "micNear",       t: "check", def: true },
   { id: "sStt",         key: "stt",           t: "sel",   def: "ur-PK" },
@@ -9589,10 +9694,26 @@ window.selectArtist = function(id) { settings.voiceArtist = id; saveSettings(); 
 function setWakeService(on){
   if (!NATIVE) { toast("Wake word sirf APK version mein hai"); return; }
   try {
-    window.MayaBridge.setPrefString && (window.MayaBridge.setPrefString('wake_lang', settings.stt || 'en-IN'),
-      window.MayaBridge.setPrefString('mic_zoom', String(settings.micZoom === undefined ? 0.8 : settings.micZoom)),
-      window.MayaBridge.setPref('sukoon', FLAGS.on('sukoon')),
-      window.MayaBridge.setPref('mic_near', settings.micNear !== false)), window.MayaBridge.wakeService(on);
+    /* 🔬 v5.10.3 (F12 + F38) — wake ki zubaan AB `settings.wakeLang` se aati hai
+       (pehle `settings.stt` thi: Urdu decoder "مایا" ko "ہے" parh leta tha),
+       aur prefs HAR save par push hote hain — sirf toggle par nahi. */
+    pushNativePrefs();
+    /* 🔬 v5.10.3 (F39) — PEHLE is call ka jawab PHENK diya jata tha: mic ki ijazat
+       na hone par Kotlin `false` lotata tha (aur ijazat ka dialog kholta tha), magar JS
+       phir bhi "Wake word ON" toast kar ke switch ON dikha deta tha — SWITCH JHOOT
+       BOLTA THA. Ab jawab parha jata hai aur halat saaf batayi jati hai. */
+    var ok = true;
+    if (window.MayaBridge.wakeService) {
+      try { ok = (window.MayaBridge.wakeService(on) !== false); } catch(e2) { ok = false; }
+    }
+    if (on && !ok) {
+      settings.wakeWord = false; saveSettings();
+      var swb = $("#sWake"); if (swb) swb.checked = false;
+      hudRefresh();
+      toast("⚠️ Wake ON nahi hui — mic ki ijazat chahiye (dialog khul raha hai)");
+      pushLog("WAKE: service start nahi hui — mic permission missing");
+      return;
+    }
     if (on) { try { if (!window.MayaBridge.batteryUnrestricted()) window.MayaBridge.requestBatteryUnrestricted(); } catch(e){} }
     toast(on ? "\uD83D\uDC42 Wake word ON — ab 'Maya' ya 'Boss' bolo" : "Wake word OFF");
     pushLog("WAKE WORD: " + (on ? "ON" : "OFF"));
@@ -9967,6 +10088,10 @@ populateVoiceSelect();
 renderArtists();
 setTimeout(consolidateMemory, 4000);
 if (NATIVE && settings.wakeWord) setTimeout(function(){ try { setWakeService(true); } catch(e){} }, 1500);
+/* 🔬 v5.10.3 (F25) — app khulte hi Kotlin ka native buffer JS mein utaar lo:
+   screen-off/app-swipe daur ke waqiat (jo UI tak kabhi nahi pohanche the) yahan
+   aa jate hain, aur KAAN panel poori tareekh dikhata hai. */
+if (NATIVE) setTimeout(function(){ try { KAAN.flushNative(); } catch(e){} }, 2200);
 setTimeout(refreshHandsFreeStatus, 800);
 setInterval(refreshHandsFreeStatus, 10000);
 if (NATIVE) {

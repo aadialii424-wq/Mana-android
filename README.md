@@ -1,9 +1,36 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.10.2 "KHUD-MUKHTAR" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.10.3 "WAKE ZINDA" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🏅 v5.10.3 — "WAKE ZINDA" *(Phase 0 + native instrument · forensic ka pehra ilaj)*
+
+Forensic ne 43 flaws pakde the; is release ne **wo teen zanjeerein kaati** jo wake ko *murda* kar
+rahi thin — aur sath mein wo **instrument** banaya jo ab mareez ke sath nahi marta.
+
+| ⛓️ | Zanjeer | Ilaj |
+|---|---|---|
+| **A** | Wake har SUNO ke baad **60 second murda** (`roka 67`) | `resumeFromApp()` ab **4 jagah CALL** hoti hai (`stopRecognizer`, `onError`, `onResults`, `onDestroy`) — pehle **0** thi. Stale-pause 60s → **10s** + `appMicBusy()` check (blind release khatam). Blocked poll 700ms → **3s**, skip reports **rate-limited (15s, `x N` ginti ke sath)** → KAAN ka 40-entry log ab kachre se nahi bharta |
+| **B** | `err 11` lagatar 15 — har 1.2s cloud par hamla | Har code ka **apna backoff** (10/11/12/13) + `errStreak` se escalation **x1→x16** + **30s cap** + 3 nakami par `resetRecognizer()` + 5 par **CIRCUIT OPEN** → `report("dead")` + toast. `error 9` (permission) par hammer band. ⚠ user ka wake switch **kabhi khud off nahi** (P9 wada barqarar) |
+| **C** | Wake ki zubaan `ur-PK` + settings service tak pohanchti hi na thin | Nayi setting **`wakeLang`** (default **en-IN**) — STT/TTS apni jagah Urdu rahenge. LAB mein `👂 WAKE KI ZUBAAN` select. **`pushNativePrefs()`** ab har `saveSettings()` par chalti hai (pehle sirf wake-toggle par — isi liye sahih fix bhi "kaam nahi kiya" lagta). Aur `wakeService()` ka jawab ab **parha** jata hai: ijazat na ho to switch OFF + saaf toast (pehle switch **jhoot** bolta tha) |
+
+**🔬 NATIVE INSTRUMENT** (F25/F27/F04) — *"instrument mareez ke sath na mare"*:
+
+* Har waqia **PEHLE Kotlin** ke ring buffer (60) mein darj hota hai, phir UI ko jata hai → `wakeEvents()` bridge + `KAAN.flushNative()`. Is liye **screen-off / app-swipe daur ke waqiat bhi** mil jate hain, aur `suna 0` ka ambiguity khatam (pehle pata hi nahi chalta tha ke recognizer behra tha ya report raste mein giri thi).
+* `evalPublicOk()` ab maujood `webViewAlive` flag ko **asal mein** check karta hai → delivery ka hisab (`bheje N · GIRE N`).
+* `wakeState()` bridge → panel mein **`HAAL (JS)` aur `HAAL (Kotlin)` dono**, sath mein **`⚠️ MISMATCH`** line (yehi line is poore bug ko 2 second mein pakad leti), `service: ZINDA/MURDA`, `wake zubaan`, `recognizer`, `gate`, `farsh`, `KOTLIN ginti`, `☠️ CIRCUIT OPEN` + `💡 ILAJ`.
+* `ERRNAME` ab **1..15** poori (pehle 10..15 ghayab → panel `err 11 — ?` chhapta tha) + naya `ERRFIX` (har code ka **rasta**, sirf naam nahi).
+* F18: 12-min watchdog ab gate chalu hote hue recognizer mic par **nahi** thons ta.
+
+🧪 **+32 test** (1153 → **1185**) — lab Section 30. Naya usool: **har lock WIRING par, declaration par nahi** (F01 ka sabaq: `resumeFromApp()` *likhi* hui thi is liye purane 1153 tests GREEN the, magar *call* kahin nahi hoti thi). 4 purane asserts sudhare — wo buggy behaviour ko lock kar rahe the (`wake_lang = settings.stt`, `> 60000`, `8 -> {`, `HAAL        : `).
+
+📖 [`docs/FIX-v5.10.3-wake-zinda.md`](docs/FIX-v5.10.3-wake-zinda.md) · forensic: [`docs/FORENSIC-WAKE-WORD.md`](docs/FORENSIC-WAKE-WORD.md)
+
+**Ab kya:** Phase 1 (robustness: `WakeState`, VAD calibration, wake ka apna recognizer) → Phase 2 (WAKE DOCTOR v2 + live notification) → **Phase 2.5 auto-update** (F43 — APK ka apna rasta, §17) → Phase 3 (wake ka dimaag Kotlin mein — screen-off/app-band/reboot) → Phase 4 (offline KWS engine).
+
+---
 
 ## 🔬 WAKE WORD FORENSIC — **42 flaws** (2 pass), STRUCTURE v2 tayyar *(analysis · koi code nahi badla)*
 
@@ -49,7 +76,8 @@ boot autostart, service heartbeat, screen-off wake — F25/F26/F28/F33/F36/F37 k
 Har phase ke acceptance criteria, test-locks (wiring par, declaration par nahi — F01 ka sabaq),
 10 device tests aur numeric targets doc mein hain.
 
-🧪 Tests **1153/1153** barqarar (analysis mein koi code change nahi).
+🧪 Forensic ke waqt tests **1153/1153** the (koi code change nahi hua tha) — **v5.10.3** mein
+Phase 0 implement hua aur +32 wiring-locks ke sath **1185/1185** ho gaye (upar dekhein).
 
 📖 [`docs/FORENSIC-WAKE-WORD.md`](docs/FORENSIC-WAKE-WORD.md)
 
