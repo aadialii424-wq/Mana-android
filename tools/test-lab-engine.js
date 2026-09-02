@@ -2295,6 +2295,26 @@ Here's a thinking process:
       '🕊️ L5 ERR-8 MERCY barqarar — na stopSelf, na switch haath mein');
   }
 
+  /* ═══ 31. 📱 QANOON 9 — RELEASE REPORT (aap ki farmaish 2026-09-03) ═══
+     "har naye version… hum ko batana hai last mein ke isme kya naya add hua
+      aur usko kaise check karna hai, test kaise karna hai."
+     Ye ab QANOON hai — aur qanoon us waqt tak qanoon nahi jab tak TAALA na ho. */
+  head('31. 📱 QANOON 9 — har release ka aam-zubaan hisab (kya naya + kaise parakhna)');
+  {
+    const WF = fs.readFileSync(path.join(ROOT, 'docs/AMAL-WORKFLOW.md'), 'utf8');
+    is(/Qanoon 9 — HAR VERSION KE AAKHIR MEIN/.test(WF) &&
+       /HISSA M — 📱 RELEASE REPORT ka FARMA/.test(WF),
+      '📜 Qanoon 9 + HISSA M ka farma workflow doc mein darj hai (zubaani wada nahi)');
+    const RD = fs.readFileSync(path.join(ROOT, 'docs/FIX-v5.10.3-wake-zinda.md'), 'utf8');
+    is(/## 📱 RELEASE REPORT/.test(RD) && /Kya naya hua — aam zubaan/.test(RD),
+      '📱 v5.10.3 ki release report maujood — aam zubaan mein (code ke naam ke bagair)');
+    is(/✅ PASS ka nishaan/.test(RD) && /❌ FAIL ka nishaan/.test(RD),
+      '🎯 har test ka PASS AUR FAIL nishaan likha hai — "check karo" ke bagair andaza nahi');
+    is(/Kya abhi bhi adhoora hai/.test(RD) && /Version ki pehchaan/.test(RD) &&
+       /Agar kaam na kare — ye bhejein/.test(RD),
+      '🫱 imaandari (kya adhoora) + version ki pehchaan + nakami par kya bhejein — teeno lazmi');
+  }
+
     console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');
     if (fail === 0) console.log('\x1b[1m\x1b[32m✅ SAB TEST PASS — ' + pass + '/' + pass + '\x1b[0m');
     else console.log('\x1b[1m\x1b[31m❌ ' + fail + ' TEST FAIL — ' + pass + '/' + (pass + fail) + ' pass\x1b[0m');

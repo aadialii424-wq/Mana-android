@@ -193,3 +193,67 @@ Section 30 (`tools/test-lab-engine.js`) ke locks:
 * Artifact: **MAYA-APK · 3,200,895 bytes** (v5.10.2 se +8.5 KB — sirf code, koi naya asset/dependency nahi)
 * Download: <https://github.com/adil-chandio/Mana-android/actions/runs/33679657338> → **MAYA-APK** → `app-debug.apk` install karein
 * Saboot ke liye: boot par toast `MAYA v5.10.3 • 👂 WAKE ZINDA: SUNO ke baad foran wapas + err-11 hammer band`
+
+---
+
+## 📱 RELEASE REPORT — v5.10.3 "WAKE ZINDA"  *(Qanoon 9 / HISSA M ka farma)*
+
+### 1. Kya naya hua — aam zubaan mein (code ke naam ke bagair)
+
+| # | Aap ko kya farq dikhega | Pehle | Ab |
+|---|---|---|---|
+| 1 | **"Maya" bolne par jawab** | 🎤 SUNO dabane ke baad **1 poore minute** tak wake bekaar — aap "Maya" bolte rehte, kuch na hota | SUNO khatam hone ke **~1 second** baad wake wapas chalu |
+| 2 | **Wake kis zubaan mein sunti hai** | Urdu decoder "مایا" ko "ہے" jaisa parh leta tha → wake chup rehti | Wake ab **English (India)** se sunti hai. ⚠ Aap ki baat-cheet (STT) aur Maya ki awaaz (TTS) **Urdu hi rahengi** — sirf wake ki pehchan badli hai. LAB mein badalne ka apna switch bhi hai |
+| 3 | **Settings ka asar** | Zubaan / mic zoom badalne ke baad wake **purani** settings par chalti rehti thi (wake OFF-ON karna parta tha) | Har **SAVE** ke baad foran lagu — OFF-ON karne ki zaroorat nahi |
+| 4 | **Wake switch ka sach** | Mic ki ijazat na hone par bhi switch **ON** dikhta aur "Wake word ON" ka toast aata — switch jhoot bolta tha | Switch khud **OFF** ho jata hai + saaf message: *"⚠️ Wake ON nahi hui — mic ki ijazat chahiye"* |
+| 5 | **Internet/service tootne par** | Har **1.2 second** nayi koshish (battery + data zaya), aur aap ko **koi khabar tak nahi** | Koshishen dheere-dheere sust (30 second tak ka waqfa), 5 nakami par **toast** + panel par `☠️ CIRCUIT OPEN` aur uska **💡 ILAJ** |
+| 6 | **KAAN panel (LAB)** | `aakhri err 11 — ?` (naam nahi) aur `HAAL: KHALI` (jo **jhoot** tha) | Error ka **naam + ilaj** · `HAAL (JS)` aur `HAAL (Kotlin)` **dono** · beech mein farq ho to `⚠️ MISMATCH` · `service: ZINDA/MURDA` · wake ki zubaan · kitni reports UI tak pohanchin aur kitni **girin** |
+| 7 | **Log ki tareekh** | Ek hi line **67 dafa** — asal waqiat mit jate the | Wahi line ab **ginti ke sath** (`x 67`) aur sirf har 15 second — poori tareekh nazar aati hai |
+| 8 | **Screen band / app band ke waqt** | Wake suni hui baat **chupke zaya** ho jati, koi nishaan nahi | Ab **darj** hoti hai: panel par `GIRE N` aur `heardOffline` nazar aata hai *(poora ilaj — yaani screen band mein bhi amal hona — Phase 3 mein)* |
+
+### 2. Kaise check karein — har cheez ka apna test
+
+> ⚙️ Pehle nayi APK install karein (neeche Hissa 5 dekhein ke lag gayi ya nahi).
+
+| Test | Kadam | ✅ PASS ka nishaan | ❌ FAIL ka nishaan |
+|---|---|---|---|
+| **T0 — APK lagi?** | App kholo | Boot par toast: **"MAYA v5.10.3 • 👂 WAKE ZINDA…"** | Purana toast (v5.10.2) → APK update nahi hui |
+| **T1 — SUNO ke baad wake** | 1) 🎤 SUNO dabao 2) 3 second bolo 3) chhor do 4) **turant** "Maya" bolo | ~1 second mein 👂 chime / "Ji Boss?" | 1 minute tak kuch na ho, phir achanak chale |
+| **T2 — wake 10 dafa** | 1 metre door, khamosh kamra, aam awaaz mein 10 dafa "Maya" | Kam az kam **8-9 dafa** jaage | 3 se kam dafa jaage |
+| **T3 — zubaan** | 1) Settings → STT = **اردو Urdu** 2) SAVE 3) wake switch ko **haath mat lagao** 4) LAB → WAKE WORD KA HAAL | Line: **`wake zubaan : en-IN`** | `wake zubaan : ur-PK` (yaani purani APK ya fix nahi chala) |
+| **T4 — internet band** | 1) Airplane mode ON 2) 5 minute chhodo 3) panel kholo | `nakami` barhe **magar** dheere (waqfa 10-30s), ek **toast** aaye, panel par `☠️ CIRCUIT OPEN` + `💡 ILAJ` | Har 1-2 second nayi koshish, koi toast nahi |
+| **T5 — ijazat** | 1) Phone Settings → Apps → MAYA → Microphone **OFF** 2) app mein wake ON karo | Switch **khud OFF** reh jaye + toast *"mic ki ijazat chahiye"* | Switch ON dikhe aur toast "Wake word ON" aaye |
+| **T6 — panel ka naya chehra** | LAB → 🩺 KAAN DOCTOR aur WAKE WORD KA HAAL kholo | Nayi lines nazar aayen: `HAAL (Kotlin)`, `service`, `wake zubaan`, `delivery: bheje N · GIRE N` | Sirf purani lines hon (`HAAL :`, `roka gaya`) → purani APK |
+| **T7 — tareekh saaf** | Wake ON chhod kar 5 minute baat karo, phir panel kholo | Log mein **mixed** waqiat hon (voice/mic/err/suna) | Log mein sirf ek hi line bar bar (`sulah: app ka mic`) |
+| **T8 — 12 minute** | App chalu chhod kar 15 minute ruk jao, phir panel kholo | `nakami` mein **3 ya 8** wale error na barhein | `err 3` / `err 8` bar bar |
+
+### 3. Kya abhi bhi adhoora hai (imaandari)
+
+| Adhoora | Kyun | Kab |
+|---|---|---|
+| **Screen band / app swipe ke baad wake ka AMAL** nahi hota (sunti hai, magar chime nahi, app nahi khulti) | Wake ka faisla abhi bhi app ki screen (WebView) ke andar hota hai, jise Android band kar sakta hai. Is release ne isay **chhupaya nahi — napa jane laiq banaya** (`heardOffline`/`GIRE N`) | **Phase 3** (v5.12.0) — wake ka dimaag native mein |
+| **Phone restart ke baad wake khud chalu nahi hoti** | Boot ka rasta jaan boojh kar band kiya gaya tha (purana "black screen" dar) | **Phase 3** |
+| **Tez shor mein wake ko chillana parta hai** (`farsh 62dB` wala masla) | Awaaz-naapne ka farsh (noise floor) pehli hi sample par atak jata hai | **Phase 1** (v5.11.0) |
+| **Airplane mode mein wake kabhi nahi chalegi** | Wake abhi **online** recognizer se hoti hai | **Phase 4** (v6.0.0) — local/offline engine |
+| **APK khud update nahi hoti** | Update ka koi channel hi nahi (har bar manual install) | **Phase 2.5** — design tayyar hai, aap ke channel ke faislay ka intezar |
+
+### 4. Agar kaam na kare — ye bhejein (3 cheezein)
+
+1. **LAB → 👂 WAKE WORD KA HAAL** ka **poora text** copy kar ke paste karein (ab is mein Kotlin ka
+   sach bhi hota hai — `HAAL (Kotlin)`, `service`, `delivery`).
+2. **LAB → 🩺 KAAN DOCTOR** ki report (phone ki asli fehrist).
+3. Ek line mein: **phone ka naam + Android version**, aur **aap kya kar rahe the** (misal:
+   "SUNO dabaya, phir Maya bola, kuch nahi hua").
+
+> Bas. In teen se agla faisla **andaze se nahi, saboot se** hoga — yehi is release ka doosra adha tha.
+
+### 5. Version ki pehchaan (nayi APK lagi ya nahi?)
+
+| Nishaan | Kahan |
+|---|---|
+| Boot toast: **"MAYA v5.10.3 • 👂 WAKE ZINDA: SUNO ke baad foran wapas + err-11 hammer band"** | App khulte hi |
+| Panel mein nayi line **`HAAL (Kotlin): …`** | LAB → 👂 WAKE WORD KA HAAL |
+| LAB mein naya select **`👂 WAKE KI ZUBAAN`** (English India / Hindi / Urdu) | LAB, "MIC KA ZOOM" ke upar |
+| Error ka **naam** likha ho (`11 — server se connection toota`), `?` nahi | LAB → panel |
+
+Agar in mein se **ek bhi nishaan nahi** mila → APK purani hai, naye fix ka imtihaan bekaar jayega.

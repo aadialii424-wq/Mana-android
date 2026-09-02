@@ -24,7 +24,33 @@ rahi thin — aur sath mein wo **instrument** banaya jo ab mareez ke sath nahi m
 * `ERRNAME` ab **1..15** poori (pehle 10..15 ghayab → panel `err 11 — ?` chhapta tha) + naya `ERRFIX` (har code ka **rasta**, sirf naam nahi).
 * F18: 12-min watchdog ab gate chalu hote hue recognizer mic par **nahi** thons ta.
 
-🧪 **+32 test** (1153 → **1185**) — lab Section 30. Naya usool: **har lock WIRING par, declaration par nahi** (F01 ka sabaq: `resumeFromApp()` *likhi* hui thi is liye purane 1153 tests GREEN the, magar *call* kahin nahi hoti thi). 4 purane asserts sudhare — wo buggy behaviour ko lock kar rahe the (`wake_lang = settings.stt`, `> 60000`, `8 -> {`, `HAAL        : `).
+🧪 **+36 test** (1153 → **1189**) — lab Section 30 (wiring locks) + Section 31 (📱 Qanoon 9). Naya usool: **har lock WIRING par, declaration par nahi** (F01 ka sabaq: `resumeFromApp()` *likhi* hui thi is liye purane 1153 tests GREEN the, magar *call* kahin nahi hoti thi). 4 purane asserts sudhare — wo buggy behaviour ko lock kar rahe the (`wake_lang = settings.stt`, `> 60000`, `8 -> {`, `HAAL        : `).
+
+### 📱 AAM ZUBAAN MEIN — kya naya hua aur kaise parakhna hai
+
+Poora hisab (8 badlaav + 9 test + "kya abhi bhi adhoora hai") release doc ke **📱 RELEASE REPORT**
+hisse mein hai. Chhota khulasa:
+
+| Aap ko kya farq dikhega | Kaise check karein | ✅ PASS |
+|---|---|---|
+| SUNO ke baad wake **foran** wapas (pehle 1 minute murda) | SUNO dabao → bolo → chhodo → turant "Maya" bolo | ~1s mein chime / "Ji Boss?" |
+| Wake ki zubaan **English (India)** (baat-cheet Urdu hi rahegi) | Settings STT = Urdu, SAVE, wake ko haath na lagao → LAB panel | `wake zubaan : en-IN` |
+| Settings badlo to **foran** lagu (wake OFF-ON ki zaroorat nahi) | Upar wala test hi | wahi |
+| Mic ki ijazat na ho to switch **jhoot nahi bolta** | Mic permission OFF kar ke wake ON karo | Switch khud OFF + "mic ki ijazat chahiye" |
+| Internet toote to **khabar** milti hai (chup-chaap marna band) | Airplane mode 5 minute | Toast + panel par `☠️ CIRCUIT OPEN` + `💡 ILAJ` |
+| Panel ab **sach** bolta hai | LAB → 👂 WAKE WORD KA HAAL | `HAAL (JS)` **aur** `HAAL (Kotlin)` dono + `delivery: bheje N · GIRE N` |
+| Log ki tareekh wapas | 5 minute baat karo → panel | Mixed waqiat, ek hi line 67 dafa nahi |
+
+**Version ki pehchaan:** boot par toast `MAYA v5.10.3 • 👂 WAKE ZINDA…` · LAB mein naya select
+`👂 WAKE KI ZUBAAN` · panel ki nayi line `HAAL (Kotlin):`. In mein se ek bhi na ho → APK purani hai.
+
+### ⚖️ Qanoon 9 (naya) — har version ke baad ye hisab **lazmi** hai
+
+Aap ki farmaish: *"har naye version… hum ko batana hai last mein ke isme kya naya add hua aur usko
+kaise check karna hai, test kaise karna hai."* Ab ye `docs/AMAL-WORKFLOW.md` ka **Qanoon 9** hai,
+uska farma **HISSA M** mein hai, aur **test-lock** lag gaya hai (lab Section 31): kisi release doc
+mein `📱 RELEASE REPORT` + "PASS ka nishaan" + "FAIL ka nishaan" + "kya adhoora hai" + "version ki
+pehchaan" na ho to tests **FAIL** honge.
 
 📖 [`docs/FIX-v5.10.3-wake-zinda.md`](docs/FIX-v5.10.3-wake-zinda.md) · forensic: [`docs/FORENSIC-WAKE-WORD.md`](docs/FORENSIC-WAKE-WORD.md)
 
@@ -77,7 +103,7 @@ Har phase ke acceptance criteria, test-locks (wiring par, declaration par nahi �
 10 device tests aur numeric targets doc mein hain.
 
 🧪 Forensic ke waqt tests **1153/1153** the (koi code change nahi hua tha) — **v5.10.3** mein
-Phase 0 implement hua aur +32 wiring-locks ke sath **1185/1185** ho gaye (upar dekhein).
+Phase 0 implement hua aur +36 locks ke sath **1189/1189** ho gaye (upar dekhein).
 
 📖 [`docs/FORENSIC-WAKE-WORD.md`](docs/FORENSIC-WAKE-WORD.md)
 
