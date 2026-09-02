@@ -198,6 +198,8 @@ Section 30 (`tools/test-lab-engine.js`) ke locks:
 
 ## 📱 RELEASE REPORT — v5.10.3 "WAKE ZINDA"  *(Qanoon 9 / HISSA M ka farma)*
 
+> 📄 **Ek parcha (phone mein rakhne layak, tick ✅ lagane layak):** [`REPORT-v5.10.3-aam-zubaan.md`](REPORT-v5.10.3-aam-zubaan.md) — neeche wala poora hisab usi ki tafseel hai.
+
 ### 1. Kya naya hua — aam zubaan mein (code ke naam ke bagair)
 
 | # | Aap ko kya farq dikhega | Pehle | Ab |

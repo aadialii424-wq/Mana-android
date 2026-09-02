@@ -24,7 +24,7 @@ rahi thin — aur sath mein wo **instrument** banaya jo ab mareez ke sath nahi m
 * `ERRNAME` ab **1..15** poori (pehle 10..15 ghayab → panel `err 11 — ?` chhapta tha) + naya `ERRFIX` (har code ka **rasta**, sirf naam nahi).
 * F18: 12-min watchdog ab gate chalu hote hue recognizer mic par **nahi** thons ta.
 
-🧪 **+36 test** (1153 → **1189**) — lab Section 30 (wiring locks) + Section 31 (📱 Qanoon 9). Naya usool: **har lock WIRING par, declaration par nahi** (F01 ka sabaq: `resumeFromApp()` *likhi* hui thi is liye purane 1153 tests GREEN the, magar *call* kahin nahi hoti thi). 4 purane asserts sudhare — wo buggy behaviour ko lock kar rahe the (`wake_lang = settings.stt`, `> 60000`, `8 -> {`, `HAAL        : `).
+🧪 **+40 test** (1153 → **1193**) — lab Section 30 (wiring locks) + Section 31/31b (📱 Qanoon 9 + ek-parcha report). Naya usool: **har lock WIRING par, declaration par nahi** (F01 ka sabaq: `resumeFromApp()` *likhi* hui thi is liye purane 1153 tests GREEN the, magar *call* kahin nahi hoti thi). 4 purane asserts sudhare — wo buggy behaviour ko lock kar rahe the (`wake_lang = settings.stt`, `> 60000`, `8 -> {`, `HAAL        : `).
 
 ### 📱 AAM ZUBAAN MEIN — kya naya hua aur kaise parakhna hai
 
@@ -51,6 +51,8 @@ kaise check karna hai, test kaise karna hai."* Ab ye `docs/AMAL-WORKFLOW.md` ka 
 uska farma **HISSA M** mein hai, aur **test-lock** lag gaya hai (lab Section 31): kisi release doc
 mein `📱 RELEASE REPORT` + "PASS ka nishaan" + "FAIL ka nishaan" + "kya adhoora hai" + "version ki
 pehchaan" na ho to tests **FAIL** honge.
+
+📄 **Ek parcha (phone mein rakhne layak, tick ✅ lagane layak):** [`docs/REPORT-v5.10.3-aam-zubaan.md`](docs/REPORT-v5.10.3-aam-zubaan.md) — kya naya hua, kaise parakhna hai, kya adhoora hai, nakami par kya bhejein, version ki pehchaan.
 
 📖 [`docs/FIX-v5.10.3-wake-zinda.md`](docs/FIX-v5.10.3-wake-zinda.md) · forensic: [`docs/FORENSIC-WAKE-WORD.md`](docs/FORENSIC-WAKE-WORD.md)
 
@@ -103,7 +105,7 @@ Har phase ke acceptance criteria, test-locks (wiring par, declaration par nahi �
 10 device tests aur numeric targets doc mein hain.
 
 🧪 Forensic ke waqt tests **1153/1153** the (koi code change nahi hua tha) — **v5.10.3** mein
-Phase 0 implement hua aur +36 locks ke sath **1189/1189** ho gaye (upar dekhein).
+Phase 0 implement hua aur +40 locks ke sath **1193/1193** ho gaye (upar dekhein).
 
 📖 [`docs/FORENSIC-WAKE-WORD.md`](docs/FORENSIC-WAKE-WORD.md)
 

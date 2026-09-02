@@ -2313,6 +2313,21 @@ Here's a thinking process:
     is(/Kya abhi bhi adhoora hai/.test(RD) && /Version ki pehchaan/.test(RD) &&
        /Agar kaam na kare — ye bhejein/.test(RD),
       '🫱 imaandari (kya adhoora) + version ki pehchaan + nakami par kya bhejein — teeno lazmi');
+
+    /* ── 31b. Ek parcha: phone mein rakhne layak, tick (✅) lagane layak ── */
+    const RP = fs.readFileSync(path.join(ROOT, 'docs/REPORT-v5.10.3-aam-zubaan.md'), 'utf8');
+    is(/## 1\) Kya naya hua/.test(RP) && /## 2\) Parakhne ka tareeqa/.test(RP) &&
+       /## 3\) Jo abhi adhoora hai/.test(RP) && /## 4\) FAIL ho to/.test(RP) &&
+       /## 5\) Sahi version ki pehchaan/.test(RP),
+      '📄 ek-parcha report: paanchon hisse (naya / parakhna / adhoora / kya bhejen / pehchaan)');
+    is((RP.match(/- \[ \]/g) || []).length >= 9,
+      '🖊️ parche mein tick-khane (checkbox) hain — user parakh kar khud ✅ laga sakta hai',
+      (RP.match(/- \[ \]/g) || []).length + ' khane');
+    is(/PASS \| FAIL|PASS ✅ \| FAIL ❌|PASS ✅/.test(RP) && /FAIL ❌/.test(RP),
+      '🎯 parche mein PASS aur FAIL dono ke nishan (andaza nahi, nishan)');
+    const RM = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
+    is(/REPORT-v5\.10\.3-aam-zubaan\.md/.test(RM),
+      '🔗 README se parche ka raasta — report chat mein gum nahi hoti, repo mein rehti hai');
   }
 
     console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');
