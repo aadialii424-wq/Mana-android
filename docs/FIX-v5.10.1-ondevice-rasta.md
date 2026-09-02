@@ -160,7 +160,11 @@ e: …/MainActivity.kt:1436:83 Type mismatch: inferred type is MainActivity.Maya
 | *(sath nikla latent bug)* `if (SDK_INT >= 31)` | Method **API 33** se hai → API 31/32 par `NoSuchMethodError`, jo `Error` hai, `Exception` **nahi** → `catch (Exception)` pakadta nahi → **bridge crash** | Dono jagah guard `>= 33` + `catch (e: Throwable)` (ye `micDoctor()` mein v5.10.0 se pehle se tha — ab pakda gaya) |
 | *(bonus)* `act(ACTION_APPLICATION_DETAILS_SETTINGS, pkg)` | App-info screen ko `setPackage` nahi, **`package:` data URI** chahiye → rung bekaar jata | `Intent(action, Uri.parse("package:$GBOARD"))` |
 
-Teeno (charo) ab **test mein lock** hain — Section **28d**: *"jo Settings constants public API
+**Natija:** commit `e33b28a` par CI **✅ GREEN** — run `33663584197`, step *"4. APK BUILD"*
+success, aur **MAYA-APK** artifact ban gayi (download: run ke page par). Yani v5.10.1 ka
+Kotlin compile ho gaya — ab ye saboot par hi likha ja raha hai, andaze par nahi.
+
+Charo galtiyaan ab **test mein lock** hain — Section **28d**: *"jo Settings constants public API
 mein hain hi nahi wo dobara na aayen"*, *"bridge ke andar `this` Context nahi"*, *"guard 33 +
 catch Throwable"*, *"app-info ko data URI"*. Yani agli dafa koi wahi galti likhe to test pehle
 bol dega, CI nahi.
