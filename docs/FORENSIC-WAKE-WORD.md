@@ -8,10 +8,21 @@
 | **Mareez** | TECNO KL4 · Android 14 (SDK 34) · WebView 152.0.7977.64 |
 | **Mahol** | STT = `ur-PK` · wakeWord = ON · AiAi = NAHI · speech service = `com.google.android.tts` · default assistant = Google Go · online |
 | **Alaamat** | `suna 0 · JAAGI 0 · nakami 8 · mic chala 7 · aakhri err 11 · roka 67 · HAAL: KHALI` |
-| **Faisla** | Wake word **toota hua NAHI, bandh hua hai** — do alag zanjeerein (A: livelock, B: retry-storm) + ek buniyadi architecture ki ghalti |
+| **Faisla** | Wake word **toota hua NAHI, bandh hua hai** — 3 zanjeerein (A: livelock, B: retry-storm, C: VAD floor) + **screen-off wake ka poora rasta hi band** (F25/F33/F26/F36) |
+| **Flaws** | **42** (pass 1: F01–F24 · pass 2: F25–F42) — 8 🔴 critical · 12 🟠 high · 12 🟡 medium · 6 ⚪ low |
+| **Plan** | **Structure v2**: Phase 0 `v5.10.3` → Phase 4 `v6.0.0` (§15) — har phase ke acceptance criteria + test-locks + device tests |
 | **Hukm** | ⛔ IS DAURA MEIN KUCH BANANA NAHI — sirf research / forensic / structure |
 
-> **TL;DR (ek saans mein):** `pauseForApp()` ka **koi wapsi raasta nahi** — `resumeFromApp()`
+> **PASS 2 KA TL;DR:** teen flaws F01 se bhi zyada bunyadi nikle — **(1)** `handleAll()` wake ka
+> nateeja **phenk deta hai** jab WebView zinda na ho (`lastHeardOffline` ek dead variable hai), yani
+> screen-band/jaib mein wake ka poora maqsad hi bekaar; **(2)** wake ka **dimaag JS mein** hai, is liye
+> uski zindagi ek UI component ke haath mein hai jise Android kabhi bhi maar sakta hai; **(3)**
+> `BootReceiver` **khokhla** hai (start-line commented) aur service ko marne ke baad zinda karne wala
+> koi nahi — reboot ke baad wake tab tak OFF jab tak app na kholein. Sath mein **F38 pref-drift**:
+> `wake_lang`/`mic_zoom`/`mic_near` sirf wake-toggle par Kotlin ko jate hain, yaani Settings badalne se
+> service ko khabar hi nahi hoti — **ye fix ko “kaam nahi kiya” dikhane wala trap hai.**
+>
+> **TL;DR (pass 1, ek saans mein):** `pauseForApp()` ka **koi wapsi raasta nahi** — `resumeFromApp()`
 > poori codebase mein ek jagah bhi call nahi hoti, is liye har SUNO tap ke baad wake **60 second
 > tak murda** rehti hai aur us dauran har 700ms ek skip-report WebView par thonsi jati hai
 > (67 dafa). Us ke baad jo recognizer chalta hai wo `ERROR_SERVER_DISCONNECTED (11)` par
@@ -202,7 +213,10 @@ feed). Yani floor ka latch **dono taraf** se nuqsaan deta hai: behraapan ya fals
 
 ---
 
-## 4. FLAW REGISTER — F01 … F24
+## 4. FLAW REGISTER — F01 … F24 *(pass 1 · logic layer)*
+
+> ⚠️ Pass 2 ke 18 naye flaws (F25–F42 — platform, delivery pipeline, lifecycle) **§13** mein hain.
+> Poora register: **42 flaws**. Revised plan: **§15 (Structure v2)** — §7 pass 1 ka plan hai, §15 usay supersede karta hai.
 
 Severity: 🔴 critical (wake ko marta hai) · 🟠 high (aksar marta hai) · 🟡 medium (kabhi/mahol par) · ⚪ low (polish)
 
@@ -797,7 +811,7 @@ forensic ka raw material yehi hai.
 
 ---
 
-## 12. AGLE QADAM KI FEHRIST (aap ke hukum ka intezar)
+## 12. AGLE QADAM KI FEHRIST (pass 1 ka plan — **ab §15 Structure v2 dekhein**, jo isay supersede karta hai)
 
 - [ ] **A.** Phase 0 implement karo (8 badlaav, `v5.10.3`, +~14 test-locks) → CI green → APK →
       T1/T5/T6/T7/T10 device par
@@ -812,6 +826,425 @@ forensic ka raw material yehi hai.
 **Mera mashwara (technical, faisla aap ka):** `A → C → B → D`. Ya agar aap chahte hain ke agla
 har masla khud-ba-khud nazar aa jaye to `A → B → C → D`. Phase 0 har surat mein **pehle** —
 wo aaj ke toote hue tajurbe ko theek karta hai aur baqi sab ka foundation hai.
+
+---
+
+## 13. 🔬 PASS 2 — doosra, gehra forensic (platform + delivery pipeline)
+
+> Pass 1 ne **logic** dekha (state machine, retry, VAD). Pass 2 ne wo dekha jo pass 1 ke
+> daaire se bahar tha: **Manifest/FGS contract, Android 14 ke qawaneen, service ka jaan-na,
+> aur "wake sun liya gaya — phir kya?" ki poori delivery chain.**
+> Natija: **17 naye flaws (F25–F41)**, jinmein se **3 pass 1 ke sab flaws se zyada bunyadi hain.**
+
+### 13.1 Sab se pehle — jo theek nikla (credit where due)
+
+| Cheez | Halat |
+|---|---|
+| `FOREGROUND_SERVICE_MICROPHONE` permission | ✅ declared |
+| `android:foregroundServiceType="microphone"` | ✅ `WakeWordService` par laga |
+| `startForeground(id, notif, FOREGROUND_SERVICE_TYPE_MICROPHONE)` API 34 guard | ✅ `WS:166-170` |
+| `<queries>` package visibility (v5.10.1 ka fix) | ✅ poori fehrist, RecognitionService intent bhi |
+| `BootReceiver` + `RECEIVE_BOOT_COMPLETED` | ✅ declared — ⚠ magar **andar se khokhla** (F26) |
+| `wakeService(true)` se pehle RECORD_AUDIO check | ✅ `MainActivity.kt:547-551` — ⚠ magar JS uska jawab nahi padhta (F39) |
+| Notification channel `IMPORTANCE_LOW` (wake) | ✅ sahih |
+
+Yaani Manifest theek hai. **Masla Manifest ke baad shuru hota hai.**
+
+### 13.2 🔴 F25 — "wake sun liya gaya… aur phir KUCH NAHI hua" (sab se bara flaw)
+
+```kotlin
+// WakeWordService.kt:365-377
+private fun handleAll(list: List<String>) {
+    …
+    if (MainActivity.instance != null) {
+        evalToApp("window.__wakeHeard && window.__wakeHeard('" + jsEsc(payload) + "')")
+    } else {
+        /* SAFE MODE: app band ho to KUCH NA KARO — v2.10.0 ka khud-app-kholna
+           engine hi black screen ka mujrim nikla tha. */
+        lastHeardOffline = payload          // ← ye variable KABHI PARA NAHI JATA
+    }
+}
+```
+
+```
+$ grep -rn "lastHeardOffline" --include=*.kt .
+WS:374:  lastHeardOffline = payload     ← likha
+WS:377:  private var lastHeardOffline   ← declare
+                                           (parha kahin nahi — DEAD VARIABLE)
+```
+
+**Matlab:** screen band ho, app swipe ho jaye, ya OEM Activity maar de → wake word **suni jati
+hai, aur uska nateeja seedha kachre mein jata hai**. Na chime, na app khulti hai, na hukm chalta
+hai. Aur notification abhi bhi kehti hai *"MAYA hamesha sun rahi hai 👂"*.
+
+Ye wake word ka **asal maqsad** hi khatam kar deta hai: haath khali hon, phone jaib mein ho,
+screen band ho — "Maya" bolo. Aaj wo halat 100% bekaar hai.
+
+**Aur iska doosra, chhipa hua asar — hamara diagnostic jhoot bol sakta tha:**
+`report()` bhi `evalToApp()` se jata hai, aur `evalToApp()` = `MainActivity.instance ?: return`
+(`WS:182-187`). Yaani **KAAN ke saare counters (suna/JAAGI/nakami/mic chala) usi WebView mein
+rehte hain jo mar sakti hai.** `suna 0` ka do matlab ho sakta hai:
+
+1. recognizer ne kuch nahi suna (pass 1 ka faisla), **ya**
+2. recognizer ne suna, magar WebView zinda nahi tha → counter kabhi barha hi nahi.
+
+**Hum in dono mein farq nahi kar sakte** — kyunke counter aur mareez ek hi jaan hain. Is liye
+F25 sirf feature ka bug nahi, **hamari poori forensic ki buniyaad par hamla** hai.
+
+**Sahih ilaj:** counters + last-50 events **Kotlin side** ring buffer mein rakho
+(`WakeWordService` ke companion mein), aur WebView zinda hone par bulk-flush karo. Phir
+`suna` ka matlab **hamesha** sach hoga — chahe UI mara ho.
+
+### 13.3 🔴 F33 — wake ka **dimaag** WebView mein hai (architecture ki asli ghalti)
+
+Wake ka poora faisla JS mein hai: `__wakeHeard` (`index.html:8626-8685`) — regex matching
+(`KAAN.SURE`/`WAKE`/`atStart`), `DARWAZA` ki timing, `SUNO.pick`, `handleUserText`, chime
+(WebAudio), `setTimeout(startListening, 400)`.
+
+```
+mic → Kotlin (sirf PCM + ASR)  →  WebView JS (poora dimaag)  →  amal
+                                    ↑
+                        Android ise kabhi bhi maar sakta hai
+                        (screen off, memory trim, OEM kill)
+```
+
+Yaani: **wake ki zindagi ka dar-o-madar ek UI component par hai** jise OS kabhi bhi band kar
+sakta hai. Aur F41 ke mutabiq MainActivity mein `webView.onPause/onResume` ka koi intezam nahi,
+is liye background mein JS timers **throttle** hote hain: `setTimeout(startListening, 400)` aur
+WebAudio `chime()` screen-off halat mein der se ya kabhi nahi chalte.
+
+**Natija:** screen-off wake teen jagah se toota hua hai — (1) Kotlin result phenk deta hai (F25),
+(2) JS throttle hota hai (F41), (3) service marne ke baad koi restart nahi karta (F36).
+
+**Sahih ilaj (Phase 3 ka dil):** wake ka **faisla Kotlin mein** ho. `SURE`/`WAKE`/`atStart`
+regexes Kotlin mein port karna mamooli kaam hai (aur inka test-lock JS + Kotlin **dono** par
+lagana chahiye taake drift na ho). Phir:
+
+```
+wake detect → Kotlin: chime (ToneGenerator/SoundPool) + DARWAZA open
+            → WebView zinda? → JS ko hukm bhejo (aaj wala raasta)
+            → WebView murda? → launchApp() + native TTS "Ji Boss?" + app ka mic kholo
+```
+
+`speakLocal()` aur `launchApp()` **pehle se likhe hue hain** — bas kahin se call nahi hote (F28).
+
+### 13.4 🔴 F26 — BootReceiver **khokhla** hai (reboot ke baad wake OFF)
+
+```kotlin
+// BootReceiver.kt:11-17
+if (Intent.ACTION_BOOT_COMPLETED == intent.action) {
+    try {
+        if (context.getSharedPreferences("maya", MODE_PRIVATE).getBoolean("wake", false)) {
+            /* SAFE MODE v2.12.1: boot autostart band */ // WakeWordService.start(context)
+        }
+    } catch (e: Exception) {}
+}
+```
+
+Pref **parhi** jati hai, phir **kuch nahi kiya jata**. Manifest mein receiver declared hai,
+permission declared hai — yaani bahar se "boot par wake chalu hoti hai" lagta hai, andar se band.
+Har reboot ke baad wake tab tak OFF jab tak user app **khol** na le (`index.html:9969` wala
+1.5s delayed `setWakeService(true)` hi akela healer hai).
+
+**Sahih ilaj:** (a) boot autostart wapas chalu, magar **shart ke sath**: RECORD_AUDIO granted +
+FGS start allowed ho, warna notification se user ko batana ("Maya wake chalu nahi ho saki —
+mic ki ijazat chahiye"); (b) `startForegroundService` ki jagah `WorkManager`/`setExactAndAllowWhileIdle`
+se do-koshishi start; (c) agar "black screen" wala purana dar (v2.10.0) asal mein launchApp se
+tha to wo F33 ke naye safe-mode mein hal ho jata hai — boot par app **kholni nahi**, sirf service
+chalu karni hai.
+
+### 13.5 🔴 F36 — service marne ke baad **koi zinda karne wala nahi**
+
+```
+$ grep -rn "WakeWordService.start" --include=*.kt .
+BootReceiver.kt:14      // ← COMMENTED OUT
+MainActivity.kt:552     ← JS bridge wakeService(true) — AKELA zinda rasta
+```
+
+* `onStartCommand` = `START_STICKY` ✅ magar system restart par `onCreate` dobara chalta hai —
+  **sirf agar process mara ho aur Android ne dobara start kiya ho**. Android 14 par FGS-mic
+  background restart par **mic-type FGS dobara start nahi hoti** (while-in-use restriction).
+* `MainActivity.onResume` mein **koi check nahi** ke wake pref ON hai aur service zinda hai.
+* Koi `AlarmManager`/`JobScheduler` heartbeat nahi jo service ki maut pakde.
+* `startAsForeground()` ka `catch (e: Exception) {}` (`WS:171`) → agar Android 14 ne
+  `SecurityException`/`ForegroundServiceStartNotAllowedException` phenka, service **bina
+  foreground ke** chalti rahegi → seconds/minutes mein kill → aur humein **koi khabar nahi**
+  (F29).
+
+**Natija:** wake ki availability OEM ke insaaf par chhor di gayi hai. Tecno/HiOS jaisi aggressive
+battery management par ye rozana marti hogi — aur user ko sirf "Maya ne jawab nahi diya" lagta hai.
+
+**Sahih ilaj:** (1) `onResume` par `if (prefs.wake && !WakeWordService.alive) start()`;
+(2) service apni zindagi ka saboot prefs mein likhe (`wake_lastBeat`), aur ek 15-min
+`setExactAndAllowWhileIdle` alarm us beat ko check kare → na mile to restart + report;
+(3) `startForeground` ki nakami ko **report** karna (`report("fgs", e.javaClass.simpleName)`)
+aur notification ko "wake beemar" halat mein badalna; (4) mic permission na ho to loop hi mat
+chalao — user ko saaf batana (F35).
+
+### 13.6 🟠 F38 — settings badlo, service ko **khabar hi nahi hoti** (pref drift)
+
+```js
+// index.html:9589-9595 — ye AKELA jagah hai jahan prefs Kotlin ko jate hain
+function setWakeService(on){
+  window.MayaBridge.setPrefString && (
+      setPrefString('wake_lang', settings.stt || 'en-IN'),
+      setPrefString('mic_zoom', …), setPref('sukoon', …), setPref('mic_near', …)),
+    window.MayaBridge.wakeService(on);
+```
+
+`wake_lang`, `mic_zoom`, `sukoon`, `mic_near` **sirf tab** Kotlin ko bheje jate hain jab wake
+switch **toggle** ho. `saveSettings()` inhein push nahi karta.
+
+**Natija (aur ye Phase 0 ke liye jaan-leva hai):** user Settings mein STT `ur-PK` → `en-IN` karta
+hai, magar wake service **purani `ur-PK`** par chalti rehti hai — jab tak user wake ko OFF/ON na
+kare. Yaani:
+
+> ⚠ **Agar hum Phase 0 mein `wakeLang` alag setting bana bhi lein, aur pref-push ka ye rasta
+> theek na karein, to fix "kaam nahi karega" lagega — halanke code sahih hoga.** Is liye F38
+> Phase 0 ka **hisaa** hona chahiye, Phase 1 ka nahi.
+
+**Sahih ilaj:** `saveSettings()` ke andar ek `pushNativePrefs()` — har settings badlaav par
+(wake_lang, mic_zoom, mic_near, sukoon) prefs dobara likho, aur service ko `report("pref", …)`
+se batao. Sath mein service har `startListening` se pehle pref **fresh** parhe (abhi bhi padhta
+hai ✅ — `WS:409-413`) — yaani sirf likhne wala rasta toota hua hai.
+
+### 13.7 🟠 F28 — `speakLocal()` aur `launchApp()` **dead code** hain
+
+```
+$ grep -n "speakLocal\|launchApp()" WakeWordService.kt
+173:    private fun speakLocal(text: String) {      ← definition
+196:    private fun launchApp() {                   ← definition
+                                                   (koi call site NAHI)
+```
+
+Do taaqatwar tukre likhe hue the aur **wire nahi kiye gaye**: service ki apni TTS awaaz, aur app
+kholne ka rasta. Inhi se F25 ka "SAFE MODE" asal mein kaam kar sakta tha. Sath mein service ek
+poora `TextToSpeech` instance (`WS:127-128`) **bekar** mein bandh kar rakhti hai (engine binding +
+memory), aur `ttsReady` flag maintain karti hai jo kabhi istemal nahi hota.
+
+⚠ Agar inhein chalu kiya jaye to do cheezein sath karni hongi:
+1. `speakLocal()` **haal = BOL_RAHI** set kare, warna service ki apni awaaz gate ko sunai degi →
+   **self-wake loop** (L7 shield sirf JS-driven speech ko cover karta hai).
+2. `speakLocal()` ki zubaan hardcoded `ur-PK` hai (`WS:175`) — settings se aani chahiye.
+
+### 13.8 🟡 F41 — WebView lifecycle ka **koi intezam nahi**
+
+```
+$ grep -n "webView.onPause\|webView.onResume\|pauseTimers\|resumeTimers\|onPause()\|onResume()" MainActivity.kt
+(kuch nahi)
+```
+
+* `onResume` nahi → **F36 ka ilaj yahan hona chahiye tha** (wake service health check), aur
+  **F06 ka resync** (HAAL dobara bhejna) bhi.
+* `onPause` nahi → WebView background mein chalta rehta hai (battery), aur chromium ke apne
+  background-throttling ke tehat JS timers **der** se chalte hain — jo F33 ke screen-off wake ko
+  aur bigarta hai.
+* `webViewAlive` flag **maujood hai** (`MainActivity.kt:78`, `markAlive()` :283, boot-guard :130)
+  magar `evalAsync()` (:1564-1566) usay **dekhta hi nahi**:
+  ```kotlin
+  private fun evalAsync(js: String) { webView.post { webView.evaluateJavascript(js, null) } }
+  ```
+  Yaani murda/destroyed WebView par bhi JS thonsa jata hai → exception ya chup-chaap zaya, aur
+  caller ko lagta hai report pohanch gayi (F27).
+
+### 13.9 🟡 F30 — Doze: `WAKE_LOCK` declared, **istemal kahin nahi**
+
+```
+$ grep -rn "WakeLock\|newWakeLock" --include=*.kt .   → 0 results
+```
+
+Poora engine `Handler.postDelayed` par chalta hai (700ms/3s poll, 45s watchdog, 12-min refresh).
+Doze mein ye callbacks **rukte** hain. Sirf gate ka `AudioRecord.read()` CPU ko jagaye rakhta hai —
+magar jab gate blocked ho (APP_SUN/BOL_RAHI) ya sessions ke beech ka waqt ho, phone so sakta hai
+→ wake behri. Aur notification kehti hai "hamesha sun rahi hai" (F31).
+
+**Sahih ilaj:** chhota `PARTIAL_WAKE_LOCK` (screen-off, service chalu dauran) **ya** kam-az-kam
+honesty: notification + panel par "Doze mein wake sust ho sakti hai — battery optimization se
+Maya ko azad karein" (`batteryUnrestricted()` pehle se maujood hai, sirf DOCTOR mein dikhta hai).
+
+### 13.10 🟡 F31 — notification **jhoot bolti hai**
+
+`"MAYA hamesha sun rahi hai 👂"` (`WS:158-160`) — static text. Ye inmein se kisi ko reflect
+nahi karti: haal (APP_SUN/BOL_RAHI), circuit-open (error-11 storm), mic permission gayab,
+WebView murda, FGS start nakam, Doze. Android user ke liye persistent notification hi **source of
+truth** hoti hai.
+
+**Sahih ilaj:** notification = live state line (Phase 2 ki `SEHATMAND / BEEMAAR / MURDA` states
+isi par map hongi), aur `MURDA` par tap → seedha KAAN panel.
+
+### 13.11 🟡 F35 — error 9 (permission) ka koi khaas ilaj nahi
+
+Agar user mic ki ijazat wapas le le: `MicKit.open()` null → `report("gate","mic nahi khula —
+seedha recognizer")` → `actuallyStart()` → `onError(9)` → `else -> 1200L` → **forever hammer**.
+Koi "ijazat chahiye" notification nahi, koi loop-break nahi.
+
+**Sahih ilaj:** error 9 par circuit **turant** open + notification action "Ijazat do" + gate/ASR
+dono band. Isi tarah error 12/13 par zubaan badalna (F12 ka ilaj) aur 10 par backoff (F09).
+
+### 13.12 Poora register — F25 … F41
+
+| # | Sev | Flaw | Saboot |
+|---|---|---|---|
+| F25 | 🔴 | WebView murda → wake ka nateeja **phenk** diya jata hai; counters bhi usi WebView mein → `suna 0` ambiguous | `WS:365-377`, `WS:182-187` |
+| F26 | 🔴 | BootReceiver khokhla — reboot ke baad wake OFF | `BootReceiver.kt:14` (commented) |
+| F27 | 🟠 | `evalAsync` `webViewAlive` check nahi karta; murda WebView par JS; delivery ka koi saboot nahi | `MainActivity.kt:1564-1566` vs `:78,130,283` |
+| F28 | 🟠 | `speakLocal()` + `launchApp()` **dead code**; TTS instance bekar mein bandha | `WS:173,196` (0 call sites) |
+| F29 | 🟠 | `startAsForeground()` ka `catch {}` — Android 14 FGS nakami chup-chaap nigal jata hai | `WS:145-172` |
+| F30 | 🟡 | Doze: `WAKE_LOCK` declared magar 0 istemal; Handler callbacks sote hain | grep = 0 results |
+| F31 | 🟡 | Notification static/jhooti — koi state reflect nahi karti | `WS:158-160` |
+| F32 | ⚪ | FGS icon `android.R.drawable.ic_dialog_info` (app icon nahi); do channels | `WS:157` |
+| F33 | 🔴 | Wake ka **dimaag** WebView JS mein — OS ise kabhi bhi maar sakta hai | `index.html:8626-8685` |
+| F34 | ⚪ | `lastHeardOffline` dead variable ("SAFE MODE" = kuch na karo) | `WS:374,377` |
+| F35 | 🟡 | error 9 (permission) par forever-hammer, koi user-alert nahi | `WS:320-329` |
+| F36 | 🔴 | Service marne ke baad koi restart nahi (boot band, onResume check nahi, heartbeat nahi) | grep: 1 live call site |
+| F37 | 🟠 | Screen-off: JS throttle + WebAudio chime unreliable → wake event pohanche to bhi amal nahi | F41 se jura |
+| F38 | 🟠 | **Pref drift**: `wake_lang`/`mic_zoom`/`mic_near`/`sukoon` sirf wake-toggle par push hote hain; settings badalne se service ko khabar nahi | `index.html:9589-9595` |
+| F39 | 🟡 | `wakeService(on)` ka return ignore → permission na ho to bhi switch ON + "Wake ON" toast | `index.html:9595`, `MainActivity.kt:547-551` |
+| F40 | ⚪ | `requestBatteryUnrestricted()` auto-fire; grant hua ya nahi, follow-up check nahi (Play-policy risk bhi) | `index.html:9596` |
+| F41 | 🟡 | WebView lifecycle (`onPause/onResume`) bilkul nahi → F36/F06 ke qudrati hooks ganwaye | grep = 0 results |
+| F42 | 🟡 | **Concurrent capture**: app ka recognizer (doosra UID: Google service) chalu ho to hamara gate **silence** padh sakta hai → floor ~0 latch → mic khulte hi foran false trigger | `MicKit.kt:65-73` + Android 10+ capture rules; log mein `farsh 28`/`farsh 62` ka flip |
+
+**Qul: 42 flaws** (pass 1: F01–F24 · pass 2: F25–F42). Severity: **8 🔴 · 12 🟠 · 12 🟡 · 6 ⚪**
+*(F42 ko pass 2 mein hi shamil kiya gaya — ye F15 ke floor-latch ko trigger karne wala mehroz hai.)*
+
+---
+
+## 14. 🌟 NORTH STAR — "perfect" ka matlab kya hai (target spec)
+
+Aap ne poocha: *"bagair kisi kami galati ke flaws ke perfectly next level"*. Ye uski **qabil-e-paimaish**
+taareef hai — har line ek test hai, raaye nahi.
+
+### 14.1 Wake ka wada (jo user se kiya jata hai)
+
+| # | Wada | Aaj | Perfect |
+|---|---|---|---|
+| W1 | "Maya" bolo → **1 second** mein chime | ❌ (∞) | ✅ ≤1.0s (quiet), ≤1.5s (noise) |
+| W2 | Screen **band**, phone jaib mein → wake chale | ❌ (F25/F33/F37) | ✅ 10/10 |
+| W3 | App **swipe** kar ke band → wake chale | ❌ (F25) | ✅ 10/10 |
+| W4 | Phone **reboot** → wake khud chalu | ❌ (F26) | ✅ ≤60s boot ke baad |
+| W5 | **Airplane mode** → wake chale | ❌ (cloud ASR) | ✅ 10/10 (Phase 4 ke baad) |
+| W6 | Maya bol rahi ho to awaaz **kabhi na kate** | ✅ (SUKOON) | ✅ barqarar |
+| W7 | Tap-to-speak ke baad wake **foran** wapas | ❌ 60s (F01) | ✅ ≤1.0s |
+| W8 | Wake beemar ho to user ko **pata chale** | ❌ (F10/F31) | ✅ notification + toast + panel |
+| W9 | User ka wake switch **kabhi khud off na ho** | ✅ (P9 wada) | ✅ barqarar |
+| W10 | 1 ghanta TV → **≤1** false wake | ❓ (`suna 0`, test hi nahi hui) | ✅ ≤1 |
+| W11 | Battery: 24 ghante background → **≤3%** extra drain | ❓ | ✅ ≤3% |
+| W12 | Koi bhi nakami **log mein namood** ho (UI mara ho tab bhi) | ❌ (F25) | ✅ Kotlin-side buffer |
+
+### 14.2 Engineering ke usool jo is forensic se nikle (aage ke har kaam par lagu)
+
+1. **Har `pause` ka `resume` usi file mein nazar aana chahiye** — aur test-lock *call-site* par,
+   declaration par nahi (F01 ka sabaq).
+2. **Do state machines ek darwaza na chalayein** — ek `WakeState`, ek source of truth (F02).
+3. **Har edge-triggered signal ka level-triggered fallback** (heartbeat/expiry) hona chahiye (F02/F06).
+4. **Instrument mareez ke sath na mare** — counters native side, UI sirf display (F25).
+5. **Har retry policy mein escalation + cap + circuit-open + user alert** — chaaron, warna wo
+   policy nahi, aadat hai (F09/F10).
+6. **Har `catch (e: Exception) {}` ek report ka maangta hai** — chup-chaap nigalna mana (F29/F17).
+7. **Settings badle to native ko foran pata chale** — warna fix "kaam nahi karta" lagta hai (F38).
+8. **Dead code ya wire karo, ya mitao** — `speakLocal`/`launchApp`/`lastHeardOffline` jaisi
+   adhoori taaqat confusion paida karti hai (F28/F34).
+9. **Jo cheez UI ke zinda rehne par depend kare, wo background feature nahi** (F33).
+10. **Notification = sach** — jo state ho wahi likho (F31).
+
+---
+
+## 15. 🏗️ STRUCTURE v2 — Phase 0 → Phase 4 (pass 2 ke baad revised)
+
+Pass 1 ka plan barqarar hai, magar pass 2 ne **tarteeb** badal di: F38 (pref drift) aur F25
+(native counters) ke bagair baqi fixes **napne layak hi nahi** rahenge.
+
+```
+Phase 0  v5.10.3  "wake ZINDA"        ← 10 badlaav (8 + F38 + F39)          [1 din]
+Phase 1  v5.11.0  "wake MAZBOOT"      ← state machine, VAD, recognizer       [2 din]
+Phase 2  v5.11.1  "wake NAZAR"        ← native counters, wakeState(), DOCTOR v2, notification [1-2 din]
+Phase 3  v5.12.0  "wake KA DIMAAG KOTLIN MEIN"  ← F25/F28/F33/F36/F26/F37   [2 din]
+Phase 4  v6.0.0   "wake AZAD (offline KWS)"     ← engine swap               [3-5 din]
+```
+
+### Phase 0 (v5.10.3) — pass 1 ke 8 badlaav **+ 2 naye**
+
+| # | Flaw | Badlaav |
+|---|---|---|
+| 0.1–0.8 | F01, F05, F03, F09, F11, F12, F18, F10 | *(§7 Phase 0 jaisa hi)* |
+| **0.9** | **F38** | `saveSettings()` → `pushNativePrefs()`: `wake_lang`/`mic_zoom`/`mic_near`/`sukoon` har settings-badlaav par Kotlin ko. **Ye 0.6 (wakeLang) ke liye zaroori hai** warna fix pohanchega hi nahi |
+| **0.10** | **F39** | `setWakeService()` ab `wakeService(on)` ka **Boolean jawab** padhe: false ho to switch wapas OFF, toast "mic ki ijazat chahiye", aur ijazat ka darwaza khule |
+
+**Naye acceptance criteria (0.9/0.10 ke liye):**
+* Settings mein STT badlo → **bina wake toggle kiye** KAAN panel par agli `start:` line nayi zubaan
+  dikhaye.
+* Mic permission deny kar ke wake ON karo → switch **OFF reh jaye**, toast ijazat mange, dialog khule.
+
+**Naye test-locks:** `pushNativePrefs` ka wajood + `saveSettings` se uska call; `setPrefString`
+sirf `setWakeService` ke andar na ho; JS mein `wakeService(` ka return istemal hota ho
+(`var ok = … wakeService(on)` jaisa pattern); Kotlin `wakeService` ka `return false` path barqarar.
+
+### Phase 1 (v5.11.0) — pass 1 ke 8 badlaav **+ 4 naye**
+
+0.1–1.8 wahi (§7). Naye:
+
+| # | Flaw | Badlaav |
+|---|---|---|
+| 1.9 | F29 | `startAsForeground()` ke `catch` mein `report("fgs", …)` + `alive=false` set + notification "wake beemar"; mic permission na ho to loop shuru hi na ho (F35) |
+| 1.10 | F35 | `onError(9)` → circuit open + notification action "Ijazat do" (direct `openSettingNamed("appinfo")` — v5.10.x ka `go()`/`act()` rasta, blind chain nahi) |
+| 1.11 | F42 | Gate ka floor **calibration window** mein tab tak na latch ho jab tak `n>0` aur 3 consecutive frames milein; `read()==0/negative` par floor update **na** ho (silence ko khamoshi samajhna ghalat hai) |
+| 1.12 | F41 | `onPause`/`onResume`: resume par HAAL resync + wake-health check; pause par WebView ko explicit background (battery) magar **JS bridge zinda** |
+
+### Phase 2 (v5.11.1) — observability, ab **native-first**
+
+Pass 1 ke 2.1–2.6 wahi, **+**:
+
+| # | Flaw | Badlaav |
+|---|---|---|
+| 2.7 | F25 | **Kotlin-side ring buffer** (last 60 events + counters) in `WakeWordService` companion; WebView zinda hote hi bulk-flush (`__wakeLogBulk`). Phir `suna`/`nakami` UI ki zindagi se azad |
+| 2.8 | F27 | `evalAsync` mein `webViewAlive` guard + delivery counter (`sentOk`/`dropped`) → panel par `reports dropped: N` |
+| 2.9 | F31 | Notification live state: `👂 sun rahi hai` / `🎧 app ka mic` / `🔊 bol rahi hai` / `⚠️ beemar (err 11 ×15)` / `☠️ murda — tap karein` |
+| 2.10 | F32 | FGS icon app ka apna; channel cleanup |
+
+### Phase 3 (v5.12.0) — **"wake ka dimaag Kotlin mein"** (screen-off wake ka asal ilaj)
+
+| # | Flaw | Badlaav |
+|---|---|---|
+| 3.1 | F33 | `SURE`/`WAKE`/`atStart`/`DARWAZA` ka **Kotlin port** (`WakeBrain.kt`), JS ke sath **shared test corpus** — ek hi JSON fixtures file dono test suites padhein, taake regex drift pakdi jaye |
+| 3.2 | F25/F34 | `handleAll()` ka faisla Kotlin mein: WebView zinda → JS ko hukm (aaj wala rasta); murda → **native path** |
+| 3.3 | F28 | `speakLocal()` (haal=BOL_RAHI ke sath, zubaan settings se) + `launchApp()` wire karo; chime ke liye `ToneGenerator`/`SoundPool` (WebAudio nahi) |
+| 3.4 | F37 | Native chime + native "Ji Boss?" + app ka mic kholna — sab Kotlin se, JS-throttle se azad |
+| 3.5 | F26/F36 | Boot autostart (shart ke sath) + `onResume` health check + 15-min heartbeat alarm + `wake_lastBeat` |
+| 3.6 | F30 | Chhota `PARTIAL_WAKE_LOCK` (ya honest Doze warning + battery-exemption CTA) |
+
+**Acceptance:** W2, W3, W4, W8, W12 poore; screen-off 10/10 wake; reboot ke 60s baad wake zinda.
+
+### Phase 4 (v6.0.0) — local KWS engine (§6.3 wala plan, unchanged)
+
+Vosk-grammar / Porcupine / sherpa-onnx ka spike → engine abstraction → `wakeEngine: asr|kws|auto`
+→ offline 10/10 (W5).
+
+### 15.1 Tarteeb ka naya logic
+
+```
+0 → wake chalne lagti hai (aur hum NAPNA shuru kar sakte hain)
+1 → wake tikki rehti hai (race, VAD, mic errors, FGS)
+2 → wake nazar aati hai (native counters — ab UI mare to bhi sach milta hai)
+3 → wake asal mein kaam aati hai (screen off, app band, reboot)
+4 → wake azad hoti hai (offline, no Google, no cloud)
+```
+
+Phase 2 ko 3 se pehle is liye rakha gaya ke Phase 3 ka har natija **napa** ja sake. Phase 4 ko
+aakhri is liye ke wo sab se bara badlaav hai aur us waqt tak hamare paas both a baseline aur
+honest instrumentation hoga.
+
+---
+
+## 16. ✅ "Kuch bhi baqi nahi" ka checklist (pass 2 ke baad)
+
+| Sawaal | Jawaab |
+|---|---|
+| Kya abhi bhi flaws hain? | **Haan — 42** (8 critical). Pass 2 ne 18 naye pakde, jinmein 4 critical. |
+| Kya wake ka code "theek karne layak" hai? | Haan — Phase 0-2 mein. Magar **screen-off/app-band wake** sirf Phase 3 (dimaag Kotlin mein) se mumkin hai; uske bagair wake ka wada adhura rahega. |
+| Kya cloud-ASR wake kabhi "perfect" ho sakti hai? | **Nahi** — W5 (offline) kabhi poora nahi hoga, aur error 10/11/12/13 ka khatra hamesha rahega (service hamari nahi). Is liye Phase 4 manzil hai, Phase 0-3 pul. |
+| Kya hamara test-suite bharosemand hai? | **Adhoora.** 1153 asserts source-grep hain (code *likha* hai ya nahi) — runtime wiring nahi. F01 iska saboot hai. Har phase mein **wiring-level** locks + ek JSON fixture corpus (JS/Kotlin shared) add honge. |
+| Kya instrumentation/Robolectric tests hain? | **Nahi** (sirf JVM source-grep). Phase 2 ke baad kam-az-kam `WakeBrain` ke liye unit tests (pure Kotlin, JVM par chal sakte hain) — ye sab se sasta high-value addition hai. |
+| Agla sab se bara risk? | Fix kar ke bhi "kaam nahi kiya" lagna — agar **F38 (pref drift)** aur **F25 (native counters)** sath na hon. Is liye dono Phase 0/2 mein zaroori hain. |
 
 ---
 
@@ -850,6 +1283,60 @@ webkitSpeechRecognition` (WebView par nahi chalta) · 4373/4384 `sunStart` · 43
 `speaking||thinking||listening` early-return · 8667 "koi Maya nahi" skip · 8687-8692 `__wakeErr` ·
 9130 `setPref("sukoon")` · 9592 **`wake_lang = settings.stt`** · 9593-9595 `mic_zoom`/`mic_near`/
 `wakeService`.
+
+## APPENDIX A.2 — pass 2 ke naye saboot (file:line)
+
+**`AndroidManifest.xml`** (jo **theek** nikla): `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_MICROPHONE`
++ `RECORD_AUDIO` + `WAKE_LOCK` (⚠ declared, 0 istemal — F30) + `RECEIVE_BOOT_COMPLETED` +
+`REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` · `<queries>` poori (Gboard/Google/tts/AiAi/vending +
+RecognitionService + ASSIST + settings actions) · `<service .WakeWordService
+android:foregroundServiceType="microphone">` · `<receiver .BootReceiver exported=true>` ·
+`compileSdk 34 / targetSdk 34 / minSdk 26` (`app/build.gradle:8,12,13`).
+
+**`WakeWordService.kt`** — 145-172 `startAsForeground()` (157 framework icon, 158-160 static
+notification text, 166-170 API-34 `FOREGROUND_SERVICE_TYPE_MICROPHONE`, **171 `catch {}`** = F29) ·
+173-181 `speakLocal()` (**0 call sites** = F28; 175 hardcoded `ur-PK`) · 182-187 `evalToApp()`
+(`MainActivity.instance ?: return` = F25 ka reporting black hole) · 189-194 `jsEsc` · 196-221
+`launchApp()` (**0 call sites** = F28) · 365-377 `handleAll()` (369 `if (instance != null)`,
+**374 `lastHeardOffline = payload` dead write** = F25/F34).
+
+**`BootReceiver.kt`** — 8-19: pref `wake` parhi jati hai (12-13), **14 par `WakeWordService.start(context)`
+commented out** ("SAFE MODE v2.12.1: boot autostart band") = F26.
+
+**`MainActivity.kt`** — 78 `webViewAlive` (1564-1566 `evalAsync` isay **check nahi karta** = F27) ·
+128/130/186-190/283 `webViewAlive` ke istemal (boot-guard, `markAlive`) · 166-171 `onDestroy`
+(`instance = null`, `stopRecognizer()` — **`resumeFromApp()` yahan bhi nahi** = F01) · 544-558
+`wakeService(start)` bridge (547-551 permission check + `return false`; 552 akela live
+`WakeWordService.start` call site = F36) · 1560 `evalAsyncPublic` · **`onPause`/`onResume` overrides
+maujood hi nahi** (F41) · 706/717 `PowerManager` sirf `batteryUnrestricted` check ke liye (WakeLock
+kahin nahi = F30).
+
+**`index.html`** — 9589-9601 `setWakeService()` (**9592-9595 akela pref-push point** = F38; 9595
+`wakeService(on)` ka return ignore = F39; 9596 auto `requestBatteryUnrestricted` = F40) · 9969 boot
+healer (`if (NATIVE && settings.wakeWord) setTimeout(setWakeService(true), 1500)`) · 8809-8811 wake
+toggle · 9010-9019 settings-change se wake sync (sirf `wakeWas !== wakeWord` par) · 4318-4326
+`afterSpeak` ka DARWAZA-driven auto-listen · 8626-8685 `__wakeHeard` = **wake ka poora dimaag** (F33).
+
+**grep ke nateeje (jo ilzaam sabit karte hain):**
+
+```
+$ grep -rn "WakeWordService.start" --include=*.kt .
+BootReceiver.kt:14:   … // WakeWordService.start(context)     ← COMMENTED
+MainActivity.kt:552:      WakeWordService.start(this@MainActivity)   ← AKELA zinda rasta
+
+$ grep -rn "lastHeardOffline" --include=*.kt .
+WakeWordService.kt:374:   lastHeardOffline = payload          ← likha
+WakeWordService.kt:377:   private var lastHeardOffline = ""    ← declare  (para kabhi nahi)
+
+$ grep -n "speakLocal\|launchApp()" WakeWordService.kt
+173:  private fun speakLocal(text: String) {                   ← sirf definition
+196:  private fun launchApp() {                                ← sirf definition
+
+$ grep -rn "WakeLock\|newWakeLock" --include=*.kt .            → 0 results
+$ grep -n "webView.onPause\|webView.onResume\|pauseTimers\|resumeTimers" MainActivity.kt → 0 results
+```
+
+---
 
 ## APPENDIX B — Glossary (Roman-Urdu ↔ code)
 

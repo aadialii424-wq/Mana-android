@@ -5,10 +5,11 @@
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
 
-## 🔬 WAKE WORD FORENSIC — 24 flaws pakde gaye, STRUCTURE tayyar *(analysis · koi code nahi badla)*
+## 🔬 WAKE WORD FORENSIC — **42 flaws** (2 pass), STRUCTURE v2 tayyar *(analysis · koi code nahi badla)*
 
 Aap ka KAAN panel diagnostic (`suna 0 · JAAGI 0 · nakami 8 · mic chala 7 · aakhri err 11 · roka 67 · HAAL: KHALI`)
-aur 1300+ lines Kotlin/JS ka line-by-line post-mortem. **Teen zanjeerein** nikleen:
+aur `WakeWordService.kt` (493) + `MicKit.kt` (191) + `MainActivity.kt` (1880) + `index.html` (10691)
++ Manifest/gradle/BootReceiver ka **do pass** mein line-by-line post-mortem. Pass 1 se **teen zanjeerein** nikleen:
 
 | ⛓️ | Zanjeer | Asal wajah (saboot ke sath) |
 |---|---|---|
@@ -25,13 +26,28 @@ service par ladte hain. Next level = **apna PCM (MicKit) → local keyword engin
 Porcupine / sherpa-onnx)** — offline, aur Zanjeer A+B ka wajood hi khatam. Options matrix +
 migration plan (LAB flag `wakeEngine: asr|kws|auto`, ASR fallback barqarar) doc mein hai.
 
-**Structure:** Phase 0 hotfix `v5.10.3` (8 badlaav: resume wiring, 10s stale, 3s poll + rate-limited
-skip, error 10-13 backoff, ERRNAME 1..15, `wakeLang` alag, watchdog `gateOn` guard, circuit-open alert)
-→ Phase 1 robustness `v5.11.0` (WakeState single-source-of-truth, HAAL heartbeat/resync, gate
+**🔬 PASS 2** (platform + delivery pipeline) ne 18 aur flaws pakde — jinmein se teen pass 1 se bhi zyada bunyadi hain:
+
+| 🔴 | Naya flaw | Saboot |
+|---|---|---|
+| **F25** | WebView murda ho to wake ka nateeja **phenk diya jata hai** — `lastHeardOffline` ek *dead variable* hai. Screen band / app swipe = wake ka poora maqsad bekaar. Aur counters bhi usi WebView mein rehte hain, is liye `suna 0` **ambiguous** tha | `WakeWordService.kt:365-377`, `:182-187` |
+| **F33** | Wake ka **dimaag JS mein** hai (`__wakeHeard`: matching, DARWAZA, chime, `setTimeout(startListening)`) — yani uski zindagi ek UI component ke haath mein jise Android kabhi bhi maar sakta hai; background mein JS throttle bhi hota hai | `index.html:8626-8685` |
+| **F26/F36** | `BootReceiver` **khokhla** (start-line commented: "SAFE MODE v2.12.1") aur service marne ke baad zinda karne wala **koi nahi** — `WakeWordService.start` ka akela live call site JS bridge hai. Reboot ke baad wake tab tak OFF jab tak app na kholein | `BootReceiver.kt:14`; grep = 1 live site |
+| **F38** | **Pref drift** — `wake_lang`/`mic_zoom`/`mic_near`/`sukoon` **sirf wake-toggle par** Kotlin ko jate hain (`setWakeService` akela push point). Settings badalne se service ko khabar nahi → *ye kisi bhi fix ko "kaam nahi kiya" dikhane wala trap hai* | `index.html:9589-9595` |
+
+Aur: `evalAsync` maujood `webViewAlive` flag ko check nahi karta (F27) · `speakLocal()`/`launchApp()` **dead code** hain — yani safe-mode ke purze likhe the, wire nahi kiye gaye (F28) · `startAsForeground()` ka `catch {}` Android 14 ki FGS nakami nigal jata hai (F29) · `WAKE_LOCK` declared magar **0 istemal** → Doze mein engine so jata hai (F30) · notification *"MAYA hamesha sun rahi hai"* har halat mein **jhoot** bolti hai (F31) · `onPause`/`onResume` overrides hi nahi (F41) · concurrent capture mein gate **silence** padh kar floor latch kar leta hai (F42).
+
+**🌟 North Star (§14):** 12 qabil-e-paimaish wade (W1-W12) — screen band 10/10, app swipe 10/10, reboot ke baad khud chalu, airplane mode mein bhi, aur *koi bhi nakami UI mare tab bhi log mein*. Plus 10 engineering usool jo is forensic se nikle (jaise: "instrument mareez ke sath na mare", "har pause ka resume usi file mein nazar aaye", "dead code ya wire karo ya mitao").
+
+**Structure v2 (§15):** Phase 0 hotfix `v5.10.3` (**10** badlaav: resume wiring, 10s stale, 3s poll + rate-limited
+skip, error 10-13 backoff, ERRNAME 1..15, `wakeLang` alag, watchdog `gateOn` guard, circuit-open alert,
+**+ F38 pref-push + F39 switch ka jhoot**) → Phase 1 robustness `v5.11.0` (WakeState single-source-of-truth, HAAL heartbeat/resync, gate
 calibration, read-error guard, wake ka apna recognizer, session-shaping extras) → Phase 2
 observability `v5.11.1` (`wakeState()` bridge, HAAL JS+Kotlin dono, WAKE DOCTOR v2, persisted history)
-→ Phase 3 engine swap `v6.0.0`. Har phase ke acceptance criteria, test-locks (wiring par, declaration
-par nahi — F01 ka sabaq), 10 device tests aur numeric targets doc mein hain.
+→ **Phase 3 `v5.12.0` — wake ka dimaag Kotlin mein** (native matching + chime + `launchApp`,
+boot autostart, service heartbeat, screen-off wake — F25/F26/F28/F33/F36/F37 ka ilaj) → Phase 4 engine swap `v6.0.0` (offline KWS).
+Har phase ke acceptance criteria, test-locks (wiring par, declaration par nahi — F01 ka sabaq),
+10 device tests aur numeric targets doc mein hain.
 
 🧪 Tests **1153/1153** barqarar (analysis mein koi code change nahi).
 
