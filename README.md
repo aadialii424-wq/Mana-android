@@ -5,6 +5,40 @@
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
 
+## 🔬 WAKE WORD FORENSIC — 24 flaws pakde gaye, STRUCTURE tayyar *(analysis · koi code nahi badla)*
+
+Aap ka KAAN panel diagnostic (`suna 0 · JAAGI 0 · nakami 8 · mic chala 7 · aakhri err 11 · roka 67 · HAAL: KHALI`)
+aur 1300+ lines Kotlin/JS ka line-by-line post-mortem. **Teen zanjeerein** nikleen:
+
+| ⛓️ | Zanjeer | Asal wajah (saboot ke sath) |
+|---|---|---|
+| **A** | Wake har SUNO ke baad **60 second murda** | `pauseForApp()` (`MainActivity.kt:363`) ki wapsi **kahin nahi** — `grep -rn resumeFromApp` = 0 external call sites. Sirf 60s ka stale-watchdog bachata hai. `roka 67` ≈ 47s × 1.4 skip/second |
+| **B** | Recognizer **kuch sunta hi nahi** (`err 11` lagatar 15) | error 11 (`ERROR_SERVER_DISCONNECTED`) par backoff `else -> 1200L` — **koi escalation nahi**, koi circuit-breaker nahi, koi alert nahi. Har 1.2s cloud par naya hamla = beemari ko feed karna. Sath: wake ki zubaan `ur-PK` (`wake_lang = settings.stt`, `index.html:9592`) — aur hamara apna DOCTOR kehta hai ke Urdu decoder "مایا" ko "ہے" parhta hai |
+| **C** | Gate **chillane par** khulta hai (`awaaz 77dB farsh 62dB`) | `floorDb` pehle sample par **latch** aur sirf neeche ja sakta hai (`WakeWordService.kt:263-265`) → chokhat 76 dB. Ulta latch ho to har sarsarahat par cloud session |
+
+Aur **instrument ne jhoot bola**: panel ka `HAAL: KHALI` JS ka haal tha, jabke Kotlin mein
+`pausedByApp = true` phansa tha — do darwaze, ek bhi source-of-truth nahi. `ERRNAME` mein
+10..15 maujood hi nahi, is liye panel "?" chhapta tha.
+
+**Faisla (buniyadi):** wake word ko *cloud ASR* se karwana ghalat shape hai — do recognizer ek hi
+service par ladte hain. Next level = **apna PCM (MicKit) → local keyword engine (Vosk-grammar /
+Porcupine / sherpa-onnx)** — offline, aur Zanjeer A+B ka wajood hi khatam. Options matrix +
+migration plan (LAB flag `wakeEngine: asr|kws|auto`, ASR fallback barqarar) doc mein hai.
+
+**Structure:** Phase 0 hotfix `v5.10.3` (8 badlaav: resume wiring, 10s stale, 3s poll + rate-limited
+skip, error 10-13 backoff, ERRNAME 1..15, `wakeLang` alag, watchdog `gateOn` guard, circuit-open alert)
+→ Phase 1 robustness `v5.11.0` (WakeState single-source-of-truth, HAAL heartbeat/resync, gate
+calibration, read-error guard, wake ka apna recognizer, session-shaping extras) → Phase 2
+observability `v5.11.1` (`wakeState()` bridge, HAAL JS+Kotlin dono, WAKE DOCTOR v2, persisted history)
+→ Phase 3 engine swap `v6.0.0`. Har phase ke acceptance criteria, test-locks (wiring par, declaration
+par nahi — F01 ka sabaq), 10 device tests aur numeric targets doc mein hain.
+
+🧪 Tests **1153/1153** barqarar (analysis mein koi code change nahi).
+
+📖 [`docs/FORENSIC-WAKE-WORD.md`](docs/FORENSIC-WAKE-WORD.md)
+
+---
+
 ## 🛑 v5.10.2 — ghalat screen ab **KHULTI HI NAHI** *(hotfix · aap ke panel ka doosra saboot)*
 
 v5.10.1 ne button ko **bolna** sikhaya (screen ka naam batata tha). Aap ne panel chala kar jo
