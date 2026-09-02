@@ -1,9 +1,60 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.10.3 "WAKE ZINDA" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.11.0 "WAKE MAZBOOT" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🛡️ v5.11.0 — "WAKE MAZBOOT" *(Phase 1: robustness · 12 badlaav)*
+
+Phase 0 ne wake ko **zinda** kiya; Phase 1 usay **mazboot** karta hai — shor, mic ki larai,
+app band hone, aur "halat phans jane" ke khilaf. Naya feature koi nahi, har badlaav forensic
+ke ek flaw ka ilaj.
+
+| 🧭 | Cheez | Ilaj |
+|---|---|---|
+| **1.1** | Halat ka **ek ghar**: `WakeState.kt` | F02: `haal`/`pausedByApp`/`lastBolAt` + JS ki copy — char jagah bikhri halat, **kisi ki mudat nahi**. Ab har halat ka `owner` + `since` + **expiry** (sulah 8s · app-mic 30s · bolna 20s). `haalBlock()` **pehle mudat** dekhta hai, phir pabandi |
+| **1.2** | HAAL **level-triggered** + heartbeat | F06: JS `sunEnd`/`bolEnd` par **FORCE-send** (dedup bypass), boot par `SUKOON.resync()`, har **10s heartbeat** (`wakeBeat`) → 3 heartbeat gayab = Kotlin **khud KHALI**. Naya `wakeResync` bridge |
+| **1.3** | **Farsh ab calibration se banta hai** | F15: pehle farsh **pehle sample par latch** hota tha aur sirf neeche ja sakta tha → `awaaz 77dB farsh 62dB` = chokhat 76dB, **chillane par bhi wake na khulti**. Ab **800ms calibration** (≥3 saaf frame), farsh **dono taraf** adapt (neeche 0.10 / upar 0.005), clamp **20..50dB**, chokhat par **absolute cap 72dB** |
+| **1.4** | Gate ka **CPU spin khatam** | F16: `if (n <= 0) continue` = read-error par **100% CPU infinite spin**. Ab `n<0` par **5-strike → mic tazaa**, `n==0` par **8ms sleep**, pehre ki **90s umar** |
+| **1.5** | `stopGate()` ki **race** | F17: pehle sirf flag band hota (join nahi, release nahi) aur **har exit** par `actuallyStart()` post hota — chahe gate app ki sulah mein band hui ho → error 3/8. Ab `join(250)` + release, aur exit **wajah** dekhta hai (`voice` → recognizer, `stop` → kuch nahi, `life/blocked/read` → `restart(200)`) |
+| **1.6** | **Wake ka apna recognizer** | F13: wake ka recognizer **Activity** ke context se banta tha — Activity mari to chupke se `default` par gir jata, aur `lastRecognizerKind` shared hone se doctor bhi jhoot bolta. Ab `makeWakeRecognizer()` (service context): yaad-kiya-hua → on-device (API 33+) → fehrist ka pehla qabil → default. Jo **chala** usay prefs mein yaad (**self-healing**); 4 lagatar nakami par bhool kar agla |
+| **1.7** | Wake **session shaping** | F14: wake intent mein silence/minimum-length **kuch nahi** tha → lambi sessions disconnect (err 11). Ab `COMPLETE_SILENCE=700ms`, `MINIMUM_LENGTH=300ms` |
+| **1.8** | **Session vs KUL** nakami | F19: `errStreak` sirf result/err8 par reset hota tha → panel ka "lagatar 15" adhoora sach (starts=7). Ab har **kamyab session** (`onReadyForSpeech`) par saaf + `errTotal` alag |
+| **1.9** | Foreground ka **jhoot** + mic ijazat | F29/F35: `startAsForeground()` ka `catch (Exception) {}` chup-chaap nigal jata → ab `record("fgs")` + `alive=false` + notification **"⚠️ wake beemar"**. Mic ijazat na ho to **loop shuru hi nahi** (`loopHeld`), ijazat milte hi **khud** shuru |
+| **1.10** | Notification par **seedha darwaza** | F35: `onError(9)` par notification action **"Ijazat do"** → `handleOpenRequest()` → app-info screen (blind intent-chain nahi) |
+| **1.11** | **Calibration window** ka ehtram | F42: window ke dauran **na trigger na farsh latch**; `read()==0/negative` frame farsh ko **chhoota hi nahi**; adhoora calibration **report** hota hai (`frame N (calibration adhoora)`) |
+| **1.12** | `onResume`/`onPause` | F41: MainActivity mein ye **the hi nahi**. Ab resume par WebView wapas + HAAL resync + `__wakeHealth()`; pause par WebView background — **`pauseTimers()` JAAN BOOJH kar nahi** (warna heartbeat + reports mar jate). Naya `listening` flag: sehat ka darwaza mic par hamla nahi karta jab recognizer chal raha ho |
+
+**Panel ki nayi lines:** `🧭 WAKE STATE` (owner · umar · heartbeat · JS beats) · `🎧 PEHRA`
+(gate · mic sun raha · farsh · chokhat · calibration · pehre ki ginti) · `🔧 khud-sudhaar N dafa` ·
+`⛔ wake RUKI (ijazat)` · `⚠️ foreground service nahi bani` · `wake ka recognizer` / `app ka
+recognizer` **alag alag**.
+
+🧪 **+41 test** (1193 → **1234**) — lab **Section 32** (Phase 1 ke wiring locks). Teen purane
+locks **sudhare** gaye: wo purane buggy rawaiye ko lock kar rahe the (`rec.release→actuallyStart`
+within 140 chars, `over > 14.0`, `while (gateOn && running)`).
+
+### 📱 v5.11.0 — AAM ZUBAAN MEIN
+
+📄 **Ek parcha (tick ✅ lagane layak):** [`docs/REPORT-v5.11.0-aam-zubaan.md`](docs/REPORT-v5.11.0-aam-zubaan.md)
+· tafseel: [`docs/FIX-v5.11.0-wake-mazboot.md`](docs/FIX-v5.11.0-wake-mazboot.md)
+
+| Aap ko kya farq dikhega | Kaise check karein | ✅ PASS | ❌ FAIL |
+|---|---|---|---|
+| Wake ki halat **khud sudhar** jati hai | 1 minute app khuli chhod dein → panel | `🔧 khud-sudhaar` **0-2** | ginti lagatar barhe |
+| Shor wale kamre mein wake | TV chalu karke 10 dafa "Maya" | **≥8** SUNO, farsh **≤50dB** | ≤5, ya farsh 62dB |
+| Jhooti wake nahi | 1 ghanta TV, koi na bole | **≤1** false wake | bar bar khud SUNO |
+| Battery/garmi par lagam | 12 minute chalu chhoden | `error 3/8` **nahi** | har 12 min clash |
+| Mic ijazat ka sach | Ijazat wapas le kar WAKE ON | Switch khud OFF + notification **⚠️ wake beemar** + **"Ijazat do"** | switch ON ka jhoot |
+| Ijazat wapas dete hi | "Ijazat do" → ijazat dein → wapas | **≤45s** mein wake khud chalu | app dobara kholni pare |
+| App wapsi par haal milta hai | Recent se swipe → 1 min baad kholein | JS aur Kotlin ka haal **ek jaisa**, `heartbeat N` barhta | MISMATCH / `heartbeat 0` |
+
+**Version ki pehchaan:** boot toast `MAYA v5.11.0 • 🛡️ WAKE MAZBOOT…` (Kotlin **aur** JS dono
+se; JS wala `native: 5.11.0-native` bhi dikhata hai) · panel ki nayi lines `🧭 WAKE STATE` +
+`🎧 PEHRA` · versionCode **75**. In mein se ek bhi na ho → APK purani hai.
+
+---
 
 ## 🏅 v5.10.3 — "WAKE ZINDA" *(Phase 0 + native instrument · forensic ka pehra ilaj)*
 
@@ -56,7 +107,7 @@ pehchaan" na ho to tests **FAIL** honge.
 
 📖 [`docs/FIX-v5.10.3-wake-zinda.md`](docs/FIX-v5.10.3-wake-zinda.md) · forensic: [`docs/FORENSIC-WAKE-WORD.md`](docs/FORENSIC-WAKE-WORD.md)
 
-**Ab kya:** Phase 1 (robustness: `WakeState`, VAD calibration, wake ka apna recognizer) → Phase 2 (WAKE DOCTOR v2 + live notification) → **Phase 2.5 auto-update** (F43 — APK ka apna rasta, §17) → Phase 3 (wake ka dimaag Kotlin mein — screen-off/app-band/reboot) → Phase 4 (offline KWS engine).
+**Ab kya:** ~~Phase 1~~ ✅ **ho gaya (v5.11.0)** → **Phase 2** (WAKE DOCTOR v2 + live notification + dBFS calibration) → **Phase 2.5 auto-update** (F43 — APK ka apna rasta, §17 · *aap ka faisla chahiye: GitHub ya apna server*) → Phase 3 (wake ka dimaag Kotlin mein — screen-off/app-band/reboot) → Phase 4 (offline KWS engine).
 
 ---
 

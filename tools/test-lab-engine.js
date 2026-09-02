@@ -1389,10 +1389,16 @@ Here's a thinking process:
     is(/KHAMOSHI KA PEHRA/.test(WS) && /gateOn/.test(WS), '🎧 khamoshi ka pehra (VAD) maujood');
     is(/if \(vadEnabled\(\)\) startGate\(\) else actuallyStart\(\)/.test(WS),
       '🔑 sannate mein recognizer BILKUL nahi chalta ("mic on/off" ka ilaj)');
-    is(/rec\.release\(\)[\s\S]{0,120}MicKit\.release\(\)[\s\S]{0,140}actuallyStart/.test(WS),
-      '🔒 mic pehle CHHORA jata hai, phir recognizer (dono ek sath nahi)');
-    is(/over > 14\.0/.test(WS) && /loud >= 3/.test(WS),
-      '📏 door ki dheemi awaaz rad — sirf qareebi buland awaaz par jaage');
+    /* v5.11.0 (1.5/F17) is lock ko SUDHARA: pehle har gate-exit par actuallyStart()
+       post hota tha — chahe gate BAHAR se band hui ho (app ka mic khul raha ho).
+       Ab mic pehle chhora jata hai (join+release) aur recognizer SIRF awaaz wali
+       exit par; "bahar se band" wali exit par kuch nahi hota (wahi race thi). */
+    is(/rec\.release\(\)[\s\S]{0,200}MicKit\.release\(\)[\s\S]{0,900}?when \(why\)[\s\S]{0,200}?actuallyStart/.test(WS) &&
+       /"stop"  -> \{/.test(WS),
+      '🔒 mic pehle CHHORA jata hai, phir recognizer — aur BAHAR se band hone par recognizer hamla NAHI karta (F17)');
+    is(/over > TRIG_STEP/.test(WS) && /loud >= 3/.test(WS) &&
+       /const val TRIG_STEP = 14\.0/.test(WS) && /const val TRIG_CAP = 72\.0/.test(WS),
+      '📏 door ki dheemi awaaz rad — sirf qareebi buland awaaz par jaage (v5.11.0: chokhat ab farsh se banti hai, cap 72dB)');
 
     /* recognizer seerhi */
     is(/isOnDeviceRecognitionAvailable/.test(MA) && /createOnDeviceSpeechRecognizer/.test(MA),
@@ -1478,7 +1484,7 @@ Here's a thinking process:
       '🎫 har schedule ka apna duct-ticket — purana pending restart MURDA (mic strobe ka ilaj)');
 
     /* ── L7 SELF-WAKE SHIELD ── */
-    is(/pehra khamosh/.test(WS) && /while \(gateOn && running\)[\s\S]{0,800}?haalBlock/.test(WS),
+    is(/pehra khamosh/.test(WS) && /while \(gateOn && running[\s\S]{0,1600}?haalBlock/.test(WS),
       '🛡️ Maya ke bolte waqt VAD pehra bhi khamosh — apni awaaz par jaagne ka loop IMKAN-HARAB');
 
     /* ── echo tail: JS aur Kotlin MILTE HAIN ── */
@@ -1510,12 +1516,13 @@ Here's a thinking process:
       '👁️ KAAN report mein HAAL (JS) + HAAL (Kotlin) + roko ki ginti nazar aati hai');
 
     /* ── version qanoon ── */
-    is(/appVersion\(\): String = "5\.10\.3-native"/.test(MA) && MA.indexOf('4.3.0-native') === -1,
+    is(/appVersion\(\): String = "5\.11\.0-native"/.test(MA) && MA.indexOf('4.3.0-native') === -1 &&
+       MA.indexOf('5.10.3-native') === -1,
       '🩹 BONUS — appVersion() ka purana 4.3.0 jhoot bhi ab qatl');
-    is(fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8').indexOf('maya-v5.10.3') > 0 &&
-       /versionCode 74/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')) &&
-       /versionName "5\.10\.3"/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')),
-      '🏷️ poore app mein VERSION v5.10.3 (cache saaf, splash saaf, APK saaf)');
+    is(fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8').indexOf('maya-v5.11.0') > 0 &&
+       /versionCode 75/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')) &&
+       /versionName "5\.11\.0"/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')),
+      '🏷️ poore app mein VERSION v5.11.0 (cache saaf, splash saaf, APK saaf)');
     is(HTML.indexOf('5.8.0') === -1, 'kahi purana 5.8.0 version nazar nahi aata');
 
     /* ── v5.9.1 hotfix — doctor ka jhoota button ab ASAL hai ── */
@@ -2277,10 +2284,10 @@ Here's a thinking process:
       '🎯 F05: appMicBusy() — blind release ki jagah asal haal');
 
     /* ── 🔖 version bump + mirror discipline ── */
-    is(/versionCode 74/.test(GR) && /versionName "5\.10\.3"/.test(GR) &&
-       /"version": "5\.10\.3"/.test(PK) && /maya-v5\.10\.3/.test(SW) &&
-       /5\.10\.3-native/.test(MA) && /MAYA v5\.10\.3/.test(MA),
-      '🔖 v5.10.3 ka bump paanchon jagah (gradle vc74 + package.json + sw.js + appVersion + toast)');
+    is(/versionCode 75/.test(GR) && /versionName "5\.11\.0"/.test(GR) &&
+       /"version": "5\.11\.0"/.test(PK) && /maya-v5\.11\.0/.test(SW) &&
+       /5\.11\.0-native/.test(MA) && /MAYA v5\.11\.0/.test(MA) && /MAYA v5\.11\.0/.test(IH),
+      '🔖 v5.11.0 ka bump CHHE jagah (gradle vc75 + package.json + sw.js + appVersion + Kotlin toast + JS toast)');
     is(PUB.indexOf('pushNativePrefs') > 0 && PUB.indexOf('sWakeLang') > 0 &&
        PUB.indexOf('HAAL (Kotlin)') > 0,
       '🪞 public/ mirror tazaa hai (npm run build) — assets aur web ek jaise');
@@ -2328,6 +2335,161 @@ Here's a thinking process:
     const RM = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
     is(/REPORT-v5\.10\.3-aam-zubaan\.md/.test(RM),
       '🔗 README se parche ka raasta — report chat mein gum nahi hoti, repo mein rehti hai');
+  }
+
+  /* ═══ 32. 🛡️ v5.11.0 — WAKE MAZBOOT (Phase 1) ═══
+     F02 (haal ki mudat) · F15/F42 (farsh calibration) · F16 (gate ka CPU spin) ·
+     F17 (stopGate ki race) · F13 (wake ka apna recognizer) · F14 (session shaping) ·
+     F19 (session vs KUL nakami) · F29 (foreground ka jhoot) · F35 (mic ijazat) ·
+     F41 (onResume/onPause) · F06 (level-triggered HAAL + heartbeat)
+     USOOL wahi: har lock WIRING par — declaration par nahi. */
+  head('32. 🛡️ v5.11.0 — WAKE MAZBOOT: haal ki mudat, farsh calibration, gate ka spin, wake ka apna recognizer');
+  {
+    const WS = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/WakeWordService.kt'), 'utf8');
+    const MA = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8');
+    const ST = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/WakeState.kt'), 'utf8');
+    const IH = fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/index.html'), 'utf8');
+
+    /* ── 1.1 (F02) WAKE STATE: halat ka EK ghar, har halat ki MUDAT ── */
+    is(/object WakeState/.test(ST) && /const val PAUSE_EXP_MS = 8000L/.test(ST) &&
+       /const val APP_SUN_EXP_MS = 30000L/.test(ST) && /const val BOL_EXP_MS = 20000L/.test(ST),
+      '🧭 1.1 (F02): WakeState — halat ka EK ghar + har halat ki MUDAT (sulah 8s · app-mic 30s · bolna 20s)');
+    is(/const val HB_MS = 10000L/.test(ST) && /const val HB_MISS = 3/.test(ST) &&
+       /HB_MS \* HB_MISS/.test(ST),
+      '🧭 1.1: heartbeat 10s · 3 miss = JS murda → Kotlin KHUD KHALI (pehle daimi pabandi)');
+    is(/get\(\) = WakeState\.haal/.test(WS) && /set\(v\) \{ WakeState\.set\(/.test(WS) &&
+       /get\(\) = WakeState\.pausedByApp/.test(WS),
+      '🧭 1.1: service ke `haal`/`pausedByApp` ab WakeState ke PAICHE hain (do ghar nahi, ek)');
+    const HBi = WS.indexOf('fun haalBlock(): String?');
+    const HBs = WS.slice(HBi, HBi + 800);
+    is(HBs.indexOf('enforceExpiry()') > 0 &&
+       HBs.indexOf('enforceExpiry()') < HBs.indexOf('if (haal == "BOL_RAHI")'),
+      '🧭 1.1: haalBlock() PEHLE mudat dekhta hai PHIR pabandi — phansa hua haal wake ko daimi band nahi rakhta');
+    is(/selfFixes\+\+/.test(ST) && /lastFixWhy/.test(ST) && /onSelfFix\(/.test(WS),
+      '🧭 1.1: khud-sudhaar CHUP-CHAAP nahi — ginti + wajah panel par (andha nahi rahenge)');
+    is(/MainActivity\.instance\?\.appMicBusy\(\)/.test(ST) && /pausedAt = t/.test(ST),
+      '🧭 1.1 (F05 ka sabaq): sulah andhi azad NAHI hoti — app ka mic khali ho tab hi, warna intezar barhao');
+    is(/if \(pausedByApp \|\| listening \|\| gateOn\) return/.test(WS),
+      '🔒 khud-sudhaar ke baad mic par HAMLA nahi agar mic pehle se kisi ke paas hai (nayi jang paida nahi ki)');
+
+    /* ── 1.2 (F06) HAAL LEVEL-TRIGGERED + heartbeat ── */
+    is(/fun wakeBeat\(h: String\): String/.test(MA) && /fun wakeResync\(h: String\): String/.test(MA) &&
+       /WakeWordService\.heartbeat\(h\)/.test(MA) && /WakeWordService\.healthKick\(\)/.test(MA),
+      '🧭 1.2: naye bridge — wakeBeat (10s heartbeat) + wakeResync (reload/wapsi par poora haal)');
+    is(/HB_MS: 10000/.test(IH) && /wakeBeat\(SUKOON\.haal\)/.test(IH) && /hbStart: function/.test(IH) &&
+       /resync: function/.test(IH),
+      '🧭 1.2: JS har 10s heartbeat bhejta hai (wakeBeat) + hbStart + resync');
+    is(/set: function \(h, force\)/.test(IH) && /SUKOON\.set\("KHALI", true\)/.test(IH) &&
+       /if \(!force && SUKOON\.haal === h\) return;/.test(IH),
+      '🧭 1.2: sunEnd/bolEnd par FORCE-send (dedup bypass) — ek khoya hua "KHALI" ab wake band nahi rakta');
+    is(/try \{ SUKOON\.resync\(\); \} catch\(e\)\{\}/.test(IH),
+      '🧭 1.2: boot par resync WIRING — WebView reload ke foran baad wake chalti hai');
+    is(/window\.__wakeHealth = function/.test(IH) && /KAAN\.push\("sehat"/.test(IH),
+      '🧭 1.2: __wakeHealth — app wapsi par sehat ka nazar (toast + log), chup-chaap nahi');
+
+    /* ── 1.3 + 1.11 (F15/F42) FARSH AB CALIBRATION SE BANTA HAI ── */
+    is(/const val CAL_MS = 800L/.test(WS) && /const val CAL_FRAMES = 3/.test(WS) &&
+       /const val FLOOR_MIN = 20\.0/.test(WS) && /const val FLOOR_MAX = 50\.0/.test(WS),
+      '🧭 1.3 (F15): 800ms calibration + 3 saaf frame + farsh ka clamp 20..50dB');
+    is(/const val TRIG_CAP = 72\.0/.test(WS) && /coerceAtMost\(TRIG_CAP\)/.test(WS),
+      '🧭 1.3: chokhat par ABSOLUTE CAP 72dB — chillane par bhi wake khulti hai (76dB wali maut khatam)');
+    is(/const val FLOOR_DOWN = 0\.10/.test(WS) && /const val FLOOR_UP = 0\.005/.test(WS) &&
+       /floorDb = floorDb\.coerceIn\(FLOOR_MIN, FLOOR_MAX\)/.test(WS),
+      '🧭 1.3: farsh ab DONO taraf seekhta hai — neeche jaldi, upar dheere (shor barhe to false-wake nahi)');
+    is(WS.indexOf('floorDb <= 0.0') === -1,
+      '🧭 1.3 (F15): purana LATCH qatl — "pehla sample hi farsh" wala bug dobara nahi aa sakta');
+    const CALi = WS.indexOf('if (!calDone) {');
+    const CALs = WS.slice(CALi, CALi + 1400);
+    is(CALs.indexOf('calUntil') > 0 && CALs.indexOf('calFrames') > 0 && CALs.indexOf('continue') > 0 &&
+       /calibration adhoora/.test(CALs),
+      '🧭 1.11 (F42): calibration window ke dauran NA trigger, NA farsh latch — aur adhoora calibration REPORT hota hai');
+    is(/if \(d > 0\.0\) \{ calFrames\+\+/.test(WS) && WS.indexOf('strikes = 0') > 0,
+      '🧭 1.11 (F42): read==0/negative frame farsh ko CHHOOTA hi nahi (khamoshi ko farsh samajhna ghalat tha)');
+
+    /* ── 1.4 (F16) GATE KA CPU SPIN + UMAR ── */
+    is(/if \(n < 0\) \{/.test(WS) && /strikes >= READ_STRIKES/.test(WS) && /why = "read"/.test(WS) &&
+       /const val READ_STRIKES = 5/.test(WS),
+      '🧭 1.4 (F16): read-error par 5-strike → mic TAZAA (pehle 100% CPU ka infinite spin, koi timeout nahi)');
+    is(/if \(n == 0\) \{/.test(WS) && /Thread\.sleep\(READ_SLEEP_MS\)/.test(WS) &&
+       /const val READ_SLEEP_MS = 8L/.test(WS),
+      '🧭 1.4 (F16): n==0 par 8ms sukoon — CPU ghoomta nahi (battery + garmi)');
+    is(/const val GATE_LIFE_MS = 90000L/.test(WS) &&
+       /while \(gateOn && running && System\.currentTimeMillis\(\) < gateUntil\)/.test(WS) &&
+       /pehre ki umar khatam/.test(WS),
+      '🧭 1.4: pehre ki zyada se zyada umar 90s — phir mic tazaa (phansa hua AudioRecord hamesha ke liye nahi)');
+
+    /* ── 1.5 (F17) stopGate: join + release + race-free exit ── */
+    is(/t\.join\(250\)/.test(WS) && WS.indexOf('private fun stopGate() { gateOn = false }') === -1,
+      '🧭 1.5 (F17): stopGate ab thread ko JOIN karta hai (250ms) — purana one-liner (sirf flag) qatl');
+    is(/when \(why\) \{/.test(WS) && /"voice" -> handler\.post \{ actuallyStart\(\) \}/.test(WS) &&
+       /"life"  -> \{/.test(WS) && /else    -> handler\.post \{ restart\(200\) \}/.test(WS),
+      '🧭 1.5 (F17): gate ki exit ab WAJAH dekhti hai — sirf AWAAZ par recognizer; sulah par kuch nahi');
+
+    /* ── 1.6 (F13) WAKE KA APNA RECOGNIZER (self-healing) ── */
+    is(/private fun makeWakeRecognizer\(\): SpeechRecognizer\?/.test(WS) &&
+       /sr = \(makeWakeRecognizer\(\)/.test(WS) && /@Volatile private var wakeRecognizerKind/.test(WS),
+      '🧭 1.6 (F13): wake ka APNA recognizer, SERVICE ke context se (Activity marne par chupke `default` par girna khatam)');
+    is(/getString\("wake_rec", null\)/.test(WS) && /rememberWakeRec\(\)/.test(WS) &&
+       /WakeState\.sessionOk\(\)\s*\n\s*rememberWakeRec\(\)/.test(WS),
+      '🧭 1.6: jo candidate CHALA usay prefs mein yaad rakha jata hai — saboot pehle onReadyForSpeech se, andaza nahi');
+    is(/forgetWakeRec\("4 lagatar nakami"\)/.test(WS) && /if \(errStreak == 4\)/.test(WS),
+      '🧭 1.6: 4 lagatar nakami = candidate bhool jao, agla azmao (self-healing — user ke haath ka kaam nahi)');
+    is(/,\\"using\\":\\"" \+ wakeRecognizerKind/.test(WS) && /appUsing/.test(WS) &&
+       /cand/.test(WS),
+      '🧭 1.6: panel ab WAKE ka aur APP ka recognizer ALAG batata hai (pehle ek shared jhoot tha)');
+
+    /* ── 1.7 (F14) wake session shaping ── */
+    is(/EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 700L/.test(WS) &&
+       /EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 300L/.test(WS),
+      '🧭 1.7 (F14): wake session ki shaping — 700ms khamoshi = khatam, 300ms = kam az kam (lambi session → err 11 band)');
+
+    /* ── 1.8 (F19) session vs KUL nakami ── */
+    is(/private var errStreak: Int/.test(WS) && /get\(\) = WakeState\.errStreak/.test(WS) &&
+       /WakeState\.sessionErr\(\)/.test(WS) && /WakeState\.sessionOk\(\)/.test(WS),
+      '🧭 1.8 (F19): errStreak har kamyab session par SAAF (onReadyForSpeech/onResults) + KUL ginti alag');
+    is(/IS SESSION lagatar/.test(IH) && /KUL nakami/.test(IH),
+      '🧭 1.8: panel ab "IS SESSION" aur "KUL" nakami ALAG dikhata hai (adhoora sach khatam)');
+
+    /* ── 1.9 (F29/F35) foreground ka jhoot + mic ijazat ka darwaza ── */
+    is(/catch \(e: Throwable\) \{\s*\n\s*\/\* 🧭 1\.9 \(F29\)/.test(WS) && /record\("fgs"/.test(WS) &&
+       /alive = false/.test(WS) && /notifyState\(true/.test(WS),
+      '🧭 1.9 (F29): foreground service na bane to CHUP-CHAAP nahi — report + alive=false + notification "wake beemar"');
+    is(/private fun micGranted\(\): Boolean/.test(WS) && /if \(micGranted\(\)\) \{\s*\n\s*startLoop\(\)/.test(WS) &&
+       /loopHeld = true/.test(WS),
+      '🧭 1.9 (F35): mic ki ijazat na ho to loop SHURU HI NAHI hota (pehle har chand second error 9 khata tha)');
+    is(/if \(loopHeld && micGranted\(\)\)/.test(WS) && /if \(loopHeld && micGranted\(\)\) \{[\s\S]{0,300}?startLoop\(\)/.test(WS),
+      '🧭 1.9: ijazat milte hi wake KHUD shuru (app band kar ke dobara kholne ki zaroorat nahi)');
+
+    /* ── 1.10 (F35) notification par seedha darwaza ── */
+    is(/addAction\(0, "Ijazat do"/.test(WS) && /putExtra\("maya_open", "appinfo"\)/.test(WS),
+      '🧭 1.10 (F35): notification par "Ijazat do" ka BUTTON — user ko Settings dhoondhna nahi parta');
+    is(/private fun handleOpenRequest\(i: Intent\?\)/.test(MA) && /"maya_open"/.test(MA) &&
+       /ACTION_APPLICATION_DETAILS_SETTINGS/.test(MA),
+      '🧭 1.10: wo button app-info screen kholta hai (wahi rasta jo device par chalta dekha gaya, blind chain nahi)');
+
+    /* ── 1.12 (F41) lifecycle: resume par resync, pause par background ── */
+    is(/override fun onResume\(\)/.test(MA) && /override fun onPause\(\)/.test(MA) &&
+       /webView\.onResume\(\)/.test(MA) && /webView\.onPause\(\)/.test(MA),
+      '🧭 1.12 (F41): MainActivity mein onResume/onPause AB HAIN (pehle the hi nahi) — WebView background + wapsi');
+    is(MA.indexOf('webView.pauseTimers()') === -1,
+      '🧭 1.12: pauseTimers() JAAN BOOJH kar nahi — us se heartbeat aur wake reports dono mar jate');
+    const ORI = MA.indexOf('override fun onResume()');
+    const ORs = MA.slice(ORI, ORI + 900);
+    is(ORs.indexOf('handleOpenRequest(intent)') > 0 && ORs.indexOf('SUKOON.resync') > 0 &&
+       ORs.indexOf('__wakeHealth') > 0,
+      '🧭 1.12: wapsi par teen kaam — notification darwaza + HAAL resync + wake ki sehat ka check');
+    is(/listening = true/.test(WS) && /if \(!listening && !gateOn && haalBlock\(\) == null\) restart\(200\)/.test(WS),
+      '🧭 1.12: `listening` ka naya flag — sehat ka darwaza mic par hamla nahi karta jab recognizer chal raha ho');
+
+    /* ── 📱 QANOON 9: v5.11.0 ka hisab bhi lazmi (aap ki farmaish) ── */
+    const FX = fs.readFileSync(path.join(ROOT, 'docs/FIX-v5.11.0-wake-mazboot.md'), 'utf8');
+    const RP = fs.readFileSync(path.join(ROOT, 'docs/REPORT-v5.11.0-aam-zubaan.md'), 'utf8');
+    is(/## 📱 RELEASE REPORT/.test(FX) && /✅ PASS/.test(FX) && /❌ FAIL/.test(FX) &&
+       /adhoora/i.test(FX),
+      '📱 Qanoon 9: v5.11.0 ki release report — kya naya, kaise parakhna (PASS/FAIL), kya adhoora');
+    is((RP.match(/- \[ \]/g) || []).length >= 8 && /## 1\)/.test(RP) && /## 5\)/.test(RP) &&
+       /FAIL ❌|FAIL ka nishan/.test(RP),
+      '📄 Qanoon 9: v5.11.0 ka EK PARCHA bhi hai (tick ✅ layak checklist + pehchaan)');
   }
 
     console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');

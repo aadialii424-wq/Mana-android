@@ -8215,13 +8215,22 @@ var KHUD = {
 var SUKOON = {
   haal: "KHALI",
   tailMs: 550,          /* echo tail — WakeWordService.ECHO_TAIL_MS se match */
+  /* 🧭 v5.11.0 (1.2 / F02) — HAAL ab LEVEL-TRIGGERED: sirf badalne par nahi,
+     balki har 10s heartbeat ke sath bhi jata hai. Kotlin side (WakeState) 3
+     heartbeat gayab hone par KHUD KHALI ho jata hai — pehle ek khoya hua call
+     wake ko hamesha ke liye band kar deta tha. */
+  HB_MS: 10000,         /* WakeState.HB_MS se match */
   _tailT: null,
+  _hbT: null,
+  beats: 0,
   _native: function (h) {
     try { if (window.MayaBridge && window.MayaBridge.setHaal) window.MayaBridge.setHaal(h); } catch (e) {}
     try { if (typeof KAAN !== "undefined" && KAAN.push) KAAN.push("haal", h); } catch (e) {}
   },
-  set: function (h) {
-    if (SUKOON.haal === h) return;
+  /* force=true → dedup bypass: Kotlin ko dobara bhejna LAZMI ho (sunEnd/bolEnd
+     par), warna ek khoya hua "KHALI" hamesha ke liye purana haal chhod jata tha. */
+  set: function (h, force) {
+    if (!force && SUKOON.haal === h) return;
     SUKOON.haal = h;
     SUKOON._native(h);
   },
@@ -8235,14 +8244,36 @@ var SUKOON = {
   bolEnd: function () {
     if (SUKOON._tailT) clearTimeout(SUKOON._tailT);
     SUKOON._tailT = setTimeout(function () {
-      if (SUKOON.haal === "BOL_RAHI") SUKOON.set("KHALI");
+      if (SUKOON.haal === "BOL_RAHI") SUKOON.set("KHALI", true);
     }, SUKOON.tailMs);
   },
   sunStart: function () {
     if (SUKOON._tailT) { clearTimeout(SUKOON._tailT); SUKOON._tailT = null; }
     SUKOON.set("APP_SUN");
   },
-  sunEnd: function () { SUKOON.set("KHALI"); }
+  sunEnd: function () { SUKOON.set("KHALI", true); },
+  /* 🧭 1.2 — heartbeat: "main zinda hun, haal ye hai" (har 10s) */
+  beat: function () {
+    try {
+      if (window.MayaBridge && window.MayaBridge.wakeBeat) window.MayaBridge.wakeBeat(SUKOON.haal);
+      SUKOON.beats++;
+    } catch (e) {}
+  },
+  hbStart: function () {
+    try { if (SUKOON._hbT) clearInterval(SUKOON._hbT); } catch (e) {}
+    SUKOON.beat();
+    SUKOON._hbT = setInterval(SUKOON.beat, SUKOON.HB_MS);
+  },
+  /* 🧭 1.2 — WebView reload / boot / app wapsi: poora resync (dedup bypass ke sath).
+     Purani APK par bridge na ho to purana rasta (setHaal) hi istemal hota hai. */
+  resync: function () {
+    var ok = false;
+    try {
+      if (window.MayaBridge && window.MayaBridge.wakeResync) { window.MayaBridge.wakeResync(SUKOON.haal); ok = true; }
+    } catch (e) {}
+    if (!ok) { try { SUKOON._native(SUKOON.haal); } catch (e) {} }
+    SUKOON.hbStart();
+  }
 };
 
 var KAAN = {
@@ -8396,12 +8427,27 @@ var KAAN = {
         L.push("  ⚠️ MISMATCH: JS aur Kotlin ka HAAL alag — wake isi liye phansi thi (ab pakda gaya)");
       }
       L.push("  service      : " + (K.alive ? ("ZINDA · " + Math.round((K.uptime || 0) / 60) + " min se") : "☠️ MURDA (service chal hi nahi rahi)"));
-      L.push("  wake zubaan  : " + (K.lang || "?") + "   ·  recognizer: " + (K.using || "?") +
-             "   ·  gate: " + (K.gate ? "KHULA" : "band") + "   ·  farsh: " + (K.floor || 0) + "dB");
+      L.push("  wake zubaan  : " + (K.lang || "?") + "   ·  wake ka recognizer: " + (K.using || "?") +
+             (K.appUsing ? ("   ·  app ka: " + K.appUsing) : "") + (K.cand ? ("  (" + K.cand + ")") : ""));
+      /* 🧭 v5.11.0 (1.1/1.2/1.3) — ab halat ka POORA hisab nazar aata hai: kis ne
+         lagayi, kab se, heartbeat zinda hai ya nahi, farsh/chokhat kya hai. */
+      L.push("  🧭 WAKE STATE : owner " + (K.owner || "?") + "  ·  " + (K.haalAge || 0) + "s se" +
+             "  ·  heartbeat " + (K.beats || 0) + (K.beatAge >= 0 ? (" (aakhri " + K.beatAge + "s pehle)") : " (ab tak koi nahi)") +
+             "  ·  JS beats " + (typeof SUKOON !== "undefined" ? (SUKOON.beats || 0) : 0));
+      L.push("  🎧 PEHRA      : " + (K.gate ? "KHULA" : "band") + "  ·  mic sun raha " + (K.listening ? "HAAN" : "nahi") +
+             "  ·  farsh " + (K.floor || 0) + "dB  ·  chokhat " + (K.trig || 0) + "dB" +
+             (K.cal === false ? "  ·  ⚠️ calibration adhoora" : "") + "  ·  pehre " + (K.gates || 0) + " dafa");
+      if ((K.selfFix || 0) > 0) {
+        L.push("  🔧 khud-sudhaar: " + K.selfFix + " dafa (aakhri: " + (K.fixWhy || "?") + ")" +
+               "  — agar ye barh raha hai to JS ka HAAL bhejna toota hua hai");
+      }
+      if (K.held) L.push("  ⛔ wake RUKI hui hai — mic ki ijazat chahiye (notification par “Ijazat do”)");
+      if (K.fgs === false) L.push("  ⚠️ foreground service nahi bani — Android/OEM ne roka (wake beemar)");
       L.push("  KOTLIN ginti : suna " + (K.nHeard || 0) + " · mic chala " + (K.nStart || 0) +
              " · nakami " + (K.nErr || 0) + " · roka " + (K.nSkip || 0) +
              ((K.nDead || 0) ? ("  ·  ☠️ dead " + K.nDead) : "") +
-             ((K.errStreak || 0) ? ("  ·  lagatar " + K.errStreak + " (err " + (K.lastErr || 0) + ")") : ""));
+             ((K.errStreak || 0) ? ("  ·  IS SESSION lagatar " + K.errStreak + " (err " + (K.lastErr || 0) + ")") : "") +
+             ((K.errTotal || 0) ? ("  ·  KUL nakami " + K.errTotal) : ""));
       L.push("  delivery     : UI ko bheje " + (K.sent || 0) + "  ·  GIRE " + (K.dropped || 0) +
              ((K.heardOffline || 0) ? ("  ⚠ " + K.heardOffline + " wake UI mare hone ki wajah se zaya (Phase 3 mein ilaj)") : ""));
       if ((K.errStreak || 0) >= 5) {
@@ -8783,6 +8829,26 @@ window.__wakeHeard = function (payload) {
   try { statusText.textContent = "\uD83D\uDC42 JI " + String(settings.name || "BOSS").toUpperCase() + "? BOLIYE..."; } catch (e) {}
   addBubble("ai", "\uD83D\uDC42 Ji " + settings.name + "? Boliye..." + (open ? ("  \uD83D\uDEAA " + open + "s") : ""));
   setTimeout(startListening, 400);
+};
+
+/* 🧭 v5.11.0 (1.12 / F41) — app wapas aane par KOTLIN khud ye bulata hai
+   (MainActivity.onResume): HAAL resync + wake ki sehat ka ek nazar. Pehle app
+   wapsi par dono taraf ka haal alag reh sakta tha aur wake chup-chaap band rehti. */
+window.__wakeHealth = function () {
+  try { SUKOON.resync(); } catch (e) {}
+  try {
+    if (!window.MayaBridge || !window.MayaBridge.wakeState) return;
+    var K = JSON.parse(window.MayaBridge.wakeState() || "null");
+    if (!K) return;
+    var msg = "";
+    if (K.held) msg = "Wake RUKI hui hai \u2014 mic ki ijazat chahiye (notification par \u201CIjazat do\u201D)";
+    else if (K.fgs === false) msg = "Wake beemar \u2014 foreground service nahi ban saki (Android/OEM ne roka)";
+    else if ((K.errStreak || 0) >= 5) msg = "Wake ka CIRCUIT KHULA hai \u2014 internet/Google masla (" + (KAAN.ERRNAME[K.lastErr] || ("err " + K.lastErr)) + ")";
+    else if (K.alive === false) msg = "Wake service MURDA hai \u2014 WAKE switch OFF/ON karein";
+    if (msg) { KAAN.push("sehat", msg); toast(msg); }
+    else KAAN.push("sehat", "wake sehatmand \u00B7 haal " + (K.haal || "?") + " \u00B7 farsh " + (K.floor || 0) +
+                   "dB \u00B7 chokhat " + (K.trig || 0) + "dB \u00B7 " + (K.using || "?"));
+  } catch (e) {}
 };
 
 window.__wakeErr = function(code){
@@ -10092,6 +10158,24 @@ if (NATIVE && settings.wakeWord) setTimeout(function(){ try { setWakeService(tru
    screen-off/app-swipe daur ke waqiat (jo UI tak kabhi nahi pohanche the) yahan
    aa jate hain, aur KAAN panel poori tareekh dikhata hai. */
 if (NATIVE) setTimeout(function(){ try { KAAN.flushNative(); } catch(e){} }, 2200);
+/* 🧭 v5.11.0 (1.2 / F41) — boot par HAAL ka poora resync + heartbeat shuru.
+   Isi se WebView reload ke FORAN baad wake chalti hai (purana masla: reload ke
+   baad Kotlin mein APP_SUN phansa rehta aur wake daimi band). */
+if (NATIVE) setTimeout(function(){ try { SUKOON.resync(); } catch(e){} }, 1800);
+/* 🏷️ v5.11.0 — VERSION KI PEHCHAAN, ab JS taraf se bhi: toast + log line.
+   (v5.10.3 ka toast Kotlin mein tha — MainActivity.onCreate; wo barqarar hai.
+   Ye JS toast ISLIYE naya hai ke APK aur web-asset ka version ALAG ho sakta hai:
+   purani APK + naya web-asset, ya ulta. Ab dono ek hi line mein nazar aate hain —
+   "native: 5.11.0-native" ke baghair web-asset ka bharosa andaza hai.) */
+if (NATIVE) setTimeout(function(){
+  try {
+    var nv = "?";
+    try { if (window.MayaBridge && window.MayaBridge.appVersion) nv = window.MayaBridge.appVersion(); } catch(e){}
+    var v = "MAYA v5.11.0 \u2022 \uD83D\uDEE1\uFE0F WAKE MAZBOOT \u2014 calibration + expiry + heartbeat";
+    toast(v);
+    pushLog(v + "   (native: " + nv + ")");
+  } catch(e){}
+}, 2600);
 setTimeout(refreshHandsFreeStatus, 800);
 setInterval(refreshHandsFreeStatus, 10000);
 if (NATIVE) {

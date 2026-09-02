@@ -129,7 +129,7 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = MayaWebViewClient()
         setContentView(webView)
         webView.loadUrl("https://$VIRTUAL_HOST/assets/web/index.html")
-        Toast.makeText(this, "MAYA v5.10.3 • 👂 WAKE ZINDA: SUNO ke baad foran wapas + err-11 hammer band", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "MAYA v5.11.0 • 🛡️ WAKE MAZBOOT: farsh calibration + haal ki mudat + heartbeat", Toast.LENGTH_LONG).show()
         // WebView zinda hai ya nahi — 8 second baad native check (v4.0.1: onPageFinished/markAlive true karte hain)
         webViewAlive = false
         android.os.Handler(Looper.getMainLooper()).postDelayed({
@@ -176,6 +176,44 @@ class MainActivity : AppCompatActivity() {
         stopRecognizer()
         try { tts?.stop(); tts?.shutdown() } catch (e: Exception) {}
         super.onDestroy()
+    }
+
+    /* 🧭 1.12 (F41) — PEHLE MainActivity mein onResume/onPause THE HI NAHI.
+       Nateeja: app wapas aane par JS aur Kotlin ka HAAL alag reh sakta tha (JS:
+       KHALI, Kotlin: APP_SUN) aur wake chup-chaap band reh jati; aur screen band
+       hone par WebView apna kaam poora jaari rakhta (battery).
+       Ab: resume par WebView wapas + HAAL resync + wake ki sehat ka check;
+       pause par WebView background — magar JS TIMERS ZINDA (pauseTimers() JAAN
+       BOOJH kar nahi: us se heartbeat aur wake reports dono mar jate). */
+    override fun onResume() {
+        super.onResume()
+        try { webView.onResume() } catch (e: Exception) {}
+        handleOpenRequest(intent)
+        try {
+            evalAsyncPublic("window.SUKOON && window.SUKOON.resync && window.SUKOON.resync();" +
+                            "window.__wakeHealth && window.__wakeHealth();")
+        } catch (e: Exception) {}
+    }
+
+    override fun onPause() {
+        try { webView.onPause() } catch (e: Exception) {}
+        super.onPause()
+    }
+
+    /* 🧭 1.10 (F35) — wake notification ke "Ijazat do" button ka darwaza.
+       (SINGLE_TOP par framework khud setIntent() karta hai, is liye onNewIntent
+       override karne ki zaroorat nahi — onResume kaafi hai.) */
+    private fun handleOpenRequest(i: Intent?) {
+        val w = try { i?.getStringExtra("maya_open") } catch (e: Exception) { null } ?: return
+        try { i?.removeExtra("maya_open") } catch (e: Exception) {}
+        if (w == "appinfo") {
+            try {
+                val si = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                Uri.parse("package:$packageName"))
+                si.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(si)
+            } catch (e: Exception) {}
+        }
     }
 
     @Suppress("DEPRECATION")
@@ -283,7 +321,7 @@ class MainActivity : AppCompatActivity() {
     inner class MayaBridge {
 
         @JavascriptInterface
-        fun appVersion(): String = "5.10.3-native"
+        fun appVersion(): String = "5.11.0-native"
 
         /* 🎚️ P9 SUKOON — JS (SUKOON) har awaaz/mic ki HAAL yahan bhejti hai.
            KHALI | BOL_RAHI | APP_SUN — WakeWordService har mic-darwaze par isi
@@ -291,6 +329,26 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface
         fun setHaal(h: String) {
             try { WakeWordService.applyHaal(h) } catch (e: Exception) {}
+        }
+
+        /* 🧭 v5.11.0 (1.2 / F02) — HAAL ab LEVEL-TRIGGERED hai, sirf edge par nahi.
+           PEHLE HAAL tab hi jata tha jab BADAL jaye: ek call kho gaya (WebView
+           reload, JS exception, screen off) to Kotlin ka haal hamesha ke liye purana
+           reh jata aur wake par daimi pabandi lag jati. Ab JS har 10s heartbeat
+           bhejta hai; 3 heartbeat gayab = Kotlin khud KHALI. */
+        @JavascriptInterface
+        fun wakeBeat(h: String): String {
+            return try { WakeWordService.heartbeat(h); "ok" } catch (e: Exception) { "err" }
+        }
+
+        /* 🧭 1.2 — WebView reload / boot / app wapsi par poora resync + sehat ka darwaza */
+        @JavascriptInterface
+        fun wakeResync(h: String): String {
+            return try {
+                WakeWordService.resyncHaal(h)
+                WakeWordService.healthKick()
+                "ok"
+            } catch (e: Exception) { "err" }
         }
 
         /* 🔬 v5.10.3 (F04) — KOTLIN KA SACH. Panel pehle sirf JS ka haal dikhata

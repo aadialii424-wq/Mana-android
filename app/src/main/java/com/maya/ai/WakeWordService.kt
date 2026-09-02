@@ -46,11 +46,48 @@ class WakeWordService : Service() {
            (4) speaker se Maya ki awaaz VAD/recognizer ko lagti -> self-wake loop
            Hal: HAAL — JS (SUKOON) batati hai, Kotlin ka mic har darwaze par
            pehle HAAL poochhta hai. */
-        @Volatile var haal: String = "KHALI"          /* KHALI | BOL_RAHI | APP_SUN */
-        @Volatile var lastBolAt: Long = 0L            /* bolne ka aakhri lamha */
-        @Volatile var pausedByApp: Boolean = false    /* L4 MIC SULAH */
-        @Volatile var pausedAt: Long = 0L
+        /* 🧭 v5.11.0 (1.1 / F02) — halat ka EK ghar ab `WakeState.kt` hai.
+           Ye charon naam barqarar hain (poora code, panel aur tests inhi se baat
+           karte hain) magar ab ye WakeState ke PAICHE (delegate) hain — owner,
+           mudat (expiry) aur JS-heartbeat ke sath. PEHLE halat char jagah bikhri
+           thi aur KISI ki koi mudat nahi thi: JS ka ek "KHALI" call kho jaye
+           (WebView reload / screen off / JS exception) to Kotlin mein APP_SUN ya
+           BOL_RAHI HAMESHA ke liye phans jata → wake par daimi pabandi, aur panel
+           "HAAL: KHALI" likh kar jhoot bolta. */
+        var haal: String
+            get() = WakeState.haal
+            set(v) { WakeState.set(v, if (v == "KHALI") "NONE" else "APP") }
+        var lastBolAt: Long
+            get() = WakeState.lastBolAt
+            set(v) { WakeState.lastBolAt = v }
+        var pausedByApp: Boolean
+            get() = WakeState.pausedByApp
+            set(v) { if (v) WakeState.pauseForApp() else WakeState.resumeFromApp() }
+        var pausedAt: Long
+            get() = WakeState.pausedAt
+            set(v) { WakeState.pausedAt = v }
         const val ECHO_TAIL_MS = 550L                 /* JS SUKOON.tailMs se match */
+
+        /* 🧭 1.1 — expiry ke constants (asal ghar WakeState, yahan hawala) */
+        val PAUSE_EXP_MS = WakeState.PAUSE_EXP_MS     /* sulah: 8s (mic khali ho to) */
+        val APP_SUN_EXP_MS = WakeState.APP_SUN_EXP_MS /* app ka mic: 30s */
+        val BOL_EXP_MS = WakeState.BOL_EXP_MS         /* bolna: 20s */
+        val HB_MS = WakeState.HB_MS                   /* JS heartbeat: 10s */
+        val HB_MISS = WakeState.HB_MISS               /* 3 miss = JS murda → KHALI */
+
+        /* 🧭 1.3 / 1.4 / 1.11 — KHAMOSHI KA PEHRA: calibration + spin + umar */
+        const val CAL_MS = 800L                       /* farsh naapne ki khirki */
+        const val CAL_FRAMES = 3                      /* itne saaf frame = calibration poora */
+        const val FLOOR_DEFAULT = 34.0                /* frame hi na mile to andaza farsh */
+        const val FLOOR_MIN = 20.0                    /* farsh ka clamp (F15: 62dB nahi) */
+        const val FLOOR_MAX = 50.0
+        const val TRIG_STEP = 14.0                    /* farsh se kitna upar = awaaz */
+        const val TRIG_CAP = 72.0                     /* chokhat kabhi is se upar NAHI */
+        const val FLOOR_DOWN = 0.10                   /* farsh neeche JALDI seekhe */
+        const val FLOOR_UP = 0.005                    /* farsh upar DHEERE (shor barhe) */
+        const val READ_STRIKES = 5                    /* n<0: itni dafa, phir mic tazaa */
+        const val READ_SLEEP_MS = 8L                  /* n==0: CPU spin nahi, 8ms sukoon */
+        const val GATE_LIFE_MS = 90000L               /* pehre ki zyada se zyada umar */
 
         /* ═══ 🔬 v5.10.3 — NATIVE INSTRUMENT (F25/F27 ka ilaj) ═══
            PEHLE: saare counters SIRF JS (KAAN) mein rehte the aur report() bhi
@@ -149,15 +186,41 @@ class WakeWordService : Service() {
            "haal" ka JVM setter bhi setHaal(String) banta hai -> platform clash
            (kotlin build fail). Isi liye "applyHaal". */
         fun applyHaal(h: String) {
-            if (h == "BOL_RAHI") lastBolAt = System.currentTimeMillis()
-            haal = h
+            WakeState.set(h, "APP")                    /* 🧭 1.1 — owner ke sath */
+            WakeState.lastBeat = System.currentTimeMillis()
             try { instance?.onHaal(h) } catch (e: Exception) {}
+        }
+
+        /* 🧭 1.2 — JS ka HAR 10s heartbeat: "main zinda hun, haal ye hai".
+           Teen heartbeat gayab = JS/WebView mar chuka → Kotlin KHUD KHALI ho jata
+           hai (pehle wake us murda HAAL ki wajah se daimi band reh jati thi). */
+        fun heartbeat(h: String?) {
+            val why = WakeState.enforceExpiry()
+            if (why != null) { try { instance?.onSelfFix(why) } catch (e: Exception) {} }
+            WakeState.beat(h)
+        }
+
+        /* 🧭 1.2 — WebView reload / boot par poora resync (JS ka dedup bypass ho kar) */
+        fun resyncHaal(h: String) {
+            WakeState.resync(h)
+            try { instance?.onHaal(h) } catch (e: Exception) {}
+        }
+
+        /* 🧭 1.12 (F41) — app wapas aayi: wake ki sehat ka check. Wake ruki hui thi
+           (ijazat / murda haal) to darwaza khulta hai — magar MIC PAR HAMLA NAHI
+           agar recognizer ya pehra pehle se chal raha hai (wahi purani jang). */
+        fun healthKick() {
+            try { instance?.kick() } catch (e: Exception) {}
         }
 
         /* L2 — mic ka jawab: abhi kholna mana hai? (null = khol lo) */
         fun haalBlock(): String? {
             val s = instance ?: return null            /* service band -> faisla baema'ni */
             if (!s.sukoonOn()) return null             /* escape hatch — LAB switch OFF */
+            /* 🧭 1.1 (F02) — pehle MUDAT dekho: jo halat apni expiry se aage nikal
+               chuki usay khud KHALI karo (self-fix ginti panel par jati hai). */
+            val fix = WakeState.enforceExpiry()
+            if (fix != null) { try { s.onSelfFix(fix) } catch (e: Exception) {} }
             if (haal == "BOL_RAHI") return "Maya bol rahi hai"
             if (haal == "APP_SUN") return "app ka mic chal raha hai"
             if (pausedByApp) return "sulah: app ka mic"
@@ -167,12 +230,11 @@ class WakeWordService : Service() {
 
         /* L4 — tap-to-speak sab se pehle; service neeche */
         fun pauseForApp() {
-            pausedByApp = true
-            pausedAt = System.currentTimeMillis()
+            WakeState.pauseForApp()
             try { instance?.hardPause() } catch (e: Exception) {}
         }
         fun resumeFromApp() {
-            pausedByApp = false
+            WakeState.resumeFromApp()
             try { instance?.softResume() } catch (e: Exception) {}
         }
 
@@ -187,9 +249,19 @@ class WakeWordService : Service() {
     @Volatile private var running = false
     private var watchdogRuns = 0
     private var lastWakeAt = 0L
-    private var errStreak = 0
+    /* 🧭 1.8 (F19) — "is session" ki lagatar nakami ab WakeState mein, aur KUL
+       nakami (`errTotal`) alag. PEHLE errStreak sirf result/err8 par reset hota
+       tha, is liye panel ka "lagatar 15" adhoora sach tha (starts=7 jabke err=15).
+       Ab har kamyab session (onReadyForSpeech) streak saaf karta hai. */
+    private var errStreak: Int
+        get() = WakeState.errStreak
+        set(v) { WakeState.errStreak = v }
     private var lastErr = 0
     private var starts = 0
+    @Volatile private var listening = false   /* 🧭 1.12 — recognizer abhi mic par hai? */
+    @Volatile private var loopHeld = false      /* 🧭 1.9 (F35) — mic ijazat ke baghair loop ruka */
+    @Volatile private var fgsOk = true          /* 🧭 1.9 (F29) — foreground bana ya nahi */
+    private var lastFixReportAt = 0L
     @Volatile private var pendingGen = 0L        /* L6 RACE TOKEN — pending restart ka duct-ticket */
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -204,7 +276,19 @@ class WakeWordService : Service() {
         try {
             tts = TextToSpeech(this) { st -> ttsReady = st == TextToSpeech.SUCCESS }
         } catch (e: Exception) {}
-        startLoop()
+        /* 🧭 1.9 (F29/F35) — mic ki ijazat na ho to loop SHURU HI NA HO.
+           PEHLE: loop chalta tha aur har chand second error 9 khata tha (battery,
+           log spam, cloud hammer) — aur notification "hamesha sun rahi hai" ka
+           JHOOT likhe rehti thi. Ab: wake rukti hai, user ko SAAF bataya jata hai,
+           aur watchdog ijazat milte hi khud shuru kar deta hai. */
+        if (micGranted()) {
+            startLoop()
+        } else {
+            loopHeld = true
+            record("dead", "9|mic ki ijazat nahi — wake ruki hui hai")
+            notifyState(true, "Mic ki ijazat chahiye — \u201CIjazat do\u201D dabayen")
+            evalToApp("window.__wakeErr && window.__wakeErr(9)")
+        }
         handler.postDelayed(::watchdog, 45000)
     }
 
@@ -247,7 +331,88 @@ class WakeWordService : Service() {
             } else {
                 startForeground(NOTIF_ID, notif)
             }
-        } catch (e: Exception) {}
+            fgsOk = true
+        } catch (e: Throwable) {
+            /* 🧭 1.9 (F29) — PEHLE ye `catch (e: Exception) {}` tha: foreground
+               service ban na sakti (Android 14 ka FGS-mic qanoon, ijazat, OEM) to
+               service CHUP-CHAAP beemar reh jati aur humein kabhi pata na chalta —
+               har empty catch ek report ka maangta hai. Ab: report + alive=false
+               + notification par "wake beemar". */
+            fgsOk = false
+            alive = false
+            record("fgs", "foreground service nahi bani: " + e.javaClass.simpleName)
+            notifyState(true, "Wake beemar — " + e.javaClass.simpleName)
+        }
+    }
+
+    /* 🧭 1.9/1.10 (F29/F35) — notification ab halat ke sath sach bolti hai.
+       Sehatmand = wahi purani line; beemar = "⚠️ wake beemar" + seedha darwaza
+       ("Ijazat do" → app-info screen). Blind intent-chain nahi, wahi rasta jo
+       v5.10.x mein device par chalta dekha gaya. */
+    @Volatile private var notifSick = false
+    private fun notifyState(sick: Boolean, text: String) {
+        if (!sick && !notifSick) return               /* sehatmand bar bar nahi banati */
+        notifSick = sick
+        try {
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val b = NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle(if (sick) "\u26A0\uFE0F MAYA wake beemar" else "MAYA hamesha sun rahi hai \uD83D\uDC42")
+                .setContentText(text)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setContentIntent(PendingIntent.getActivity(
+                    this, 1,
+                    Intent(this, MainActivity::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+            if (sick) {
+                b.addAction(0, "Ijazat do", PendingIntent.getActivity(
+                    this, 2,
+                    Intent(this, MainActivity::class.java)
+                        .putExtra("maya_open", "appinfo")
+                        .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+            }
+            nm.notify(NOTIF_ID, b.build())
+        } catch (e: Throwable) {
+            record("fgs", "notification nahi bani: " + e.javaClass.simpleName)
+        }
+    }
+
+    /* 🧭 1.9 (F35) — mic ki ijazat ka asal haal (guess nahi) */
+    private fun micGranted(): Boolean = try {
+        androidx.core.content.ContextCompat.checkSelfPermission(
+            this, android.Manifest.permission.RECORD_AUDIO
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    } catch (e: Throwable) { true }
+
+    /* 🧭 1.12 (F41) — app ke wapas aane par sehat ka darwaza */
+    fun kick() {
+        handler.post {
+            if (!running) return@post
+            val fix = WakeState.enforceExpiry()
+            if (fix != null) onSelfFix(fix)
+            if (loopHeld && micGranted()) {
+                loopHeld = false
+                notifyState(false, "Bolo: \u201CMaya\u201D ya \u201CBoss\u201D \u2014 kahin se bhi")
+                startLoop()
+                return@post
+            }
+            if (!listening && !gateOn && haalBlock() == null) restart(200)
+        }
+    }
+
+    /* 🧭 1.1 — expiry ne khud sudhara to user ko batana (rate-limited) */
+    fun onSelfFix(why: String) {
+        val now = System.currentTimeMillis()
+        if (now - lastFixReportAt < 5000L) return     /* har darwaze par ek hi baat */
+        lastFixReportAt = now
+        report("haal", "khud-sudhaar: " + why)
+        /* mic pehle se kisi ke paas ho to hamla nahi (warna wahi error 3/8) */
+        if (pausedByApp || listening || gateOn) return
+        handler.post { restart(300) }                 /* pabandi hati → wake wapas */
     }
 
     private fun speakLocal(text: String) {
@@ -296,8 +461,11 @@ class WakeWordService : Service() {
        aur recognizer kabhi ek sath nahi chalte.
        ═══════════════════════════════════════════════════════════════════ */
     @Volatile private var gateOn = false
-    private var gateThread: Thread? = null
+    @Volatile private var gateThread: Thread? = null
     private var floorDb = 0.0
+    @Volatile private var trigDb = 0.0        /* 🧭 1.3 — chokhat (farsh + TRIG_STEP, cap 72dB) */
+    @Volatile private var calOk = false       /* 🧭 1.11 — calibration poora hua ya adhoora */
+    @Volatile private var gateLoops = 0L      /* kitni dafa pehra chala (panel ke liye) */
 
     private fun vadEnabled(): Boolean = try {
         getSharedPreferences("maya", Context.MODE_PRIVATE).getBoolean("mic_near", true)
@@ -320,49 +488,133 @@ class WakeWordService : Service() {
                 handler.post { actuallyStart() }
                 return@Thread
             }
+            gateLoops++
             report("gate", "pehra shuru  zoom:" + (if (MicKit.fxZoom) "\u2713" else "\u2717") +
                    " ns:" + (if (MicKit.fxNs) "\u2713" else "\u2717"))
             val buf = ShortArray(1600)
             var quiet = 0
             var loud = 0
+            var strikes = 0
+            var calFrames = 0
+            var calMin = 99.0
+            var calDone = false
+            var why = "stop"                   /* voice | blocked | read | life | stop */
             floorDb = 0.0
+            trigDb = 0.0
+            calOk = false
+            val gateUntil = System.currentTimeMillis() + GATE_LIFE_MS   /* 🧭 1.4 — umar */
+            val calUntil = System.currentTimeMillis() + CAL_MS          /* 🧭 1.3 — khirki */
             try {
                 rec.startRecording()
-                while (gateOn && running) {
+                while (gateOn && running && System.currentTimeMillis() < gateUntil) {
                     val n = rec.read(buf, 0, buf.size)
-                    if (n <= 0) continue
+                    /* 🧭 1.4 (F16) — PEHLE `if (n <= 0) continue` tha: read-error par
+                       100% CPU ka INFINITE SPIN (battery + garmi + mic mar jata) aur
+                       koi timeout nahi. Ab: n<0 par ginti, 5 strike = mic tazaa;
+                       n==0 par 8ms sukoon (spin nahi). */
+                    if (n < 0) {
+                        strikes++
+                        if (strikes >= READ_STRIKES) { why = "read"; break }
+                        try { Thread.sleep(READ_SLEEP_MS) } catch (e: InterruptedException) { break }
+                        continue
+                    }
+                    if (n == 0) {
+                        try { Thread.sleep(READ_SLEEP_MS) } catch (e: InterruptedException) { break }
+                        continue
+                    }
+                    strikes = 0
                     /* L7 SELF-WAKE SHIELD — Maya ke bolte waqt PEHRA bhi khamosh.
                        Warna speaker se uski apni awaaz gate ko "awaaz" lagti aur
                        MAYA APNE HI WAKE WORD par jaag sakti thi (loop) — isi liye
                        aap ko jawab ke beech mic on/off dikh raha tha. */
-                    val why = haalBlock()
-                    if (why != null) {
-                        reportSkip("pehra khamosh — " + why)
+                    val blocked = haalBlock()
+                    if (blocked != null) {
+                        reportSkip("pehra khamosh — " + blocked)
+                        why = "blocked"
                         break
                     }
                     val d = MicKit.db(buf, n)
-                    if (floorDb <= 0.0) floorDb = d
-                    if (d < floorDb) floorDb = floorDb * 0.9 + d * 0.1     /* farsh dheere dheere seekho */
+                    /* 🧭 1.3 + 1.11 (F15/F42) — CALIBRATION WINDOW (800ms):
+                       PEHLE farsh PEHLE sample par LATCH ho jata tha aur sirf NEECHE
+                       ja sakta tha. Nateeja: agar pehla frame kisi shor/AGC ka tha to
+                       farsh 62dB ban jata, chokhat 76dB — aur aap ke CHILLANE par bhi
+                       wake na khulti ("awaaz 77dB farsh 62dB" wala log).
+                       Ab: pehle 800ms khamoshi ka farsh NAAPA jata hai (kam az kam 3
+                       saaf frame; read==0/negative frame farsh ko CHHOOTA hi nahi —
+                       khamoshi ko farsh samajhna ghalat hai). Is dauran koi trigger nahi. */
+                    if (!calDone) {
+                        if (d > 0.0) { calFrames++; if (d < calMin) calMin = d }
+                        if (System.currentTimeMillis() >= calUntil) {
+                            val f = if (calFrames > 0 && calMin < 99.0) calMin else FLOOR_DEFAULT
+                            floorDb = f.coerceIn(FLOOR_MIN, FLOOR_MAX)
+                            trigDb = (floorDb + TRIG_STEP).coerceAtMost(TRIG_CAP)
+                            calOk = calFrames >= CAL_FRAMES
+                            calDone = true
+                            report("gate", "farsh " + Math.round(floorDb) + "dB  chokhat " +
+                                   Math.round(trigDb) + "dB  frame " + calFrames +
+                                   (if (calOk) "" else " (calibration adhoora)"))
+                        }
+                        continue
+                    }
+                    /* 🧭 1.3 (F15) — farsh ab DONO taraf seekhta hai: neeche jaldi
+                       (0.10), upar dheere (0.005) — warna shor barhne par chokhat
+                       hamesha neeche reh jati aur false-wake shuru. Clamp 20..50 aur
+                       chokhat par ABSOLUTE CAP (72dB) — chillane par bhi wake khule. */
+                    if (d < floorDb) floorDb = floorDb * (1.0 - FLOOR_DOWN) + d * FLOOR_DOWN
+                    else floorDb = floorDb * (1.0 - FLOOR_UP) + d * FLOOR_UP
+                    floorDb = floorDb.coerceIn(FLOOR_MIN, FLOOR_MAX)
+                    trigDb = (floorDb + TRIG_STEP).coerceAtMost(TRIG_CAP)
                     val over = d - floorDb
-                    if (over > 14.0) { loud++; quiet = 0 } else { quiet++; if (quiet > 3) loud = 0 }
+                    if (over > TRIG_STEP || d >= trigDb) { loud++; quiet = 0 }
+                    else { quiet++; if (quiet > 3) loud = 0 }
                     if (loud >= 3) {                                       /* ~300ms qareebi awaaz */
-                        report("voice", "awaaz " + Math.round(d) + "dB  farsh " + Math.round(floorDb) + "dB")
+                        report("voice", "awaaz " + Math.round(d) + "dB  farsh " +
+                               Math.round(floorDb) + "dB  chokhat " + Math.round(trigDb) + "dB")
+                        why = "voice"
                         break
                     }
                 }
                 rec.stop()
             } catch (e: Exception) {
                 report("gate", "pehra nakaam: " + (e.message ?: "?"))
+                if (why == "stop") why = "read"
             }
+            if (why == "stop" && System.currentTimeMillis() >= gateUntil) why = "life"
             try { rec.release() } catch (e: Exception) {}
             MicKit.release()
             gateOn = false
-            if (running) handler.post { actuallyStart() }                  /* ab recognizer ki baari */
+            gateThread = null
+            if (!running) return@Thread
+            /* 🧭 1.5 (F17) — PEHLE har exit par `actuallyStart()` post hota tha, CHAHE
+               gate bahar se band kiya gaya ho (onHaal / hardPause = app ka mic khul
+               raha hai). Nateeja: wake ka recognizer usi lamhe mic par hamla karta →
+               error 3/8 aur Maya ki awaaz kat jati. Ab exit ki WAJAH dekhi jati hai. */
+            when (why) {
+                "voice" -> handler.post { actuallyStart() }      /* ab recognizer ki baari */
+                "stop"  -> { /* bahar se band (sulah) — koi race nahi, kuch mat karo */ }
+                "life"  -> {
+                    report("gate", "pehre ki umar khatam (" + (GATE_LIFE_MS / 1000L) + "s) — mic tazaa")
+                    handler.post { restart(200) }
+                }
+                else    -> handler.post { restart(200) }         /* blocked / read — wapas pehre par */
+            }
         }
         gateThread?.start()
     }
 
-    private fun stopGate() { gateOn = false }
+    /* 🧭 1.5 (F17) — pehle sirf `gateOn = false` tha: thread kaam khatam karne tak
+       MIC PAR rehta (AudioRecord release nahi, join nahi). Isi liye app ka mic
+       khulte hi error 3/8 aata tha. Ab: flag off → 250ms join → audio-effects
+       release. (AudioRecord khud thread release karta hai — dobara release crash.) */
+    private fun stopGate() {
+        gateOn = false
+        val t = gateThread
+        if (t != null && t !== Thread.currentThread()) {
+            try { t.join(250) } catch (e: Exception) {}
+        }
+        gateThread = null
+        try { MicKit.release() } catch (e: Exception) {}
+    }
 
     private fun startLoop() {
         handler.post {
@@ -381,10 +633,24 @@ class WakeWordService : Service() {
         /* 🎯 P8b — wahi seerhi jo MainActivity mein hai: on-device -> Google -> aam.
            Android 12+ par default AiAi ho sakta hai jo kaam hi nahi karta. */
         try {
-        sr = (MainActivity.instance?.makeRecognizer()
+        /* 🧭 1.6 (F13) — wake ka APNA recognizer, SERVICE ke context se. PEHLE ye
+           `MainActivity.instance?.makeRecognizer()` se banta tha: Activity mari
+           (screen off / OEM kill) to wake chupke se `default` par gir jati thi, aur
+           `lastRecognizerKind` SHARED hone ki wajah se DOCTOR bhi jhoot bolta tha
+           ("using: on-device" jabke wake asal mein default chala rahi thi). */
+        sr = (makeWakeRecognizer()
+              ?: MainActivity.instance?.makeRecognizer()
               ?: SpeechRecognizer.createSpeechRecognizer(this)).apply {
             setRecognitionListener(object : RecognitionListener {
-                override fun onReadyForSpeech(params: Bundle?) {}
+                override fun onReadyForSpeech(params: Bundle?) {
+                    /* 🧭 1.8 (F19) — kamyab session: streak SAAF (KUL ginti barqarar).
+                       🧭 1.6 — aur jo candidate CHALA usay yaad rakho: saboot, andaza
+                       nahi. (Forensic ka "har candidate par test session" wala idea
+                       JAAN BOOJH kar nahi kiya — do recognizer ek sath mic par = wahi
+                       error 8 / mic jang jo Phase 0 mein mari thi.) */
+                    WakeState.sessionOk()
+                    rememberWakeRec()
+                }
                 override fun onBeginningOfSpeech() {}
                 override fun onRmsChanged(rmsdB: Float) {}
                 override fun onBufferReceived(buffer: ByteArray?) {}
@@ -395,7 +661,8 @@ class WakeWordService : Service() {
                        aur itni tez restart par Google ka recognizer chup ho jata
                        hai — yehi "mic on hota hai band hota hai" ki wajah thi.
                        Ab har lagatar nakami par intezar barhta jata hai. */
-                    errStreak++
+                    listening = false
+                    WakeState.sessionErr()   /* 🧭 1.8 — streak AUR kul (errTotal) dono */
                     lastErr = error
                     report("err", error.toString() + "|" + errStreak)
 
@@ -414,6 +681,11 @@ class WakeWordService : Service() {
                        Har 1.2s hammer bekaar hai; user ko batana zaroori hai. */
                     if (error == 9) {
                         report("dead", "9|mic ki ijazat nahi — wake ruk gayi")
+                        /* 🧭 1.10 (F35) — circuit open + notification par seedha
+                           darwaza ("Ijazat do"). Pehle sirf toast tha: user ko khud
+                           Settings dhoondhna parta tha. */
+                        loopHeld = true
+                        notifyState(true, "Mic ki ijazat chahiye \u2014 \u201CIjazat do\u201D dabayen")
                         evalToApp("window.__wakeErr && window.__wakeErr(9)")
                         restart(60000)
                         return
@@ -443,6 +715,10 @@ class WakeWordService : Service() {
 
                     /* 3 lagatar nakami = service ka connection khud mar chuka hai */
                     if (errStreak >= 3) { try { resetRecognizer() } catch (e: Throwable) {} }
+                    /* 🧭 1.6 — 4 lagatar nakami = ye candidate is phone par kaam ka
+                       nahi: prefs se bhool jao, taake agla resetRecognizer() AGLA
+                       candidate azmaye (self-healing — user ke haath ka kaam nahi). */
+                    if (errStreak == 4) { forgetWakeRec("4 lagatar nakami") }
 
                     /* 🔬 F10 — CIRCUIT OPEN: chup-chaap marna band, user ko khabar.
                        ⚠ settings.wakeWord ko HAATH NAHI lagate — P9 ka wada barqarar
@@ -456,7 +732,8 @@ class WakeWordService : Service() {
                 override fun onResults(results: Bundle?) {
                     val all = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                         ?: arrayListOf()
-                    if (all.isNotEmpty()) { handleAll(all); errStreak = 0 }
+                    listening = false
+                    if (all.isNotEmpty()) { handleAll(all); errStreak = 0; WakeState.sessionOk() }
                     restart(400)
                 }
                 override fun onPartialResults(partialResults: Bundle?) {}
@@ -570,17 +847,38 @@ class WakeWordService : Service() {
                 putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
                 putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 6)
                 putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false)
+                /* 🧭 1.7 (F14) — session shaping: PEHLE wake intent mein silence /
+                   minimum-length KUCH nahi tha (app wale path mein 700ms tha). Is liye
+                   wake sessions kabhi kabhi bohat lambi khinchti thin aur
+                   SERVER_DISCONNECTED (err 11) par khatam hoti thin. Ab dono path ek
+                   jaise: 700ms khamoshi = session khatam, 300ms = kam az kam bolna. */
+                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 700L)
+                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 300L)
             }
             starts++
             report("start", lang + "|" + starts)
             sr?.startListening(intent)
-        } catch (e: Exception) {}
+            listening = true                 /* 🧭 1.12 — mic par hamla karne se pehle dekho */
+        } catch (e: Exception) { listening = false }
     }
 
     /** Har 45s zinda hai? har 12 min fresh recognizer */
     private fun watchdog() {
         if (!running) return
         watchdogRuns++
+        /* 🧭 1.2 — expiry ka hisab sirf mic-darwazon par nahi, yahan bhi (45s).
+           JS ke heartbeat gayab hon to haal khud KHALI, aur user ko "khud-sudhaar"
+           ki report (chup-chaap nahi). */
+        val fix = WakeState.enforceExpiry()
+        if (fix != null) { try { onSelfFix(fix) } catch (e: Exception) {} }
+        /* 🧭 1.9 (F35) — mic ki ijazat mil gayi to wake KHUD shuru: pehle user ko
+           app band kar ke dobara kholni parti thi. */
+        if (loopHeld && micGranted()) {
+            loopHeld = false
+            notifyState(false, "Bolo: “Maya” ya “Boss” — kahin se bhi")
+            report("sulah", "mic ki ijazat mil gayi — wake shuru")
+            startLoop()
+        }
         if (watchdogRuns >= 16) { // ~12 min
             watchdogRuns = 0
             /* L2 — watchdog bhi HAAL se pooche: Maya ke bolte waqt recognizer
@@ -652,6 +950,81 @@ class WakeWordService : Service() {
         }
     }
 
+    /* ═══ 🧭 1.6 (F13) — WAKE KA APNA RECOGNIZER ═══
+       Seerhi: (1) jo pehle CHALA tha (prefs mein yaad) → (2) Android 13+ ka
+       on-device → (3) phone ki RecognitionService fehrist se pehla qabil →
+       (4) aam default. Jo asal mein chalta hai (pehla `onReadyForSpeech`) usay
+       yaad kar liya jata hai; 4 lagatar nakami par bhoola diya jata hai. */
+    @Volatile private var wakeRecognizerKind: String = "-"
+    private var wakeCandidate: String = ""
+
+    private fun makeWakeRecognizer(): SpeechRecognizer? {
+        val list = try {
+            packageManager.queryIntentServices(
+                Intent(android.speech.RecognitionService.SERVICE_INTERFACE), 0)
+        } catch (e: Throwable) { emptyList() }
+        val remembered = try {
+            getSharedPreferences("maya", Context.MODE_PRIVATE).getString("wake_rec", null)
+        } catch (e: Throwable) { null }
+
+        if (!remembered.isNullOrEmpty()) {
+            for (ri in list) {
+                val si = ri.serviceInfo ?: continue
+                if (si.packageName + "/" + si.name == remembered) {
+                    try {
+                        wakeCandidate = remembered
+                        wakeRecognizerKind = "yaad:" + si.packageName
+                        return SpeechRecognizer.createSpeechRecognizer(
+                            this, android.content.ComponentName(si.packageName, si.name))
+                    } catch (e: Throwable) {}
+                }
+            }
+        }
+        if (Build.VERSION.SDK_INT >= 33) {
+            try {
+                if (SpeechRecognizer.isOnDeviceRecognitionAvailable(this)) {
+                    wakeCandidate = "on-device"
+                    wakeRecognizerKind = "on-device"
+                    return SpeechRecognizer.createOnDeviceSpeechRecognizer(this)
+                }
+            } catch (e: Throwable) {}
+        }
+        for (ri in list) {
+            val si = ri.serviceInfo ?: continue
+            try {
+                val r = SpeechRecognizer.createSpeechRecognizer(
+                    this, android.content.ComponentName(si.packageName, si.name))
+                wakeCandidate = si.packageName + "/" + si.name
+                wakeRecognizerKind = si.packageName
+                return r
+            } catch (e: Throwable) {}
+        }
+        return try {
+            wakeCandidate = ""
+            wakeRecognizerKind = "default"
+            SpeechRecognizer.createSpeechRecognizer(this)
+        } catch (e: Throwable) { null }
+    }
+
+    private fun rememberWakeRec() {
+        if (wakeCandidate.isEmpty()) return
+        try {
+            val p = getSharedPreferences("maya", Context.MODE_PRIVATE)
+            if (p.getString("wake_rec", null) != wakeCandidate) {
+                p.edit().putString("wake_rec", wakeCandidate).apply()
+                report("rec", "wake ka recognizer yaad: " + wakeRecognizerKind)
+            }
+        } catch (e: Throwable) {}
+    }
+
+    private fun forgetWakeRec(why: String) {
+        try {
+            getSharedPreferences("maya", Context.MODE_PRIVATE).edit().remove("wake_rec").apply()
+            wakeCandidate = ""
+            report("rec", "recognizer bhoola diya (" + why + ") — agla candidate azmaya jayega")
+        } catch (e: Throwable) {}
+    }
+
     /* 🔬 F12 — wake ki zubaan AB STT se azad hai. Urdu decoder "مایا" ko "ہے"
        jaisa parh leta hai (hamara apna KAAN DOCTOR ye kehta tha), is liye wake
        ka default en-IN hai aur user LAB se badal sakta hai. */
@@ -672,12 +1045,27 @@ class WakeWordService : Service() {
         s.append(",\"pausedFor\":").append(if (pausedByApp) (System.currentTimeMillis() - pausedAt) else 0L)
         s.append(",\"block\":\"" + (haalBlock() ?: "").replace("\"", "'") + "\"")
         s.append(",\"gate\":").append(if (gateOn) "true" else "false")
+        s.append(",\"listening\":").append(if (listening) "true" else "false")
         s.append(",\"sukoon\":").append(if (sukoonOn()) "true" else "false")
         s.append(",\"lang\":\"" + wakeLangNow() + "\"")
-        s.append(",\"using\":\"" + (MainActivity.instance?.lastRecognizerKind ?: "-") + "\"")
+        s.append(",\"using\":\"" + wakeRecognizerKind + "\"")          /* 🧭 1.6 — wake ka APNA */
+        s.append(",\"appUsing\":\"" + (MainActivity.instance?.lastRecognizerKind ?: "-") + "\"")
+        s.append(",\"cand\":\"" + wakeCandidate.replace("\"", "'") + "\"")
         s.append(",\"floor\":").append(Math.round(floorDb))
+        s.append(",\"trig\":").append(Math.round(trigDb))
+        s.append(",\"cal\":").append(if (calOk) "true" else "false")
+        s.append(",\"gates\":").append(gateLoops)
+        s.append(",\"fgs\":").append(if (fgsOk) "true" else "false")
+        s.append(",\"held\":").append(if (loopHeld) "true" else "false")
+        s.append(",\"owner\":\"" + WakeState.owner + "\"")
+        s.append(",\"haalAge\":").append(WakeState.age() / 1000L)
+        s.append(",\"beats\":").append(WakeState.beats)
+        s.append(",\"beatAge\":").append(if (WakeState.lastBeat > 0L) ((System.currentTimeMillis() - WakeState.lastBeat) / 1000L) else -1L)
+        s.append(",\"selfFix\":").append(WakeState.selfFixes)
+        s.append(",\"fixWhy\":\"" + WakeState.lastFixWhy.replace("\"", "'") + "\"")
         s.append(",\"starts\":").append(starts)
         s.append(",\"errStreak\":").append(errStreak)
+        s.append(",\"errTotal\":").append(WakeState.errTotal)
         s.append(",\"lastErr\":").append(lastErr)
         s.append(",\"uptime\":").append(if (startedAt > 0L) ((System.currentTimeMillis() - startedAt) / 1000L) else 0L)
         s.append(",\"nHeard\":").append(nHeard)
