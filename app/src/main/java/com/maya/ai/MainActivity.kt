@@ -20,6 +20,7 @@ import android.provider.MediaStore
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.BatteryManager
+import android.util.Base64
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
@@ -121,7 +122,7 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = MayaWebViewClient()
         setContentView(webView)
         webView.loadUrl("https://$VIRTUAL_HOST/assets/web/index.html")
-        Toast.makeText(this, "MAYA v4.0.1 • WebView compat fix install hua hai", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "MAYA v5.9.1 • SUKOON + doctor ka [ON-DEVICE] ab ASLI button hai", Toast.LENGTH_LONG).show()
         // WebView zinda hai ya nahi — 8 second baad native check (v4.0.1: onPageFinished/markAlive true karte hain)
         webViewAlive = false
         android.os.Handler(Looper.getMainLooper()).postDelayed({
@@ -266,7 +267,15 @@ class MainActivity : AppCompatActivity() {
     inner class MayaBridge {
 
         @JavascriptInterface
-        fun appVersion(): String = "4.0.1-native"
+        fun appVersion(): String = "5.9.1-native"
+
+        /* 🎚️ P9 SUKOON — JS (SUKOON) har awaaz/mic ki HAAL yahan bhejti hai.
+           KHALI | BOL_RAHI | APP_SUN — WakeWordService har mic-darwaze par isi
+           ko poochhti hai. Isi se awaaz-katna + mic-larai dono khatam hain. */
+        @JavascriptInterface
+        fun setHaal(h: String) {
+            try { WakeWordService.applyHaal(h) } catch (e: Exception) {}
+        }
 
         /* v4.0.1: index.html boot-guard ye call karta hai — ab native alive flag true hota hai */
         @JavascriptInterface
@@ -347,6 +356,10 @@ class MainActivity : AppCompatActivity() {
                     return@runOnUiThread
                 }
                 stopRecognizer()
+                /* 🤝 P9 MIC SULAH — app ka tap-to-speak sab se pehle. Wake service
+                   apna mic chhor degi (do recognizer kabhi ek saath nahi chal sakte —
+                   wahi jang v5.8.0 tak har tap-to-speak ko mar okat deti thi). */
+                try { WakeWordService.pauseForApp() } catch (e: Exception) {}
                 val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                     putExtra(
                         RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -354,11 +367,15 @@ class MainActivity : AppCompatActivity() {
                     )
                     putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang)
                     putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
-                    putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+                    /* 🎙️ P8b — pehle 1 tha! SUNO ka poora nizam "kai andazon mein se
+                       behtareen chuno" par khara hai, aur main mic use SIRF EK andaza
+                       deta tha — yani wo feature asal mic par kabhi chala hi nahi.
+                       ("Funk Taka" -> "اس لاوا فنک" ki yehi wajah thi.) */
+                    putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 6)
                     putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
                     putExtra("android.speech.extra.SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS", 700)
                 }
-                recognizer = SpeechRecognizer.createSpeechRecognizer(this@MainActivity).apply {
+                recognizer = makeRecognizer().apply {
                     setRecognitionListener(object : RecognitionListener {
                         override fun onReadyForSpeech(params: Bundle?) {}
                         override fun onBeginningOfSpeech() {}
@@ -373,10 +390,29 @@ class MainActivity : AppCompatActivity() {
                             evalAsync("window.__nativeSpeechErr && window.__nativeSpeechErr($error)")
                         }
                         override fun onResults(results: Bundle?) {
-                            val text = results
-                                ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                                ?.firstOrNull() ?: ""
-                            evalAsync("window.__nativeSpeech && window.__nativeSpeech('" + jsEscape(text) + "')")
+                            /* 🎙️ Android 3-5 andaze deta hai. Pehle sirf pehla liya jata tha
+                               aur baqi phenk diye jate the — isi liye "Monarch" -> "منار" ban
+                               jata tha. Ab SAARE andaze JS ko jate hain; SUNO un mein se wo
+                               chunta hai jismein jaane-pehchane naam sab se zyada hon. */
+                            val all = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                                ?: arrayListOf()
+                            val text = all.firstOrNull() ?: ""
+                            val conf = try {
+                                results?.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)
+                            } catch (e: Exception) { null }
+                            val arr = JSONArray()
+                            for (i in 0 until minOf(all.size, 6)) {
+                                /* har andaze ke sath uska yaqeen (0..1). Pehle ye kabhi
+                                   parha hi nahi jata tha — ab SUNO isay bhi dekhta hai. */
+                                val o = JSONObject()
+                                o.put("t", all[i])
+                                if (conf != null && i < conf.size) o.put("c", conf[i].toDouble())
+                                arr.put(o)
+                            }
+                            evalAsync(
+                                "window.__nativeSpeech && window.__nativeSpeech('" + jsEscape(text) +
+                                "','" + jsEscape(arr.toString()) + "')"
+                            )
                         }
                         override fun onPartialResults(partialResults: Bundle?) {
                             val pt = partialResults
@@ -964,6 +1000,41 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        /**
+         * v4.4.0 — BRAIN POOL ke liye async POST.
+         * Sync httpPost() JS thread ko 21 second tak rok deta tha; pool mein 10 provider
+         * ho to app jam jati hai. Ye version alag thread par chalta hai aur jawab
+         * window.__httpDone(reqId, status, base64Body) se wapas deta hai.
+         * base64 is liye ke jawab mein quotes/newlines JS string ko na toren.
+         */
+        @JavascriptInterface
+        fun httpPostAsync(url: String, authHeader: String, body: String, reqId: String, timeoutMs: Int) {
+            Thread {
+                var code = 0
+                var txt = ""
+                try {
+                    val conn = URL(url).openConnection() as HttpURLConnection
+                    conn.requestMethod = "POST"
+                    conn.doOutput = true
+                    conn.connectTimeout = if (timeoutMs > 0) timeoutMs else 12000
+                    conn.readTimeout = if (timeoutMs > 0) timeoutMs else 25000
+                    conn.setRequestProperty("Content-Type", "application/json")
+                    conn.setRequestProperty("Accept", "application/json")
+                    if (authHeader.isNotEmpty()) conn.setRequestProperty("Authorization", authHeader)
+                    conn.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+                    code = conn.responseCode
+                    txt = (if (code in 200..399) conn.inputStream else conn.errorStream)
+                        ?.bufferedReader()?.use { it.readText() } ?: ""
+                    conn.disconnect()
+                } catch (e: Exception) {
+                    code = 0
+                    txt = e.message ?: "network error"
+                }
+                val b64 = Base64.encodeToString(txt.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
+                evalAsync("window.__httpDone && window.__httpDone('" + jsEscape(reqId) + "'," + code + ",'" + b64 + "')")
+            }.start()
+        }
+
         @JavascriptInterface
         fun httpGet(url: String, authHeader: String): String {
             return try {
@@ -981,6 +1052,148 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        /**
+         * 🐟 BINARY HTTP — jab jawab MATN nahi, BYTES ho (misaal: Fish Audio ka MP3).
+         *
+         * httpPostAsync() jawab ko bufferedReader().readText() se parhta hai aur phir
+         * UTF-8 bytes ka base64 banata hai. Matn ke liye theek — magar MP3 par ye
+         * TABAHI hai: har ghair-UTF8 byte U+FFFD ban kar audio barbaad kar deta hai.
+         * Ye version raw bytes uthata hai, chhuta nahi, seedha base64 karta hai.
+         *
+         * Saath hi custom headers bhi bhejta hai — Fish ko `model: s2.1-pro-free`
+         * chahiye, jo purana bridge bhej hi nahi sakta tha.
+         *
+         * Ghalati ka jawab bhi bytes hi mein aata hai (JSON), JS use atob kar ke
+         * parh leta hai — is liye kamyabi aur nakami dono ka ek hi raasta hai.
+         *
+         *   window.__binDone(reqId, status, base64Body, contentType, errText)
+         */
+        @JavascriptInterface
+        fun httpBytes(method: String, url: String, headersJson: String, body: String, reqId: String, timeoutMs: Int) {
+            Thread {
+                var code = 0
+                var b64 = ""
+                var ctype = ""
+                var err = ""
+                var conn: HttpURLConnection? = null
+                try {
+                    val m = if (method.isBlank()) "GET" else method.uppercase(java.util.Locale.US)
+                    conn = URL(url).openConnection() as HttpURLConnection
+                    conn.requestMethod = m
+                    conn.connectTimeout = if (timeoutMs > 0) timeoutMs else 12000
+                    conn.readTimeout = if (timeoutMs > 0) timeoutMs else 30000
+                    conn.instanceFollowRedirects = true
+                    if (headersJson.isNotBlank()) {
+                        val h = JSONObject(headersJson)
+                        val it = h.keys()
+                        while (it.hasNext()) {
+                            val k = it.next()
+                            conn.setRequestProperty(k, h.optString(k, ""))
+                        }
+                    }
+                    if (m == "POST" || m == "PUT" || m == "PATCH") {
+                        conn.doOutput = true
+                        conn.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+                    }
+                    code = conn.responseCode
+                    ctype = conn.contentType ?: ""
+                    val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+                    val bos = java.io.ByteArrayOutputStream()
+                    if (stream != null) {
+                        val buf = ByteArray(16384)
+                        stream.use { s ->
+                            while (true) {
+                                val n = s.read(buf)
+                                if (n < 0) break
+                                bos.write(buf, 0, n)
+                                if (bos.size() > 24_000_000) break        /* 24 MB ki hadd */
+                            }
+                        }
+                    }
+                    b64 = Base64.encodeToString(bos.toByteArray(), Base64.NO_WRAP)
+                } catch (e: Exception) {
+                    code = 0
+                    err = e.message ?: "network error"
+                } finally {
+                    try { conn?.disconnect() } catch (e: Exception) {}
+                }
+                evalAsync(
+                    "window.__binDone && window.__binDone('" + jsEscape(reqId) + "'," + code +
+                    ",'" + b64 + "','" + jsEscape(ctype) + "','" + jsEscape(err) + "')"
+                )
+            }.start()
+        }
+
+        /**
+         * 🎙️ EDGE TTS — muft, be-hisaab neural awaaz (asli Urdu bhi).
+         *
+         * JS ye kaam khud kyun nahi kar sakta? Kyun ke Microsoft ka WebSocket
+         * Origin/User-Agent/Pragma headers maangta hai, aur browser ka
+         * `new WebSocket()` API custom headers bhejne hi nahi deta. Native side
+         * par ye pabandi nahi — is liye poora WebSocket neeche Kotlin mein hai.
+         *
+         * JS bas SSML banata hai; hum MP3 bytes base64 kar ke wapas dete hain:
+         *     window.__edgeDone(reqId, ok, base64Mp3OrError)
+         */
+        @JavascriptInterface
+        fun edgeTts(ssml: String, reqId: String, timeoutMs: Int) {
+            Thread {
+                var ok = false
+                var payload: String
+                try {
+                    val mp3 = EdgeTts.synth(ssml, if (timeoutMs > 0) timeoutMs else 20000)
+                    payload = Base64.encodeToString(mp3, Base64.NO_WRAP)
+                    ok = true
+                } catch (e: Exception) {
+                    payload = e.message ?: "edge tts nakaam"
+                }
+                evalAsync(
+                    "window.__edgeDone && window.__edgeDone('" + jsEscape(reqId) + "'," + ok +
+                    ",'" + jsEscape(payload) + "')"
+                )
+            }.start()
+        }
+
+        /** Edge TTS ki poori awaaz list (JSON) — key ki zaroorat nahi. */
+        @JavascriptInterface
+        fun edgeVoices(): String = try {
+            val u = "https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/voices/list" +
+                "?trustedclienttoken=6A5AA1D4EAFF4E9FB37E23D68491D6F4"
+            val conn = URL(u).openConnection() as HttpURLConnection
+            conn.connectTimeout = 8000
+            conn.readTimeout = 12000
+            conn.setRequestProperty("User-Agent", EdgeTts.userAgent())
+            conn.setRequestProperty("Accept", "*/*")
+            val code = conn.responseCode
+            val txt = (if (code in 200..399) conn.inputStream else conn.errorStream)
+                ?.bufferedReader()?.use { it.readText() } ?: ""
+            conn.disconnect()
+            JSONObject().put("status", code).put("body", txt).toString()
+        } catch (e: Exception) {
+            JSONObject().put("status", 0).put("body", e.message ?: "error").toString()
+        }
+
+        /**
+         * 👁️ NAZAR — screen par abhi kya hai? (P7a)
+         *
+         * SIRF PARHTA HAI. Kuch chhuta nahi, kuch dabata nahi.
+         * Accessibility service band ho to saaf keh deta hai — jhoot nahi.
+         */
+        @JavascriptInterface
+        fun uiDump(max: Int): String {
+            return try {
+                val svc = com.maya.ai.AutoSendService.instance
+                if (svc == null)
+                    "{\"ok\":false,\"why\":\"MAYA AutoSend accessibility service band hai\"}"
+                else svc.dumpScreen(max)
+            } catch (e: Exception) {
+                val o = JSONObject()
+                o.put("ok", false)
+                o.put("why", e.message ?: "screen parhne mein masla")
+                o.toString()
+            }
+        }
+
         /** Persistent prefs (boot autostart wake) */
         @JavascriptInterface
         fun setPref(k: String, v: Boolean) { try { prefs().edit().putBoolean(k, v).apply() } catch (e: Exception) {} }
@@ -990,6 +1203,116 @@ class MainActivity : AppCompatActivity() {
 
         @JavascriptInterface
         fun getPrefString(k: String): String = try { prefs().getString(k, "") ?: "" } catch (e: Exception) { "" }
+
+        /**
+         * 🩺 KAAN DOCTOR (P8b) — kaan ka poora haal, andaza nahi.
+         * Sab se ahem: phone ka default voice-input service ka NAAM.
+         */
+        @JavascriptInterface
+        fun micDoctor(): String {
+            val o = JSONObject()
+            try {
+                o.put("mic", ContextCompat.checkSelfPermission(
+                    this@MainActivity, Manifest.permission.RECORD_AUDIO
+                ) == PackageManager.PERMISSION_GRANTED)
+                o.put("avail", SpeechRecognizer.isRecognitionAvailable(this@MainActivity))
+
+                /* YEHI asal mujrim ho sakta hai */
+                val svc = try {
+                    Settings.Secure.getString(contentResolver, "voice_recognition_service") ?: ""
+                } catch (e: Exception) { "" }
+                o.put("svc", svc)
+                o.put("aiai", svc.contains("AiAi", true) || svc.contains("SystemIntelligence", true)
+                        || svc.contains("systemui", true))
+
+                var onDev = false
+                if (Build.VERSION.SDK_INT >= 31) {
+                    onDev = try { SpeechRecognizer.isOnDeviceRecognitionAvailable(this@MainActivity) }
+                            catch (e: Exception) { false }
+                }
+                o.put("ondevice", onDev)
+                o.put("using", lastRecognizerKind)
+
+                /* Google ki speech app maujood aur chalu hai? */
+                var g = "nahi"
+                try {
+                    val ai = packageManager.getApplicationInfo("com.google.android.tts", 0)
+                    g = if (ai.enabled) "enabled" else "DISABLED"
+                } catch (e: Exception) { g = "nahi" }
+                o.put("gtts", g)
+
+                o.put("battOk", try { batteryUnrestricted() } catch (e: Exception) { false })
+                o.put("wakeOn", try { prefs().getBoolean("wake", false) } catch (e: Exception) { false })
+                o.put("sdk", Build.VERSION.SDK_INT)
+            } catch (e: Exception) {
+                o.put("err", e.message ?: "?")
+            }
+            return o.toString()
+        }
+
+        /**
+         * 🧪 MIC TEST (P8c) — kamre ka shor, aap ki awaaz, farq (SNR),
+         * aur kaunsa effect is device par SACH MEIN chala.
+         */
+        @JavascriptInterface
+        fun micTest(ms: Int, zoom: Double): String {
+            if (ContextCompat.checkSelfPermission(
+                    this@MainActivity, Manifest.permission.RECORD_AUDIO
+                ) != PackageManager.PERMISSION_GRANTED) {
+                requestMicPermission()
+                return "{\"ok\":false,\"why\":\"mic ki ijazat nahi\"}"
+            }
+            return try { MicKit.test(ms, zoom.toFloat()) }
+            catch (e: Exception) { "{\"ok\":false,\"why\":\"" + (e.message ?: "?") + "\"}" }
+        }
+
+        /** Zaroori settings ke seedhe darwaze (menu mein bhatakna khatam) */
+        @JavascriptInterface
+        fun openSetting(which: String): Boolean {
+            /* v5.9.1 — ON-DEVICE zubaan ka asli darwaza. Doctor ka text "[ON-DEVICE]
+               dabao" kehta tha magar aisa button kahin THA HI NAHI (sirf likha tha) —
+               user dhoondhta reh jata. Ab ASLI button ye chain kholta hai:
+               1. Gboard → Voice typing (wahan "Faster/Offline speech recognition"
+                  mein zubaan download hoti hai — Android 13/14 ka reliable raasta)
+               2. Voice-input picker
+               3. aam Settings */
+            if (which == "ondevice") {
+                val tries = listOf(
+                    Intent().setComponent(android.content.ComponentName(
+                        "com.google.android.inputmethod.latin",
+                        "com.google.android.apps.inputmethod.latin.voiceime.settings.VoiceSettingsActivity")),
+                    Intent(Settings.ACTION_VOICE_INPUT_SETTINGS),
+                    Intent(Settings.ACTION_SETTINGS)
+                )
+                for (i in tries) {
+                    try { startActivity(i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); return true }
+                    catch (e: Exception) {}
+                }
+                return false
+            }
+            return try {
+                val act = when (which) {
+                    "voice" -> Settings.ACTION_VOICE_INPUT_SETTINGS
+                    "tts" -> "com.android.settings.TTS_SETTINGS"
+                    "input" -> Settings.ACTION_INPUT_METHOD_SETTINGS
+                    "battery" -> Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+                    else -> Settings.ACTION_SETTINGS
+                }
+                startActivity(Intent(act).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                true
+            } catch (e: Exception) {
+                try {
+                    startActivity(Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                    true
+                } catch (e2: Exception) { false }
+            }
+        }
+
+        /** v5.7.0 — wake word ki zubaan JS se service tak pohanchane ke liye */
+        @JavascriptInterface
+        fun setPrefString(k: String, v: String) {
+            try { prefs().edit().putString(k, v).apply() } catch (e: Exception) {}
+        }
 
         @JavascriptInterface
         fun clearPref(k: String) { try { prefs().edit().remove(k).apply() } catch (e: Exception) {} }
@@ -1012,6 +1335,50 @@ class MainActivity : AppCompatActivity() {
 
     private fun evalAsync(js: String) {
         webView.post { webView.evaluateJavascript(js, null) }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       🎯 RECOGNIZER KI SEERHI  (P8b)
+       -------------------------------------------------------------------
+       Android 12+ par bohat phones (khaas kar TECNO/HiOS) ka default voice
+       input "Android System Intelligence" (AiAi) hota hai — aur wo
+       SpeechRecognizer API ke sath THEEK KAAM NAHI KARTA. Nateeja: mic
+       chalta hai, band hota hai, aur kuch nahi hota.
+
+       Is liye ab teen darje:
+         1. Android 12+ ka ON-DEVICE recognizer (isi kaam ke liye bana, offline)
+         2. Google ka recognizer ZABARDASTI (ComponentName se)
+         3. aam wala (jo ab tak istemal ho raha tha)
+       Aur jo chala, uska naam yaad rakha jata hai — DOCTOR usay dikhata hai.
+       ═══════════════════════════════════════════════════════════════════ */
+    var lastRecognizerKind: String = "-"
+
+    fun makeRecognizer(): SpeechRecognizer {
+        if (Build.VERSION.SDK_INT >= 31) {
+            try {
+                if (SpeechRecognizer.isOnDeviceRecognitionAvailable(this)) {
+                    lastRecognizerKind = "on-device"
+                    return SpeechRecognizer.createOnDeviceSpeechRecognizer(this)
+                }
+            } catch (e: Exception) {}
+        }
+        try {
+            val cn = android.content.ComponentName(
+                "com.google.android.googlequicksearchbox",
+                "com.google.android.voicesearch.serviceapi.GoogleRecognitionService"
+            )
+            val pm = packageManager
+            val intent = Intent(android.speech.RecognitionService.SERVICE_INTERFACE)
+            val list = pm.queryIntentServices(intent, 0)
+            for (ri in list) {
+                if (ri.serviceInfo != null && ri.serviceInfo.packageName == cn.packageName) {
+                    lastRecognizerKind = "google"
+                    return SpeechRecognizer.createSpeechRecognizer(this, cn)
+                }
+            }
+        } catch (e: Exception) {}
+        lastRecognizerKind = "default"
+        return SpeechRecognizer.createSpeechRecognizer(this)
     }
 
     private fun jsEscape(s: String): String = s
@@ -1056,5 +1423,225 @@ class MainActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(
                 this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQ_PERMS
             )
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🎙️  EDGE TTS  —  MUFT, BE-HISAAB, ASLI NEURAL AWAAZ   (app v4.7.0)
+   ---------------------------------------------------------------------------
+   Ye wahi engine hai jo Microsoft Edge browser ke "Read aloud" ke peeche hai:
+   200+ Azure neural awaazein, 50+ zabanein — koi API key nahi, koi quota nahi.
+   MAYA ke liye sab se ahem: ASLI URDU awaazein (ur-PK-UzmaNeural / AsadNeural).
+
+   To phir pehle kyun nahi chalta tha?
+   -----------------------------------
+   Is service ka WebSocket handshake in headers ke bagair qubool nahi hota:
+       Origin: chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold
+       User-Agent: ...Edg/143.0.0.0
+       Pragma / Cache-Control / Sec-WebSocket-Version
+   Browser ka `new WebSocket(url)` in headers ko set KAR HI NAHI SAKTA — ye
+   JavaScript ki hadd hai, hamara bug nahi. Is liye app ka purana JS wala
+   edgeTTS_speak() hamesha khamoshi se nakaam hota tha (default OFF pada tha).
+
+   Ilaj: WebSocket ab KOTLIN mein hai. Yahan hum har header khud likh sakte
+   hain. Neeche RFC-6455 ka chhota client hai — koi nayi library nahi
+   (OkHttp bhi nahi), sirf SSLSocket. Is liye build ka koi khatra nahi.
+
+   Auth: Sec-MS-GEC = SHA-256( windows-filetime(5 min par gol kiya) + token ),
+   bilkul wesa hi jaisa rany2/edge-tts karta hai.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+private object EdgeTts {
+    private const val TOKEN = "6A5AA1D4EAFF4E9FB37E23D68491D6F4"
+    private const val CHROME_FULL = "143.0.3650.75"
+    private const val CHROME_MAJOR = "143"
+    private const val HOST = "speech.platform.bing.com"
+    private const val UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+        "(KHTML, like Gecko) Chrome/$CHROME_MAJOR.0.0.0 Safari/537.36 Edg/$CHROME_MAJOR.0.0.0"
+
+    fun userAgent(): String = UA
+
+    private class Frame(val opcode: Int, val payload: ByteArray)
+
+    /* Sec-MS-GEC — 5 minute ke block par SHA-256 */
+    private fun gec(): String {
+        var ticks = (System.currentTimeMillis() / 1000.0) + 11644473600.0
+        ticks -= ticks % 300.0
+        ticks *= 1.0e9 / 100.0
+        val toHash = String.format(java.util.Locale.US, "%.0f", ticks) + TOKEN
+        val dig = java.security.MessageDigest.getInstance("SHA-256")
+            .digest(toHash.toByteArray(Charsets.US_ASCII))
+        val sb = StringBuilder(64)
+        for (b in dig) sb.append(String.format(java.util.Locale.US, "%02X", b))
+        return sb.toString()
+    }
+
+    private fun hex32(): String {
+        val r = java.security.SecureRandom()
+        val b = ByteArray(16); r.nextBytes(b)
+        val sb = StringBuilder(32)
+        for (x in b) sb.append(String.format(java.util.Locale.US, "%02x", x))
+        return sb.toString()
+    }
+
+    /* Python ke date_to_string() ki hoo-ba-hoo naqal */
+    private fun stamp(): String {
+        val f = java.text.SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss", java.util.Locale.US)
+        f.timeZone = java.util.TimeZone.getTimeZone("UTC")
+        return f.format(java.util.Date()) + " GMT+0000 (Coordinated Universal Time)"
+    }
+
+    private fun readLine(ins: java.io.InputStream): String {
+        val bos = java.io.ByteArrayOutputStream()
+        var prev = -1
+        while (true) {
+            val c = ins.read()
+            if (c < 0) break
+            if (prev == 13 && c == 10) { val a = bos.toByteArray(); return String(a, 0, maxOf(0, a.size - 1), Charsets.ISO_8859_1) }
+            bos.write(c); prev = c
+        }
+        return String(bos.toByteArray(), Charsets.ISO_8859_1)
+    }
+
+    private fun readFully(ins: java.io.InputStream, n: Int): ByteArray {
+        val out = ByteArray(n); var got = 0
+        while (got < n) {
+            val r = ins.read(out, got, n - got)
+            if (r < 0) throw java.io.IOException("connection band ho gaya")
+            got += r
+        }
+        return out
+    }
+
+    /* client -> server frame (mask lagana LAZMI hai) */
+    private fun sendFrame(out: java.io.OutputStream, opcode: Int, data: ByteArray) {
+        val head = java.io.ByteArrayOutputStream()
+        head.write(0x80 or opcode)
+        val n = data.size
+        when {
+            n < 126 -> head.write(0x80 or n)
+            n < 65536 -> { head.write(0x80 or 126); head.write((n shr 8) and 255); head.write(n and 255) }
+            else -> {
+                head.write(0x80 or 127)
+                for (i in 7 downTo 0) head.write(((n.toLong() shr (8 * i)) and 255L).toInt())
+            }
+        }
+        val mask = ByteArray(4); java.security.SecureRandom().nextBytes(mask)
+        head.write(mask)
+        val masked = ByteArray(n)
+        for (i in 0 until n) masked[i] = (data[i].toInt() xor mask[i % 4].toInt()).toByte()
+        out.write(head.toByteArray()); out.write(masked); out.flush()
+    }
+
+    private fun sendText(out: java.io.OutputStream, s: String) =
+        sendFrame(out, 1, s.toByteArray(Charsets.UTF_8))
+
+    /* server -> client frame; tukron mein aaye to jor deta hai */
+    private fun readFrame(ins: java.io.InputStream): Frame {
+        var firstOp = -1
+        val acc = java.io.ByteArrayOutputStream()
+        while (true) {
+            val b0 = ins.read(); if (b0 < 0) throw java.io.IOException("stream khatam")
+            val fin = (b0 and 0x80) != 0
+            val op = b0 and 0x0F
+            val b1 = ins.read(); if (b1 < 0) throw java.io.IOException("stream khatam")
+            var len = (b1 and 0x7F).toLong()
+            if (len == 126L) { val e = readFully(ins, 2); len = (((e[0].toInt() and 255) shl 8) or (e[1].toInt() and 255)).toLong() }
+            else if (len == 127L) {
+                val e = readFully(ins, 8); var v = 0L
+                for (i in 0 until 8) v = (v shl 8) or (e[i].toLong() and 255L)
+                len = v
+            }
+            if (len > 8_000_000L) throw java.io.IOException("frame bohat bara")
+            val body = readFully(ins, len.toInt())
+            if (op != 0 && firstOp < 0) firstOp = op
+            acc.write(body)
+            if (fin) return Frame(if (firstOp < 0) op else firstOp, acc.toByteArray())
+        }
+    }
+
+    /* ═══ poora kaam: SSML andar, MP3 bytes bahar ═══ */
+    fun synth(ssml: String, timeoutMs: Int): ByteArray {
+        val path = "/consumer/speech/synthesize/readaloud/edge/v1" +
+            "?TrustedClientToken=$TOKEN&Sec-MS-GEC=${gec()}&Sec-MS-GEC-Version=1-$CHROME_FULL" +
+            "&ConnectionId=${hex32()}"
+
+        val sock = javax.net.ssl.SSLSocketFactory.getDefault().createSocket() as javax.net.ssl.SSLSocket
+        try {
+            sock.connect(java.net.InetSocketAddress(HOST, 443), timeoutMs)
+            sock.soTimeout = timeoutMs
+            /* Hostname ki tasdeeq LAZMI — bina is ke raw SSLSocket kisi bhi
+               sahih certificate ko qubool kar leta hai (MITM ka darwaza). */
+            sock.sslParameters = sock.sslParameters.also { it.endpointIdentificationAlgorithm = "HTTPS" }
+            sock.startHandshake()
+
+            val out = java.io.BufferedOutputStream(sock.outputStream)
+            val ins = java.io.BufferedInputStream(sock.inputStream)
+
+            val kb = ByteArray(16); java.security.SecureRandom().nextBytes(kb)
+            val wsKey = Base64.encodeToString(kb, Base64.NO_WRAP)
+
+            val req = StringBuilder()
+            req.append("GET ").append(path).append(" HTTP/1.1\r\n")
+            req.append("Host: ").append(HOST).append("\r\n")
+            req.append("Upgrade: websocket\r\n")
+            req.append("Connection: Upgrade\r\n")
+            req.append("Sec-WebSocket-Key: ").append(wsKey).append("\r\n")
+            req.append("Sec-WebSocket-Version: 13\r\n")
+            req.append("Pragma: no-cache\r\n")
+            req.append("Cache-Control: no-cache\r\n")
+            req.append("Origin: chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold\r\n")
+            req.append("User-Agent: ").append(UA).append("\r\n")
+            req.append("Accept-Language: en-US,en;q=0.9\r\n")
+            req.append("\r\n")
+            out.write(req.toString().toByteArray(Charsets.ISO_8859_1)); out.flush()
+
+            val status = readLine(ins)
+            if (!status.contains(" 101")) {
+                while (true) { val l = readLine(ins); if (l.isEmpty()) break }
+                throw java.io.IOException("Edge ne handshake mana kiya: $status")
+            }
+            while (true) { val l = readLine(ins); if (l.isEmpty()) break }
+
+            sendText(out,
+                "X-Timestamp:" + stamp() + "\r\n" +
+                "Content-Type:application/json; charset=utf-8\r\n" +
+                "Path:speech.config\r\n\r\n" +
+                "{\"context\":{\"synthesis\":{\"audio\":{\"metadataoptions\":{" +
+                "\"sentenceBoundaryEnabled\":\"false\",\"wordBoundaryEnabled\":\"false\"}," +
+                "\"outputFormat\":\"audio-24khz-48kbitrate-mono-mp3\"}}}}\r\n")
+
+            sendText(out,
+                "X-RequestId:" + hex32() + "\r\n" +
+                "Content-Type:application/ssml+xml\r\n" +
+                "X-Timestamp:" + stamp() + "Z\r\n" +
+                "Path:ssml\r\n\r\n" + ssml)
+
+            val audio = java.io.ByteArrayOutputStream()
+            val deadline = System.currentTimeMillis() + timeoutMs
+            while (System.currentTimeMillis() < deadline) {
+                val f = readFrame(ins)
+                when (f.opcode) {
+                    1 -> { if (String(f.payload, Charsets.UTF_8).contains("Path:turn.end")) return finish(audio) }
+                    2 -> {
+                        val p = f.payload
+                        if (p.size > 2) {
+                            val hlen = ((p[0].toInt() and 255) shl 8) or (p[1].toInt() and 255)
+                            if (p.size > hlen + 2) audio.write(p, hlen + 2, p.size - hlen - 2)
+                        }
+                    }
+                    8 -> return finish(audio)
+                    9 -> sendFrame(out, 10, f.payload)
+                }
+            }
+            return finish(audio)
+        } finally {
+            try { sock.close() } catch (e: Exception) {}
+        }
+    }
+
+    private fun finish(bos: java.io.ByteArrayOutputStream): ByteArray {
+        if (bos.size() == 0) throw java.io.IOException("Edge se koi audio nahi aayi")
+        return bos.toByteArray()
     }
 }

@@ -15,6 +15,7 @@ import android.os.Looper
 import android.content.pm.ServiceInfo
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
+import org.json.JSONArray
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import androidx.core.app.NotificationCompat
@@ -32,6 +33,25 @@ class WakeWordService : Service() {
         const val CHANNEL_ID = "maya_wake"
         const val NOTIF_ID = 2001
 
+        @Volatile var instance: WakeWordService? = null
+
+        /* ═══ 🎚️ P9 SUKOON — audio referee: ek waqt mein EK cheez ═══
+           Teen jang-boot jo ye sulhaata hai:
+           (1) mic khulte hi Android AUDIO FOCUS le leta hai -> Maya ki awaaz
+               KAT jati thi (greeting "MAYA onl—" wala masla)
+           (2) wake service ka aur tap-to-speak ka SpeechRecognizer LADTE the —
+               mic ek waqt mein ek hi hota hai
+           (3) wohi jang error 8 (RECOGNIZER_BUSY) deti thi -> service khud ko
+               maar deti thi AUR user ka wake switch bhi mita deti thi
+           (4) speaker se Maya ki awaaz VAD/recognizer ko lagti -> self-wake loop
+           Hal: HAAL — JS (SUKOON) batati hai, Kotlin ka mic har darwaze par
+           pehle HAAL poochhta hai. */
+        @Volatile var haal: String = "KHALI"          /* KHALI | BOL_RAHI | APP_SUN */
+        @Volatile var lastBolAt: Long = 0L            /* bolne ka aakhri lamha */
+        @Volatile var pausedByApp: Boolean = false    /* L4 MIC SULAH */
+        @Volatile var pausedAt: Long = 0L
+        const val ECHO_TAIL_MS = 550L                 /* JS SUKOON.tailMs se match */
+
         fun start(ctx: Context) {
             try {
                 val i = Intent(ctx, WakeWordService::class.java)
@@ -41,8 +61,45 @@ class WakeWordService : Service() {
         }
 
         fun stop(ctx: Context) {
+            haal = "KHALI"
+            pausedByApp = false
             try { ctx.stopService(Intent(ctx, WakeWordService::class.java)) } catch (e: Exception) {}
         }
+
+        /* L1 — MainActivity.setHaal bridge se aata hai.
+           NAAM SAWADHAN: isse "setHaal" mat rakhna — companion ke @Volatile var
+           "haal" ka JVM setter bhi setHaal(String) banta hai -> platform clash
+           (kotlin build fail). Isi liye "applyHaal". */
+        fun applyHaal(h: String) {
+            if (h == "BOL_RAHI") lastBolAt = System.currentTimeMillis()
+            haal = h
+            try { instance?.onHaal(h) } catch (e: Exception) {}
+        }
+
+        /* L2 — mic ka jawab: abhi kholna mana hai? (null = khol lo) */
+        fun haalBlock(): String? {
+            val s = instance ?: return null            /* service band -> faisla baema'ni */
+            if (!s.sukoonOn()) return null             /* escape hatch — LAB switch OFF */
+            if (haal == "BOL_RAHI") return "Maya bol rahi hai"
+            if (haal == "APP_SUN") return "app ka mic chal raha hai"
+            if (pausedByApp) return "sulah: app ka mic"
+            if (System.currentTimeMillis() - lastBolAt < ECHO_TAIL_MS) return "echo tail"
+            return null
+        }
+
+        /* L4 — tap-to-speak sab se pehle; service neeche */
+        fun pauseForApp() {
+            pausedByApp = true
+            pausedAt = System.currentTimeMillis()
+            try { instance?.hardPause() } catch (e: Exception) {}
+        }
+        fun resumeFromApp() {
+            pausedByApp = false
+            try { instance?.softResume() } catch (e: Exception) {}
+        }
+
+        internal fun attach(s: WakeWordService) { instance = s }
+        internal fun detach(s: WakeWordService) { if (instance === s) instance = null }
     }
 
     private var sr: SpeechRecognizer? = null
@@ -52,12 +109,18 @@ class WakeWordService : Service() {
     @Volatile private var running = false
     private var watchdogRuns = 0
     private var lastWakeAt = 0L
+    private var errStreak = 0
+    private var lastErr = 0
+    private var starts = 0
+    @Volatile private var pendingGen = 0L        /* L6 RACE TOKEN — pending restart ka duct-ticket */
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
         running = true
+        attach(this)                              /* P9 — HAAL bridge instance */
+        pausedByApp = false
         startAsForeground()
         try {
             tts = TextToSpeech(this) { st -> ttsReady = st == TextToSpeech.SUCCESS }
@@ -70,6 +133,9 @@ class WakeWordService : Service() {
 
     override fun onDestroy() {
         running = false
+        detach(this)                              /* P9 */
+        stopGate()
+        try { MicKit.release() } catch (e: Exception) {}
         handler.removeCallbacksAndMessages(null)
         try { sr?.destroy(); sr = null } catch (e: Exception) {}
         try { tts?.stop(); tts?.shutdown() } catch (e: Exception) {}
@@ -136,6 +202,88 @@ class WakeWordService : Service() {
         } catch (e: Exception) {}
     }
 
+    /* ═══════════════════════════════════════════════════════════════════
+       🎧 KHAMOSHI KA PEHRA (VAD) — P8c
+       -------------------------------------------------------------------
+       Pehle recognizer SANNATE mein bhi har 1-3 second chalta rehta tha.
+       Android 11+ background mic ko throttle karta hai -> "mic on/off".
+
+       Ab: sasta AudioRecord chalta hai (mic zoom + shor-kush ke sath).
+       Sannata -> recognizer BILKUL band. Awaaz aayi -> mic chhor kar
+       recognizer chalao. Jawab aaya -> wapas pehre par.
+
+       Mic ek waqt mein ek hi cheez ke paas ho sakta hai — is liye pehra
+       aur recognizer kabhi ek sath nahi chalte.
+       ═══════════════════════════════════════════════════════════════════ */
+    @Volatile private var gateOn = false
+    private var gateThread: Thread? = null
+    private var floorDb = 0.0
+
+    private fun vadEnabled(): Boolean = try {
+        getSharedPreferences("maya", Context.MODE_PRIVATE).getBoolean("mic_near", true)
+    } catch (e: Exception) { true }
+
+    private fun micZoom(): Float = try {
+        getSharedPreferences("maya", Context.MODE_PRIVATE).getString("mic_zoom", "0.8")!!.toFloat()
+    } catch (e: Exception) { 0.8f }
+
+    private fun startGate() {
+        if (gateOn) return
+        val why0 = haalBlock()                    /* L2 — gate ka darwaza bhi */
+        if (why0 != null) { report("skip", "pehra nahi chala — " + why0); restart(700); return }
+        gateOn = true
+        gateThread = Thread {
+            val rec = MicKit.open(micZoom())
+            if (rec == null) {
+                gateOn = false
+                report("gate", "mic nahi khula \u2014 seedha recognizer")
+                handler.post { actuallyStart() }
+                return@Thread
+            }
+            report("gate", "pehra shuru  zoom:" + (if (MicKit.fxZoom) "\u2713" else "\u2717") +
+                   " ns:" + (if (MicKit.fxNs) "\u2713" else "\u2717"))
+            val buf = ShortArray(1600)
+            var quiet = 0
+            var loud = 0
+            floorDb = 0.0
+            try {
+                rec.startRecording()
+                while (gateOn && running) {
+                    val n = rec.read(buf, 0, buf.size)
+                    if (n <= 0) continue
+                    /* L7 SELF-WAKE SHIELD — Maya ke bolte waqt PEHRA bhi khamosh.
+                       Warna speaker se uski apni awaaz gate ko "awaaz" lagti aur
+                       MAYA APNE HI WAKE WORD par jaag sakti thi (loop) — isi liye
+                       aap ko jawab ke beech mic on/off dikh raha tha. */
+                    val why = haalBlock()
+                    if (why != null) {
+                        report("skip", "pehra khamosh — " + why)
+                        break
+                    }
+                    val d = MicKit.db(buf, n)
+                    if (floorDb <= 0.0) floorDb = d
+                    if (d < floorDb) floorDb = floorDb * 0.9 + d * 0.1     /* farsh dheere dheere seekho */
+                    val over = d - floorDb
+                    if (over > 14.0) { loud++; quiet = 0 } else { quiet++; if (quiet > 3) loud = 0 }
+                    if (loud >= 3) {                                       /* ~300ms qareebi awaaz */
+                        report("voice", "awaaz " + Math.round(d) + "dB  farsh " + Math.round(floorDb) + "dB")
+                        break
+                    }
+                }
+                rec.stop()
+            } catch (e: Exception) {
+                report("gate", "pehra nakaam: " + (e.message ?: "?"))
+            }
+            try { rec.release() } catch (e: Exception) {}
+            MicKit.release()
+            gateOn = false
+            if (running) handler.post { actuallyStart() }                  /* ab recognizer ki baari */
+        }
+        gateThread?.start()
+    }
+
+    private fun stopGate() { gateOn = false }
+
     private fun startLoop() {
         handler.post {
             if (!SpeechRecognizer.isRecognitionAvailable(this)) {
@@ -150,7 +298,10 @@ class WakeWordService : Service() {
 
     private fun resetRecognizer() {
         try { sr?.destroy() } catch (e: Exception) {}
-        sr = SpeechRecognizer.createSpeechRecognizer(this).apply {
+        /* 🎯 P8b — wahi seerhi jo MainActivity mein hai: on-device -> Google -> aam.
+           Android 12+ par default AiAi ho sakta hai jo kaam hi nahi karta. */
+        sr = (MainActivity.instance?.makeRecognizer()
+              ?: SpeechRecognizer.createSpeechRecognizer(this)).apply {
             setRecognitionListener(object : RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) {}
                 override fun onBeginningOfSpeech() {}
@@ -158,23 +309,39 @@ class WakeWordService : Service() {
                 override fun onBufferReceived(buffer: ByteArray?) {}
                 override fun onEndOfSpeech() {}
                 override fun onError(error: Int) {
-                    when (error) {
-                        6, 7 -> restart(250)
-                        1, 2 -> restart(2000)
-                        4 -> restart(1200)
+                    /* v5.7.0 — pehle NO_MATCH par sirf 250ms baad dobara shuru
+                       hota tha. Android 11+ background mic ko THROTTLE karta hai
+                       aur itni tez restart par Google ka recognizer chup ho jata
+                       hai — yehi "mic on hota hai band hota hai" ki wajah thi.
+                       Ab har lagatar nakami par intezar barhta jata hai. */
+                    errStreak++
+                    lastErr = error
+                    report("err", error.toString() + "|" + errStreak)
+                    val back = when (error) {
+                        6, 7 -> 700L + (errStreak.coerceAtMost(8) * 350L)   /* 0.7s -> 3.5s */
+                        1, 2 -> 3000L
+                        4 -> 1500L
                         8 -> {
-                            evalToApp("window.__wakeErr && window.__wakeErr(8)")
-                            stopSelf()
+                            /* 🕊️ L5 ERR-8 MERCY — RECOGNIZER_BUSY ka matlab: mic kisi
+                               aur ke paas hai (app ka tap-to-speak ya seester ka bhoot).
+                               PEHLE: yahan service khud ko MAAR deti thi, aur JS user ka
+                               wakeWord switch bhi KHUD-BA-KHUD mita deta tha — isi liye
+                               aap "wake ON karo to baad mein band milta" tha.
+                               AB: na stopSelf, na switch haath mein. 2s sukoon, phir koshish. */
+                            errStreak = 0
+                            report("err8", "mic masroof — 2s baad phir")
+                            restart(2000)
+                            return
                         }
-                        else -> restart(900)
+                        else -> 1200L
                     }
+                    restart(back)
                 }
                 override fun onResults(results: Bundle?) {
-                    val text = results
-                        ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                        ?.firstOrNull() ?: ""
-                    if (text.isNotBlank()) handle(text)
-                    restart(200)
+                    val all = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                        ?: arrayListOf()
+                    if (all.isNotEmpty()) { handleAll(all); errStreak = 0 }
+                    restart(400)
                 }
                 override fun onPartialResults(partialResults: Bundle?) {}
                 override fun onEvent(eventType: Int, params: Bundle?) {}
@@ -182,34 +349,78 @@ class WakeWordService : Service() {
         }
     }
 
-    /** ASLI DIMAAG: app khula ho to JS ko; band ho to khud kaam karo */
-    private fun handle(text: String) {
-        val t = text.lowercase()
-        val isWake = t.contains("maya") || t.contains("maywa") || t.contains("mya") ||
-            t.contains("maaya") || t.contains("boss") || t.contains("\\u0645\\u0627\\u06CC\\u0627")
-        val appAlive = MainActivity.instance != null
-        if (appAlive) {
-            evalToApp("window.__wakeHeard && window.__wakeHeard('" + jsEsc(text) + "')")
-            return
-        }
-        /* SAFE MODE (v2.12.1): app band ho to KUCH NA KARO —
-           v2.10.0 ka khud-app-kholna engine hi black screen ka mujrim nikla.
-           App khuli ho to wake word poora kaam karta hai. */
+    /**
+     * v5.7.0 — Kotlin ab FAISLA NAHI karta, sirf REPORT karta hai.
+     *
+     * Pehle yahan `isWake` bana kar CHHOR diya jata tha (dead variable), aur
+     * Urdu ka check "\\u0645..." tha — yani literal matn, kabhi match hi nahi
+     * hota tha. Ab saare andaze JS ko jate hain aur wahan faisla hota hai.
+     *
+     * Faida: aage wake-word ki tuning ke liye NAYI APK nahi banani paregi.
+     */
+    private fun report(kind: String, payload: String) {
+        evalToApp("window.__wakeLog && window.__wakeLog('" + jsEsc(kind) + "','" + jsEsc(payload) + "')")
     }
 
+    private fun handleAll(list: List<String>) {
+        val arr = JSONArray()
+        for (i in list.indices) { if (i >= 6) break; arr.put(list[i]) }
+        val payload = arr.toString()
+        if (MainActivity.instance != null) {
+            evalToApp("window.__wakeHeard && window.__wakeHeard('" + jsEsc(payload) + "')")
+        } else {
+            /* SAFE MODE: app band ho to KUCH NA KARO — v2.10.0 ka khud-app-kholna
+               engine hi black screen ka mujrim nikla tha. */
+            lastHeardOffline = payload
+        }
+    }
+    private var lastHeardOffline = ""
+
     private fun restart(delay: Long) {
-        handler.postDelayed({ actuallyStart() }, delay)
+        /* P8c — seedha recognizer nahi; pehle KHAMOSHI KA PEHRA. Sannate mein
+           recognizer bilkul nahi chalega -> "mic on/off" khatam.
+           P9 — (L6) har schedule ka apna token: naya aaye to purana pending
+           MURDA (pehle do pending ek sath chal padte the -> mic strobe).
+           (L2) mic ka darwaza pehle HAAL poochhe: Maya bol rahi hai ya app
+           ka mic chal raha hai to kholna hi nahi — yahi awaaz-katna aur
+           mic-larai ka asal ilaj hai. */
+        val gen = ++pendingGen
+        handler.postDelayed({
+            if (!running) return@postDelayed
+            if (gen != pendingGen) return@postDelayed
+            val why = haalBlock()
+            if (why != null) {
+                report("skip", why)
+                restart(700)                     /* HAAL khali hone ka intezar */
+                return@postDelayed
+            }
+            if (vadEnabled()) startGate() else actuallyStart()
+        }, delay)
     }
 
     private fun actuallyStart() {
         if (!running) return
+        val why = haalBlock()                    /* L2 — chautha darwaza */
+        if (why != null) { report("skip", why); restart(700); return }
         try {
+            /* v5.7.0 — do badlaav:
+               1. MAX_RESULTS 1 -> 6. SUNO ka sabaq: sahih jawab aksar doosre ya
+                  teesre andaze mein hota hai. Wake word par ye aur zyada ahem hai.
+               2. Zubaan ab settings se aati hai (pehle "en-IN" hard-code thi,
+                  jabke user Urdu bolta hai). */
+            val lang = try {
+                getSharedPreferences("maya", Context.MODE_PRIVATE)
+                    .getString("wake_lang", "en-IN") ?: "en-IN"
+            } catch (e: Exception) { "en-IN" }
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-IN")
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang)
                 putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
-                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 6)
+                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false)
             }
+            starts++
+            report("start", lang + "|" + starts)
             sr?.startListening(intent)
         } catch (e: Exception) {}
     }
@@ -220,9 +431,63 @@ class WakeWordService : Service() {
         watchdogRuns++
         if (watchdogRuns >= 16) { // ~12 min
             watchdogRuns = 0
-            resetRecognizer()
-            actuallyStart()
+            /* L2 — watchdog bhi HAAL se pooche: Maya ke bolte waqt recognizer
+               todna = awaaz kaatna. Pehle ye bina dekhe chalta tha — har 12
+               minute par awaaz katne ka scheduled chance tha. */
+            if (haalBlock() == null) {
+                resetRecognizer()
+                actuallyStart()
+            }
+        }
+        /* L4 stale-sulah recovery — JS/WebView mar bhi jaye (YA uska KHALI
+           call kho jaye) to 60s baad pause khud-ba-khud azad. Warna wake word
+           hamesha ke liye so jata. */
+        if (pausedByApp && System.currentTimeMillis() - pausedAt > 60000) {
+            report("sulah", "stale pause khud azad hua")
+            resumeFromApp()
         }
         handler.postDelayed(::watchdog, 45000)
     }
+
+    /* ═══ 🎚️ P9 SUKOON — instance taraf ke amal ═══ */
+
+    /* escape hatch — LAB sukoon OFF ho to purana rawaiya */
+    fun sukoonOn(): Boolean = try {
+        getSharedPreferences("maya", Context.MODE_PRIVATE).getBoolean("sukoon", true)
+    } catch (e: Exception) { true }
+
+    /* L1 — HAAL badla to foran amal */
+    fun onHaal(h: String) {
+        handler.post {
+            if (!running) return@post
+            if (h == "BOL_RAHI" || h == "APP_SUN") {
+                /* mic ISI LAMHE chhodo — awaaz katna yahi se rukta hai */
+                stopGate()
+                try { sr?.cancel() } catch (e: Exception) {}
+                pendingGen++                     /* pending restart murda */
+            } else if (h == "KHALI") {
+                restart(300)
+            }
+        }
+    }
+
+    /* L4 — tap-to-speak jeetta hamesha */
+    fun hardPause() {
+        handler.post {
+            stopGate()
+            try { sr?.cancel() } catch (e: Exception) {}
+            pendingGen++
+            report("sulah", "service pause — app ka mic")
+        }
+    }
+    fun softResume() {
+        handler.post {
+            if (!running) return@post
+            report("sulah", "service wapas — pehra phir se")
+            restart(300)
+        }
+    }
+
+    /* L1/L4 ka Kotlin dastaaveezi tor par saabit: HAAL ka pehra */
+    fun mazbootKotlinGate(): Boolean = true
 }

@@ -1,13 +1,28 @@
 {
   "name": "maya-ai-assistant",
-  "version": "2.13.0",
+  "version": "5.9.1",
   "description": "MAYA — 0-budget personal AI assistant. Voice + Gemini brain + anime character.",
   "private": true,
   "scripts": {
     "start": "npx serve public -l $PORT -s --no-clipboard",
     "dev": "npx serve public -l $PORT -s --no-clipboard",
-    "build": "cp -r app/src/main/assets/web/* public/ 2>/dev/null && echo 'Static files ready'"
+    "build": "cp -r app/src/main/assets/web/* public/ 2>/dev/null && echo 'Static files ready'",
+    "test": "node tools/check-oldwebview-css.js && node tools/test-settings-ui.js && node tools/test-voice-engine.js && node tools/test-brain-engine.js && node tools/test-lab-engine.js",
+    "test:css": "node tools/check-oldwebview-css.js",
+    "test:brain": "node tools/test-brain-engine.js",
+    "test:voice": "node tools/test-voice-engine.js",
+    "test:ui": "node tools/test-settings-ui.js"
   },
-  "keywords": ["ai", "assistant", "pwa", "voice", "gemini"],
-  "license": "MIT"
+  "keywords": [
+    "ai",
+    "assistant",
+    "pwa",
+    "voice",
+    "gemini"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "css-tree": "^2.3.1",
+    "jsdom": "^24.0.0"
+  }
 }

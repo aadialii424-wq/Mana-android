@@ -1,9 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  MAYA — Accessibility service ka config
+
+  v5.6.0 (P7a) mein teen cheezein badli gayin:
+
+    1. android:packageNames="com.whatsapp"  HATA di gayi
+       Pehle Maya sirf WhatsApp dekh sakti thi. Ab har app — Chrome,
+       Instagram, Play Store — taake wo screen PARH sake.
+
+    2. flagReportViewIds jora gaya
+       Is ke bagair element ke view-id nahi milte (jaise "search_box"),
+       aur sirf matn par bharosa karna parta hai.
+
+    3. canPerformGestures="true"
+       Scroll / swipe ke liye (P7b mein istemal hoga; abhi sirf DEKHNA hai).
+
+  ⚠️ Ye config badalne ke baad Android ko service dobara jorni parti hai —
+     Settings → Accessibility → MAYA AutoSend → OFF phir ON.
+-->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
-    android:packageNames="com.whatsapp"
     android:accessibilityFeedbackType="feedbackGeneric"
-    android:accessibilityFlags="flagDefault"
+    android:accessibilityFlags="flagDefault|flagReportViewIds"
     android:notificationTimeout="120"
     android:canRetrieveWindowContent="true"
+    android:canPerformGestures="true"
     android:description="@string/autosend_desc" />
