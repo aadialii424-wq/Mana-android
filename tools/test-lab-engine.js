@@ -126,6 +126,26 @@ function natworld(batt, flags) {
   return w;
 }
 
+/* 👂 KAAN (wake word) — SUKOON ke baad, __wakeLog se pehle */
+const KNA = HTML.indexOf('var KAAN = {');
+const KNB = HTML.indexOf('/* Kotlin ki har report yahan aati hai');
+if (KNA < 0 || KNB < 0 || KNB < KNA) { console.error('KAAN source nahi mila'); process.exit(1); }
+const KAANSRC = HTML.slice(KNA, KNB);
+
+/* KAAN ki duniya — bridge stub ke sath (onDeviceMap/micDoctor hum dete hain) */
+function kw() {
+  const dom = new JSDOM('<!doctype html><body></body>', { runScripts: 'dangerously' });
+  const w = dom.window;
+  w.pushLog = function () {}; w.toast = function () {};
+  w.settings = { name: 'Boss', stt: 'ur-PK', wakeWord: true, micZoom: 0.8 };
+  w.speaking = false; w.thinking = false; w.listening = false;
+  w.NATIVE = true;
+  w.MayaBridge = { onDeviceMap: function () { return '{}'; }, micDoctor: function () { return '{}'; } };
+  w.eval(HTML.slice(HTML.indexOf('var SCHEMA = {'), HTML.indexOf('var AWAAZ = {')));  /* FLAGS */
+  w.eval(KAANSRC);
+  return w;
+}
+
 /* waqt ka SANCHA — test kabhi CI ke ghante par fail na ho:
    din ka waqt (15:xx) chuna jata hai, khamosh ghanton (0-7) se door */
 function at(dayOffset, hh, mm) {
@@ -1472,23 +1492,23 @@ Here's a thinking process:
       '👁️ KAAN report mein HAAL + roko ki ginti nazar aati hai');
 
     /* ── version qanoon ── */
-    is(/appVersion\(\): String = "5\.10\.0-native"/.test(MA) && MA.indexOf('4.3.0-native') === -1,
+    is(/appVersion\(\): String = "5\.10\.1-native"/.test(MA) && MA.indexOf('4.3.0-native') === -1,
       '🩹 BONUS — appVersion() ka purana 4.3.0 jhoot bhi ab qatl');
-    is(fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8').indexOf('maya-v5.10.0') > 0 &&
-       /versionCode 71/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')) &&
-       /versionName "5\.10\.0"/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')),
-      '🏷️ poore app mein VERSION v5.10.0 (cache saaf, splash saaf, APK saaf)');
+    is(fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8').indexOf('maya-v5.10.1') > 0 &&
+       /versionCode 72/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')) &&
+       /versionName "5\.10\.1"/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')),
+      '🏷️ poore app mein VERSION v5.10.1 (cache saaf, splash saaf, APK saaf)');
     is(HTML.indexOf('5.8.0') === -1, 'kahi purana 5.8.0 version nazar nahi aata');
 
     /* ── v5.9.1 hotfix — doctor ka jhoota button ab ASAL hai ── */
     head('26c. 🗣️ ON-DEVICE LANGUAGE — wo button jo pehle sirf LIKHA tha');
     is(HTML.indexOf('id="labOnDevice"') > 0,
       '🔑🆕 LAB mein ab 🗣️ ON-DEVICE LANGUAGE ka ASLI button hai (pehle sirf text tha — user dhoondta reh jata tha)');
-    is(/openSetting\("ondevice"\)/.test(HTML) && /show\("\\uD83D\\uDDE3\\uFE0F ON-DEVICE LANGUAGE/.test(HTML.replace(/'/g, '"')),
-      'button ka click Gboard voice-typing kholta hai + likha hua shajra bhi dikhta hai (ghalat screen khul jaye to bhi raasta yaad rahe)');
-    is(/if \(which == "ondevice"\)/.test(MA) && /VoiceSettingsActivity/.test(MA) &&
+    is(/show\("\\uD83D\\uDDE3\\uFE0F ON-DEVICE LANGUAGE/.test(HTML.replace(/'/g, '"')) && /KAAN\.onDevice\(\)/.test(HTML),
+      'button ka click poora panel dikhata hai (v5.10.1: ab screen ka NAAM bhi batata hai — Section 28)');
+    is(/"ondevice", "gboardvoice" ->/.test(MA) && /VoiceSettingsActivity/.test(MA) &&
        /ACTION_VOICE_INPUT_SETTINGS/.test(MA) && /ACTION_SETTINGS/.test(MA),
-      '🔑 Kotlin: 3-qadam ki fallback chain — Gboard → voice-input picker → aam Settings (koi bhi phone tode nahi)');
+      '🔑 Kotlin: Gboard → voice-input → input-method → aam Settings (koi bhi phone tode nahi) — tafseel Section 28');
     is(HTML.indexOf('[ON-DEVICE] dabao') === -1,
       '🔑🆕 doctor ab us button ka HAWALA nahi deta jo MAUJOOD nahi — seedha asli button ka rasta likhta hai');
   }
@@ -1864,6 +1884,136 @@ Here's a thinking process:
       }
       is(green + blocked === w2.TOOL_DECLS.length,
         '🔒 ' + w2.TOOL_DECLS.length + '/' + w2.TOOL_DECLS.length + ' tools par ye taala jaancha gaya (🟢 ' + green + ' ijazat ke sath, baqi ' + blocked + ' rad)');
+    }
+
+
+    /* ═══ 28. 🗣️ v5.10.1 — ON-DEVICE LANGUAGE ka raasta (aap ki video ka saboot) ═══ */
+    head('28. 🗣️ ON-DEVICE ka RAASTA — "Digital assistant" wali screen kyun khuli?');
+
+    /* ── 28a. 🔬 Kotlin: andhi chain ka qatl ── */
+    {
+      const MF = fs.readFileSync(path.join(ROOT, 'app/src/main/AndroidManifest.xml'), 'utf8');
+      const MA = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8');
+      is(MF.indexOf('<queries>') > 0 && /com\.google\.android\.inputmethod\.latin/.test(MF) &&
+         /android\.speech\.RecognitionService/.test(MF) && /ACTION_ASSIST|android\.intent\.action\.ASSIST/.test(MF),
+        '🔑🆕 manifest mein <queries> — Android 11+ ki package-visibility se Gboard/Google app CHHUPE hue the (pehla qadam hamesha fail hota tha)');
+      is(/private fun go\(i: Intent\): String\?/.test(MA) && /queryIntentActivities\(i, 0\)/.test(MA) &&
+         /getActivityInfo\(cn, 0\)/.test(MA) && /flattenToShortString\(\)/.test(MA),
+        '🔑🆕 go() — screen khud khole se PEHLE poochhta hai ke use KAUN kholta hai, aur us component ka NAAM wapas deta hai (andaza nahi)');
+      is(/fun openSettingNamed\(which: String\): String\?/.test(MA) &&
+         /fun openSetting\(which: String\): Boolean = openSettingNamed\(which\) != null/.test(MA),
+        '🔒 purana openSetting() bridge SALAMAT (purani JS nahi tooti — Qanoon 2), naya naam wala sath hai');
+      is(/fun onDeviceMap\(\): String/.test(MA) && /RecognitionService\.SERVICE_INTERFACE/.test(MA) &&
+         /queryIntentServices/.test(MA) && /o\.put\("asst", asst\)/.test(MA),
+        '🔑🆕 onDeviceMap() — RecognitionService ki FEHRIST + assistant ka NAAM (aap ki video ka saboot ab code mein dikhta hai)');
+      is(MA.indexOf('for (i in tries) {') === -1,
+        '💀 purani ANDHI chain (startActivity → return true, screen ka naam poochhe bagair) MITA di gayi');
+      is(/"assistant" ->/.test(MA) && MA.indexOf('"assistant"') > MA.indexOf('"ondevice", "gboardvoice"'),
+        '🤖 Digital-assistant screen ab SIRF alag darwaze par — zubaan ki seedhi ka hissa NAHI (wohi ghalat screen jo video mein khuli thi)');
+      is(/ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS/.test(MA) && /com\.android\.settings\.TTS_SETTINGS/.test(MA),
+        '🔒 purane darwaze (battery / tts / voice / input) sab salamat');
+    }
+
+    /* ── 28b. 👁️ KAAN.onDevice(): ASLI fehrist, sirf ASLI button ── */
+    {
+      const w = kw();
+      /* aap ka phone: Google Go assistant, poori Google app NAHI, Gboard Go */
+      w.MayaBridge.onDeviceMap = function () {
+        return JSON.stringify({
+          sdk: 33, aiai: false, goog: false, ondevice: false, using: 'default',
+          svc: 'com.google.android.apps.searchlite/.SearchLiteAssistService',
+          srv: [{ pkg: 'com.google.android.apps.searchlite', label: 'Google Go', comp: 'a/b' }],
+          kb: ['com.google.android.inputmethod.latin.go'],
+          asst: 'Google Go'
+        });
+      };
+      let r = w.KAAN.onDevice();
+      is(/ASLI fehrist/.test(r.txt), '🕵️ panel ka waada: andaza nahi, phone ki fehlist');
+      is(/Google Go/.test(r.txt) && r.txt.indexOf('Speech recognition services') > 0,
+        '📋 phone ki asli services + assistant ka naam dikhta hai (chhupa hua saboot nahi)');
+      is(r.btns.some(function (b) { return b.k === 'voiceservices'; }), '🎙️ speech services ka darwaza hamesha maujood');
+      /* chaitha phone: koi keyboard hi NAHI — wahan jhoota Gboard button banna hi nahi chahiye */
+      w.MayaBridge.onDeviceMap = function () {
+        return JSON.stringify({ sdk: 33, aiai: false, goog: false, ondevice: false, using: 'default',
+          svc: 'x/y', srv: [], kb: [], asst: 'Google Go' });
+      };
+      const rn = w.KAAN.onDevice();
+      is(!rn.btns.some(function (b) { return b.k === 'gboardvoice'; }) &&
+         rn.btns.some(function (b) { return b.k === 'gboard'; }),
+        '🔑🆕 Gboard NAHI hai to us ka JHOOTA button bhi nahi banta — sirf keyboard settings');
+      is(/GBOARD IS PHONE PAR NAHI HAI/.test(rn.txt), '🤝 SACH: saaf kehta hai ke Gboard nahi (bahana nahi, andaza nahi)');
+      /* wapas aap ke phone (Gboard Go) par lao — baqi jaanch isi par hoti hai */
+      w.MayaBridge.onDeviceMap = function () {
+        return JSON.stringify({
+          sdk: 33, aiai: false, goog: false, ondevice: false, using: 'default',
+          svc: 'com.google.android.apps.searchlite/.SearchLiteAssistService',
+          srv: [{ pkg: 'com.google.android.apps.searchlite', label: 'Google Go', comp: 'a/b' }],
+          kb: ['com.google.android.inputmethod.latin.go'],
+          asst: 'Google Go'
+        });
+      };
+      r = w.KAAN.onDevice();
+      /* teesra phone: sirf GBOARD GO (aap ke video wale phone jaisa) */
+      w.MayaBridge.onDeviceMap = function () {
+        return JSON.stringify({ sdk: 33, aiai: false, goog: false, ondevice: false, using: 'default',
+          svc: 'x/y', srv: [], kb: ['com.google.android.inputmethod.latin.go'], asst: 'Google Go' });
+      };
+      const rgo = w.KAAN.onDevice();
+      is(/GBOARD GO' HAI, poora Gboard NAHI/.test(rgo.txt) && /jhoota\s+wadaa?/i.test(rgo.txt.replace(/waada/, 'wada')),
+        '🔑🆕 Gboard Go par saaf sach: us mein Voice typing aksar hoti hi nahi (jhoota waada nahi)');
+      is(rgo.btns.filter(function (b) { return b.k === 'gboard'; }).length === 1,
+        '   → sath "poora Gboard lao" ka darwaza bhi');
+      is(/SACH: is phone par offline \(on-device\) wake mumkin NAHI/.test(r.txt),
+        '🔑🆕 na AiAi na poori Google app → imaandari: offline wake mumkin NAHI (jhooti umeed nahi)');
+      is(/Digital assistant app/.test(r.txt) && /HAL NAHI HOTA/.test(r.txt),
+        '🛑 panel khud batata hai ke assistant wali screen se ye masla HAL NAHI hota (aap ki video ka sabak)');
+      is(/\\u0627\\u0631\\u062F\\u0648/.test(JSON.stringify(r.txt)) || r.txt.indexOf('\u0627\u0631\u062F\u0648') > 0,
+        '📝 likha hua manual raasta bhi saath (koi screen na khule to bhi raasta yaad rahe)');
+
+      /* doosra phone: Gboard + AiAi maujood */
+      w.MayaBridge.onDeviceMap = function () {
+        return JSON.stringify({
+          sdk: 34, aiai: true, goog: true, ondevice: true, using: 'on-device',
+          svc: 'com.google.android.as/.AiAiRecognitionService',
+          srv: [{ pkg: 'com.google.android.as', label: 'Android System Intelligence', comp: 'c/d' },
+                { pkg: 'com.google.android.googlequicksearchbox', label: 'Speech Recognition & Synthesis', comp: 'e/f' }],
+          kb: ['com.google.android.inputmethod.latin', 'com.google.android.tts'],
+          asst: 'Google'
+        });
+      };
+      r = w.KAAN.onDevice();
+      is(r.btns[0].k === 'gboardvoice' && r.btns.length >= 4,
+        '✅ Gboard maujood ho to pehla button wahi (Voice typing settings) — 4+ darwaze');
+      is(/On-device recognizer\s*: MAUJOOD/.test(r.txt),
+        '🎉 on-device maujood ho to khush khabri bhi SACH likhi jati hai (chhupate nahi)');
+      is(r.txt.indexOf('offline (on-device) wake mumkin NAHI') === -1,
+        '🔑 AiAi + Google app hon to "namumkin" wali baat NAHI aati (jhoota dar nahi)');
+
+      /* purani APK — bridge hi nahi */
+      const w0 = kw();
+      delete w0.MayaBridge.onDeviceMap;
+      const r0 = w0.KAAN.onDevice();
+      is(r0.d === null && /purani hai/.test(r0.txt) && r0.btns.length >= 1 && /On-screen keyboard/.test(r0.txt),
+        '🔒 purani APK (bina onDeviceMap) par bhi panel chalta hai — likha hua raasta + Qanoon 2');
+
+      /* bridge toot jaye (garbage JSON) to crash NAHI */
+      const w1 = kw();
+      w1.MayaBridge.onDeviceMap = function () { return '}{'; };
+      let okc = true; try { w1.KAAN.onDevice(); } catch (e) { okc = false; }
+      is(okc, '🛡️ kharab JSON par bhi crash nahi (WebView mein koi error screen nahi)');
+    }
+
+    /* ── 28c. 🩺 doctor ki nasihat ab panel ka rasta batati hai ── */
+    {
+      const w = kw();
+      w.MayaBridge.micDoctor = function () {
+        return JSON.stringify({ mic: true, avail: true, svc: 'com.google.android.as/AiAi', aiai: true,
+          ondevice: false, using: 'default', gtts: 'enabled', battOk: true, wakeOn: true, sdk: 34 });
+      };
+      const d = w.KAAN.doctor();
+      is(d.indexOf('ON-DEVICE LANGUAGE button') > 0 && /ASLI darwaze/.test(d),
+        '🩺 doctor ab "wo button dabao" ke sath ye bhi kehta hai ke panel ASLI darwaze dikhata hai');
+      is(d.indexOf('[ON-DEVICE] dabao') === -1, '🔑 jhoota bracket-button ka hawala ab bhi gayab (v5.9.1 ka sabak yaad hai)');
     }
 
     console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');

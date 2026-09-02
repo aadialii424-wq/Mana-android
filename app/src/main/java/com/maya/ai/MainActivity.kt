@@ -29,6 +29,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.provider.AlarmClock
 import android.speech.RecognitionListener
+import android.speech.RecognitionService
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
@@ -122,7 +123,7 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = MayaWebViewClient()
         setContentView(webView)
         webView.loadUrl("https://$VIRTUAL_HOST/assets/web/index.html")
-        Toast.makeText(this, "MAYA v5.10.0 • 🕸️ KHUD-MUKHTAR — Maya ab khud notice karti hai (LAB mein switch)", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "MAYA v5.10.1 • 🗣️ ON-DEVICE LANGUAGE ka raasta theek — ab andaza nahi, phone ki asli fehrist", Toast.LENGTH_LONG).show()
         // WebView zinda hai ya nahi — 8 second baad native check (v4.0.1: onPageFinished/markAlive true karte hain)
         webViewAlive = false
         android.os.Handler(Looper.getMainLooper()).postDelayed({
@@ -267,7 +268,7 @@ class MainActivity : AppCompatActivity() {
     inner class MayaBridge {
 
         @JavascriptInterface
-        fun appVersion(): String = "5.10.0-native"
+        fun appVersion(): String = "5.10.1-native"
 
         /* 🎚️ P9 SUKOON — JS (SUKOON) har awaaz/mic ki HAAL yahan bhejti hai.
            KHALI | BOL_RAHI | APP_SUN — WakeWordService har mic-darwaze par isi
@@ -1266,46 +1267,220 @@ class MainActivity : AppCompatActivity() {
             catch (e: Exception) { "{\"ok\":false,\"why\":\"" + (e.message ?: "?") + "\"}" }
         }
 
+        /* ═══════════════════════════════════════════════════════════════
+           🗣️ v5.10.1 — SETTINGS KA RAASTA: andhi chain khatam.
+
+           User ki video ne pakda: 🗣️ ON-DEVICE LANGUAGE dabaya to phone ki
+           "Digital assistant app" screen khul gayi (Google Go / Ella / None) —
+           jahan offline speech ki koi cheez hi NAHI hoti.
+
+           Wajah (code se, andaza nahi):
+             tries = [ Gboard VoiceSettingsActivity,
+                       Settings.ACTION_VOICE_INPUT_SETTINGS,
+                       Settings.ACTION_SETTINGS ]
+             har try par startActivity() aur foran `return true`        // ← ANDHA
+
+           Do chhed the:
+           1. startActivity sirf ActivityNotFoundException par rukta hai. Kai OEM
+              (Android Go / Infinix / itel) Settings screens ACTION_VOICE_INPUT_
+              SETTINGS ko apni "Digital assistant" screen par alias kar dete hain —
+              intent CHAL jata hai, magar GALAT screen khulti hai. Aur hum khushi
+              khushi `return true` kar dete the.
+           2. Pehla qadam Gboard ka component tha — Android 11+ ki PACKAGE
+              VISIBILITY ke qanoon se wo package humein DIKHTA hi nahi tha
+              (manifest mein <queries> tha hi nahi), is liye wo hamesha fail hota.
+
+           Ilaj:
+           • go() — pehle POOCHHO ke is intent ko kaun kholega (queryIntentActivities),
+             phir us component ko EXPLICIT set kar ke chalao. Screen ka NAAM wapas
+             jata hai — JS ab jhoot nahi bol sakta ke "ye screen khul gayi".
+           • onDeviceMap() — phone par SACH MEIN kya maujood hai ( RecognitionService
+             ki poori fehrist, keyboard, assistant ) JS ko dikhao, taake panel sirf
+             ASLI darwaze ke button banaye. Andaza nahi — fehrist.
+           • <queries> manifest mein — ab Gboard/Google app nazar aate hain.
+           ═══════════════════════════════════════════════════════════════ */
+
+        /** Screen kholo — magar PEHLE poochh kar ke use kaun kholta hai.
+         *  Wapas: khulne wali activity ka naam (ya null = kuch na khula). */
+        private fun go(i: Intent): String? {
+            return try {
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                val pm = packageManager
+                if (i.component == null) {
+                    val list = try { pm.queryIntentActivities(i, 0) } catch (e: Exception) { emptyList() }
+                    val ri = list.firstOrNull() ?: return null
+                    i.setClassName(ri.activityInfo.packageName, ri.activityInfo.name)
+                } else {
+                    val cn = i.component ?: return null
+                    val exists = try {
+                        pm.getActivityInfo(cn, 0); true
+                    } catch (e: Exception) { false }
+                    if (!exists) return null
+                }
+                val cn = i.component ?: return null
+                startActivity(i)
+                cn.flattenToShortString()
+            } catch (e: Exception) { null }
+        }
+
+        private fun act(action: String, pkg: String? = null): Intent {
+            val i = Intent(action)
+            if (pkg != null) i.`package` = pkg
+            return i
+        }
+
+        private fun comp(pkg: String, cls: String): Intent =
+            Intent().setComponent(android.content.ComponentName(pkg, cls))
+
         /** Zaroori settings ke seedhe darwaze (menu mein bhatakna khatam) */
         @JavascriptInterface
-        fun openSetting(which: String): Boolean {
-            /* v5.9.1 — ON-DEVICE zubaan ka asli darwaza. Doctor ka text "[ON-DEVICE]
-               dabao" kehta tha magar aisa button kahin THA HI NAHI (sirf likha tha) —
-               user dhoondhta reh jata. Ab ASLI button ye chain kholta hai:
-               1. Gboard → Voice typing (wahan "Faster/Offline speech recognition"
-                  mein zubaan download hoti hai — Android 13/14 ka reliable raasta)
-               2. Voice-input picker
-               3. aam Settings */
-            if (which == "ondevice") {
-                val tries = listOf(
-                    Intent().setComponent(android.content.ComponentName(
-                        "com.google.android.inputmethod.latin",
-                        "com.google.android.apps.inputmethod.latin.voiceime.settings.VoiceSettingsActivity")),
-                    Intent(Settings.ACTION_VOICE_INPUT_SETTINGS),
-                    Intent(Settings.ACTION_SETTINGS)
-                )
-                for (i in tries) {
-                    try { startActivity(i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); return true }
-                    catch (e: Exception) {}
-                }
-                return false
+        fun openSetting(which: String): Boolean = openSettingNamed(which) != null
+
+        /** Wahi darwaza, magar ab ye batata hai ke KHALI screen khuli — jhoot nahi */
+        @JavascriptInterface
+        fun openSettingNamed(which: String): String? {
+            val GBOARD = "com.google.android.inputmethod.latin"
+            val GBOARD_GO = "com.google.android.inputmethod.latin.go"
+            val VOICE_IME = "com.google.android.apps.inputmethod.latin.voiceime.settings.VoiceSettingsActivity"
+            return when (which) {
+                /* 🗣️ zubaan pack download karne ki screen (Gboard → Voice typing) */
+                "ondevice", "gboardvoice" ->
+                    go(comp(GBOARD, VOICE_IME))
+                        ?: go(comp(GBOARD_GO, VOICE_IME))
+                        ?: go(act(Settings.ACTION_VOICE_INPUT_SETTINGS))
+                        ?: go(act(Settings.ACTION_INPUT_METHOD_SETTINGS))
+                        ?: go(act(Settings.ACTION_SETTINGS))
+
+                /* ⌨️ keyboard ki aam settings */
+                "gboard" ->
+                    go(act(Settings.ACTION_INPUT_METHOD_SETTINGS))
+                        ?: go(act(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, GBOARD))
+                        ?: go(act(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, GBOARD_GO))
+
+                /* 🎙️ speech services — TTS + default voice input */
+                "voiceservices" ->
+                    go(act("com.android.settings.TTS_SETTINGS"))
+                        ?: go(act(Settings.ACTION_VOICE_INPUT_SETTINGS))
+                        ?: go(act(Settings.ACTION_SETTINGS))
+
+                /* 🤖 digital assistant (ab SIRF tab jab user KHUD ye maange) */
+                "assistant" ->
+                    go(act(Settings.ACTION_ASSISTANT_SETTINGS))
+                        ?: go(act(Settings.ACTION_MANAGE_DEFAULT_ASSISTANT))
+                        ?: go(act(Settings.ACTION_VOICE_INPUT_SETTINGS))
+                        ?: go(act(Settings.ACTION_SETTINGS))
+
+                "voice" ->
+                    go(act(Settings.ACTION_VOICE_INPUT_SETTINGS))
+                        ?: go(act("com.android.settings.TTS_SETTINGS"))
+                "tts" ->
+                    go(act("com.android.settings.TTS_SETTINGS"))
+                        ?: go(act(Settings.ACTION_SETTINGS))
+                "input" ->
+                    go(act(Settings.ACTION_INPUT_METHOD_SETTINGS))
+                        ?: go(act(Settings.ACTION_SETTINGS))
+                "battery" ->
+                    go(act(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+                        ?: go(act(Settings.ACTION_SETTINGS))
+                else -> go(act(Settings.ACTION_SETTINGS))
             }
-            return try {
-                val act = when (which) {
-                    "voice" -> Settings.ACTION_VOICE_INPUT_SETTINGS
-                    "tts" -> "com.android.settings.TTS_SETTINGS"
-                    "input" -> Settings.ACTION_INPUT_METHOD_SETTINGS
-                    "battery" -> Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
-                    else -> Settings.ACTION_SETTINGS
-                }
-                startActivity(Intent(act).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                true
-            } catch (e: Exception) {
+        }
+
+        /**
+         * 🗣️ ON-DEVICE MAP (v5.10.1) — "andaza karo ke phone mein kya hoga" khatam.
+         * Ye phone par SACH MEIN maujood cheezon ki FEHRIST deta hai:
+         *   srv  : RecognitionService ki poori list (naam + component) — wahi
+         *          queryIntentServices jo makeRecognizer() ki seerhi istemal karti hai
+         *   aiai : Android System Intelligence (on-device ka ghar)
+         *   goog : poori Google app (Speech Recognition & Synthesis)
+         *   kb   : keyboard (Gboard / Gboard Go)
+         *   asst : default digital assistant ka NAAM (video wala saboot)
+         * JS isi se panel banata hai — sirf ASLI darwazon ke button.
+         */
+        @JavascriptInterface
+        fun onDeviceMap(): String {
+            val o = JSONObject()
+            try {
+                val pm = packageManager
+                o.put("sdk", Build.VERSION.SDK_INT)
+
+                /* 1. speech recognition services — Android inhein khud visible rakhta hai */
+                val srv = JSONArray()
+                var goog = false
+                var aiai = false
                 try {
-                    startActivity(Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                    true
-                } catch (e2: Exception) { false }
+                    val list = pm.queryIntentServices(
+                        Intent(RecognitionService.SERVICE_INTERFACE), 0
+                    )
+                    for (ri in list) {
+                        val si = ri.serviceInfo ?: continue
+                        val label = try { ri.loadLabel(pm).toString() } catch (e: Exception) { si.packageName }
+                        val one = JSONObject()
+                        one.put("pkg", si.packageName)
+                        one.put("label", label)
+                        one.put("comp", si.packageName + "/" + si.name)
+                        srv.put(one)
+                        if (si.packageName.contains("googlequicksearchbox")) goog = true
+                        if (si.packageName.contains("as.oss") || si.packageName.contains("AiAi") ||
+                            si.packageName.contains("systemintelligence")
+                        ) aiai = true
+                    }
+                } catch (e: Exception) {}
+                o.put("srv", srv)
+                o.put("goog", goog)
+                o.put("aiai", aiai)
+
+                /* 2. on-device recognizer (Android 12+) */
+                var onDev = false
+                if (Build.VERSION.SDK_INT >= 31) {
+                    onDev = try { SpeechRecognizer.isOnDeviceRecognitionAvailable(this) }
+                    catch (e: Exception) { false }
+                }
+                o.put("ondevice", onDev)
+
+                /* 3. phone ka default voice-input service */
+                o.put("svc", try {
+                    Settings.Secure.getString(contentResolver, "voice_recognition_service") ?: ""
+                } catch (e: Exception) { "" })
+
+                /* 4. keyboard — <queries> ke baad ab ye NAZAR aata hai (pehle andha tha) */
+                val kb = JSONArray()
+                val pkgs = listOf(
+                    "com.google.android.inputmethod.latin",          // Gboard
+                    "com.google.android.inputmethod.latin.go",   // Gboard Go
+                    "com.google.android.apps.searchlite",        // Google Go / Search Lite
+                    "com.google.android.googlequicksearchbox",   // poori Google app
+                    "com.google.android.tts"                     // Speech by Google
+                )
+                for (pkg in pkgs) {
+                    try {
+                        val ai = pm.getApplicationInfo(pkg, 0)
+                        if (ai.enabled) kb.put(pkg)
+                    } catch (e: Exception) {}
+                }
+                o.put("kb", kb)
+
+                /* 5. default ASSISTANT ka NAAM — video isi ka saboot thi */
+                var asst = ""
+                try {
+                    val ai = Intent(Intent.ACTION_ASSIST).addCategory(Intent.CATEGORY_DEFAULT)
+                    val ri = pm.resolveActivity(ai, PackageManager.MATCH_DEFAULT_ONLY)
+                    val pkg = ri?.activityInfo?.packageName
+                    if (pkg != null) {
+                        asst = try { pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString() }
+                               catch (e: Exception) { pkg }
+                    }
+                } catch (e: Exception) {}
+                if (asst.isEmpty()) {
+                    try {
+                        asst = Settings.Secure.getString(contentResolver, "assistant") ?: ""
+                    } catch (e: Exception) {}
+                }
+                o.put("asst", asst)
+            } catch (e: Exception) {
+                try { o.put("err", e.message ?: "?") } catch (e2: Exception) {}
             }
+            return o.toString()
         }
 
         /** v5.7.0 — wake word ki zubaan JS se service tak pohanchane ke liye */

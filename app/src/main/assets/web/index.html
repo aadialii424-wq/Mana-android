@@ -536,7 +536,7 @@ nav{padding:8px 10px 10px}
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v5.10.0 — 🕸️ KHUD-MUKHTAR — Maya ab khud notice karti hai (aadat · adhoora kaam · HAAL) — bol-budget ke sath</div>
+  <div class="ver">v5.10.1 — 🗣️ ON-DEVICE ka RAASTA THEEK (ab andaza nahi, phone ki asli fehrist) · 🕸️ KHUD-MUKHTAR (P6)</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid #c85050; background:#3c0a0f; border-radius:12px; padding:12px; text-align:left;">
@@ -561,14 +561,14 @@ nav{padding:8px 10px 10px}
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v5.10.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
+  <div class="dfoot">MAYA v5.10.1 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.10.0 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.10.1 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -729,7 +729,7 @@ nav{padding:8px 10px 10px}
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.10.0</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.10.1</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -1172,6 +1172,7 @@ nav{padding:8px 10px 10px}
         <div class="ui-row" style="gap:6px">
           <button type="button" class="ui-btn ui-btn-ghost" id="labOnDevice" style="margin:0">🗣️ ON-DEVICE LANGUAGE — wake ki zubaan download karo</button>
         </div>
+        <div id="labOnDeviceBox" style="display:none"></div>
         <div class="ui-hint">Yeh "Maya" sun-ne wale ka offline dimaag hai — khule Gboard → <b>Voice typing</b> mein <b>اردو + English (India)</b> download karyn (Wi-Fi par, ~80MB har ik). Iske baghair online Google "Maya" ko "ہے" jaisa ghalat parh leta hai.</div>
         <button type="button" class="ui-btn ui-btn-ghost" id="labKaan">👂 WAKE WORD KA HAAL — Maya ne kya suna?</button>
         <button type="button" class="ui-btn ui-btn-ghost" id="labNazarTest">👁️ SCREEN ABHI PARHO — dekho Maya kya dekh rahi hai</button>
@@ -1198,7 +1199,7 @@ nav{padding:8px 10px 10px}
       </div>
 
       <button type="button" class="ui-btn ui-btn-save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v5.10.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v5.10.1 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -1213,7 +1214,7 @@ nav{padding:8px 10px 10px}
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v5.10.0 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v5.10.1 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -1281,7 +1282,7 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v5.10.0 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v5.10.1 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
@@ -1370,7 +1371,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v5.10.0 — SYSTEMS ONLINE  (KHUD-MUKHTAR: P6 · SUKOON: audio referee)");
+    pushLog("MAYA v5.10.1 — SYSTEMS ONLINE  (KHUD-MUKHTAR: P6 · SUKOON: audio referee)");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -8389,7 +8390,7 @@ var KAAN = {
       /* v5.10.0 — pehle yahan purane bracket-button ka hawala likha hota tha magar
          aisa button kahin THA HI NAHI (user dhoondta reh jata). Ab neeche ASLI
          button hai: 🗣️ */
-      if (bad.indexOf("ondevice") >= 0) L.push("     \u2022 neeche \uD83D\uDDE3\uFE0F ON-DEVICE LANGUAGE button dabao \u2192 \u0627\u0631\u062F\u0648 + English (India) download karo (offline chalegi)");
+      if (bad.indexOf("ondevice") >= 0) L.push("     \u2022 neeche \uD83D\uDDE3\uFE0F ON-DEVICE LANGUAGE button dabao \u2014 wo AAP KE PHONE ki fehrist se sirf ASLI darwaze dikhata hai (v5.10.1: pehle ye button andhayan 'Digital assistant' ki screen khol deta tha)");
       if (bad.indexOf("gtts") >= 0) L.push("     \u2022 Play Store \u2192 \"Speech Recognition & Synthesis\" install/enable karo");
       if (bad.indexOf("batt") >= 0) L.push("     \u2022 [BATTERY] dabao \u2192 MAYA ko \"Unrestricted\" karo");
       if (bad.indexOf("mic") >= 0) L.push("     \u2022 Mic ki ijazat do");
@@ -8423,6 +8424,126 @@ var KAAN = {
     else if (r.snr >= 12) L.push("  \uD83D\uDC49 Thora qareeb aa kar boliye, ya zoom barhao.");
     else L.push("  \uD83D\uDC49 Bohat shor hai ya awaaz door se aa rahi hai. Qareeb aa kar boliye.");
     cb(L.join("\n"));
+  },
+
+  /* ═══ 🗣️ ON-DEVICE LANGUAGE ki SEEDHI (v5.10.1) ═══
+     User ki video ne pakda: button dabaya to phone ki "Digital assistant app"
+     screen khul gayi (Google Go / Ella / None) — jahan offline speech ki koi
+     cheez hi NAHI hoti.
+
+     Do chhed the (dono Kotlin mein):
+       1. `startActivity()` sirf ActivityNotFoundException par rukta hai. Kai OEM
+          (Android Go / Infinix / itel) ACTION_VOICE_INPUT_SETTINGS ko apni
+          "Digital assistant" screen par alias kar dete hain — intent CHAL jata
+          hai magar GALAT screen khulti hai, aur hum `return true` kar dete the.
+       2. Gboard ka component Android 11+ ki PACKAGE VISIBILITY se chhupa tha
+          (manifest mein <queries> tha hi nahi) — pehla qadam hamesha fail.
+
+     Ab: Kotlin `onDeviceMap()` phone par SACH MEIN maujood cheezon ki fehrist
+     bhejta hai (RecognitionService list · keyboard · assistant ka naam), aur
+     `go()` kisi bhi screen ko khud khole — us component ko POOCHH kar.
+     Ye function wahi fehrist insani zubaan mein badalta hai + sirf ASLI
+     darwazon ke button banata hai. Andaza nahi — saboot. */
+  onDevice: function () {
+    var d = null;
+    try {
+      if (window.MayaBridge && window.MayaBridge.onDeviceMap) d = JSON.parse(window.MayaBridge.onDeviceMap());
+    } catch (e) { d = null; }
+    var L = ["\uD83D\uDDE3\uFE0F ON-DEVICE LANGUAGE \u2014 aap ke phone ki ASLI fehrist", ""], btns = [], i, k;
+
+    if (!d) {
+      /* purani APK (v5.10.1 se pehle onDeviceMap bridge hai hi nahi) — Qanoon 2 */
+      L.push("  \u26A0\uFE0F Ye APK itni purani hai ke phone ki fehrist nahi bhej sakti.");
+      L.push("     (v5.10.1+ mein ye panel phone par SACH MEIN maujood cheezein dikhata");
+      L.push("      hai, aur sirf wo button banata hai jo is phone par ASAL MEIN khulta hai.)");
+      L.push("");
+      L.push("  Abhi ke liye likha hua raasta:");
+      L.push("     Settings \u2192 System \u2192 Languages & input \u2192 On-screen keyboard");
+      L.push("     \u2192 Gboard \u2192 Voice typing \u2192 'Faster voice typing' ON");
+      L.push("     \u2192 Offline speech recognition \u2192 \u0627\u0631\u062F\u0648 + English (India)");
+      btns.push({ t: "\u2699\uFE0F Voice input settings kholo", k: "voice" });
+      return { txt: L.join("\n"), btns: btns, d: null };
+    }
+
+    var srv = d.srv || [], kb = d.kb || [];
+    var GB = -1, GBGO = -1, GG = -1, TTS = -1;
+    for (i = 0; i < kb.length; i++) {
+      k = String(kb[i]);
+      if (k === "com.google.android.inputmethod.latin") GB = i;
+      else if (k === "com.google.android.inputmethod.latin.go") GBGO = i;
+      else if (k === "com.google.android.apps.searchlite") GG = i;
+      else if (k === "com.google.android.tts") TTS = i;
+    }
+
+    L.push("  \uD83E\uDDE9 Speech recognition services is phone par \u2014 " + srv.length);
+    for (i = 0; i < srv.length && i < 6; i++) {
+      L.push("     \u2022 " + (srv[i].label || srv[i].pkg) + "   \u2014 " + srv[i].pkg);
+    }
+    if (!srv.length) L.push("     \u2022 KOI NAHI \u274C (isi liye \"Maya\" sunai hi nahi deti)");
+    L.push("");
+    L.push("  " + (d.aiai ? "\u2705" : "\u274C") + " Android System Intelligence : " + (d.aiai ? "maujood (on-device recognizer ka ghar)" : "NAHI \u2014 is phone par offline wake mushkil hai"));
+    L.push("  " + (d.goog ? "\u2705" : "\u274C") + " Poori Google app           : " + (d.goog ? "maujood (isi mein zubaan pack download hoti hain)" : "NAHI"));
+    L.push("  " + (d.ondevice ? "\u2705" : "\u26A0\uFE0F") + " On-device recognizer      : " + (d.ondevice ? "MAUJOOD \u2014 offline chalega" : "nahi (Android 12+ chahiye + pack download)"));
+    L.push("  \uD83C\uDFAF Abhi chal raha hai        : " + (d.using || "-"));
+    L.push("  \uD83C\uDFF7\uFE0F Default voice-input      : " + (KAAN.ERRSVC(d.svc) || "?"));
+    L.push("  \u2328\uFE0F Keyboard                 : " + (GB >= 0 ? "Gboard \u2705" : (GBGO >= 0 ? "Gboard Go \u26A0\uFE0F" : "Gboard NAHI \u274C")));
+    if (d.asst) L.push("  \uD83E\uDD16 Default assistant       : " + d.asst + "  (Maya is se azad hai \u2014 Maya apna recognizer khud chunti hai)");
+    L.push("");
+
+    /* ── seedhi: sirf ASLI darwaze ── */
+    L.push("  \uD83E\uDE9C SEEDHI \u2014 sirf wo darwaze jo IS PHONE PAR MAUJOOD hain:");
+    if (GB >= 0) {
+      btns.push({ t: "\u2699\uFE0F 1. Gboard \u2192 Voice typing settings", k: "gboardvoice" });
+      L.push("     1. [\u2699\uFE0F Gboard Voice typing] dabao");
+      L.push("        \u2192 'Faster voice typing' ON");
+      L.push("        \u2192 'Offline speech recognition' \u2192 \u0627\u0631\u062F\u0648 + English (India) download");
+    } else if (GBGO >= 0) {
+      /* Gboard Go: chhota keyboard — us mein Voice typing settings aksar HOTI HI
+         NAHI. Jhoota waada nahi: darwaza dikha rahe hain magar saaf bata kar. */
+      btns.push({ t: "\u2699\uFE0F 1. Gboard Go ki settings dekho (Voice typing ho to)", k: "gboardvoice" });
+      btns.push({ t: "\u2328\uFE0F Keyboard settings (poora Gboard yahan se lao)", k: "gboard" });
+      L.push("     1. \u26A0\uFE0F IS PHONE PAR 'GBOARD GO' HAI, poora Gboard NAHI. Go mein");
+      L.push("        'Voice typing' ki settings aksar hoti hi nahi \u2014 is liye jhoota");
+      L.push("        waada nahi: pehle poora Gboard install karo (Play Store), phir");
+      L.push("        us ki settings mein 'Offline speech recognition' milega.");
+    } else {
+      L.push("     1. \u274C GBOARD IS PHONE PAR NAHI HAI \u2014 is liye 'Voice typing' ki screen");
+      L.push("        kabhi nahi khulegi. Play Store se Gboard install karo, phir ye");
+      L.push("        darwaza khud ban jayega.");
+      btns.push({ t: "\u2328\uFE0F Keyboard settings (Gboard yahan se dhoondo)", k: "gboard" });
+    }
+    btns.push({ t: "\uD83C\uDFA4 2. Voice input / speech services", k: "voiceservices" });
+    L.push("     2. [\uD83C\uDFA4 Voice input] \u2192 default service \"Speech Recognition & Synthesis\"");
+    L.push("        (Google) chuno \u2014 \"Android System Intelligence\" NAHI");
+    if (!d.goog) {
+      L.push("        \u26A0\uFE0F is phone par poori Google app NAHI hai \u2014 pehle Play Store se");
+      L.push("           \"Speech Recognition & Synthesis\" install karo");
+    }
+    L.push("     3. MAYA band karo \u2192 dobara kholo \u2192 \uD83E\uDE7A KAAN DOCTOR mein");
+    L.push("        'On-device recognizer: maujood' likhna chahiye");
+    L.push("");
+    L.push("  \u270D\uFE0F Agar koi bhi button kaam na kare \u2014 LIKHA HUA raasta (kabhi ghalat nahi hota):");
+    L.push("     Settings \u2192 System \u2192 Languages & input \u2192 On-screen keyboard \u2192 Gboard");
+    L.push("     \u2192 Voice typing \u2192 Faster voice typing ON \u2192 Offline speech recognition");
+    L.push("     \u2192 \u0627\u0631\u062F\u0648 (Urdu) + English (India) download  (~80MB har ek, Wi-Fi par)");
+    L.push("");
+
+    /* ── imaandari: assistant wali screen se ye masla HAL NAHI HOTA ── */
+    L.push("  \uD83D\uDED1 'Digital assistant app' (Google Go / Ella / None) wali screen se ye");
+    L.push("     masla HAL NAHI HOTA \u2014 wo assistant ki pasand hai, MAYA ki awaaz ki");
+    L.push("     qismat us se nahi badalti. v5.10.0 tak humara button ANDHAYANA wahin");
+    L.push("     gira sakta tha; ab har screen POOCHH kar kholti hai aur us ka NAAM");
+    L.push("     aap ko bataya jata hai.");
+    if (!d.aiai && !d.goog) {
+      L.push("");
+      L.push("  \uD83E\uDD1D SACH: is phone par offline (on-device) wake mumkin NAHI lagta \u2014 na");
+      L.push("     AiAi hai na poori Google app. Maya \"Maya\" ONLINE recognizer se sunegi");
+      L.push("     (internet zaroori). Behtar: STT 'English (India)' rakho \u2014 Urdu decoder");
+      L.push("     \"\u0645\u0627\u06CC\u0627\" ko aksar \"\u06C1\u06D2\" jaisa parh leta hai. Wake phir bhi chalegi.");
+    }
+    btns.push({ t: "\uD83D\uDD0E Kyun? KAAN DOCTOR ki poori report", k: "__doctor" });
+    btns.push({ t: "\uD83E\uDD16 (garam) Digital assistant settings", k: "assistant" });
+    return { txt: L.join("\n"), btns: btns, d: d };
   }
 };
 
@@ -8980,24 +9101,66 @@ function labPaint(){
   });
 
   /* 🗣️ v5.10.0 — jo cheez doctor sirf LIKHTA tha, ab MAUJOOD hai */
+  /* 🗣️ v5.10.1 — ON-DEVICE LANGUAGE ka panel: phone ki ASLI fehrist + sirf wo
+     button jo is phone par sach mein kuch kholte hain. Purana handler screen
+     ka NAAM poochhe bagair "jo screen khuli us mein dhoondo…" likh deta tha —
+     aur screen khulti thi DIGITAL ASSISTANT ki (user ki video = saboot). */
   var lod = $("#labOnDevice");
   if (lod) lod.addEventListener("click", function(){
-    var ok = false;
-    try { ok = window.MayaBridge.openSetting("ondevice") === true; } catch (e) {}
-    /* Likha hua shajra bhi saath — koi ghalat screen khul jaye to raasta yaad rahe */
-    show("\uD83D\uDDE3\uFE0F ON-DEVICE LANGUAGE\n\n" +
-      "Jo screen khuli us mein dhoondo:\n" +
-      "  Gboard \u2192 Voice typing \u2192 'Faster voice typing' ON\n" +
-      "  phir 'Offline speech recognition' par dabao \u2192 ALL list se:\n" +
-      "     \u0627\u0631\u062F\u0648 (Urdu)  +  English (India)   DOWNLOAD\n\n" +
-      "(har zubaan ~80MB — Wi-Fi par khoob hoga)\n\n" +
-      "Agar woh screen na khuli to chhota raasta:\n" +
-      "  Settings \u2192 System \u2192 Languages & input \u2192 On-screen keyboard\n" +
-      "  \u2192 Gboard \u2192 Voice typing \u2192 Faster voice typing ON\n\n" +
-      "Ho jaye to MAYA band karo \u2192 dobara kholo \u2192 \uD83E\uDE7A KAAN DOCTOR mein\n" +
-      "'On-device recognizer: maujood' likhna chahiye.");
-    if (!ok) { try { window.MayaBridge.openSetting("voice"); } catch (e2) { toast("Settings khol nahi saki — manual raasta upar"); } }
+    var r = null;
+    try { r = KAAN.onDevice(); } catch (e) { r = null; }
+    if (!r) { show("\uD83D\uDDE3\uFE0F ON-DEVICE LANGUAGE chal nahi saka: " + String((e && e.message) || e)); return; }
+    show(r.txt);                                  /* poori fehrist labOut mein bhi */
+    onDevicePanel(r);
+    try { pushLog("\uD83D\uDDE3\uFE0F ON-DEVICE panel khula"); } catch (e2) {}
   });
+
+  function onDevicePanel(r){
+    var box = $("#labOnDeviceBox");
+    if (!box) return;
+    try { while (box.firstChild) box.removeChild(box.firstChild); } catch (e) { box.innerHTML = ""; }
+    var pre = document.createElement("pre");
+    pre.className = "ui-pre show";
+    pre.style.display = "block";
+    pre.style.maxHeight = "170px";
+    pre.textContent = r.txt;
+    box.appendChild(pre);
+    var i, btns = r.btns || [];
+    for (i = 0; i < btns.length; i++) {
+      (function (b) {
+        var el = document.createElement("button");
+        el.type = "button";
+        el.className = "ui-btn ui-btn-ghost";
+        el.style.marginTop = "6px";
+        el.textContent = b.t;
+        el.addEventListener("click", function () {
+          if (b.k === "__doctor") { try { show(KAAN.doctor()); } catch (e) {} return; }
+          var name = null, ok = false;
+          /* v5.10.1: pehle POOCHHO ke kaun si screen khuli — andaza nahi */
+          try {
+            if (window.MayaBridge && window.MayaBridge.openSettingNamed) name = window.MayaBridge.openSettingNamed(b.k);
+            else ok = window.MayaBridge.openSetting(b.k) === true;   /* purani APK */
+          } catch (e) { name = null; ok = false; }
+          if (name) {
+            toast("\u2705 Khuli: " + String(name).split("/").pop());
+            show(r.txt + "\n\n\u2705 Jo screen khuli: " + name +
+                 "\n\u261D\uFE0F Us mein dhoondo: Voice typing \u2192 Faster voice typing \u2192 Offline speech recognition");
+          } else if (ok) {
+            toast("Screen khul gayi — upar likha raasta dhoondo");
+          } else {
+            /* toast 2 second mein ghayab — likha hua raasta MEHFOOZ rakho */
+            toast("\u274C is phone par wo screen maujood nahi — manual raasta neeche likh diya");
+            show(r.txt + "\n\n\u274C \"" + b.t + "\" \u2014 is phone par wo screen maujood nahi." +
+                 "\n\u261D\uFE0F Upar likha hua manual raasta istemal karo (wo kabhi ghalat nahi hota).");
+          }
+          try { pushLog("ON-DEVICE: " + b.k + " \u2192 " + (name || (ok ? "khuli (naam maloom nahi)" : "NAHI khuli"))); } catch (e2) {}
+        });
+        box.appendChild(el);
+      })(btns[i]);
+    }
+    box.style.display = "block";
+    try { if (typeof MayaUI !== "undefined" && MayaUI.layout) MayaUI.layout(); } catch (e3) {}
+  }
 
   var kb = $("#labKaan");
   if (kb) kb.addEventListener("click", function(){ show(KAAN.report()); });
@@ -9398,7 +9561,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v5.10.0 — DOCTOR REPORT");
+  out.push("MAYA v5.10.1 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
@@ -10105,8 +10268,8 @@ function startProactive(){
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
 try { if (typeof KHUD !== "undefined" && FLAGS.on("khud")) KHUD.start(); } catch(e){}
-try { $("#hudBuild").textContent = "v5.10.0"; } catch(e){}
-try { pushLog("MAYA v5.10.0 — DIMAAG v2 + AWAAZ v6 + \uD83D\uDD78\uFE0F KHUD-MUKHTAR ONLINE"); } catch(e){}
+try { $("#hudBuild").textContent = "v5.10.1"; } catch(e){}
+try { pushLog("MAYA v5.10.1 — DIMAAG v2 + AWAAZ v6 + \uD83D\uDD78\uFE0F KHUD-MUKHTAR ONLINE"); } catch(e){}
 
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD" runtime   (v4.1.0)
@@ -10365,7 +10528,7 @@ var MayaUI = (function () {
     for (i = 0; i < reopen.length; i++) delCls(reopen[i], "is-open");
 
     var out = [];
-    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v5.10.0");
+    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v5.10.1");
     out.push("WEBVIEW: Chrome " + (window.__webviewMajor || "?") + (window.__oldWebview ? " (PURANA)" : ""));
     out.push("");
     out.push("VISIBLE: " + okc + "   INVISIBLE: " + bad + (bad ? "  \u274C" : "  \u2705"));

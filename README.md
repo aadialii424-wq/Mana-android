@@ -1,9 +1,35 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.10.0 "KHUD-MUKHTAR" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.10.1 "KHUD-MUKHTAR" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🗣️ v5.10.1 — ON-DEVICE LANGUAGE ka rasta theek: **andaza nahi, phone ki asli fehlist** *(hotfix · aap ki video ne pakda)*
+
+Aap ne 🗣️ **ON-DEVICE LANGUAGE** dabaya → phone ki **"Digital assistant app"** screen khul gayi
+(`None · Ella · Google Go`) — jahan offline speech ki **koi cheez hi nahi hoti**. Pakda sahi.
+
+| Chhed (code se sabit) | Nateeja |
+|---|---|
+| `for (i in tries) { startActivity(i); return true }` — **ANDHI chain**. `startActivity` sirf *ActivityNotFound* par rukta hai, aur kai OEM (Android Go/Infinix/itel) `ACTION_VOICE_INPUT_SETTINGS` ko **apni "Digital assistant" screen par alias** kar dete hain | Intent chal jata → `return true` → hum khush, aap **galat screen** par |
+| Manifest mein **`<queries>` tha hi nahi** → Android 11+ ki package-visibility se Gboard/Google app **dikhte hi nahi the** | Pehla qadam hamesha fail · 🩺 DOCTOR hamesha *"Speech by Google: nahi"* ka **jhoot** bolta (chahe install ho) |
+
+**Ilaj:** `<queries>` (aankhein wapas) · `go()` — screen khud khole se **pehle poochhta** hai aur
+**kaun si screen khuli us ka naam** wapas karta hai (`openSettingNamed`) · `onDeviceMap()` — phone par
+**sach mein maujood** RecognitionService/keyboard/assistant ki fehlist · panel sirf **ASLI darwazon** ke
+button banata hai (Gboard nahi → us ka jhoota button bhi nahi) · assistant screen ab seedhi se **bahar**.
+
+**Aur aap ke phone ka sach:** default assistant **Google Go** = Android Go/lite build — aam tor par na
+**AiAi** hota hai na **poori Google app**, yani offline zubaan pack **download hone ki jagah hi nahi**.
+Panel ab ye **saaf keh deta hai** (jhooti umeed nahi): wake **online** chalegi, behtar ke STT
+`English (India)` rakho (Urdu decoder "مایا" ko "ہے" parh leta hai).
+
+🧪 **+49 test** (1066 → **1115**) — Section 28 (Kotlin + JS locks) aur ui-13 (asli DOM mein panel + button).
+
+📖 [`docs/FIX-v5.10.1-ondevice-rasta.md`](docs/FIX-v5.10.1-ondevice-rasta.md)
+
+---
 
 ## 🕸️ v5.10.0 — KHUD-MUKHTAR: Maya ab khud NOTICE karti hai *(P6 · switch default OFF)*
 
@@ -30,7 +56,7 @@ Aur agar localStorage mein herapheri ho jaye to bhi `run()` tier dobara jaanchta
 battery-guard, `Math.round` bucket (jis se 20% aur 25% ALAG aadatain ban kar shart kabhi poori
 na hoti), aur `can()` ki tarteeb (budget khatam par bhi "45 min baad" ka jhoota waada).
 
-📖 [`docs/RELEASE-v5.10.0.md`](docs/RELEASE-v5.10.0.md) · usool: [`docs/KHUD-MUKHTAR-ARCHITECTURE.md`](docs/KHUD-MUKHTAR-ARCHITECTURE.md) · plan: [`docs/P6-KHUD-MUKHTAR-PLAN.md`](docs/P6-KHUD-MUKHTAR-PLAN.md)
+📖 [`docs/RELEASE-v5.10.0.md`](docs/RELEASE-v5.10.0.md) · usool: [`docs/KHUD-MUKHTAR-ARCHITECTURE.md`](docs/KHUD-MUKHTAR-ARCHITECTURE.md) · plan: [`docs/P6-KHUD-MUKHTAR-PLAN.md`](docs/P6-KHUD-MUKHTAR-PLAN.md) *(v5.10.1 mein 🗣️ ON-DEVICE ka rasta bhi theek hua)*
 
 🧪 **1081 test** (975 → 1081)
 
