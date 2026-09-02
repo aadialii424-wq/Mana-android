@@ -95,23 +95,24 @@ saaf sach: *"offline wake mumkin NAHI lagta"*.
 
 ## 4. 🧪 Saboot
 
-`npm test` = **1152/1152 PASS** (v5.10.0 baseline 1081 → **+71**)
+`npm test` = **1153/1153 PASS** (v5.10.0 baseline 1081 → **+72**)
 
 | Suite | v5.10.0 | v5.10.1 | **v5.10.2** |
 |---|---|---|---|
 | settings-ui | 84 | 95 | **101** (+6: Section 14 — assistant screen par sach, per-button hint) |
 | voice | 294 | 294 | 294 |
 | brain | 155 | 155 | 155 |
-| lab | 548 | 579 | **602** (+23: Section 29a–d) |
+| lab | 548 | 579 | **603** (+24: Section 29a–d) |
 
 Section 29 kya lock karta hai: `go()` ki block-list · teeno rungs par `"assist"` ·
 `assistant` darwaze par block **nahi** · `appinfo:`/`market:` · Play Store query ·
 `makeRecognizer` guard 33 + `Throwable` (teeno jagah) · panel ka takrao khatam ·
 jhoota dar khatam · jhooti umeed bhi nahi · har darwaze ka hint · `&amp;` wala `&` nahi ·
-Play Store na ho to `market:` button nahi · AiAi wale phone par khush-khabri.
+Play Store na ho to `market:` button nahi · AiAi wale phone par khush-khabri · `act()` ko `Uri` na thonsna (v5.10.2 ki CI ne 2 `Type mismatch: Uri! but String?` pakde — ab lock).
 
-**CI:** `Build MAYA APK` — is commit ka natija PR #6 par (pichhla run ✅ green tha,
-APK artifact `MAYA-APK` bani thi).
+**CI:** `Build MAYA APK` — v5.10.2 ka pehla run do `Type mismatch` par toota
+(`act(action, pkg: String?)` ko `Uri.parse(...)` thons diya tha) — theek kar ke dobara push kiya;
+natija PR #6 par ✅/❌. v5.10.1 ka aakhri run ✅ green tha (APK artifact `MAYA-APK`).
 
 ---
 

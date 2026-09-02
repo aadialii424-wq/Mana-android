@@ -27,7 +27,7 @@ keh diya. Naam batana **aadha** ilaj tha.
 | Darwaze badle to mashwara purana raha | **Har darwaze ka apna HINT** + naye darwaze: `appinfo:<pkg>`, `market:<pkg>` (Play Store — sirf jab `onDeviceMap` kahe ke Play Store maujood hai) |
 | **🛡️ Purana chhupa crash:** `makeRecognizer()` ka guard `>= 31`, magar `isOnDeviceRecognitionAvailable` **API 33** se hai. Android 12/12L par `NoSuchMethodError` (Error hai, Exception nahi → `catch (Exception)` pakadta hi na tha) | Guard `33` + `catch (Throwable)` — teeno jagah. **Android 12 par SUNO dabate hi app crash hoti thi** |
 
-🧪 **+29 test** (1123 → **1152**) — lab Section 29a–d (+23) aur settings-ui Section 14 (+6).
+🧪 **+30 test** (1123 → **1153**) — lab Section 29a–d (+24) aur settings-ui Section 14 (+6).
 
 📖 [`docs/FIX-v5.10.2-assistant-screen-band.md`](docs/FIX-v5.10.2-assistant-screen-band.md)
 

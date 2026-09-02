@@ -2040,6 +2040,8 @@ Here's a thinking process:
         '🔑🆕 method API 33 se hai — dono jagah guard 33 (pehle 31 tha: API 31/32 par crash)');
       is((MA2.match(/catch \(e: Throwable\)/g) || []).length >= 2,
         '🛡️🆕 NoSuchMethodError ek ERROR hai, Exception nahi — is liye catch (Throwable) (warna purane phone par bridge mar jata)');
+      is(!/act\([^)]*Uri\.parse/.test(MA2),
+        '🔑🆕 act(action, pkg: String?) ko Uri mat thonsna — CI ne 2 "Type mismatch: Uri! but String?" pakde (v5.10.2)');
       is(/Intent\(Settings\.ACTION_APPLICATION_DETAILS_SETTINGS, Uri\.parse\("package:\$GBOARD"\)\)/.test(MA2),
         '🔑🆕 app-info screen ko package: DATA URI chahiye — sirf setPackage() se wo rung bekaar jata tha');
       const MFX = fs.readFileSync(path.join(ROOT, 'app/src/main/AndroidManifest.xml'), 'utf8');

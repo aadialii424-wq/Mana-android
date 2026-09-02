@@ -1385,7 +1385,7 @@ class MainActivity : AppCompatActivity() {
                         ?: go(comp(GBOARD_GO, VOICE_IME))
                         ?: go(act(Settings.ACTION_VOICE_INPUT_SETTINGS), "assist")
                         ?: go(act(Settings.ACTION_INPUT_METHOD_SETTINGS))
-                        ?: go(act(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$GSPEECH")))
+                        ?: go(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$GSPEECH")))
                         ?: go(act(Settings.ACTION_SETTINGS))
 
                 /* ⌨️ keyboard ki aam settings */
@@ -1398,7 +1398,7 @@ class MainActivity : AppCompatActivity() {
                 "voiceservices" ->
                     go(act("com.android.settings.TTS_SETTINGS"))
                         ?: go(act(Settings.ACTION_VOICE_INPUT_SETTINGS), "assist")
-                        ?: go(act(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$GSPEECH")))
+                        ?: go(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$GSPEECH")))
                         ?: go(act(Settings.ACTION_SETTINGS))
 
                 /* 🤖 digital assistant (ab SIRF tab jab user KHUD ye maange).
