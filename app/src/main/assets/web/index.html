@@ -536,7 +536,7 @@ nav{padding:8px 10px 10px}
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v5.9.1 — 🎚️ SUKOON — awaaz kabhi nahi kategi · mic-larai khatam · wake word sach mein zinda</div>
+  <div class="ver">v5.10.0 — 🕸️ KHUD-MUKHTAR — Maya ab khud notice karti hai (aadat · adhoora kaam · HAAL) — bol-budget ke sath</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid #c85050; background:#3c0a0f; border-radius:12px; padding:12px; text-align:left;">
@@ -561,14 +561,14 @@ nav{padding:8px 10px 10px}
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v5.9.1 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
+  <div class="dfoot">MAYA v5.10.0 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.9.1 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.10.0 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
 
@@ -729,7 +729,7 @@ nav{padding:8px 10px 10px}
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.9.1</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.10.0</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -1140,6 +1140,10 @@ nav{padding:8px 10px 10px}
           <div class="ui-row-txt">🎚️ SUKOON — <b>awaaz kabhi nahi kategi</b> <small>(default ON — bugfix: mic aur awaaz ki ladai khatam · "Maya online" poora sunai dega · wake switch kabhi khud nahi mitega. Sirf masla ho to OFF karo)</small></div>
           <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labSukoon"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
         </div>
+        <div class="ui-row">
+          <div class="ui-row-txt">🕸️ KHUD-MUKHTAR — <b>Maya khud sochti hai</b> <small>(P6 · 👁️ abhi ka HAAL dimaag ko · 🧠 aap ki AADAT khud pakar kar tajweez · 📌 adhoora kaam yaad · 🛡️ bol-budget 6/din + raat 12-7 khamosh. <b>Sirf 🟢 SABZ kaam — call/SMS kabhi nahi.</b>)</small></div>
+          <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labKhud"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
+        </div>
         <div class="ui-hint" id="labHint">—</div>
 
         <div class="ui-row">
@@ -1172,6 +1176,9 @@ nav{padding:8px 10px 10px}
         <button type="button" class="ui-btn ui-btn-ghost" id="labKaan">👂 WAKE WORD KA HAAL — Maya ne kya suna?</button>
         <button type="button" class="ui-btn ui-btn-ghost" id="labNazarTest">👁️ SCREEN ABHI PARHO — dekho Maya kya dekh rahi hai</button>
         <button type="button" class="ui-btn ui-btn-ghost" id="labLedger">📜 AAJ KYA KYA KIYA — poora roznamcha</button>
+        <button type="button" class="ui-btn ui-btn-ghost" id="labKhudReport">🕸️ KHUD-MUKHTAR KA HAAL — kya seekha, kya adhoora hai</button>
+        <button type="button" class="ui-btn ui-btn-ghost" id="labKhudDry">⚗️ DRY-RUN — abhi karti to kya (karegi kuch nahi)</button>
+        <button type="button" class="ui-btn ui-btn-ghost" id="labHaal">👁️ ABHI KA HAAL — jo dimaag ko bheja jata hai</button>
         <button type="button" class="ui-btn ui-btn-ghost" id="labBaseline">📊 BASELINE DEKHO — aaj ke asli number</button>
         <button type="button" class="ui-btn ui-btn-ghost" id="labHarvest">🗃️ MERI BAATON SE TEST SET (naam/number chhupa kar)</button>
         <button type="button" class="ui-btn ui-btn-ghost" id="labDiag">📋 DIAGNOSTIC COPY KARO — sab kuch clipboard par</button>
@@ -1191,7 +1198,7 @@ nav{padding:8px 10px 10px}
       </div>
 
       <button type="button" class="ui-btn ui-btn-save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v5.9.1 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v5.10.0 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -1206,7 +1213,7 @@ nav{padding:8px 10px 10px}
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v5.9.1 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v5.10.0 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -1274,7 +1281,7 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v5.9.1 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v5.10.0 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
@@ -1363,7 +1370,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v5.9.1 — SYSTEMS ONLINE  (SUKOON: audio referee)");
+    pushLog("MAYA v5.10.0 — SYSTEMS ONLINE  (KHUD-MUKHTAR: P6 · SUKOON: audio referee)");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1577,7 +1584,7 @@ var VOICE_MOODS = [
 var PERSONA_MOOD = { maya:"warm", friday:"pro", jarvis:"pro", venom:"funny", gf:"warm", coach:"hype", teacher:"calm" };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧪  MAYA LAB  —  P0 (NAAP-TOL) + P1 (SAAF ZUBAAN) + 👑 MALIK    (app v5.9.1)
+   🧪  MAYA LAB  —  P0 (NAAP-TOL) + P1 (SAAF ZUBAAN) + 👑 MALIK    (app v5.10.0)
    ---------------------------------------------------------------------------
    Ye block 3 kaam karta hai, aur teeno ALAG SWITCH ke peeche hain:
 
@@ -1617,7 +1624,7 @@ var SCHEMA = {
 /* ───────────────────────── 🧪 FLAGS — har nayi cheez ek switch ke peeche ───── */
 var FLAGS = {
   KEY: "maya_flags",
-  DEF: { naap: true, saaf: false, malik: false, poolTools: false, suno: false, sach: false, boli: false, ijazat: false, bijli: false, aankh: false, nazar: false, sukoon: true },  /* naap + sukoon default ON (bay-zarar / bugfix) */
+  DEF: { naap: true, saaf: false, malik: false, poolTools: false, suno: false, sach: false, boli: false, ijazat: false, bijli: false, aankh: false, nazar: false, sukoon: true, khud: false },  /* naap + sukoon default ON (bay-zarar / bugfix) · khud (P6) default OFF — pehle sabit ho, phir chale */
   v: null,
   load: function () {
     if (FLAGS.v) return FLAGS.v;
@@ -1968,6 +1975,16 @@ var DIAG = {
       add("");
     }
     if (FLAGS.on("naap")) { add("\u2500\u2500 \ud83d\udcca NAAP \u2500\u2500"); add(NAAP.report()); add(""); }
+    /* 🕸️ P6 — khud-mukhtari ka hisaab bhi diagnostic mein (andha nahi rahenge) */
+    if (FLAGS.on("khud")) {
+      add("\u2500\u2500 \ud83d\udd78\ufe0f KHUD-MUKHTAR \u2500\u2500");
+      add("  " + safe(function () { return KHUD.BUDGET.report(); }, "?"));
+      add("  haal: " + safe(function () { return KHUD.HAAL.line(); }, "?"));
+      add("  aadatain: " + safe(function () { return KHUD.AADAT.list().length; }, "?") +
+          "  · abhi banti: " + safe(function () { return KHUD.AADAT.mine().length; }, "?") +
+          "  · adhoore: " + safe(function () { return KHUD.ADHOORA.pendingList().length; }, "?"));
+      add("");
+    }
 
     add("\u2500\u2500 \u2699\ufe0f SETTINGS (keys chhupi hui) \u2500\u2500");
     s = safe(function () { return settings; }, {});
@@ -2055,7 +2072,7 @@ FLAGS.load();
 NAAP.load();
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🎙️  SUNO  —  MAYA aap ki AWAAZ theek samjhe                  (app v5.9.1)
+   🎙️  SUNO  —  MAYA aap ki AWAAZ theek samjhe                  (app v5.10.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ki apni chat se):
 
@@ -2317,7 +2334,7 @@ var SUNO = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗣️  BOLI  —  LEHJA (accent) ka asal ilaj                      (app v5.9.1)
+   🗣️  BOLI  —  LEHJA (accent) ka asal ilaj                      (app v5.10.0)
    ---------------------------------------------------------------------------
    ASAL MASLA — awaaz ka nahi, MATN ka tha.
 
@@ -4500,6 +4517,38 @@ function handleUserText(text, wasVoice){
     }
   }
 
+  /* 🕸️ P6 KHUD-MUKHTAR — "kya seekha hai?", "abhi ka haal?", "kuch mat karo"
+     Ye teen sawal dimaag par jane ki zaroorat hi nahi (jawab app ke paas hai). */
+  if (typeof KHUD !== "undefined" && FLAGS.on("khud")) {
+    var _kt = stripped.toLowerCase();
+    if (/^(kya seekha|kya seekh|kya notice|kya yaad kiya|khud kya|kya pakda)/.test(_kt) ||
+        /(aadat|aadatain|khud[\s-]?mukhtar|khudmukhtar).*(report|haal|dikhao|batao|list)/.test(_kt)) {
+      NAAP.mark("brain"); reply(KHUD.report(), wasVoice); pushLog("KHUD: report boli"); return;
+    }
+    if (/(dry[\s-]?run|nakli chala|karti to kya|test kar ke batao)/.test(_kt)) {
+      NAAP.mark("brain"); reply(KHUD.dry(), wasVoice); pushLog("KHUD: dry-run"); return;
+    }
+    if (/^(abhi ka haal|abhi ka haal kya|haal kya hai|kya hal hai phone)/.test(_kt) ||
+        /(haal|status).*(battery|net|waqt)/.test(_kt)) {
+      NAAP.mark("brain");
+      reply("Abhi " + KHUD.HAAL.line() + ". Aur " + KHUD.BUDGET.report(), wasVoice);
+      pushLog("KHUD: HAAL bola"); return;
+    }
+    if (/^(aaj kuch mat karo|khud kuch mat karo|chup raho aaj|aaj chup)/.test(_kt)) {
+      KHUD.BUDGET.load();
+      KHUD.BUDGET.S.n = KHUD.BUDGET.DAY;
+      KHUD.BUDGET.save();
+      reply("Theek hai, aaj main khud se kuch nahi karungi aur nahi bolungi — sirf jab aap bulayenge.", wasVoice);
+      pushLog("KHUD: aaj ka budget user ne band kiya"); return;
+    }
+    if (/^(jo seekha|jo aadatain|sab aadatain|seekha hua)(.*)(bhool|mita|hata|saaf)/.test(_kt) ||
+        /(aadat|aadatain).*(bhool|mita|hata|saaf)/.test(_kt)) {
+      KHUD.AADAT.map = {}; KHUD.AADAT.save();
+      reply("Sab seekhi hui aadatain bhool gayi — ab roznamche se naye sirey se seekhungi.", wasVoice);
+      pushLog("KHUD: aadatain saaf"); return;
+    }
+  }
+
   /* ⚡ BIJLI — 🟢 SABZ kaam DIMAAG SE PEHLE, ~50ms mein. Internet ke bina bhi. */
   if (typeof BIJLI !== "undefined") {
     var _bm = BIJLI.match(stripped);
@@ -5346,9 +5395,9 @@ async function resolveModels(){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v5.9.1)
+   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v5.10.0)
    ---------------------------------------------------------------------------
-   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v5.9.1 se pehle Groq
+   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v5.10.0 se pehle Groq
    ne 16 August 2026 ko apne purane Llama 3.x models band kar diye the — hamara
    default wahi tha, is liye "backup brain bhi thak gaya" aata tha.
 
@@ -5699,7 +5748,7 @@ window.__httpDone = function (id, status, b64) {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v5.9.1)
+   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v5.10.0)
    ---------------------------------------------------------------------------
    Purane code ke 3 asli bugs jinki wajah se "Sab free brains busy" bar bar aata tha:
 
@@ -6037,7 +6086,7 @@ async function geminiTry(m, plain){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   👁️  NAZAR  —  Maya screen PARH sakti hai                     (P7a · v5.9.1)
+   👁️  NAZAR  —  Maya screen PARH sakti hai                     (P7a · v5.10.0)
    ---------------------------------------------------------------------------
    Ye P7 ka PEHLA qadam hai: Maya screen ko DEKHTI hai, magar CHHUTI NAHI.
 
@@ -6177,7 +6226,7 @@ var NAZAR = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ⚡  BIJLI  +  👁️  AANKHEIN                              (P4 · app v5.9.1)
+   ⚡  BIJLI  +  👁️  AANKHEIN                              (P4 · app v5.10.0)
    ═══════════════════════════════════════════════════════════════════════════
 
    ⚡ BIJLI — phone control 50ms mein, DIMAAG se PEHLE
@@ -6323,7 +6372,7 @@ var AANKH = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🛡️  IJAZAT + 📜 LEDGER + ⟲ UNDO + 📊 TRACE            (P3 · app v5.9.1)
+   🛡️  IJAZAT + 📜 LEDGER + ⟲ UNDO + 📊 TRACE            (P3 · app v5.10.0)
    ---------------------------------------------------------------------------
    AMAL-WORKFLOW.md ka usool: "P3 (LAGAAM) P4/P6 (zyada taqat) se PEHLE."
 
@@ -6605,7 +6654,7 @@ var TRACE = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🤝  HAQEEQAT  —  "SACH BOLO" ka nizam                        (app v5.9.1)
+   🤝  HAQEEQAT  —  "SACH BOLO" ka nizam                        (app v5.10.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ki apni chat se — 5 dafa):
 
@@ -6770,7 +6819,7 @@ var HAQEEQAT = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ⚡  AMAL ENGINE — P2a: TOOLS AB HAR DIMAAG KO                  (app v5.9.1)
+   ⚡  AMAL ENGINE — P2a: TOOLS AB HAR DIMAAG KO                  (app v5.10.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ke apne device se sabit):
 
@@ -7181,6 +7230,9 @@ window.__notifIncoming = function(from){
 };
 window.__autoSent = function(){
   pushLog("AUTO-SEND \u2713");
+  /* 📌 P6 ADHOORA: ye wohi tasdeeq hai jo "typed" amal ko BHEJA hua banati hai —
+     is ke bagair Maya roz wahi purana message "adhoora" samajh kar poochti rehti */
+  try { if (typeof KHUD !== "undefined" && KHUD.ADHOORA && KHUD.ADHOORA.markSent) KHUD.ADHOORA.markSent(); } catch (e) {}
   addBubble("ai", "\u2713 Bhej diya, " + settings.name + "!");
   speak("Bhej diya, " + settings.name + "!", lastWasVoice);
 };
@@ -7347,9 +7399,757 @@ async function ytPlay(query){
   return "YouTube search khol rahi hoon, " + settings.name + " — pehla wala dabana.";
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   🕸️  KHUD-MUKHTAR  —  P6: Maya khud sochti hai, magar LAGAAM ke sath
+                                                                  (app v5.10.0)
+   ---------------------------------------------------------------------------
+   ASAL MASLA (plan: docs/P6-KHUD-MUKHTAR-PLAN.md · forensic, andaza nahi):
+
+     var PRO_LINES = […6 jumlay…];
+     setInterval(… har 6 minute ek RANDOM jumla bol do …, 360000);
+
+   Ye "khud-mukhtari" NAHI THI — bay-maqsad SHOR tha. Na waqt dekhta tha, na
+   battery, na aap ka kaam. Aur raat 3 baje bhi bol sakta tha.
+
+   Dusri taraf teen cheezein pehle se MAUJOOD thin magar kabhi istemal na huin:
+     📜 LEDGER   har amal ka roznamcha (P3) — magar MAX:60, aur PARHA kabhi nahi
+     🤝 HAQEEQAT har tool ka `state` — "typed" (likha, BHEJA NAHI) darj hota tha,
+                 magar us adhoore kaam ka kisi ko YAAD nahi rehta tha
+     🔋 battery / network / waqt — sab maloom ho sakta tha, magar DIMAAG ko
+                 kabhi bataya hi nahi gaya (prompt mein HAAL ka koi zikr nahi tha)
+
+   ILAJ — 5 sutoon (HISSA 3 of the plan), EK switch ke peeche (`khud`, OFF):
+
+     👁️ HAAL    abhi ka poora haal, ~40 token — waqt, battery, net, headphone,
+                aakhri amal. Dimag ko har turn par bheja jata hai, aur prompt
+                ka qanoon: jo HAAL mein NAHI, wo ijaad MAT karo.
+     🛡️ BUDGET  khud se bolne ki LAGAAM — 6/din · do ke darmiyan 45 min ·
+                raat 12 se subah 7 KHAMOSH · Maya bol/sun rahi ho to chup ·
+                🔴 SURKH aur 🟡 ZARD kaam KABHI nahi · battery <10% par sirf
+                zaroori · har cheez DARJ (kitni roki gayi, kyun).
+     🧠 AADAT   LEDGER ko khud parh kar aadat pakarna: (tool + arg bucket +
+                ghanta) ≥4 dafa AUR ≥3 alag din → tajweez. Sirf 🟢 SABZ.
+                Ek waqt mein EK tajweez. Mana kiya → hamesha ke liye chup.
+     📌 ADHOORA "typed" wale amal jinke baad AUTO-SEND ✓ na aaya ho, 10 min se
+                purane hon → "wo kaam adhoora reh gaya tha, ab bhejun?"
+                Rozana EK se zyada nahi.
+     ⚗️ DRY-RUN "karti to ye karti" — chalta kuch nahi. Naye rules dekhne ko.
+
+   QANOON (HISSA 4 of the plan):
+     1. Switch OFF = ek line bhi nahi chalti, purana raasta jyun ka tyun.
+     2. Khud-mukhtar amal KABHI 🔴 SURKH nahi (call/SMS/WhatsApp bhejna mana).
+        🟡 ZARD bhi nahi — sirf 🟢 SABZ (torch/brightness/volume/timer/info).
+     3. Har khud-mukhtar amal LEDGER + NAAP + pushLog mein darj (⟲ undo muft).
+     4. Bol-budget se zyada kuch nahi — aur har rok DARJ hoti hai (andha nahi).
+     5. Tajweez EK dafa. "NAHI" ka matlab "dobara kabhi mat poochhna".
+     6. Koi naya Kotlin nahi — sab JS. Purani APK ke sath bhi chalega.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var KHUD = {
+  V: "1.0",
+
+  /* ─────────── 🛡️ BUDGET — be-lagam khud-mukhtari = tabahi ─────────── */
+  BUDGET: {
+    KEY: "maya_khud_budget",
+    DAY: 6,                  /* rozana kitni dafa KHUD se bolna */
+    GAP: 45 * 60000,         /* do khud-ba-khud baaton ke darmiyan */
+    QUIET_FROM: 0,           /* raat 12 baje */
+    QUIET_TO: 7,             /* subah 7 baje — KHAMOSH GHANTE */
+    LOW_BATT: 10,            /* is se neeche sirf zaroori baat */
+    ROZ: 20,                 /* har rule/tajweez ki rozana hadd (loop ka taala) */
+    S: null,
+    load: function () {
+      if (KHUD.BUDGET.S) return KHUD.BUDGET.S;
+      var s = { day: "", n: 0, last: 0, said: {}, asked: {}, denied: 0, quietBlocked: 0, gapBlocked: 0, capBlocked: 0, battBlocked: 0, busyBlocked: 0 };
+      try {
+        var raw = JSON.parse(localStorage.getItem(KHUD.BUDGET.KEY) || "{}");
+        if (raw && typeof raw === "object") {
+          if (typeof raw.day === "string") s.day = raw.day;
+          if (typeof raw.n === "number") s.n = raw.n;
+          if (typeof raw.last === "number") s.last = raw.last;
+          if (raw.said && typeof raw.said === "object") s.said = raw.said;
+          if (raw.asked && typeof raw.asked === "object") s.asked = raw.asked;
+          if (typeof raw.denied === "number") s.denied = raw.denied;
+          if (typeof raw.quietBlocked === "number") s.quietBlocked = raw.quietBlocked;
+          if (typeof raw.gapBlocked === "number") s.gapBlocked = raw.gapBlocked;
+          if (typeof raw.capBlocked === "number") s.capBlocked = raw.capBlocked;
+          if (typeof raw.battBlocked === "number") s.battBlocked = raw.battBlocked;
+          if (typeof raw.busyBlocked === "number") s.busyBlocked = raw.busyBlocked;
+        }
+      } catch (e) {}
+      KHUD.BUDGET.S = s;
+      return s;
+    },
+    save: function () {
+      try { localStorage.setItem(KHUD.BUDGET.KEY, JSON.stringify(KHUD.BUDGET.load())); } catch (e) {}
+    },
+    today: function (when) {
+      var d = new Date(when || (new Date()).getTime());
+      return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+    },
+    /* din badal gaya to ginti saaf */
+    roll: function (when) {
+      var s = KHUD.BUDGET.load();
+      var t = KHUD.BUDGET.today(when);
+      if (s.day !== t) { s.day = t; s.n = 0; s.said = {}; }
+      return s;
+    },
+    /* 🔇 khamosh ghante: raat QUIET_FROM se subah QUIET_TO tak */
+    quiet: function (when) {
+      var h = new Date(when || (new Date()).getTime()).getHours();
+      return (h >= KHUD.BUDGET.QUIET_FROM && h < KHUD.BUDGET.QUIET_TO);
+    },
+    /* kya abhi KHUD se bol/kaam kar sakti hoon? urgent = battery jaisi zaroori baat */
+    can: function (why, when, urgent) {
+      var now = when || (new Date()).getTime();
+      var s = KHUD.BUDGET.roll(now);
+      if (!FLAGS.on("khud")) return { ok: false, why: "🕸️ KHUD-MUKHTAR ka switch band hai (LAB)" };
+      /* 🤫 Maya bol rahi hai ya sun rahi hai → beech mein na tokay */
+      if (typeof SUKOON !== "undefined" && SUKOON.haal !== "KHALI") {
+        s.busyBlocked++; KHUD.BUDGET.save();
+        return { ok: false, why: "Maya abhi " + (SUKOON.haal === "BOL_RAHI" ? "bol rahi hai" : "sun rahi hai") + " — beech mein nahi bolti" };
+      }
+      if (typeof speaking !== "undefined" && speaking) {
+        s.busyBlocked++; KHUD.BUDGET.save();
+        return { ok: false, why: "Maya abhi bol rahi hai" };
+      }
+      if (KHUD.BUDGET.quiet(now)) {
+        s.quietBlocked++; KHUD.BUDGET.save();
+        return { ok: false, why: "🔇 khamosh ghante (raat 12 se subah 7) — neend zaroori hai" };
+      }
+      /* hadd PEHLE: budget khatam ho to "45 min baad" ka jhoota waada na kare */
+      if (s.n >= KHUD.BUDGET.DAY && !urgent) {
+        s.capBlocked++; KHUD.BUDGET.save();
+        return { ok: false, why: "\ud83d\udcac aaj ka bol-budget khatam (" + KHUD.BUDGET.DAY + "/" + KHUD.BUDGET.DAY + ") — kal subah 7 ke baad" };
+      }
+      if (now - s.last < KHUD.BUDGET.GAP && !urgent) {
+        s.gapBlocked++; KHUD.BUDGET.save();
+        return { ok: false, why: "\u23f3 " + Math.round((KHUD.BUDGET.GAP - (now - s.last)) / 60000) + " minute baad bol sakti hoon (45 min ka farq)" };
+      }
+      /* 🔋 battery <10% → sirf zaroori (warna Maya khud battery kha jayegi) */
+      if (!urgent) {
+        var b = KHUD.HAAL.battery();
+        /* charge ho rahi ho to ijazat — warna phone raat bhar plug par laga rahe
+           aur Maya goongi ho jaye (bina wajah ki pabandi) */
+        if (b && b.level !== null && !b.charging && b.level < KHUD.BUDGET.LOW_BATT) {
+          s.battBlocked++; KHUD.BUDGET.save();
+          return { ok: false, why: "🔋 battery " + b.level + "% — ab sirf zaroori baat, warna phone band" };
+        }
+      }
+      return { ok: true, why: "" };
+    },
+    spend: function (kind, when) {
+      var now = when || (new Date()).getTime();
+      var s = KHUD.BUDGET.roll(now);
+      s.n++;
+      s.last = now;
+      if (kind) s.said[kind] = (s.said[kind] || 0) + 1;
+      KHUD.BUDGET.save();
+      return s.n;
+    },
+    /* ek hi qism ki baat rozana ek dafa (paani yaad dilana bar bar nahi) */
+    saidToday: function (kind, when) {
+      var s = KHUD.BUDGET.roll(when);
+      return !!(kind && s.said[kind]);
+    },
+    /* rozana hadd: ek rule/tajweez 20 dafa se zyada nahi */
+    askOk: function (key, when) {
+      var s = KHUD.BUDGET.roll(when);
+      if (!s.asked[key]) s.asked[key] = { d: s.day, n: 0 };
+      if (s.asked[key].d !== s.day) s.asked[key] = { d: s.day, n: 0 };
+      return s.asked[key].n < KHUD.BUDGET.ROZ;
+    },
+    asked: function (key, when) {
+      var s = KHUD.BUDGET.roll(when);
+      if (!s.asked[key]) s.asked[key] = { d: s.day, n: 0 };
+      if (s.asked[key].d !== s.day) s.asked[key] = { d: s.day, n: 0 };
+      s.asked[key].n++;
+      KHUD.BUDGET.save();
+      return s.asked[key].n;
+    },
+    left: function (when) {
+      var s = KHUD.BUDGET.roll(when);
+      return Math.max(0, KHUD.BUDGET.DAY - s.n);
+    },
+    report: function (when) {
+      var s = KHUD.BUDGET.roll(when);
+      return "💬 " + s.n + "/" + KHUD.BUDGET.DAY + " khud se bola  ·  baqi " + KHUD.BUDGET.left(when) +
+             "  ·  roki: khamosh-ghante " + s.quietBlocked + " · farq " + s.gapBlocked +
+             " · hadd " + s.capBlocked + " · battery " + s.battBlocked + " · masroof " + s.busyBlocked;
+    }
+  },
+
+  /* ─────────── 👁️ HAAL — Maya ko apne phone ka pata ho ─────────── */
+  HAAL: {
+    _at: 0,
+    _b: null,
+    /* battery: native bridge pehle, browser baad mein, warna sach sach null */
+    battery: function () {
+      try {
+        if (typeof NATIVE !== "undefined" && NATIVE && window.MayaBridge && window.MayaBridge.battery) {
+          var j = JSON.parse(window.MayaBridge.battery());
+          if (j && typeof j.level === "number") return { level: j.level, charging: !!j.charging };
+        }
+      } catch (e) {}
+      return KHUD.HAAL._b;                 /* browser ki async reading (agar hai) */
+    },
+    /* browser battery — ek dafa, chup-chaap (purane WebView mein hai hi nahi) */
+    watch: function () {
+      try {
+        if (navigator.getBattery) {
+          navigator.getBattery().then(function (b) {
+            function upd() { KHUD.HAAL._b = { level: Math.round(b.level * 100), charging: !!b.charging }; }
+            upd();
+            try { b.addEventListener("levelchange", upd); b.addEventListener("chargingchange", upd); } catch (e) {}
+          }, function () {});
+        }
+      } catch (e) {}
+    },
+    net: function () {
+      try {
+        var c = navigator.connection;
+        if (c && c.effectiveType) return String(c.effectiveType).toUpperCase();
+      } catch (e) {}
+      try {
+        if (navigator.onLine === false) return "offline";
+      } catch (e) {}
+      return "";
+    },
+    headphone: function () {
+      try {
+        var d = navigator.mediaDevices;
+        if (d && d.enumerateDevices) {
+          d.enumerateDevices().then(function (list) {
+            var i, on = false;
+            for (i = 0; i < list.length; i++) {
+              if (list[i].kind === "audiooutput" && /headphone|headset|earbud|bluetooth|airpod/i.test(String(list[i].label || ""))) on = true;
+            }
+            KHUD.HAAL._hp = on;
+          }, function () {});
+        }
+      } catch (e) {}
+      return KHUD.HAAL._hp === true;
+    },
+    _hp: false,
+    /* din ka hissa — Urdu mein, koi library nahi */
+    waqt: function (when) {
+      var d = new Date(when || (new Date()).getTime());
+      var h = d.getHours();
+      if (h >= 4 && h < 12) return "subah";
+      if (h >= 12 && h < 16) return "dopahar";
+      if (h >= 16 && h < 19) return "shaam";
+      if (h >= 19 && h < 23) return "raat";
+      return "aadhi raat";   /* 23 se 4 tak */
+    },
+    /* ~40 token: sirf wohi jo sach mein maloom hai (andaza nahi, jhoot nahi) */
+    facts: function (when) {
+      var now = when || (new Date()).getTime();
+      var d = new Date(now);
+      var o = { hh: d.getHours(), mm: d.getMinutes(), part: KHUD.HAAL.waqt(now), batt: null, net: "", hp: false, last: null };
+      try { o.batt = KHUD.HAAL.battery(); } catch (e) { o.batt = null; }
+      try { o.net = KHUD.HAAL.net(); } catch (e) { o.net = ""; }
+      try { o.hp = KHUD.HAAL.headphone(); } catch (e) { o.hp = false; }
+      try { o.last = KHUD.HAAL.lastAmal(now); } catch (e) { o.last = null; }
+      return o;
+    },
+    line: function (when) {
+      var f = KHUD.HAAL.facts(when);
+      var p = [];
+      p.push(f.part + " " + (f.hh < 10 ? "0" : "") + f.hh + ":" + (f.mm < 10 ? "0" : "") + f.mm);
+      if (f.batt && f.batt.level !== null && f.batt.level !== undefined) {
+        p.push("battery " + f.batt.level + "%" + (f.batt.charging ? " (charge ho rahi hai)" : ""));
+      }
+      if (f.net) p.push(f.net === "offline" ? "internet BAND" : f.net);
+      if (f.hp) p.push("headphone laga hai");
+      if (f.last) p.push("aakhri amal: " + f.last);
+      return p.join(" · ");
+    },
+    /* prompt mein jane wali line — khali halat par "" (crash kabhi nahi) */
+    context: function (when) {
+      try {
+        if (!FLAGS.on("khud")) return "";
+        var l = KHUD.HAAL.line(when);
+        if (!l) return "";
+        return "\n👁️ ABHI KA HAAL (phone se naapa gaya, " + l + "). Is haal ko sirf tab zikr karo jab user ki baat se lagta khaye — misaal: battery kam ho to andhera kam karne ka mashwara. Jo HAAL mein NAHI likha, us ka daawa hargiz mat karo.";
+      } catch (e) { return ""; }
+    },
+    /* LEDGER ka aakhri KAAMYAB amal — "abhi kya kiya tha" ka pata */
+    lastAmal: function (when) {
+      var now = when || (new Date()).getTime();
+      if (typeof LEDGER === "undefined" || !LEDGER.load) return "";
+      var l = LEDGER.load(), i, e;
+      for (i = l.length - 1; i >= 0; i--) {
+        e = l[i];
+        if (!e || !e.ok || !e.t) continue;
+        var ago = Math.round((now - e.t) / 60000);
+        if (ago < 0) ago = 0;
+        var bits = [];
+        if (e.a && typeof e.a === "object") {
+          if (e.a.percent !== undefined) bits.push(e.a.percent + "%");
+          if (e.a.on !== undefined) bits.push(e.a.on ? "ON" : "OFF");
+          if (e.a.name) bits.push(String(e.a.name).slice(0, 16));
+        }
+        return e.n + (bits.length ? (" " + bits.join(" ")) : "") + " (" + (ago < 1 ? "abhi" : ago + " min pehle") + ")" + (e.st ? " [" + e.st + "]" : "");
+      }
+      return "";
+    },
+    /* prompt ka qanoon — HAAL se jhoot na banaya jaye */
+    rule: function () {
+      if (!FLAGS.on("khud")) return "";
+      return "\n👁️ HAAL KA QANOON: upar diye HAAL ko qudrati tor par istemal karo (battery kam ho to mashwara, raat ho to sone ki baat) — magar HAAL mein jo NAHI, wo ijaad mat karo. Aur khud se lambi nasihat mat shuru karo: bol-budget mehdood hai.";
+    }
+  },
+
+  /* ─────────── 🧠 AADAT — LEDGER se aadat pakarna (WTF #1) ─────────── */
+  AADAT: {
+    KEY: "maya_khud_aadat",
+    NEED: 4,          /* kam az kam 4 dafa */
+    DAYS: 3,          /* kam az kam 3 alag din */
+    WIN: 59,          /* minute — us ghante ke andar */
+    map: null,
+    load: function () {
+      if (KHUD.AADAT.map) return KHUD.AADAT.map;
+      var m = {};
+      try {
+        var raw = JSON.parse(localStorage.getItem(KHUD.AADAT.KEY) || "{}");
+        if (raw && typeof raw === "object") m = raw;
+      } catch (e) { m = {}; }
+      KHUD.AADAT.map = m;
+      return m;
+    },
+    save: function () {
+      try { localStorage.setItem(KHUD.AADAT.KEY, JSON.stringify(KHUD.AADAT.map || {})); } catch (e) {}
+    },
+    /* numbers ko bucket mein daalo — 15 aur 20 alag aadatain nahi, 10-19 ek aadat */
+    bucket: function (v) {
+      /* boolean pehle: Number(true)=1 → bucket 0 ban jata aur ON/OFF ki pehchan kho jati */
+      if (typeof v === "boolean") return v ? "on" : "off";
+      var n = Number(v);
+      if (isNaN(n)) return String(v).toLowerCase().slice(0, 18);
+      /* FLOOR (round nahi): round se 25 → 30 ho jata aur 20/25 ALAG aadatain
+         ban kar shart kabhi poori na hoti. Floor = "10 se 19 ek hi tokri". */
+      return String(Math.floor(n / 10) * 10);
+    },
+    /* (tool, arg-bucket, ghanta) ki chaabi — isi se aadat pehchani jati hai */
+    sig: function (name, args) {
+      var a = args || {}, keys = [], k, parts = [];
+      for (k in a) if (Object.prototype.hasOwnProperty.call(a, k)) keys.push(k);
+      keys.sort();
+      for (var i = 0; i < keys.length; i++) {
+        k = keys[i];
+        if (k === "code" || k === "input" || k === "text" || k === "query" || k === "url" || k === "entry") continue;  /* bekaar matn se aadat nahi banti */
+        parts.push(k + "=" + KHUD.AADAT.bucket(a[k]));
+      }
+      return name + "|" + parts.join(",");
+    },
+    dayKey: function (t) {
+      var d = new Date(t);
+      return d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate();
+    },
+    /* LEDGER ko parh kar aadatain nikalo — sirf 🟢 SABZ, sirf kaamyab amal */
+    mine: function (when) {
+      var out = [];
+      if (typeof LEDGER === "undefined" || !LEDGER.load) return out;
+      var list = LEDGER.load();
+      var seen = {}, order = [], i, e, d, k, hh;
+      for (i = 0; i < list.length; i++) {
+        e = list[i];
+        if (!e || !e.t || !e.n || e.ok !== true) continue;
+        if (typeof IJAZAT !== "undefined" && IJAZAT.T && IJAZAT.T[e.n] !== 1) continue;   /* 🟢 SABZ ke siwa kuch nahi */
+        d = new Date(e.t);
+        hh = d.getHours();
+        k = KHUD.AADAT.sig(e.n, e.a) + "@" + hh;
+        if (!seen[k]) { seen[k] = { key: k, sig: KHUD.AADAT.sig(e.n, e.a), n: e.n, a: e.a || {}, hour: hh, min: d.getMinutes(), count: 0, days: {}, last: 0 }; order.push(k); }
+        seen[k].count++;
+        seen[k].days[KHUD.AADAT.dayKey(e.t)] = 1;
+        if (e.t > seen[k].last) { seen[k].last = e.t; seen[k].min = d.getMinutes(); }
+      }
+      for (i = 0; i < order.length; i++) {
+        e = seen[order[i]];
+        e.dayCount = 0;
+        for (var dk in e.days) if (Object.prototype.hasOwnProperty.call(e.days, dk)) e.dayCount++;
+        if (e.count >= KHUD.AADAT.NEED && e.dayCount >= KHUD.AADAT.DAYS) out.push(e);
+      }
+      out.sort(function (x, y) { return (y.count - x.count) || (y.last - x.last); });
+      return out;
+    },
+    /* abhi chalane laiq aadat — ek waqt mein sirf EK (shor nahi) */
+    due: function (when) {
+      var now = when || (new Date()).getTime();
+      if (!FLAGS.on("khud")) return null;
+      var m = KHUD.AADAT.load(), found = KHUD.AADAT.mine(now), i, h, s;
+      var d0 = new Date(now);
+      var today = KHUD.BUDGET.today(now);
+      for (i = 0; i < found.length; i++) {
+        h = found[i];
+        s = h.sig + "@" + h.hour;
+        if (m[s] && (m[s].mode === "off" || m[s].mode === "denied")) continue;   /* mana kiya → kabhi nahi */
+        if (m[s] && m[s].lastRunDay === today) continue;                        /* aaj ho chuka */
+        if (d0.getHours() !== h.hour) continue;                                 /* waqt ka ghanta */
+        if (d0.getMinutes() < h.min) continue;                                  /* aadat ke waqt se pehle nahi */
+        if (d0.getMinutes() > h.min + KHUD.AADAT.WIN) continue;                 /* window nikal gayi */
+        h.sigKey = s;
+        return h;
+      }
+      return null;
+    },
+    find: function (sigKey) {
+      var found = KHUD.AADAT.mine(), i;
+      for (i = 0; i < found.length; i++) if (found[i].sig + "@" + found[i].hour === sigKey) return found[i];
+      return null;
+    },
+    human: function (h) {
+      var bits = [], a = h.a || {}, k;
+      for (k in a) if (Object.prototype.hasOwnProperty.call(a, k)) {
+        if (k === "percent") bits.push(a[k] + "%");
+        else if (k === "on") bits.push(a[k] ? "ON" : "OFF");
+        else if (typeof a[k] !== "object") bits.push(String(a[k]).slice(0, 18));
+      }
+      return h.n + (bits.length ? (" (" + bits.join(", ") + ")") : "") +
+             " — roz taqreeban " + (h.hour < 10 ? "0" : "") + h.hour + ":" + (h.min < 10 ? "0" : "") + h.min;
+    },
+    /* 💥 WTF #1 — "ye aap ne kabhi bataya nahi tha, aap ne ghaur bhi nahi kiya tha" */
+    propose: function (h) {
+      var sigKey = h.sigKey || (h.sig + "@" + h.hour);
+      if (KHUD.pending) return false;
+      /* 🔑 ek hi aadat ki tajweez ZINDAGI mein EK dafa — HAAN/POOCH/NAHI jo bhi
+         kaha, wo faisla mehfooz hai. (NAHI = hamesha ke liye chup.) */
+      var already = KHUD.AADAT.load()[sigKey];
+      if (already && already.mode) return false;
+      if (!KHUD.BUDGET.askOk("aadat:" + sigKey)) return false;
+      KHUD.BUDGET.asked("aadat:" + sigKey);
+      var txt = "🧠 MAYA NE KUCH NOTICE KIYA\n\n  Pichle " + h.dayCount + " alag dinon mein " + h.count + " dafa:\n  " + KHUD.AADAT.human(h) +
+                "\n\n  Ye aap ne kabhi bataya nahi tha — maine apne 📜 roznamche (LEDGER) se khud nikala.\n  Roz is waqt KHUD kar diya karun?";
+      return KHUD.card("🧠 AADAT", txt, ["✅ HAAN, ROZ KARO", "⏰ POOCH KAR KARO", "❌ NAHI"], function (which) {
+        var m = KHUD.AADAT.load();
+        if (which === 0) m[sigKey] = { mode: "auto", n: h.n, a: h.a, hour: h.hour, min: h.min, count: h.count, days: h.dayCount, made: (new Date()).getTime(), runs: 0, lastRunDay: "" };
+        else if (which === 1) m[sigKey] = { mode: "ask", n: h.n, a: h.a, hour: h.hour, min: h.min, count: h.count, days: h.dayCount, made: (new Date()).getTime(), runs: 0, lastRunDay: "" };
+        else { m[sigKey] = { mode: "off", made: (new Date()).getTime() }; KHUD.BUDGET.load().denied++; KHUD.BUDGET.save(); }
+        KHUD.AADAT.save();
+        try { pushLog("KHUD/AADAT: " + sigKey + " → " + (which === 0 ? "ROZ KARO" : which === 1 ? "POOCH KAR" : "NAHI (hamesha ke liye)")); } catch (e) {}
+        try {
+          if (typeof toast === "function") toast(which === 2 ? "❌ theek hai — ye tajweez dobara nahi aayegi" : "✅ seekh liya — roz " + (h.hour < 10 ? "0" : "") + h.hour + " baje ke aas paas");
+        } catch (e) {}
+        KHUD.pending = null;
+        return which;
+      });
+    },
+    /* aadat chalao — 🟢 SABZ hi, warna INKAR (qanoon 2) */
+    run: function (sigKey, mode, when) {
+      var h = KHUD.AADAT.find(sigKey);
+      /* roznamcha sirf 60 amal rakhta hai — purani aadat ka saboot ghum sakta hai.
+         Magar aap ka FAISLA (mode + args) localStorage mein hai: wahi kaafi hai. */
+      if (!h) {
+        var st = KHUD.AADAT.load()[sigKey];
+        if (!st || !st.n) return { ok: false, why: "aadat ka data nahi mila (na roznamche mein, na mehfooz faislon mein)" };
+        h = { n: st.n, a: st.a || {}, hour: st.hour || 0, min: st.min || 0, count: st.count || 0, dayCount: st.days || 0, sigKey: sigKey };
+      }
+      if (typeof IJAZAT !== "undefined" && IJAZAT.T && IJAZAT.T[h.n] !== 1) {
+        return { ok: false, why: "🚫 " + h.n + " 🟢 SABZ nahi — khud-mukhtar amal kabhi zard/surkh nahi karta" };
+      }
+      if (mode === "dry") return { ok: true, dry: true, say: "⚗️ DRY-RUN: karti to " + KHUD.AADAT.human(h) };
+      if (mode === "ask") {
+        if (KHUD.pending) return { ok: false, why: "ek aur tajweez pehle se khuli hai" };
+        KHUD.card("⏰ AADAT", "Roz is waqt aap " + KHUD.AADAT.human(h) + " karte ho.\nAb kar doon?", ["✅ HAAN", "❌ NAHI"], function (which) {
+          KHUD.pending = null;
+          if (which === 0) KHUD.AADAT.act(h, sigKey);
+          else { try { if (typeof toast === "function") toast("❌ theek hai, nahi kiya"); } catch (e) {} }
+          return which;
+        });
+        return { ok: true, asked: true };
+      }
+      return KHUD.AADAT.act(h, sigKey);
+    },
+    act: function (h, sigKey) {
+      /* pehle markRun: nakaam ho ya kaamyab, us ghanta dobara koshish NAHI
+         (warna tick har 2 min ek hi kaam bar bar karta — loop ka taala) */
+      KHUD.AADAT.markRun(sigKey);
+      try {
+        var p = execTool(h.n, h.a || {});
+        if (p && p.then) {
+          p.then(function (out) {
+            var okb = !!(out && out.ok !== false && out.done !== false);
+            try { pushLog("KHUD/AADAT: " + h.n + " " + (okb ? "\u2705 khud kar diya" : "\u274C nakaam")); } catch (e) {}
+          }, function () { try { pushLog("KHUD/AADAT: " + h.n + " \u274C (error)"); } catch (e) {} });
+        }
+      } catch (e) { return { ok: false, why: String((e && e.message) || e) }; }
+      return { ok: true, tool: h.n };
+    },
+    markRun: function (sigKey) {
+      var m = KHUD.AADAT.load();
+      if (!m[sigKey]) m[sigKey] = { mode: "auto" };
+      m[sigKey].runs = (m[sigKey].runs || 0) + 1;
+      m[sigKey].lastRunDay = KHUD.BUDGET.today();
+      m[sigKey].lastRun = (new Date()).getTime();
+      KHUD.AADAT.save();
+    },
+    list: function () {
+      var m = KHUD.AADAT.load(), out = [], k;
+      for (k in m) if (Object.prototype.hasOwnProperty.call(m, k)) out.push({ key: k, v: m[k] });
+      out.sort(function (a, b) { return (b.v.count || 0) - (a.v.count || 0); });
+      return out;
+    }
+  },
+
+  /* ─────────── 📌 ADHOORA — "type kar diya, SEND nahi hua" (WTF #2) ─────────── */
+  ADHOORA: {
+    OLD: 10 * 60000,       /* 10 min se purana ho to hi poocho */
+    RECENT: 3 * 24 * 3600000,   /* 3 din se purani cheez adhoori nahi, bhooli hui hai */
+    SENT_WINDOW: 30 * 60000,
+    /* AUTO-SEND ✓ aaya → pichle 30 min ke "typed" amal BHEJE hue maano */
+    markSent: function (when) {
+      if (typeof LEDGER === "undefined" || !LEDGER.load) return 0;
+      var now = when || (new Date()).getTime();
+      var l = LEDGER.load(), i, e, n = 0;
+      for (i = 0; i < l.length; i++) {
+        e = l[i];
+        if (!e || e.st !== "typed" || e.sent) continue;
+        if (now - e.t <= KHUD.ADHOORA.SENT_WINDOW) { e.sent = 1; n++; }
+      }
+      if (n) { try { LEDGER.save(); } catch (e2) {} }
+      return n;
+    },
+    /* LEDGER mein dhoondo: typed/started, tasdeeq nahi aayi, 10 min se purana */
+    find: function (when) {
+      if (!FLAGS.on("khud")) return null;
+      if (typeof LEDGER === "undefined" || !LEDGER.load) return null;
+      var now = when || (new Date()).getTime();
+      var l = LEDGER.load(), i, e, out = [];
+      for (i = l.length - 1; i >= 0; i--) {
+        e = l[i];
+        if (!e || !e.t) continue;
+        if (e.st !== "typed" && e.st !== "started") continue;
+        if (e.ok !== true) continue;
+        if (e.sent || e.kdone) continue;
+        var age = now - e.t;
+        if (age < KHUD.ADHOORA.OLD) continue;
+        if (age > KHUD.ADHOORA.RECENT) continue;
+        out.push(e);
+        if (out.length >= 3) break;
+      }
+      if (!out.length) return null;
+      return out[0];
+    },
+    what: function (e) {
+      var a = e.a || {};
+      var kya = a.text || a.message || "";
+      return (a.name ? (a.name + " ko ") : "") + e.n + (kya ? (" — “" + String(kya).slice(0, 50) + "”") : "");
+    },
+    /* 💥 WTF #2 — asli chat ka adhoora kaam, ek dafa poochho phir chup */
+    offer: function (when) {
+      var e = KHUD.ADHOORA.find(when);
+      if (!e) return false;
+      if (KHUD.pending) return false;
+      if (!KHUD.BUDGET.askOk("adhoora")) return false;
+      KHUD.BUDGET.asked("adhoora");
+      var ago = Math.round(((when || (new Date()).getTime()) - e.t) / 60000);
+      var d = new Date(e.t);
+      var hh = (d.getHours() < 10 ? "0" : "") + d.getHours() + ":" + (d.getMinutes() < 10 ? "0" : "") + d.getMinutes();
+      var txt = "📌 EK KAAM ADHOORA REH GAYA THA\n\n  " + hh + " par " + KHUD.ADHOORA.what(e) + "\n  (" + (ago < 60 ? ago + " minute" : Math.round(ago / 60) + " ghante") + " pehle — " +
+                (e.st === "typed" ? "matn TYPE hua tha magar BHEJA nahi gaya" : "chala tha magar tasdeeq nahi aayi") + ")\n\n  Ab kar doon?";
+      return KHUD.card("📌 ADHOORA", txt, ["✅ HAAN, ABHI KARO", "❌ REHNE DO"], function (which) {
+        KHUD.pending = null;
+        if (which !== 0) { try { e.kdone = 1; LEDGER.save(); } catch (e2) {} try { pushLog("KHUD/ADHOORA: user ne mana kiya"); } catch (e3) {} return which; }
+        try {
+          var p = execTool(e.n, e.a || {});
+          if (p && p.then) p.then(function (out) {
+            try { pushLog("KHUD/ADHOORA: " + e.n + " " + (out && out.ok !== false ? "✅" : "❌")); } catch (e4) {}
+            try { e.kdone = 1; LEDGER.save(); } catch (e5) {}
+          }, function () {});
+        } catch (e6) {}
+        return which;
+      });
+    },
+    pendingList: function (when) {
+      var now = when || (new Date()).getTime();
+      if (typeof LEDGER === "undefined" || !LEDGER.load) return [];
+      var l = LEDGER.load(), i, e, out = [];
+      for (i = l.length - 1; i >= 0; i--) {
+        e = l[i];
+        if (!e || !e.t || e.sent || e.kdone) continue;
+        if (e.st !== "typed" && e.st !== "started") continue;
+        out.push("  • " + new Date(e.t).toLocaleString() + "  " + e.n + (e.a && e.a.name ? (" → " + e.a.name) : "") + "  [" + e.st + "]");
+        if (out.length >= 5) break;
+      }
+      return out;
+    }
+  },
+
+  /* ─────────── 🃏 card + 💬 bolne ki lagaam ─────────── */
+  pending: null,
+  card: function (tag, text, labels, onPick) {
+    if (KHUD.pending) return false;
+    var done = false;
+    function finish(w) {
+      if (done) return;
+      done = true;
+      try { if (row && row.parentNode) row.parentNode.removeChild(row); } catch (e) {}
+      KHUD.pending = null;
+      try { onPick(w); } catch (e) {}
+    }
+    var row = null;
+    try {
+      var host = (typeof log !== "undefined" && log && log.appendChild) ? log : document.body;
+      row = document.createElement("div");
+      row.className = "row ai";
+      var b = document.createElement("div");
+      b.className = "bubble";
+      var html = "<span class='who'>" + esc(tag) + "</span>" + esc(text).replace(/\n/g, "<br>") +
+                 "<div style='margin-top:9px;display:flex;gap:8px;flex-wrap:wrap'>";
+      var i;
+      for (i = 0; i < labels.length; i++) {
+        html += "<button type='button' class='ui-btn" + (i === 0 ? "" : " ui-btn-ghost") + "' data-k='" + i +
+                "' style='margin:0;min-height:40px'>" + esc(labels[i]) + "</button>";
+      }
+      html += "</div><div class='ui-hint' style='margin-top:6px'>Jawab na diya to ye card 5 minute baad khud hat jayega — dobara nahi poochhungi.</div>";
+      b.innerHTML = html;
+      row.appendChild(b);
+      host.appendChild(row);
+      try { host.scrollTop = host.scrollHeight; } catch (e2) {}
+      b.addEventListener("click", function (ev) {
+        var t = ev.target;
+        if (!t || !t.getAttribute) return;
+        var v = t.getAttribute("data-k");
+        if (v === null) return;
+        finish(parseInt(v, 10));
+      });
+    } catch (e) { KHUD.pending = null; return false; }
+    KHUD.pending = finish;
+    setTimeout(function () { finish(-1); }, 300000);   /* 5 min — jawab na aaya to chup */
+    return true;
+  },
+
+  /* khud se bolna — BUDGET se guzar kar hi */
+  say: function (msg, kind, urgent, when) {
+    if (!msg) return false;
+    var g = KHUD.BUDGET.can(kind || "baat", when, urgent);
+    if (!g.ok) { try { pushLog("KHUD roka: " + g.why); } catch (e) {} return false; }
+    KHUD.BUDGET.spend(kind, when);
+    try {
+      if (typeof reply === "function") reply(msg, false);
+      else if (typeof toast === "function") toast(msg);
+    } catch (e) { return false; }
+    try { pushLog("KHUD: khud boli (" + (kind || "baat") + ")"); } catch (e2) {}
+    try { if (typeof LEDGER !== "undefined" && LEDGER.load) LEDGER.push("notify", { title: "KHUD-MUKHTAR", text: String(msg).slice(0, 40) }, { ok: true, state: "info" }, undefined); } catch (e3) {}
+    return true;
+  },
+
+  /* ⚗️ DRY-RUN — "karti to ye karti", chalta kuch nahi */
+  dry: function (when) {
+    var L = ["⚗️ DRY-RUN — ye karti, magar KIYA KUCH NAHI", ""];
+    var now = when || (new Date()).getTime();
+    var g = KHUD.BUDGET.can("dry", now);
+    L.push("  bol-budget : " + (g.ok ? "✅ abhi bol sakti hoon" : ("🚫 " + g.why)));
+    L.push("  " + KHUD.BUDGET.report(now));
+    var a = KHUD.AADAT.due(now);
+    L.push("  aadat      : " + (a ? ("🟢 " + KHUD.AADAT.human(a) + " → karti to abhi chala deti") : "koi aadat is waqt banti nahi"));
+    var ad = KHUD.ADHOORA.find(now);
+    L.push("  adhoora    : " + (ad ? ("📌 " + KHUD.ADHOORA.what(ad) + " → poochti") : "koi adhoora kaam nahi mila"));
+    var b = KHUD.HAAL.battery();
+    L.push("  haal       : " + KHUD.HAAL.line(now));
+    if (b && b.level !== null && b.level < 15 && !b.charging) L.push("  battery    : 🔋 " + b.level + "% — saver ka mashwara karti");
+    L.push("");
+    L.push("  (🕸️ switch ON ho to ye sab ASAL mein hota — har amal 📜 LEDGER mein darj)");
+    return L.join("\n");
+  },
+
+  report: function (when) {
+    var now = when || (new Date()).getTime();
+    var L = ["🕸️ KHUD-MUKHTAR — Maya ne kya NOTICE kiya", ""];
+    L.push("  " + (FLAGS.on("khud") ? "🟢 switch ON" : "⭕ switch OFF (LAB mein chalu karo)"));
+    L.push("  " + KHUD.BUDGET.report(now));
+    L.push("  👁️ HAAL: " + (KHUD.HAAL.line(now) || "kuch maloom nahi"));
+    L.push("");
+    var m = KHUD.AADAT.list(), i;
+    L.push("🧠 SEEKHI HUI AADATAIN — " + m.length);
+    if (!m.length) L.push("  abhi koi nahi. 📜 LEDGER mein " + (typeof LEDGER !== "undefined" && LEDGER.load ? LEDGER.load().length : 0) + " amal darj hain.");
+    for (i = 0; i < m.length && i < 8; i++) {
+      var v = m[i].v;
+      var mode = v.mode === "auto" ? "✅ ROZ KHUD" : v.mode === "ask" ? "⏰ POOCH KAR" : v.mode === "denied" ? "🚫 MANA" : "❌ BAND";
+      L.push("  " + mode + "  " + m[i].key + (v.count ? ("   (" + v.count + " dafa, " + (v.days || 0) + " din)") : "") + (v.runs ? ("  · chala " + v.runs + " dafa") : ""));
+    }
+    L.push("");
+    var found = KHUD.AADAT.mine(now);
+    L.push("🔍 ABHI BANTI HUI AADATAIN — " + found.length + "  (≥" + KHUD.AADAT.NEED + " dafa AUR ≥" + KHUD.AADAT.DAYS + " alag din, sirf 🟢 SABZ)");
+    for (i = 0; i < found.length && i < 6; i++) L.push("  • " + KHUD.AADAT.human(found[i]) + "   " + found[i].count + " dafa / " + found[i].dayCount + " din");
+    if (!found.length) {
+      L.push("  kuch nahi mili" + (typeof IJAZAT !== "undefined" && !FLAGS.on("ijazat") ? "  ⚠️ 📜 LEDGER khali hai kyunki 🛡️ IJAZAT ka switch band hai — roznamcha wahin banta hai" : " — roznamcha abhi chhota hai"));
+    }
+    L.push("");
+    var pl = KHUD.ADHOORA.pendingList(now);
+    L.push("📌 ADHOORE KAAM — " + pl.length);
+    for (i = 0; i < pl.length; i++) L.push(pl[i]);
+    if (!pl.length) L.push("  koi nahi ✅  (matn TYPE kar ke SEND na dabane wale kaam yahan aate hain)");
+    L.push("");
+    L.push("🔇 KHAMOSH GHANTE: raat 12 se subah 7  ·  💬 hadd " + KHUD.BUDGET.DAY + "/din  ·  ⏳ farq 45 min");
+    L.push("🚫 khud se kabhi 🔴 SURKH ya 🟡 ZARD kaam NAHI (sirf 🟢 SABZ)");
+    return L.join("\n");
+  },
+
+  /* har 2 minute ek halka sa jhonk — koi network call nahi, sirf hisab */
+  tick: function (when) {
+    try {
+      if (!FLAGS.on("khud")) return null;
+      var now = when || (new Date()).getTime();
+      if (KHUD.pending) return null;                       /* ek card khula hai → chup */
+      if (typeof thinking !== "undefined" && thinking) return null;
+      /* 📌 adhoora kaam — sab se aham (asli kaam adhoora pada hai) */
+      var ad = KHUD.ADHOORA.find(now);
+      if (ad && KHUD.BUDGET.can("adhoora", now).ok) {
+        if (KHUD.ADHOORA.offer(now)) return { kind: "adhoora", e: ad };
+      }
+      /* 🧠 aadat — 🟢 SABZ hi, aur qanoon ke mutabiq */
+      var h = KHUD.AADAT.due(now);
+      if (h) {
+        var s = KHUD.AADAT.load()[h.sigKey];
+        var mode = s ? s.mode : null;
+        if (!mode) {
+          if (KHUD.BUDGET.can("aadat", now).ok && KHUD.AADAT.propose(h)) return { kind: "aadat-tajweez", h: h };
+        } else if (mode === "auto") {
+          var g = KHUD.BUDGET.can("aadat", now);
+          if (g.ok) { KHUD.BUDGET.spend("aadat", now); KHUD.AADAT.run(h.sigKey, "auto", now); return { kind: "aadat-auto", h: h }; }
+        } else if (mode === "ask") {
+          if (KHUD.BUDGET.can("aadat", now).ok) { KHUD.AADAT.run(h.sigKey, "ask", now); return { kind: "aadat-ask", h: h }; }
+        }
+      }
+      /* 🔋 battery — zaroori baat (urgent: gap aur hadd se chhoot) */
+      var b = KHUD.HAAL.battery();
+      if (b && b.level !== null && b.level <= 15 && !b.charging && !KHUD.BUDGET.saidToday("battery", now)) {
+        if (KHUD.say("🔋 " + (settings && settings.name ? settings.name + ", " : "") + "battery " + b.level + "% par hai aur charge nahi ho rahi — battery saver chalu kar do, warna main bhi thori der mein so jaungi.", "battery", b.level <= 10, now)) return { kind: "battery" };
+      }
+      /* 💧 3 ghante se chup ho, din ka waqt ho → ek hi baat, rozana ek dafa */
+      if (!settings || settings.proactive !== false) {
+        var lastAct = 0;
+        try { if (typeof MAYA_V4 !== "undefined" && MAYA_V4.lastInteract) lastAct = MAYA_V4.lastInteract; } catch (e) { lastAct = 0; }
+        if (lastAct && now - lastAct > 3 * 3600000 && !KHUD.BUDGET.saidToday("idle", now) && KHUD.BUDGET.can("idle", now).ok) {
+          var hr = new Date(now).getHours();
+          var msg = (hr >= 12 && hr < 18)
+            ? "💧 " + ((settings && settings.name) || "Boss") + ", teen ghante se phone par ho — paani pi lo, do minute aankhein band kar lo. Main yahin hoon."
+            : "🌙 " + ((settings && settings.name) || "Boss") + ", kaafi der se jaage ho — thora aaram kar lo. Zaroorat ho to bula lena.";
+          if (KHUD.say(msg, "idle", false, now)) return { kind: "idle" };
+        }
+      }
+      return null;
+    } catch (e) { return null; }
+  },
+
+  timer: null,
+  start: function () {
+    try { if (KHUD.timer) { clearInterval(KHUD.timer); KHUD.timer = null; } } catch (e) {}
+    if (!FLAGS.on("khud")) return false;
+    KHUD.HAAL.watch();
+    KHUD.timer = setInterval(function () { try { KHUD.tick(); } catch (e) {} }, 120000);
+    try { pushLog("🕸️ KHUD-MUKHTAR zinda — har 2 min jhonk (bol-budget " + KHUD.BUDGET.DAY + "/din)"); } catch (e2) {}
+    return true;
+  },
+  stop: function () {
+    try { if (KHUD.timer) clearInterval(KHUD.timer); } catch (e) {}
+    KHUD.timer = null;
+  }
+};
+
 /* ---------- WAKE WORD ('Maya' / 'Boss') ---------- */
 /* ═══════════════════════════════════════════════════════════════════════════
-   👂  KAAN  —  wake word ka asal ilaj                          (v5.9.1)
+   👂  KAAN  —  wake word ka asal ilaj                          (v5.10.0)
    ---------------------------------------------------------------------------
    User: "background mein mic on/off hota hai, magar 'Maya' bolne par kuch
           nahi hota."
@@ -7521,7 +8321,7 @@ var KAAN = {
       L.push("  Iska matlab ya to:");
       L.push("   \u2022 wake word switch OFF hai, ya");
       L.push("   \u2022 mic ki ijazat nahi mili, ya");
-      L.push("   \u2022 purani APK hai (v5.9.1 se pehle diagnostics thi hi nahi)");
+      L.push("   \u2022 purani APK hai (v5.10.0 se pehle diagnostics thi hi nahi)");
       return L.join("\n");
     }
     L.push("  \u2500\u2500 aakhri " + Math.min(KAAN.log.length, 22) + " waqiat \u2500\u2500");
@@ -7586,7 +8386,7 @@ var KAAN = {
     } else {
       L.push("  \uD83D\uDC49 KYA KARNA HAI:");
       if (bad.indexOf("aiai") >= 0) L.push("     \u2022 [VOICE INPUT] dabao \u2192 \"Speech Recognition & Synthesis\" chuno");
-      /* v5.9.1 — pehle yahan purane bracket-button ka hawala likha hota tha magar
+      /* v5.10.0 — pehle yahan purane bracket-button ka hawala likha hota tha magar
          aisa button kahin THA HI NAHI (user dhoondta reh jata). Ab neeche ASLI
          button hai: 🗣️ */
       if (bad.indexOf("ondevice") >= 0) L.push("     \u2022 neeche \uD83D\uDDE3\uFE0F ON-DEVICE LANGUAGE button dabao \u2192 \u0627\u0631\u062F\u0648 + English (India) download karo (offline chalegi)");
@@ -7626,7 +8426,7 @@ var KAAN = {
   }
 };
 
-/* Kotlin ki har report yahan aati hai (v5.9.1) */
+/* Kotlin ki har report yahan aati hai (v5.10.0) */
 window.__wakeLog = function (kind, data) {
   try { KAAN.push(String(kind || "?"), data); } catch (e) {}
 };
@@ -7830,7 +8630,7 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 
 /* ---------- SETTINGS TAB ---------- */
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v5.9.1)
+   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v5.10.0)
    ---------------------------------------------------------------------------
    Purana bug (user ne pakda): "girlfriend mode on karta hun, groq key lagata
    hun — thori der baad wo option khud band ho jata hai."
@@ -8081,6 +8881,7 @@ function labPaint(){
   n = $("#labBijli"); if (n) n.checked = f.bijli === true;
   n = $("#labNazar"); if (n) n.checked = f.nazar === true;
   n = $("#labSukoon"); if (n) n.checked = f.sukoon === true;
+  n = $("#labKhud");  if (n) n.checked = f.khud === true;
   h = $("#labHint");
   if (h) {
     var on = [];
@@ -8094,6 +8895,8 @@ function labPaint(){
     if (f.ijazat) on.push("🛡️ ijazat");
     if (f.bijli) on.push("⚡ bijli");
     if (f.nazar) on.push("👁️ nazar");
+    if (f.sukoon) on.push("🎚️ sukoon");
+    if (f.khud) on.push("🕸️ khud-mukhtar");
     h.className = "ui-hint" + (on.length ? " ok" : "");
     h.textContent = on.length ? ("Chalu: " + on.join(" · ") + "   •   " + NAAP.hist.length + " turn naape ja chuke")
                               : "Sab band — Maya bilkul purane tareeqe par chal rahi hai.";
@@ -8121,6 +8924,16 @@ function labPaint(){
   sw("labNazar", "nazar", "👁️ screen parhna");
   /* 🎚️ P9 SUKOON — gate Kotlin mein yeh pref LIVE parhta hai: toggle par turant mirror */
   sw("labSukoon", "sukoon", "🎚️ awaaz+mic sukoon");
+  /* 🕸️ P6 KHUD-MUKHTAR — switch ON hote hi purani 6-minute chatter band, KHUD tick chalu */
+  sw("labKhud", "khud", "🕸️ khud-mukhtar");
+  var lkd = $("#labKhud");
+  if (lkd) lkd.addEventListener("change", function(){
+    try {
+      if (FLAGS.on("khud")) { KHUD.start(); }
+      else { KHUD.stop(); }
+      startProactive();   /* dobara: ab faisla KHUD ka hai ya purane shor ka */
+    } catch (e) {}
+  });
   var labSukoonMirror = function () {
     try {
       if (window.MayaBridge && window.MayaBridge.setPref) window.MayaBridge.setPref("sukoon", FLAGS.on("sukoon"));
@@ -8166,7 +8979,7 @@ function labPaint(){
     try { window.MayaBridge.openSetting("battery"); } catch (e) { toast("Sirf APK mein"); }
   });
 
-  /* 🗣️ v5.9.1 — jo cheez doctor sirf LIKHTA tha, ab MAUJOOD hai */
+  /* 🗣️ v5.10.0 — jo cheez doctor sirf LIKHTA tha, ab MAUJOOD hai */
   var lod = $("#labOnDevice");
   if (lod) lod.addEventListener("click", function(){
     var ok = false;
@@ -8209,6 +9022,25 @@ function labPaint(){
   var lb = $("#labLedger");
   if (lb) lb.addEventListener("click", function(){
     show(LEDGER.today() + "\n\n\u27F2 \"wapas karo\" bolo to aakhri wapas-hone-laiq kaam palat dungi.");
+  });
+
+  /* 🕸️ P6 — KHUD-MUKHTAR ki teen aankhein */
+  var khr = $("#labKhudReport");
+  if (khr) khr.addEventListener("click", function(){
+    try { show(KHUD.report()); pushLog("KHUD: report dekhi"); } catch (e) { show("KHUD-MUKHTAR chal nahi saka: " + String((e && e.message) || e)); }
+  });
+  var khd = $("#labKhudDry");
+  if (khd) khd.addEventListener("click", function(){
+    try { show(KHUD.dry()); } catch (e) { show("DRY-RUN chal nahi saka: " + String((e && e.message) || e)); }
+  });
+  var hal = $("#labHaal");
+  if (hal) hal.addEventListener("click", function(){
+    try {
+      show("\uD83D\uDC41 ABHI KA HAAL\n\n  " + (KHUD.HAAL.line() || "kuch maloom nahi") +
+           "\n\n  dimaag ko ye line har turn par jati hai (~40 token):\n  " +
+           (KHUD.HAAL.context() || "(switch OFF hai — is liye abhi kuch nahi ja rahi)") +
+           "\n\n  🛡️ " + KHUD.BUDGET.report());
+    } catch (e) { show("HAAL chal nahi saka: " + String((e && e.message) || e)); }
   });
 
   var b = $("#labBaseline");
@@ -8566,7 +9398,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v5.9.1 — DOCTOR REPORT");
+  out.push("MAYA v5.10.0 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
@@ -8983,6 +9815,11 @@ sysPrompt = function(){
     if (settings.musicApp && settings.musicApp !== "youtube") p += "\nMusic app preference: " + settings.musicApp + ".";
     if (typeof MALIK !== "undefined") p += MALIK.block();   /* \uD83D\uDC51 P1 */
     if (typeof HAQEEQAT !== "undefined") p += HAQEEQAT.rule();   /* \uD83E\uDD1D P3 */
+    /* \uD83D\uDC41 P6 KHUD-MUKHTAR — abhi ka HAAL (~40 token) + us ko istemal karne ka qanoon */
+    if (typeof KHUD !== "undefined" && FLAGS.on("khud")) {
+      try { p += KHUD.HAAL.context(); } catch (e) {}
+      try { p += KHUD.HAAL.rule(); } catch (e) {}
+    }
     if (settings.convoMode) p += "\nCONVERSATION MODE: thora zyada emotional/expressive tone — real insaan jaisi feel.";
   } catch(e){}
   return p;
@@ -9157,7 +9994,7 @@ document.querySelectorAll(".setgrp-head").forEach(function(h){
   h.addEventListener("click", function(){ h.parentElement.classList.toggle("open"); });
 });
 
-/* NOTE: loadV4Form / doosra saveSettings handler v5.9.1 mein khatam.
+/* NOTE: loadV4Form / doosra saveSettings handler v5.10.0 mein khatam.
    Ab SETFORM (upar) hi settings ka wahid darwaza hai — dekho SET_FIELDS.
    Sliders live update karte hain, baqi sab SAVE par ek hi tarteeb se. */
 try { $("#sRadius").addEventListener("input", function(){ $("#radiusVal").textContent = this.value; settings.radius = parseInt(this.value,10) || 18; saveSettings(); applyTheme(); }); } catch(e){}
@@ -9214,7 +10051,11 @@ renderFacts = function(){
   try { hudRefresh(); } catch(e){}
 };
 
-/* ---------- PROACTIVE MODE (video jaisa — khud ba khud baat) ---------- */
+/* ---------- PROACTIVE MODE (purana: har 6 minute ek RANDOM jumla) ----------
+   ⚠️ P6 ke baad ye sirf TAB chalta hai jab 🕸️ KHUD-MUKHTAR ka switch BAND ho.
+   Plan (docs/P6-KHUD-MUKHTAR-PLAN.md §1.2) isay "bay-maqsad shor" kehta hai —
+   is liye KHUD ON hote hi ye raasta chhor diya jata hai (khatam nahi kiya:
+   Qanoon 1 — switch OFF par purana rawaiya bilkul waisa hi rahe). */
 var PRO_LINES = [
   "{n}, soch rahi thi... aaj ka din kaisa ja raha hai?",
   "Bore ho rahi hoon {n} — koi quiz karein ya interesting fact sunaun?",
@@ -9223,8 +10064,23 @@ var PRO_LINES = [
   "Mausam check karun? ya battery? bas bol do.",
   "Waise {n}, mujhe tumhari baatein yaad rehti hain — kaafi memory bank bhar gaya hai."
 ];
+/* 🕸️ P6 KHUD-MUKHTAR ka darwaza: `khud` ON ho to bay-maqsad 6-minute wali
+   chatter KHUD-BA-KHUD KHATAM — ab har baat ki WAJAH hoti hai (aadat, adhoora
+   kaam, battery, teen ghante ki chuppi) aur har baat BUDGET se guzarti hai
+   (6/din · 45 min ka farq · raat 12 se subah 7 khamosh). Switch OFF = purana
+   raasta bilkul jyun ka tyun (Qanoon 1). */
 function startProactive(){
   if (MAYA_V4.proactiveTimer) { clearInterval(MAYA_V4.proactiveTimer); MAYA_V4.proactiveTimer = null; }
+  var khudOn = false;
+  try { khudOn = (typeof KHUD !== "undefined" && FLAGS.on("khud")); } catch (e) { khudOn = false; }
+  if (khudOn) {
+    try { KHUD.HAAL.watch(); } catch (e) {}
+    MAYA_V4.proactiveTimer = setInterval(function(){
+      try { KHUD.tick(); } catch (e) {}
+    }, 120000);                     /* har 2 min halki jhonk — koi network call nahi */
+    try { pushLog("\uD83D\uDD78\uFE0F KHUD-MUKHTAR: proactive ka shor band — ab bol-budget wali baatein"); } catch (e2) {}
+    return;
+  }
   if (!settings.proactive) return;
   MAYA_V4.proactiveTimer = setInterval(function(){
     try {
@@ -9248,8 +10104,9 @@ function startProactive(){
 
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
-try { $("#hudBuild").textContent = "v5.9.1"; } catch(e){}
-try { pushLog("MAYA v5.9.1 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
+try { if (typeof KHUD !== "undefined" && FLAGS.on("khud")) KHUD.start(); } catch(e){}
+try { $("#hudBuild").textContent = "v5.10.0"; } catch(e){}
+try { pushLog("MAYA v5.10.0 — DIMAAG v2 + AWAAZ v6 + \uD83D\uDD78\uFE0F KHUD-MUKHTAR ONLINE"); } catch(e){}
 
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD" runtime   (v4.1.0)
@@ -9508,7 +10365,7 @@ var MayaUI = (function () {
     for (i = 0; i < reopen.length; i++) delCls(reopen[i], "is-open");
 
     var out = [];
-    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v5.9.1");
+    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v5.10.0");
     out.push("WEBVIEW: Chrome " + (window.__webviewMajor || "?") + (window.__oldWebview ? " (PURANA)" : ""));
     out.push("");
     out.push("VISIBLE: " + okc + "   INVISIBLE: " + bad + (bad ? "  \u274C" : "  \u2705"));

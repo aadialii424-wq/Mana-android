@@ -295,6 +295,34 @@ setTimeout(function () {
   try { doc.getElementById('saveSettings').click(); } catch (e) {}
   is(win.settings.gfMode === false, 'Gender female par GF mode khud band (aur wajah batai gayi)');
 
+  /* 🕸️ P6 KHUD-MUKHTAR — poori page boot kar ke (sirf source nahi, ASAL dom) */
+  section('12. \uD83D\uDD78\uFE0F KHUD-MUKHTAR (P6) BOOT');
+  is(!!win.KHUD, '🕸️ KHUD module poori app ke boot par zinda (koi script nahi toota)');
+  is(win.FLAGS.DEF.khud === false, '🔑 khud default OFF — pehle sabit ho, phir chale (Qanoon 1)');
+  is(!!doc.getElementById('labKhud'), 'LAB mein 🕸️ KHUD-MUKHTAR ka switch maujood');
+  is(doc.getElementById('labKhud').checked === false, '   → aur shuru mein band dikhta hai (jhooti halat nahi)');
+  is(!!doc.getElementById('labKhudReport') && !!doc.getElementById('labKhudDry') && !!doc.getElementById('labHaal'),
+     'teen button: HAAL report · DRY-RUN · ABHI KA HAAL');
+  /* switch ON → asli rawaiya */
+  win.FLAGS.set('khud', true);
+  doc.getElementById('labKhud').checked = true;
+  doc.getElementById('labKhud').dispatchEvent(new win.Event('change'));
+  is(win.KHUD.timer !== null, '🔑 switch ON → KHUD ki jhonk chalu (aur purani 6-min chatter band)');
+  is(doc.getElementById('labKhudReport').textContent.indexOf('KHUD-MUKHTAR') > 0, 'button ka label saaf hai');
+  doc.getElementById('labKhudReport').click();
+  var out = doc.getElementById('labOut').textContent;
+  is(out.indexOf('KHUD-MUKHTAR') > 0 && out.indexOf('KHAMOSH GHANTE') > 0 && out.indexOf('SURKH') > 0,
+     '🕸️ report chalti hai — qanoon apne andar likha (andhi khud-mukhtari nahi)');
+  doc.getElementById('labKhudDry').click();
+  is(doc.getElementById('labOut').textContent.indexOf('DRY-RUN') > 0, '⚗️ DRY-RUN chalta hai (karega kuch nahi)');
+  doc.getElementById('labHaal').click();
+  is(doc.getElementById('labOut').textContent.indexOf('ABHI KA HAAL') > 0, '👁️ HAAL button abhi ka haal dikhata hai');
+  is(win.KHUD.HAAL.context().indexOf('ABHI KA HAAL') > 0, '🧠 dimaag ko HAAL ja raha hai (prompt line)');
+  win.FLAGS.set('khud', false);
+  doc.getElementById('labKhud').checked = false;
+  doc.getElementById('labKhud').dispatchEvent(new win.Event('change'));
+  is(win.KHUD.timer === null && win.KHUD.HAAL.context() === '', '🔒 switch OFF → timer murda, prompt saaf (Qanoon 1)');
+
   done();
 }, 400);
 

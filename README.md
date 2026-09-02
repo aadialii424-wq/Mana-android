@@ -1,9 +1,40 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.9.0 "SUKOON" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.10.0 "KHUD-MUKHTAR" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🕸️ v5.10.0 — KHUD-MUKHTAR: Maya ab khud NOTICE karti hai *(P6 · switch default OFF)*
+
+**Bay-maqsad shor khatam. Ab har khud-ba-khud baat ki WAJAH hoti hai — aur har wajah ka hisab.**
+
+Pehle `proactive: true` ka matlab tha: **har 6 minute ek RANDOM jumla** (`PRO_LINES` mein se),
+na waqt dekhta tha na battery, raat 3 baje bhi. Doosri taraf teen cheezein maujood thin magar
+**kabhi istemal na huin**: 📜 LEDGER (har amal ka roznamcha), 🤝 HAQEEQAT ka `state:"typed"`
+(matn likha gaya, BHEJA nahi gaya), aur battery/waqt/net ka pata.
+
+| Sutoon | Kya karta hai | Jadbahad |
+|---|---|---|
+| 👁️ **HAAL** | Abhi ka haal (~40 token) har turn dimaag ko: `dopahar 15:30 · battery 12% · 4G · aakhri amal: brightness_control 30% (5 min pehle)` | Pehle dimaag ANDHA tha — battery 12% par bhi "brightness 100 kar di" keh deta. Qanoon: **jo HAAL mein NAHI, wo ijaad mat karo** |
+| 🛡️ **BUDGET** | 6 khud-ba-khud baatein/din · do ke darmiyan 45 min · **raat 12 se subah 7 KHAMOSH** · bol/sun rahi ho to chup · battery <10% (charge na ho) to sirf zaroori · har rule 20/din | Har ROK **darj** hoti hai (`roki: khamosh-ghante 3 · farq 2 · hadd 1`) — andhi khud-mukhtari nahi |
+| 🧠 **AADAT** | LEDGER khud parh kar: `(tool + arg bucket + ghanta)` **≥4 dafa AUR ≥3 alag din** → tajweez card | *"Pichle 4 din se aap ~15:10 par brightness 20-29% karte ho. Roz KHUD kar dun?"* — **sirf 🟢 SABZ tools**, ek waqt mein EK tajweez, **NAHI = dobara kabhi nahi** |
+| 📌 **ADHOORA** | `state:"typed"` wale amal jinke baad **AUTO-SEND ✓ na aaya**, 10 min se purane → *"wo kaam adhoora reh gaya tha, ab bhejun?"* | Rozana ek se zyada nahi. `__autoSent` hook tasdeeq karta hai → **bheja hua message adhoora NAHI** |
+| ⚗️ **DRY-RUN** | *"abhi karti to kya"* — poora hisab, chalta KUCH NAHI | Naya switch dekhne ka mehfooz tareeqa |
+
+🚫 **Qanoon 2:** khud-mukhtar amal **kabhi 🔴 SURKH ya 🟡 ZARD nahi** — na call, na SMS, na WhatsApp.
+Test saare 36 tools par lagta hai: 🟢 16 ijazat ke sath, baqi 20 **rad**.
+Aur agar localStorage mein herapheri ho jaye to bhi `run()` tier dobara jaanchta hai.
+
+🧪 **106 naye test** (94 lab + 12 boot) — inhone module ke **3 asli bug** pakde: charge hote hue
+battery-guard, `Math.round` bucket (jis se 20% aur 25% ALAG aadatain ban kar shart kabhi poori
+na hoti), aur `can()` ki tarteeb (budget khatam par bhi "45 min baad" ka jhoota waada).
+
+📖 [`docs/RELEASE-v5.10.0.md`](docs/RELEASE-v5.10.0.md) · usool: [`docs/KHUD-MUKHTAR-ARCHITECTURE.md`](docs/KHUD-MUKHTAR-ARCHITECTURE.md) · plan: [`docs/P6-KHUD-MUKHTAR-PLAN.md`](docs/P6-KHUD-MUKHTAR-PLAN.md)
+
+🧪 **1081 test** (975 → 1081)
+
+---
 
 ## 🎚️ v5.9.0 — SUKOON: awaaz kabhi nahi kategi · mic-larai khatam *(P9 · v5.9.1 mein 🗣️ ON-DEVICE LANGUAGE ka asli button bhi)*
 
