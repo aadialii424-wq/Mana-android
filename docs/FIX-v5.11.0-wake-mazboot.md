@@ -122,9 +122,12 @@ Kotlin toast · JS toast = **chhe** jagah).
 
 ## 7. 🚦 CI / build
 
-* Push ke baad GitHub Actions (`Build MAYA APK`) ka natija yahan likha jayega.
-* **CI run:** _(push ke baad update)_
-* **APK:** artifact `MAYA-APK`
+* **CI run [33689569785](https://github.com/adil-chandio/Mana-android/actions/runs/33689569785) — ✅ SUCCESS (pehli koshish)**
+  · commit `71cc015` · Kotlin compile **clean** (`WakeState.kt` + `WakeWordService` + `MainActivity`)
+* **APK:** artifact `MAYA-APK` — **3,211,753 bytes** (v5.10.3 ke 3,200,895 se **+10,858 bytes**)
+* **Download:** https://github.com/adil-chandio/Mana-android/actions/runs/33689569785
+* ⚠️ CI ki annotations sirf **cache/deprecation** ki thin (Node 20 → 24, `setup-java@v4`,
+  gradle cache 400) — build se koi talluq nahi, pichli runs mein bhi wahi thin.
 
 ---
 

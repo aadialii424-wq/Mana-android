@@ -4,6 +4,8 @@
 > hai, kya adhoora hai, nakami par kya bhejein, aur version ki pehchaan.
 >
 > **Version:** 5.11.0 (WAKE MAZBOOT) · **Tests:** 1234/1234 GREEN · **Phase:** 1 (robustness)
+> **Build:** ✅ CI GREEN (pehli koshish) · **APK:** 3,211,753 bytes (3.2 MB)
+> **Download:** https://github.com/adil-chandio/Mana-android/actions/runs/33689569785
 > Tafseel: [`FIX-v5.11.0-wake-mazboot.md`](FIX-v5.11.0-wake-mazboot.md)
 
 ---
