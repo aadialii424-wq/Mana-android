@@ -19,7 +19,7 @@ Teen live masle, EK jang-boot: mic aur awaaz do kore hain jo ek hi badan (audio 
 
 Aur: **L3** 550ms echo tail (tail timer mic ko stomp nahi karta) · **L7** SELF-WAKE SHIELD (apni awaaz par jaagna imkan-harab) · 60s stale-pause recovery · escape hatch switch (LAB → 🎚️ SUKOON, default ON).
 
-📖 [`docs/RELEASE-v5.9.0.md`](docs/RELEASE-v5.9.0.md) · usool: [`docs/SUKOON-AUDIO-ARBITRATION.md`](docs/SUKOON-AUDIO-ARBITRATION.md)
+📖 [`docs/RELEASE-v5.9.0.md`](docs/RELEASE-v5.9.0.md)+(v5.9.1 hotfix: doctor ka chhupa button ab asal) · usool: [`docs/SUKOON-AUDIO-ARBITRATION.md`](docs/SUKOON-AUDIO-ARBITRATION.md) · agla: [`docs/P10-AUTOUPDATE-PLAN.md`](docs/P10-AUTOUPDATE-PLAN.md)
 
 🧪 **970 test** (932 → 970)
 
