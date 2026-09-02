@@ -1,9 +1,37 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.10.1 "KHUD-MUKHTAR" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.10.2 "KHUD-MUKHTAR" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🛑 v5.10.2 — ghalat screen ab **KHULTI HI NAHI** *(hotfix · aap ke panel ka doosra saboot)*
+
+v5.10.1 ne button ko **bolna** sikhaya (screen ka naam batata tha). Aap ne panel chala kar jo
+bheja, us ne ek chhed aur pakda:
+
+```
+✅ Jo screen khuli: com.android.settings/.Settings$ManageAssistActivity
+☝️ Us mein dhoondo: Voice typing → Faster voice typing → Offline speech recognition
+```
+
+Yaani **"Digital assistant" screen phir bhi khuli**, aur hum ne us par *Voice typing* dhoondne ko
+keh diya. Naam batana **aadha** ilaj tha.
+
+| Kya | Ilaj |
+|---|---|
+| OEM ne `ACTION_VOICE_INPUT_SETTINGS` ko assistant screen par alias kiya | `go(i, vararg blocked)` — naam `assist` se mile to screen **kholta hi nahi**, agla rung azmata hai (teeno voice rungs par block; `assistant` darwaza jaan boojh kar khula) |
+| Panel **apni hi fehrist se takra** gaya: `com.google.android.tts` (Speech Recognition and Synthesis) maujood tha, magar hum sirf "poori Google app" dekhte the → *"pehle install karo"* | Ab `srv` fehlist se pehchante hain → `✅ Google ka speech service` ki alag line, aur mashwara halat ke hisaab se (ek service ho to *"wahi default hai, chunne ki zaroorat NAHI"*) |
+| `🤝 SACH: offline wake mumkin NAHI` — **jhoota dar** | Speech service maujood ho to pack download **ho sakta hai** (Gboard typing offline chalegi). Magar **jhooti umeed bhi nahi**: Maya ki WAKE abhi online hai (`EXTRA_PREFER_OFFLINE` istemal nahi karti) — saaf likha |
+| `Languages &amp; input` (kuch render paths par `&` bigadta tha) | Apne matn se nanga `&` hataya → `Languages aur input` |
+| Darwaze badle to mashwara purana raha | **Har darwaze ka apna HINT** + naye darwaze: `appinfo:<pkg>`, `market:<pkg>` (Play Store — sirf jab `onDeviceMap` kahe ke Play Store maujood hai) |
+| **🛡️ Purana chhupa crash:** `makeRecognizer()` ka guard `>= 31`, magar `isOnDeviceRecognitionAvailable` **API 33** se hai. Android 12/12L par `NoSuchMethodError` (Error hai, Exception nahi → `catch (Exception)` pakadta hi na tha) | Guard `33` + `catch (Throwable)` — teeno jagah. **Android 12 par SUNO dabate hi app crash hoti thi** |
+
+🧪 **+29 test** (1123 → **1152**) — lab Section 29a–d (+23) aur settings-ui Section 14 (+6).
+
+📖 [`docs/FIX-v5.10.2-assistant-screen-band.md`](docs/FIX-v5.10.2-assistant-screen-band.md)
+
+---
 
 ## 🗣️ v5.10.1 — ON-DEVICE LANGUAGE ka rasta theek: **andaza nahi, phone ki asli fehlist** *(hotfix · aap ki video ne pakda)*
 
@@ -27,7 +55,7 @@ Panel ab ye **saaf keh deta hai** (jhooti umeed nahi): wake **online** chalegi, 
 
 🧪 **+42 test** (1081 → **1123**) — lab Section 28 (Kotlin + JS locks, +31) aur settings-ui Section 13 (asli DOM mein panel + button, +11). CI ne 3 Kotlin compile errors pakde — theek kiye, unhein test mein **lock** kar diya (28d), aur ab CI **✅ GREEN** (run 33663584197 — APK ban gayi).
 
-📖 [`docs/FIX-v5.10.1-ondevice-rasta.md`](docs/FIX-v5.10.1-ondevice-rasta.md)
+📖 [`docs/FIX-v5.10.1-ondevice-rasta.md`](docs/FIX-v5.10.1-ondevice-rasta.md) *(v5.10.2 mein ghalat screen khulna hi BAND — upar dekhein)*
 
 ---
 

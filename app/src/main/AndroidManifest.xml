@@ -39,6 +39,8 @@
         <package android:name="com.google.android.tts" />
         <package android:name="com.google.android.ai.aicore" />
         <package android:name="com.google.android.as" />
+        <!-- Play Store: "market:" darwaza (Speech Services by Google install karne ka) -->
+        <package android:name="com.android.vending" />
         <intent>
             <action android:name="android.speech.RecognitionService" />
         </intent>
@@ -64,6 +66,10 @@
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="package" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="market" />
         </intent>
         <intent>
             <action android:name="android.intent.action.MAIN" />

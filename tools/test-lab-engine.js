@@ -1492,12 +1492,12 @@ Here's a thinking process:
       '👁️ KAAN report mein HAAL + roko ki ginti nazar aati hai');
 
     /* ── version qanoon ── */
-    is(/appVersion\(\): String = "5\.10\.1-native"/.test(MA) && MA.indexOf('4.3.0-native') === -1,
+    is(/appVersion\(\): String = "5\.10\.2-native"/.test(MA) && MA.indexOf('4.3.0-native') === -1,
       '🩹 BONUS — appVersion() ka purana 4.3.0 jhoot bhi ab qatl');
-    is(fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8').indexOf('maya-v5.10.1') > 0 &&
-       /versionCode 72/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')) &&
-       /versionName "5\.10\.1"/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')),
-      '🏷️ poore app mein VERSION v5.10.1 (cache saaf, splash saaf, APK saaf)');
+    is(fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8').indexOf('maya-v5.10.2') > 0 &&
+       /versionCode 73/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')) &&
+       /versionName "5\.10\.2"/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')),
+      '🏷️ poore app mein VERSION v5.10.2 (cache saaf, splash saaf, APK saaf)');
     is(HTML.indexOf('5.8.0') === -1, 'kahi purana 5.8.0 version nazar nahi aata');
 
     /* ── v5.9.1 hotfix — doctor ka jhoota button ab ASAL hai ── */
@@ -1897,7 +1897,7 @@ Here's a thinking process:
       is(MF.indexOf('<queries>') > 0 && /com\.google\.android\.inputmethod\.latin/.test(MF) &&
          /android\.speech\.RecognitionService/.test(MF) && /ACTION_ASSIST|android\.intent\.action\.ASSIST/.test(MF),
         '🔑🆕 manifest mein <queries> — Android 11+ ki package-visibility se Gboard/Google app CHHUPE hue the (pehla qadam hamesha fail hota tha)');
-      is(/private fun go\(i: Intent\): String\?/.test(MA) && /queryIntentActivities\(i, 0\)/.test(MA) &&
+      is(/private fun go\(i: Intent, vararg blocked: String\): String\?/.test(MA) && /queryIntentActivities\(i, 0\)/.test(MA) &&
          /getActivityInfo\(cn, 0\)/.test(MA) && /flattenToShortString\(\)/.test(MA),
         '🔑🆕 go() — screen khud khole se PEHLE poochhta hai ke use KAUN kholta hai, aur us component ka NAAM wapas deta hai (andaza nahi)');
       is(/fun openSettingNamed\(which: String\): String\?/.test(MA) &&
@@ -2046,6 +2046,107 @@ Here's a thinking process:
       is(!/ASSISTANT_SETTINGS|MANAGE_DEFAULT_ASSISTANT/.test(MFX) &&
          /MANAGE_DEFAULT_APPS_SETTINGS/.test(MFX),
         '📄 manifest ke <queries> bhi wahi asal action par (jo cheez khulti hi nahi us ki query bekaar)');
+    }
+
+
+    /* ═══ 29. 🗣️ v5.10.2 — ghalat screen ab KHULTI HI NAHI (aap ke phone ka doosra saboot) ═══
+       v5.10.1 ne naam batana shuru kiya, magar aap ne khud dekha:
+         ✅ Jo screen khuli: com.android.settings/.Settings$ManageAssistActivity
+         ☝️ Us mein dhoondo: Voice typing → Faster voice typing …   ← YE MASHWARA GALAT THA
+       Yaani wo "Digital assistant" screen KHUL bhi gayi aur hum ne us par zubaan ka
+       pack dhoondne ko keh diya. Ab: Kotlin wo rung kholta hi nahi, JS naam par khud
+       pehchanta hai, aur fehlist ka takrao ("speech service maujood" + "install karo")
+       bhi khatam. */
+    head('29. 🗣️ v5.10.2 — ASSISTANT screen ab khulti hi nahi + fehlist ka takrao khatam');
+
+    /* ── 29a. 🔬 Kotlin ── */
+    {
+      const MA3 = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8');
+      const MF3 = fs.readFileSync(path.join(ROOT, 'app/src/main/AndroidManifest.xml'), 'utf8');
+      is(/private fun go\(i: Intent, vararg blocked: String\): String\?/.test(MA3) &&
+         /for \(bb in blocked\) if \(bb\.isNotEmpty\(\) && low\.contains\(bb\.lowercase\(\)\)\) return null/.test(MA3),
+        '🔑🆕 go() ko BLOCK-LIST sikhayi: naam milta ho to screen kholti hi nahi (sirf naam batana kaafi na tha)');
+      const rungBlocks = (MA3.match(/go\(act\(Settings\.ACTION_VOICE_INPUT_SETTINGS\), "assist"\)/g) || []).length;
+      is(rungBlocks === 3, '🔑🆕 teeno voice rungs par "assist" block — aap ke phone par yehi ManageAssistActivity khulta tha', rungBlocks + '/3 rung');
+      is(!/MANAGE_DEFAULT_APPS_SETTINGS"\), "assist"/.test(MA3),
+        '🔒 magar "assistant" darwaze par block NAHI — user KHUD maange to wo screen khulni chahiye');
+      is(/which\.startsWith\("appinfo:"\)/.test(MA3) && /which\.startsWith\("market:"\)/.test(MA3),
+        '🔑🆕 naye darwaze appinfo:<pkg> aur market:<pkg> — JS ab fehlist dekh kar KHUD darwaza chunti hai');
+      is(/market:\/\/details\?id=\$pkg/.test(MA3) && /play\.google\.com\/store\/apps\/details\?id=\$pkg/.test(MA3),
+        '   → Play Store app na ho to web fallback (dono go() se POOCHH kar, andaza nahi)');
+      is(/o\.put\("play", play\)/.test(MA3) && /getPackageInfo\("com\.android\.vending", 0\)/.test(MA3),
+        '🔑🆕 onDeviceMap ab Play Store ki maujoodgi bhi batata hai');
+      is(/com\.android\.vending/.test(MF3) && /android:scheme="market"/.test(MF3),
+        '📄 manifest queries: Play Store + market scheme (warna market: darwaza resolve hi na hota)');
+      const MK = MA3.slice(MA3.indexOf('fun makeRecognizer'));
+      is(/Build\.VERSION\.SDK_INT >= 33/.test(MK) && /catch \(e: Throwable\)/.test(MK),
+        '🛡️🆕 makeRecognizer ka guard 31→33 + Throwable: Android 12/12L par SUNO dabate hi CRASH (NoSuchMethodError)');
+      is((MA3.match(/Build\.VERSION\.SDK_INT >= 33/g) || []).length === 3,
+        '🔒 teeno jagah (makeRecognizer + micDoctor + onDeviceMap) ek hi guard — koi chhoota nahi');
+    }
+
+    /* ── 29b. 👁️ panel: aap ke phone par jo takrao tha wo khatam ── */
+    {
+      const w = kw();
+      w.MayaBridge.onDeviceMap = function () {
+        return JSON.stringify({
+          sdk: 33, aiai: false, goog: false, ondevice: false, using: 'default',
+          svc: 'com.google.android.tts/.SpeechRecognitionService',
+          srv: [{ pkg: 'com.google.android.tts', label: 'Speech Recognition and Synthesis', comp: 'a/b' }],
+          kb: ['com.google.android.inputmethod.latin'], asst: 'Google Go', play: true
+        });
+      };
+      const r = w.KAAN.onDevice();
+      is(/Google ka speech service\s*: Speech Recognition and Synthesis/.test(r.txt),
+        '📋🆕 Google ka speech service ab ALAG line par dikhta hai (pehle sirf "poori Google app" dekha jata tha)');
+      is(r.txt.indexOf('magar speech service maujood hai') > 0,
+        '🔑🆕 takrao khatam: "poori Google app NAHI" ab apni hi fehrist se nahi takrata');
+      is(r.txt.indexOf('wake mumkin NAHI') === -1,
+        '🤝🆕 jhoota dar khatam — speech service maujood ho to "mumkin NAHI" nahi kehte');
+      is(/EXTRA_PREFER_OFFLINE istemal nahi karti/.test(r.txt),
+        '🔑🆕 jhooti umeed bhi nahi: Maya ki WAKE abhi online hai — ye saaf likha hai (pack se sirf Gboard typing offline hoti hai)');
+      is(/SIRF EK service hai/.test(r.txt),
+        '🎯 ek hi service ho to "default chuno" wala bekaar mashwara nahi (wo hi default hai)');
+      is(r.btns.some(function (b) { return b.k === 'appinfo:com.google.android.tts'; }),
+        '📦🆕 app-info ka darwaza — zubaan pack isi app mein hoti hain');
+      is(r.btns.filter(function (b) { return b.h; }).length === r.btns.length - 1,
+        '🔑🆕 har darwaze ka apna HINT (sirf DOCTOR ka nahi) — aam "Voice typing dhoondo" mashwara har screen par sach nahi hota');
+      is(r.txt.indexOf('&') === -1,
+        '🧹 panel ke apne matn mein "&" nahi (kuch render paths par wo "&amp;" ban kar dikhta tha)');
+    }
+
+    /* ── 29c. 🛒 Play Store ka darwaza sirf jab Play Store maujood ho ── */
+    {
+      const w = kw();
+      const base = { sdk: 33, aiai: false, goog: false, ondevice: false, using: 'default',
+        svc: 'x/y', srv: [], kb: ['com.google.android.inputmethod.latin'], asst: 'Google' };
+      w.MayaBridge.onDeviceMap = function () { return JSON.stringify(Object.assign({}, base, { play: true })); };
+      const r = w.KAAN.onDevice();
+      is(r.btns.some(function (b) { return b.k === 'market:com.google.android.tts'; }),
+        '🛒🆕 speech service NAHI + Play Store maujood → seedha install ka darwaza (menu mein bhatakna nahi)');
+      w.MayaBridge.onDeviceMap = function () { return JSON.stringify(base); };
+      const r2 = w.KAAN.onDevice();
+      is(!r2.btns.some(function (b) { return String(b.k).indexOf('market:') === 0; }),
+        '🔒 Play Store na ho to market ka JHOOTA button nahi banta');
+      is(/KOI speech service NAHI/.test(r2.txt), '🤝 aur saaf bata deta hai ke chunne ko kuch nahi');
+    }
+
+    /* ── 29d. 👍 AiAi wale phone par khush-khabri (wahan jhoota dar nahi) ── */
+    {
+      const w = kw();
+      w.MayaBridge.onDeviceMap = function () {
+        return JSON.stringify({ sdk: 34, aiai: true, goog: true, ondevice: true, using: 'on-device',
+          svc: 'com.google.android.as/.AiAiRecognitionService',
+          srv: [{ pkg: 'com.google.android.as', label: 'Android System Intelligence', comp: 'c/d' }],
+          kb: ['com.google.android.inputmethod.latin'], asst: 'Google', play: true });
+      };
+      const r = w.KAAN.onDevice();
+      is(/On-device ka GHAR is phone par maujood hai/.test(r.txt),
+        '👍🆕 AiAi/on-device ho to saaf khush-khabri: pack download karo, wake offline chalegi');
+      is(r.txt.indexOf('EXTRA_PREFER_OFFLINE') === -1 && r.txt.indexOf('wake mumkin NAHI') === -1,
+        '🔒 wahan na "wake online hai" wali be-mauqa baat, na jhoota dar');
+      is(r.btns.some(function (b) { return b.k === 'appinfo:com.google.android.as'; }),
+        '📦 AiAi ki app-info bhi (packs/storage dekhne ke liye)');
     }
 
     console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');

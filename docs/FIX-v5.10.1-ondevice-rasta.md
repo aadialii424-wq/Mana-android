@@ -2,6 +2,9 @@
 
 **versionCode 72 · chhoti fix release · aap ki VIDEO ne pakda**
 
+> ⚠️ **v5.10.2 mein is ka ek chhed aur band hua** — v5.10.1 naam to batata tha magar
+> ghalat (assistant) screen KHOL bhi deta tha: [`docs/FIX-v5.10.2-assistant-screen-band.md`](FIX-v5.10.2-assistant-screen-band.md)
+
 > Aap ne 🗣️ ON-DEVICE LANGUAGE dabaya → phone ki **"Digital assistant app"** screen khul
 > gayi (`None` · `Ella` · **Google Go**) — jahan offline speech ki **koi cheez hi nahi hoti**.
 > Aap ne sahi pakda: *"dekho kya ho raha hai"*. Ye release usi ka jawab hai.

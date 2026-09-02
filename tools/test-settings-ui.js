@@ -371,6 +371,48 @@ setTimeout(function () {
        '🤝 screen na khuli to JHOOT nahi bolta: saaf "maujood nahi" + manual raasta MEHFOOZ (toast 2 sec mein urr jata hai)');
   }
 
+  /* 🛑 v5.10.2 — ghalat (assistant) screen par ab jhoota mashwara NAHI.
+     Aap ka saboot: "✅ Jo screen khuli: com.android.settings/.Settings$ManageAssistActivity
+     ☝️ Us mein dhoondo: Voice typing → Faster voice typing …" */
+  section('14. \uD83D\uDED1 ASSISTANT SCREEN PAR SACH (v5.10.2)');
+  win.MayaBridge = {
+    onDeviceMap: function () {
+      return JSON.stringify({ sdk: 33, aiai: false, goog: false, ondevice: false, using: 'default',
+        svc: 'com.google.android.tts/.SpeechRecognitionService',
+        srv: [{ pkg: 'com.google.android.tts', label: 'Speech Recognition and Synthesis', comp: 'a/b' }],
+        kb: ['com.google.android.inputmethod.latin'], asst: 'Google Go', play: true });
+    },
+    openSettingNamed: function (k) {
+      win.__opened = k;
+      if (k === 'voiceservices') return 'com.android.settings/.Settings$ManageAssistActivity';
+      if (k === 'gboardvoice') return 'com.google.android.inputmethod.latin/.VoiceSettingsActivity';
+      if (String(k).indexOf('appinfo:') === 0) return 'com.android.settings/.Settings$AppDetailsActivity';
+      return null;
+    }
+  };
+  doc.getElementById('labOnDevice').click();
+  var box2 = doc.getElementById('labOnDeviceBox'), out = doc.getElementById('labOut');
+  var bs = box2.querySelectorAll('button'), voc2 = null, gb2 = null, ai2 = null, q;
+  for (q = 0; q < bs.length; q++) {
+    var tt = bs[q].textContent;
+    if (tt.indexOf('Voice input') > 0) voc2 = bs[q];
+    else if (tt.indexOf('Voice typing settings') > 0) gb2 = bs[q];
+    else if (tt.indexOf('app-info') > 0) ai2 = bs[q];
+  }
+  is(!!voc2 && !!gb2 && !!ai2, '🆕 teeno darwaze bane (voice input / Gboard voice typing / app-info)');
+  voc2.click();
+  is(win.__opened === 'voiceservices', '   → button ne wahi darwaza maanga (koi andhi chain nahi)');
+  is(out.textContent.indexOf('ManageAssistActivity') > 0 && out.textContent.indexOf('HOTA HI NAHI') > 0,
+     '🛑 OEM ne assistant screen thons di to JS KHUD pehchan kar saaf kehta hai (Kotlin block ka doosra qila)');
+  is(out.textContent.indexOf('Us mein dhoondo: Voice typing') === -1,
+     '🔑🆕 ghalat screen par "Voice typing dhoondo" wala jhoota mashwara KHATAM (aap ka pakda hua bug)');
+  gb2.click();
+  is(out.textContent.indexOf('VoiceSettingsActivity') > 0 && out.textContent.indexOf('Faster voice typing') > 0,
+     '✅ sahi screen par wahi mashwara jo us screen par SACH hai (har darwaze ka apna hint)');
+  ai2.click();
+  is(out.textContent.indexOf('AppDetailsActivity') > 0 && out.textContent.indexOf('Clear data') > 0,
+     '📦 app-info ka apna hint: "Clear data NAHI karna" (warna pack urr jate hain)');
+
   done();
 }, 400);
 

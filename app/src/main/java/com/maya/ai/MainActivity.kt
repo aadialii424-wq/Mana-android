@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = MayaWebViewClient()
         setContentView(webView)
         webView.loadUrl("https://$VIRTUAL_HOST/assets/web/index.html")
-        Toast.makeText(this, "MAYA v5.10.1 • 🗣️ ON-DEVICE LANGUAGE ka raasta theek — ab andaza nahi, phone ki asli fehrist", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "MAYA v5.10.2 • 🗣️ ON-DEVICE: ghalat (assistant) screen ab khulti hi nahi", Toast.LENGTH_LONG).show()
         // WebView zinda hai ya nahi — 8 second baad native check (v4.0.1: onPageFinished/markAlive true karte hain)
         webViewAlive = false
         android.os.Handler(Looper.getMainLooper()).postDelayed({
@@ -268,7 +268,7 @@ class MainActivity : AppCompatActivity() {
     inner class MayaBridge {
 
         @JavascriptInterface
-        fun appVersion(): String = "5.10.1-native"
+        fun appVersion(): String = "5.10.2-native"
 
         /* 🎚️ P9 SUKOON — JS (SUKOON) har awaaz/mic ki HAAL yahan bhejti hai.
            KHALI | BOL_RAHI | APP_SUN — WakeWordService har mic-darwaze par isi
@@ -1303,9 +1303,19 @@ class MainActivity : AppCompatActivity() {
            • <queries> manifest mein — ab Gboard/Google app nazar aate hain.
            ═══════════════════════════════════════════════════════════════ */
 
-        /** Screen kholo — magar PEHLE poochh kar ke use kaun kholta hai.
-         *  Wapas: khulne wali activity ka naam (ya null = kuch na khula). */
-        private fun go(i: Intent): String? {
+        /**
+         * Screen kholo — magar PEHLE poochh kar ke use kaun kholta hai.
+         * Wapas: khulne wali activity ka naam (ya null = kuch na khula).
+         *
+         * v5.10.2: `blocked` — kuch phones par OEM ne ACTION_VOICE_INPUT_SETTINGS
+         * ko "Digital assistant" screen par alias kar diya hota hai (aap ke phone
+         * par: com.android.settings/.Settings$ManageAssistActivity). Sirf NAAM
+         * batana kaafi NAHI tha — wo screen KHOLNI hi nahi chahiye, kyunki us
+         * mein zubaan ka pack hota hi nahi. Is liye: khulne wali screen ka naam
+         * kisi blocked lafz se milta ho to use CHHOR do (null) aur seedhi ka agla
+         * rung azmao.
+         */
+        private fun go(i: Intent, vararg blocked: String): String? {
             return try {
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 val pm = packageManager
@@ -1321,8 +1331,13 @@ class MainActivity : AppCompatActivity() {
                     if (!exists) return null
                 }
                 val cn = i.component ?: return null
+                val flat = cn.flattenToShortString()
+                if (blocked.isNotEmpty()) {
+                    val low = flat.lowercase()
+                    for (bb in blocked) if (bb.isNotEmpty() && low.contains(bb.lowercase())) return null
+                }
                 startActivity(i)
-                cn.flattenToShortString()
+                flat
             } catch (e: Exception) { null }
         }
 
@@ -1345,13 +1360,32 @@ class MainActivity : AppCompatActivity() {
             val GBOARD = "com.google.android.inputmethod.latin"
             val GBOARD_GO = "com.google.android.inputmethod.latin.go"
             val VOICE_IME = "com.google.android.apps.inputmethod.latin.voiceime.settings.VoiceSettingsActivity"
+            val GSPEECH = "com.google.android.tts"          // Speech Services by Google
+
+            /* v5.10.2: JS ab phone ki fehlist se KHUD darwaza chunti hai —
+               "appinfo:<pkg>" = us app ki info screen, "market:<pkg>" = Play Store.
+               Aap ke phone jaise halat mein yehi kaam aata hai: speech service
+               maujood hai magar poori Google app nahi. */
+            if (which.startsWith("appinfo:")) {
+                val pkg = which.substring(8)
+                if (pkg.isEmpty()) return null
+                return go(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$pkg")))
+            }
+            if (which.startsWith("market:")) {
+                val pkg = which.substring(7)
+                if (pkg.isEmpty()) return null
+                return go(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$pkg")))
+                    ?: go(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$pkg")))
+            }
+
             return when (which) {
                 /* 🗣️ zubaan pack download karne ki screen (Gboard → Voice typing) */
                 "ondevice", "gboardvoice" ->
                     go(comp(GBOARD, VOICE_IME))
                         ?: go(comp(GBOARD_GO, VOICE_IME))
-                        ?: go(act(Settings.ACTION_VOICE_INPUT_SETTINGS))
+                        ?: go(act(Settings.ACTION_VOICE_INPUT_SETTINGS), "assist")
                         ?: go(act(Settings.ACTION_INPUT_METHOD_SETTINGS))
+                        ?: go(act(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$GSPEECH")))
                         ?: go(act(Settings.ACTION_SETTINGS))
 
                 /* ⌨️ keyboard ki aam settings */
@@ -1363,7 +1397,8 @@ class MainActivity : AppCompatActivity() {
                 /* 🎙️ speech services — TTS + default voice input */
                 "voiceservices" ->
                     go(act("com.android.settings.TTS_SETTINGS"))
-                        ?: go(act(Settings.ACTION_VOICE_INPUT_SETTINGS))
+                        ?: go(act(Settings.ACTION_VOICE_INPUT_SETTINGS), "assist")
+                        ?: go(act(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$GSPEECH")))
                         ?: go(act(Settings.ACTION_SETTINGS))
 
                 /* 🤖 digital assistant (ab SIRF tab jab user KHUD ye maange).
@@ -1377,7 +1412,7 @@ class MainActivity : AppCompatActivity() {
                         ?: go(act(Settings.ACTION_SETTINGS))
 
                 "voice" ->
-                    go(act(Settings.ACTION_VOICE_INPUT_SETTINGS))
+                    go(act(Settings.ACTION_VOICE_INPUT_SETTINGS), "assist")
                         ?: go(act("com.android.settings.TTS_SETTINGS"))
                 "tts" ->
                     go(act("com.android.settings.TTS_SETTINGS"))
@@ -1393,7 +1428,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         /**
-         * 🗣️ ON-DEVICE MAP (v5.10.1) — "andaza karo ke phone mein kya hoga" khatam.
+         * 🗣️ ON-DEVICE MAP (v5.10.1+, v5.10.2 mein `play` bhi) — "andaza karo ke phone mein kya hoga" khatam.
          * Ye phone par SACH MEIN maujood cheezon ki FEHRIST deta hai:
          *   srv  : RecognitionService ki poori list (naam + component) — wahi
          *          queryIntentServices jo makeRecognizer() ki seerhi istemal karti hai
@@ -1469,6 +1504,15 @@ class MainActivity : AppCompatActivity() {
                 }
                 o.put("kb", kb)
 
+                /* 4b. Play Store — "market:" darwaza isi par chalta hai. Android Go
+                       par aam tor par hota hai, magar andaza nahi: poochh lo. */
+                var play = false
+                try {
+                    val pi = pm.getPackageInfo("com.android.vending", 0)
+                    play = pi.applicationInfo != null && pi.applicationInfo.enabled
+                } catch (e: Exception) { play = false }
+                o.put("play", play)
+
                 /* 5. default ASSISTANT ka NAAM — video isi ka saboot thi */
                 var asst = ""
                 try {
@@ -1538,13 +1582,18 @@ class MainActivity : AppCompatActivity() {
     var lastRecognizerKind: String = "-"
 
     fun makeRecognizer(): SpeechRecognizer {
-        if (Build.VERSION.SDK_INT >= 31) {
+        /* v5.10.2: guard 31 se 33 kiya. isOnDeviceRecognitionAvailable /
+           createOnDeviceSpeechRecognizer API 33 se hain — Android 12/12L (31/32)
+           par ye call NoSuchMethodError phenkti hai, jo Error hai Exception NAHI,
+           is liye purana `catch (Exception)` use pakadta hi nahi tha: SUNO dabate
+           hi app crash. Teen jagah (yahan + micDoctor + onDeviceMap) ab 33 + Throwable. */
+        if (Build.VERSION.SDK_INT >= 33) {
             try {
                 if (SpeechRecognizer.isOnDeviceRecognitionAvailable(this)) {
                     lastRecognizerKind = "on-device"
                     return SpeechRecognizer.createOnDeviceSpeechRecognizer(this)
                 }
-            } catch (e: Exception) {}
+            } catch (e: Throwable) {}
         }
         try {
             val cn = android.content.ComponentName(
