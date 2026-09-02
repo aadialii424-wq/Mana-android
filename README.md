@@ -5,7 +5,7 @@
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
 
-## 🎚️ v5.9.0 — SUKOON: awaaz kabhi nahi kategi · mic-larai khatam *(P9)*
+## 🎚️ v5.9.0 — SUKOON: awaaz kabhi nahi kategi · mic-larai khatam *(P9 · v5.9.1 mein 🗣️ ON-DEVICE LANGUAGE ka asli button bhi)*
 
 **📵 Ek waqt mein EK cheez — Maya ya BOL rahi hai, ya SUN rahi hai. Kabhi dono ek saath nahi.**
 

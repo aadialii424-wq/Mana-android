@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = MayaWebViewClient()
         setContentView(webView)
         webView.loadUrl("https://$VIRTUAL_HOST/assets/web/index.html")
-        Toast.makeText(this, "MAYA v5.9.0 • SUKOON — awaaz kabhi nahi kategi, mic-kranti suljh gayi", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "MAYA v5.9.1 • SUKOON + doctor ka [ON-DEVICE] ab ASLI button hai", Toast.LENGTH_LONG).show()
         // WebView zinda hai ya nahi — 8 second baad native check (v4.0.1: onPageFinished/markAlive true karte hain)
         webViewAlive = false
         android.os.Handler(Looper.getMainLooper()).postDelayed({
@@ -267,7 +267,7 @@ class MainActivity : AppCompatActivity() {
     inner class MayaBridge {
 
         @JavascriptInterface
-        fun appVersion(): String = "5.9.0-native"
+        fun appVersion(): String = "5.9.1-native"
 
         /* 🎚️ P9 SUKOON — JS (SUKOON) har awaaz/mic ki HAAL yahan bhejti hai.
            KHALI | BOL_RAHI | APP_SUN — WakeWordService har mic-darwaze par isi
@@ -1269,6 +1269,27 @@ class MainActivity : AppCompatActivity() {
         /** Zaroori settings ke seedhe darwaze (menu mein bhatakna khatam) */
         @JavascriptInterface
         fun openSetting(which: String): Boolean {
+            /* v5.9.1 — ON-DEVICE zubaan ka asli darwaza. Doctor ka text "[ON-DEVICE]
+               dabao" kehta tha magar aisa button kahin THA HI NAHI (sirf likha tha) —
+               user dhoondhta reh jata. Ab ASLI button ye chain kholta hai:
+               1. Gboard → Voice typing (wahan "Faster/Offline speech recognition"
+                  mein zubaan download hoti hai — Android 13/14 ka reliable raasta)
+               2. Voice-input picker
+               3. aam Settings */
+            if (which == "ondevice") {
+                val tries = listOf(
+                    Intent().setComponent(android.content.ComponentName(
+                        "com.google.android.inputmethod.latin",
+                        "com.google.android.apps.inputmethod.latin.voiceime.settings.VoiceSettingsActivity")),
+                    Intent(Settings.ACTION_VOICE_INPUT_SETTINGS),
+                    Intent(Settings.ACTION_SETTINGS)
+                )
+                for (i in tries) {
+                    try { startActivity(i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); return true }
+                    catch (e: Exception) {}
+                }
+                return false
+            }
             return try {
                 val act = when (which) {
                     "voice" -> Settings.ACTION_VOICE_INPUT_SETTINGS

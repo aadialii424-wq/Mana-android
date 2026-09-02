@@ -1415,12 +1415,24 @@ Here's a thinking process:
       '👁️ KAAN report mein HAAL + roko ki ginti nazar aati hai');
 
     /* ── version qanoon ── */
-    is(/appVersion\(\): String = "5\.9\.0-native"/.test(MA) && MA.indexOf('4.3.0-native') === -1,
+    is(/appVersion\(\): String = "5\.9\.1-native"/.test(MA) && MA.indexOf('4.3.0-native') === -1,
       '🩹 BONUS — appVersion() ka purana 4.3.0 jhoot bhi ab qatl');
-    is(fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8').indexOf('maya-v5.9.0') > 0 &&
-       /versionCode 69/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')),
-      '🏷️ poore app mein VERSION v5.9.0 (cache saaf, splash saaf, APK saaf)');
+    is(fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8').indexOf('maya-v5.9.1') > 0 &&
+       /versionCode 70/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')),
+      '🏷️ poore app mein VERSION v5.9.1 (cache saaf, splash saaf, APK saaf)');
     is(HTML.indexOf('5.8.0') === -1, 'kahi purana 5.8.0 version nazar nahi aata');
+
+    /* ── v5.9.1 hotfix — doctor ka jhoota button ab ASAL hai ── */
+    head('26c. 🗣️ ON-DEVICE LANGUAGE — wo button jo pehle sirf LIKHA tha');
+    is(HTML.indexOf('id="labOnDevice"') > 0,
+      '🔑🆕 LAB mein ab 🗣️ ON-DEVICE LANGUAGE ka ASLI button hai (pehle sirf text tha — user dhoondta reh jata tha)');
+    is(/openSetting\("ondevice"\)/.test(HTML) && /show\("\\uD83D\\uDDE3\\uFE0F ON-DEVICE LANGUAGE/.test(HTML.replace(/'/g, '"')),
+      'button ka click Gboard voice-typing kholta hai + likha hua shajra bhi dikhta hai (ghalat screen khul jaye to bhi raasta yaad rahe)');
+    is(/if \(which == "ondevice"\)/.test(MA) && /VoiceSettingsActivity/.test(MA) &&
+       /ACTION_VOICE_INPUT_SETTINGS/.test(MA) && /ACTION_SETTINGS/.test(MA),
+      '🔑 Kotlin: 3-qadam ki fallback chain — Gboard → voice-input picker → aam Settings (koi bhi phone tode nahi)');
+    is(HTML.indexOf('[ON-DEVICE] dabao') === -1,
+      '🔑🆕 doctor ab us button ka HAWALA nahi deta jo MAUJOOD nahi — seedha asli button ka rasta likhta hai');
   }
 
   /* ── 26b. ASLI behavior — time ke saath (550ms tail) ── */
