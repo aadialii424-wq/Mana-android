@@ -140,7 +140,28 @@ Naye test kya lock karte hain:
 * **ui-13:** poori page boot kar ke — `labOnDeviceBox` · button click · bridge ka naam wapas
   · screen na khuli to *"maujood nahi"* + manual raasta **mehfooz** (toast 2 sec mein urr jata hai)
 
-**Kotlin compile:** CI (`Build MAYA APK`) har push par — is push ka natija PR #6 par ✅/❌.
+**Kotlin compile:** CI (`Build MAYA APK`) har push par — magar **2 Sep 2026 ko CI khud toota hua
+mila** (humare code ki wajah se nahi):
+
+```
+warning: Restore Gradle distribution 8.7 failed: Error: Cache service responded with 400
+step "4. APK BUILD" → 2 SECOND mein exit 1   (gradle binary hi PATH par nahi aayi)
+run ka log bhi download nahi ho saka: results blob → EOF
+```
+
+Do run (33659273564, 33659834324) bilkul ek jaisi alamat ke sath mare. Iska matlab:
+**compile ka saboot abhi CI se nahi mil saka** — Kotlin ki 245 nayi lines par nazar
+dobara padhi gayi (imports, braces 425/425 barabar, koi non-local return nahi) magar
+wo saboot ke barabar nahi. Jab cache service wapas aaye, agla push ✅ dega.
+
+**Ilaj taiyar hai magar lagane ki ijazat chahiye:** Arena ke GitHub App ke paas
+`workflows` permission NAHI hai, is liye `.github/workflows/build-apk.yml` main push
+nahi kar sakta (`refusing to allow a GitHub App to create or update workflow …
+without 'workflows' permission`). Sakht workflow ka patch yahan rakha hai:
+[`docs/CI-FIX-gradle-cache-400.patch`](CI-FIX-gradle-cache-400.patch) — is mein
+(a) `setup-gradle` optional (cache toote to ZIP se Gradle khud utarta hai) aur
+(b) build ka poora log `BUILD-LOG` artifact banta hai, taake agli nakami ki wajah
+2 minute mein mil jaye, 25 minute ke andhere ke baad andaza nahi.
 
 ---
 
