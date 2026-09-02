@@ -187,4 +187,9 @@ Section 30 (`tools/test-lab-engine.js`) ke locks:
 * Branch: `arena/01a062e9-mana-android`
 * Workflow: `.github/workflows/build-apk.yml` (badla nahi gaya — permission effective nahi)
 * Tests local: **1185/1185** ✅
-* CI status: *(commit ke baad yahan darj hoga)*
+* CI status: ✅ **GREEN** — run [`33679657338`](https://github.com/adil-chandio/Mana-android/actions/runs/33679657338)
+  (commit `99c80f5`) — **pehli hi koshish mein** saare steps pass:
+  `Code checkout · Java 17 · Gradle 8.7 · APK BUILD · APK upload`
+* Artifact: **MAYA-APK · 3,200,895 bytes** (v5.10.2 se +8.5 KB — sirf code, koi naya asset/dependency nahi)
+* Download: <https://github.com/adil-chandio/Mana-android/actions/runs/33679657338> → **MAYA-APK** → `app-debug.apk` install karein
+* Saboot ke liye: boot par toast `MAYA v5.10.3 • 👂 WAKE ZINDA: SUNO ke baad foran wapas + err-11 hammer band`
