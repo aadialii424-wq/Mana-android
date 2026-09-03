@@ -71,6 +71,24 @@ function makeWorld(opts = {}) {
   w.resolveModels = async () => w.MODEL_CACHE.names;
   w.reply = (t) => state.replies.push(t);
 
+  /* 🛡️ J1 (v5.12.0) — askAI ab JAWAB referee ko chhoota hai: sochne ka WATCHDOG
+     (mark/clear) aur GENERATION token (thinkGen), taake watchdog ke reset ke baad
+     purana jawab na bolaa jaye. Asli JAWAB index.html mein askAI se PEHLE defined
+     hai; is naqli duniya mein wahi hisaab chhote stub se. Yahan sab askAI(false)
+     hote hain is liye `bol` (awaz) khaali hai — reply ki ginti NAHI badalti. */
+  w.JAWAB = {
+    thinkGen: 0,
+    at: { listen: 0, think: 0, speak: 0 },
+    n: { err: 0, reListen: 0, breaks: 0, watchdog: 0, thinkReset: 0, speakReset: 0, ignore: 0 },
+    noMatchStreak: 0, netStreak: 0, clientStreak: 0, retryN: 0, retryT: 0,
+    lastErr: 0, lastWhy: '',
+    mark: function (k) { this.at[k] = Date.now(); },
+    clear: function (k) { this.at[k] = 0; },
+    age: function (k) { return this.at[k] ? (Date.now() - this.at[k]) : 0; },
+    bol: function () {},
+    hearAgain: function () {}
+  };
+
   /* naqli fetch */
   const plan = opts.plan || [{ status: 200, body: okBody('theek hai') }];
   let n = 0;

@@ -1476,6 +1476,11 @@ window.__nativeTtsDone = function(){ speaking = false; try { SUKOON.bolEnd(); } 
    pise hue naam (Monarch / Instagram / Funk Taka) theek karta hai. */
 window.__nativeSpeech = function(text, altsJson){
   listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle");
+  try {
+    JAWAB.clear("listen");
+    JAWAB.noMatchStreak = 0; JAWAB.netStreak = 0; JAWAB.clientStreak = 0;
+    JAWAB.retryN = 0; JAWAB.retryT = 0;          /* kamyaab sunai = hisab saaf */
+  } catch (e) {}
   var alts = [];
   try { if (altsJson) alts = JSON.parse(altsJson); } catch (e) { alts = []; }
   if (!alts.length && text) alts = [text];
@@ -1486,8 +1491,12 @@ window.__nativeSpeech = function(text, altsJson){
       /* 🎯 P8b — Android ka yaqeen bohat kam? ghalat kaam karne se behtar poochh lo */
       if (SUNO.weak() && FLAGS.on("suno")) {
         pushLog("SUNO: kam yaqeen (" + SUNO.lastConf.toFixed(2) + ") \u2014 poochh rahi hoon");
-        addBubble("ai", "\uD83D\uDC42 Theek se sunai nahi diya \u2014 \u201C" + said + "\u201D kaha tha? Dobara boliye.");
-        try { if (typeof AWAAZ === "object") AWAAZ.speak("Theek se sunai nahi diya, dobara boliye", {}); } catch (e) {}
+        /* 🛡️ J1 (F47) — PEHLE: addBubble + AWAAZ.speak() SEEDHA (speak() bypass) →
+           `speaking` flag false + SUKOON.bolStart() NAHI → wake Maya ki APNI awaaz
+           par khul sakti thi; aur `return` ke baad mic DOBARA khulta hi nahi tha
+           (baat-cheet wahin khatam). Ab reply() ka poora rasta: bubble + speak +
+           SUKOON + afterSpeak → mic khud dobara. */
+        reply("\uD83D\uDC42 Theek se sunai nahi diya \u2014 \u201C" + said + "\u201D kaha tha? Dobara boliye.", true);
         return;
       }
       if (SUNO.last && SUNO.last.raw !== said && typeof pushLog === "function")
@@ -1505,9 +1514,15 @@ window.__nativeRms = function(db){
 };
 window.__nativeSpeechErr = function(code){
   listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle"); interimEl.textContent = "";
-  var m = { 1:"Network timeout", 2:"Network error", 3:"Mic masla", 4:"Recognizer busy", 5:"Voice service error", 6:"Koi awaz nahi mili", 7:"Mic permission nahi" }[code] || "Voice error";
-  toast(m);
-  addBubble("ai", m + ". " + (code === 5 || code === 2 ? "Google app / voice service check karo aur dobara try karo." : "Dobara try karo, " + settings.name + "."));
+  /* 🛡️ J1 (F44 + F45) — PEHLE yahan do jurm the:
+     (1) code ka matlab GALAT: AOSP mein 7 = NO_MATCH ("samajh nahi aaya") hai,
+         magar hum "Mic permission nahi" likhte the (ijazat ka code 9 hai);
+         8..15 ke liye sirf "Voice error" — asal wajah kabhi nahi milti thi.
+     (2) nakami ke baad mic DOBARA KHULTA HI NAHI tha → dobara "Maya" kehna parti
+         thi. Aap ka tajurba: "bolta hun to reply nahi aata".
+     Ab: poori fehlist 1..15 + har code ka APNA AMAL (JAWAB.sttError). */
+  try { JAWAB.sttError(code); }
+  catch (e) { try { toast("Voice error (" + code + ") — dobara try karo"); } catch (e2) {} }
 };
 
 /* ---------- TTS ---------- */
@@ -4320,10 +4335,14 @@ function speak(text, wasVoice) {
   AWAAZ.speak(clean, {
     onStart: function (eng) {
       speaking = true; try { SUKOON.bolStart(); } catch (e) {} setOrb("speaking");
+      /* 🛡️ J1 (F46) — bolne ka watchdog budget: base + harf ke hisab se (1400 harf
+         ka jawab ~100s bolta hai; saabit 60s par kaat dena jawab ka qatl tha) */
+      try { JAWAB.mark("speak", JAWAB.SPEAK_BASE + JAWAB.SPEAK_PER_CHAR * String(clean || "").length); } catch (e) {}
       try { NAAP.mark("voice"); NAAP.cur && (NAAP.cur.engine = eng || AWAAZ.engine); } catch (e) {}   /* 📊 P0 */
     },
     onDone: function () {
       speaking = false; try { SUKOON.bolEnd(); } catch (e) {}
+      try { JAWAB.clear("speak"); } catch (e) {}
       try { NAAP.end({ engine: AWAAZ.engine, saaf: (NAAP.cur && NAAP.cur.saafHit) || 0 }); } catch (e) {}  /* 📊 P0 */
       afterSpeak(wasVoice);
     }
@@ -4336,7 +4355,12 @@ function nativeSpeak(clean, wasVoice) {
   AWAAZ.stop(); AWAAZ.gen++;
   AWAAZ.setEngine("device");
   speaking = true; try { SUKOON.bolStart(); } catch (e) {} setOrb("speaking");
-  AWAAZ.device(String(clean || ""), function () { speaking = false; try { SUKOON.bolEnd(); } catch (e) {} afterSpeak(wasVoice); });
+  try { JAWAB.mark("speak", JAWAB.SPEAK_BASE + JAWAB.SPEAK_PER_CHAR * String(clean || "").length); } catch (e) {}
+  AWAAZ.device(String(clean || ""), function () {
+    speaking = false; try { SUKOON.bolEnd(); } catch (e) {}
+    try { JAWAB.clear("speak"); } catch (e) {}
+    afterSpeak(wasVoice);
+  });
 }
 
 function afterSpeak(wasVoice){
@@ -4356,7 +4380,248 @@ function afterSpeak(wasVoice){
   if (settings.autoListen) setTimeout(startListening, 350);
 }
 
+/* ═══════════ 🛡️ JAWAB (v5.12.0 / J1) — jawab ka referee ═══════════
+   Aap ki shikayat: "kabhi bolta hun to reply nahi aata, aur pata nahi chalta
+   kyun." Forensic (docs/FORENSIC-JAWAB-LOOP.md) ne 15 flaws pakde; J1 un mein
+   se wo theek karta hai jo jawab ko CHUP-CHAAP maar dete the:
+
+   F46  sunne / sochne / bolne ka koi WATCHDOG nahi tha — ek flag phans jaye to
+        wake bhi ignore hoti thi (kyunke __wakeHeard `listening` dekhta hai) aur
+        mic button ULTA kaam karta tha (dabao = band). Ab teenon ka watchdog.
+   F44  error code ka matlab GALAT tha: AOSP ka 7 = NO_MATCH hai, magar hum
+        "Mic permission nahi" kehte the; 8..15 ke liye sirf "Voice error".
+        Ab poori fehlist 1..15 + har code ka APNA AMAL.
+   F45  nakami ke baad mic dobara KHULTA HI NAHI tha — dobara "Maya" kehna
+        parti thi. Ab: dobara suno / ruk kar dobara / ijazat mango / zubaan
+        badlo — aur user ko BOL KAR bataya jata hai.
+   F47  kam-yaqeen wala rasta speak() ko bypass karta tha (SUKOON nahi → wake
+        Maya ki apni awaaz par khul sakti thi) aur mic dobara nahi khulta tha.
+   F53  wake ka ignore CHUP-CHAAP hota tha. Ab wajah log + status par.
+   F54  dimaag fail par sirf toast tha — voice mode mein kuch sunai nahi deta.
+   F55  darwaza jawab SHURU par refresh nahi hota tha → lamba jawab baat-cheet
+        ko beech mein tod deta tha.
+
+   ⚠️ IMAANDARI (plan se do barikiyan badlin, wajah ke sath):
+   · Structure mein watchdog 25s(think)/60s(speak) tha. AMAL mein think 40s aur
+     speak ADAPTIVE (20s + 110ms/harf) hai — kyunke 1400 harf ka jawab 100
+     second tak bolta hai; 60s par kaat dena jawab ka qatl hota.
+   · Reset ke baad purane jawab ko `thinkGen` se roka jata hai, warna watchdog
+     aur dimaag DONO jawab de dete (do jawab ek sath). */
+var JAWAB = {
+  at: { listen: 0, think: 0, speak: 0 },
+  LISTEN_MAX: 12000,          /* mic 12s se zyada phansa = murda */
+  THINK_MAX: 40000,           /* dimaag 40s se zyada = murda */
+  SPEAK_BASE: 20000,          /* bolne ka budget: base + harf ke hisab se */
+  SPEAK_PER_CHAR: 110,
+  STUCK: 20000,               /* wake ignore ke waqt itna purana flag = phansa hua */
+  speakBudget: 0,
+  thinkGen: 0,
+  n: { watchdog: 0, err: 0, reListen: 0, ignore: 0, thinkReset: 0, speakReset: 0, breaks: 0 },
+  lastErr: 0, lastWhy: "", noMatchStreak: 0, netStreak: 0, clientStreak: 0,
+  retryN: 0, retryT: 0,           /* dobara-suno ka circuit breaker (F45+) */
+
+  mark: function (w, budget) { JAWAB.at[w] = Date.now(); if (budget) JAWAB.speakBudget = budget; },
+  clear: function (w) { JAWAB.at[w] = 0; if (w === "speak") JAWAB.speakBudget = 0; },
+  age: function (w) { return JAWAB.at[w] ? (Date.now() - JAWAB.at[w]) : 0; },
+
+  /* AOSP SpeechRecognizer ERROR_* — poori fehlist 1..15 (F44) */
+  ERRNAME: {
+    1:"network ka waqt khatam", 2:"network masla", 3:"mic ka masla",
+    4:"Google ka server masla", 5:"client ka masla", 6:"koi awaaz nahi mili",
+    7:"samajh nahi aaya (no match)", 8:"mic masroof", 9:"mic ki ijazat nahi",
+    10:"bohot request bhej di gayin", 11:"server se connection toota",
+    12:"ye zubaan support nahi hoti", 13:"zubaan ka pack maujood nahi",
+    14:"support check nahi ho saka", 15:"model-download events support nahi"
+  },
+
+  /* BOL kar batana (F54) — darwaza refresh ke sath, taake jawab ke baad mic
+     khud dobara khul jaye (existing afterSpeak machinery istemal hoti hai). */
+  bol: function (text, dobara) {
+    try {
+      if (dobara !== false && typeof settings === "object" && settings.wakeWord &&
+          typeof KAAN !== "undefined" && KAAN.DARWAZA) KAAN.DARWAZA.open();
+    } catch (e) {}
+    try { addBubble("ai", text); } catch (e) {}
+    try { speak(text, dobara !== false); } catch (e) {}
+  },
+
+  /* mic dobara kholna (F45) — apni awaaz ke beech NAHI */
+  hearAgain: function (why, delay) {
+    try {
+      if (typeof settings === "object" && settings.wakeWord && typeof KAAN !== "undefined") KAAN.DARWAZA.open();
+    } catch (e) {}
+    /* 🛡️ J1 (F45+) — dobara-suno ka CIRCUIT BREAKER (amal mein mila naya flaw). PEHLE koi hisab nahi tha:
+       jo bhi code bar bar nakam hota (mic busy / voice service murda) hum har
+       1-2 second mic kholti rehtin — chup-chaap, be-inteha (battery + user ke
+       liye khamosh loop). Ab: 25s ke andar 6 koshishein nakam = ruk jao, darwaza
+       band, aur BOL kar batao. Kamyab sunai par hisab saaf (__nativeSpeech). */
+    var _n = Date.now();
+    if (!JAWAB.retryT || _n - JAWAB.retryT > 25000) { JAWAB.retryN = 0; JAWAB.retryT = _n; }
+    JAWAB.retryN++;
+    if (JAWAB.retryN > 6) {
+      /* 🛡️ J1 (F45+) — breaker LATCH hota hai: trip hone ke baad usi 25s ki khidki
+         mein dobara mic kholti hi nahi (warna agla call foran 7ween koshish par
+         trip kar ke phir khud band ho jata — aadha breaker). Khidki guzarne par
+         hisab khud saaf = nayi koshish ki ijazat. */
+      JAWAB.retryN = 6; JAWAB.retryT = Date.now(); JAWAB.n.breaks++;
+      try { KAAN.DARWAZA.close(); } catch (e) {}
+      try { KAAN.push("reListen", "circuit breaker — 25s mein 6 koshishein nakam, ruk gayi"); } catch (e) {}
+      JAWAB.bol("Mic bar bar nakam ho raha hai — main ruk jati hun. Thori der baad “Maya” keh kar bulaiye.", false);
+      return;
+    }
+    JAWAB.n.reListen++;
+    try { KAAN.push("reListen", why + " — mic " + Math.round((delay || 400) / 100) / 10 + "s baad dobara"); } catch (e) {}
+    setTimeout(function () {
+      try {
+        if (speaking || thinking) { JAWAB.hearAgain(why, 800); return; }
+        if (!(typeof settings === "object" && settings.wakeWord)) return;  /* wake band = khud mic nahi kholte */
+        startListening();
+      } catch (e) {}
+    }, delay || 400);
+  },
+
+  /* STT ki nakami ka FAISLA — har code ka apna amal (F44 + F45) */
+  sttError: function (code) {
+    code = +code || 0;
+    JAWAB.lastErr = code; JAWAB.n.err++; JAWAB.clear("listen");
+    var name = JAWAB.ERRNAME[code] || ("code " + code + " (anpehchan)");
+    JAWAB.lastWhy = name;
+    try { KAAN.push("sttErr", code + " — " + name); } catch (e) {}
+    try { pushLog("STT err " + code + " — " + name); } catch (e) {}
+    try { statusText.textContent = "⚠️ " + name; } catch (e) {}
+
+    if (code === 9) {                       /* ijazat: khud theek nahi ho sakta */
+      JAWAB.bol("Mic ki ijazat chahiye — Settings ya notification ke “Ijazat do” se ijazat dein, phir boliye.", false);
+      return;
+    }
+    if (code === 12 || code === 13) {       /* zubaan ka pack: user ka faisla */
+      JAWAB.bol("Is zubaan ka voice pack phone mein nahi hai — Settings mein STT ki zubaan badal kar dobara koshish karein.", false);
+      return;
+    }
+    if (code === 1 || code === 2 || code === 4 || code === 11) {
+      JAWAB.netStreak++;
+      if (JAWAB.netStreak >= 3) {
+        JAWAB.netStreak = 0;
+        JAWAB.bol("Internet ya Google ka masla hai — thori der baad dobara boliye.", false);
+        return;
+      }
+      JAWAB.hearAgain("network", 1500);
+      return;
+    }
+    /* 🛡️ J1 (F44) — 5 = client (voice service kaam nahi kar rahi), 14/15 = support
+       check/model events nahi ho sake. Ye sab PHONE ke masle hain, dobara bolne se
+       theek NAHI hote: is liye 2 dafa koshish, phir bol kar batana aur ruk jana. */
+    if (code === 5 || code === 14 || code === 15) {
+      JAWAB.clientStreak++;
+      if (JAWAB.clientStreak >= 2) {
+        JAWAB.clientStreak = 0;
+        try { KAAN.DARWAZA.close(); } catch (e) {}
+        JAWAB.bol("Phone ka voice service (Google app) jawab de gaya hai — MAYA dobara khol kar ya phone restart kar ke try karein.", false);
+        return;
+      }
+      JAWAB.hearAgain("client", 1500);
+      return;
+    }
+    if (code === 10) { JAWAB.hearAgain("too-many-requests", 5000); return; }
+    if (code === 8)  { JAWAB.hearAgain("mic-busy", 800); return; }
+    if (code === 3)  { JAWAB.hearAgain("audio", 1200); return; }
+    if (code === 6 || code === 7) {         /* sab se aam: suna hi nahi / samjha nahi */
+      JAWAB.noMatchStreak++;
+      if (JAWAB.noMatchStreak === 1) {
+        JAWAB.bol(code === 7 ? "Ji? Theek se sunai nahi diya — dobara boliye." : "Koi awaaz nahi aayi — boliye, main sun rahi hun.");
+        return;                              /* bol kar → afterSpeak khud mic dobara kholega */
+      }
+      if (JAWAB.noMatchStreak >= 4) {
+        JAWAB.noMatchStreak = 0;
+        try { KAAN.DARWAZA.close(); } catch (e) {}
+        JAWAB.bol("Main ruk jati hun — jab zaroorat ho “Maya” keh kar bulaiye.", false);
+        return;
+      }
+      JAWAB.hearAgain("no-match", 500);
+      return;
+    }
+    JAWAB.hearAgain("client", 1000);
+  },
+
+  /* phanse hue flags ka ilaaj (F46) — sab kuch ek jagah reset */
+  reset: function (why) {
+    try { listening = false; thinking = false; speaking = false; } catch (e) {}
+    try { SUKOON.sunEnd(); } catch (e) {}
+    try { AWAAZ.stop(); } catch (e) {}
+    JAWAB.at.listen = 0; JAWAB.at.think = 0; JAWAB.at.speak = 0; JAWAB.speakBudget = 0;
+    JAWAB.thinkGen++;                        /* purana jawab ab nahi aayega */
+    try { setOrb("idle"); } catch (e) {}
+    try { interimEl.textContent = ""; } catch (e) {}
+    try { if (window.MayaBridge && window.MayaBridge.stopListen) window.MayaBridge.stopListen(); } catch (e) {}
+    try { KAAN.push("watchdog", "reset: " + (why || "phanse flags") + " — wake wapas zinda"); } catch (e) {}
+  },
+
+  /* wake ignore hone ki WAJAH (F53) — aur phansa flag ho to khud reset */
+  ignore: function () {
+    var why = speaking ? ("Maya bol rahi hai (" + Math.round(JAWAB.age("speak") / 1000) + "s se)")
+            : thinking ? ("jawab soch rahi hai (" + Math.round(JAWAB.age("think") / 1000) + "s se)")
+            : listening ? ("mic khula hai (" + Math.round(JAWAB.age("listen") / 1000) + "s se)")
+            : "masroof";
+    JAWAB.n.ignore++;
+    try { KAAN.push("ignore", "wake ignore — " + why); } catch (e) {}
+    try { statusText.textContent = "🙉 Sun nahi sakti: " + why; } catch (e) {}
+    var stuck = (listening && JAWAB.age("listen") > JAWAB.LISTEN_MAX) ||
+                (thinking && JAWAB.age("think") > JAWAB.THINK_MAX) ||
+                (speaking && JAWAB.age("speak") > (JAWAB.speakBudget || JAWAB.SPEAK_BASE));
+    if (stuck) { JAWAB.reset("wake ignore + phansa flag"); return true; }
+    return false;
+  },
+
+  /* har 2s: teenon watchdog (F46) */
+  watchdog: function () {
+    var now = Date.now();
+    if (JAWAB.at.listen && now - JAWAB.at.listen > JAWAB.LISTEN_MAX) {
+      JAWAB.n.watchdog++;
+      try { listening = false; } catch (e) {}
+      try { SUKOON.sunEnd(); } catch (e) {}
+      try { setOrb("idle"); interimEl.textContent = ""; } catch (e) {}
+      try { if (window.MayaBridge && window.MayaBridge.stopListen) window.MayaBridge.stopListen(); } catch (e) {}
+      JAWAB.clear("listen");
+      try { KAAN.push("watchdog", "mic " + Math.round(JAWAB.LISTEN_MAX / 1000) + "s se phansa tha — khud reset (" + JAWAB.n.watchdog + " dafa)"); } catch (e) {}
+      try { statusText.textContent = "⏱️ Mic phans gaya tha — ab dobara sun rahi hun"; } catch (e) {}
+      JAWAB.hearAgain("watchdog", 600);
+    }
+    if (JAWAB.at.think && now - JAWAB.at.think > JAWAB.THINK_MAX) {
+      JAWAB.n.thinkReset++;
+      JAWAB.clear("think"); JAWAB.thinkGen++;
+      try { thinking = false; setOrb("idle"); } catch (e) {}
+      try { KAAN.push("watchdog", "dimaag " + Math.round(JAWAB.THINK_MAX / 1000) + "s se soch raha tha — jawab rad, user ko bataya"); } catch (e) {}
+      JAWAB.bol("Jawab aane mein bohat der ho gayi — dobara boliye, main sun rahi hun.");
+    }
+    var sb = JAWAB.speakBudget || JAWAB.SPEAK_BASE;
+    if (JAWAB.at.speak && now - JAWAB.at.speak > sb) {
+      JAWAB.n.speakReset++;
+      JAWAB.clear("speak");
+      try { speaking = false; SUKOON.bolEnd(); AWAAZ.stop(); setOrb("idle"); } catch (e) {}
+      try { KAAN.push("watchdog", "awaaz " + Math.round(sb / 1000) + "s budget se zyada chal rahi thi — reset"); } catch (e) {}
+      try { statusText.textContent = "⏱️ Awaaz phans gayi thi — reset"; } catch (e) {}
+    }
+  },
+
+  /* LAB/panel ke liye ek-line hisab */
+  report: function () {
+    return "watchdog " + JAWAB.n.watchdog + " · think-reset " + JAWAB.n.thinkReset +
+           " · speak-reset " + JAWAB.n.speakReset + " · STT err " + JAWAB.n.err +
+           " (aakhri " + JAWAB.lastErr + " — " + (JAWAB.lastWhy || "—") + ")" +
+           " · mic dobara " + JAWAB.n.reListen + " (breaker " + JAWAB.n.breaks + ")" +
+           " · wake ignore " + JAWAB.n.ignore;
+  }
+};
+
 function reply(text, wasVoice, link){
+  /* 🛡️ J1 (F55) — darwaza jawab SHURU hote hi refresh. PEHLE sirf jawab ke BAAD
+     (afterSpeak) refresh hota tha: dimaag + lambi awaaz mil kar 15s le lein to
+     darwaza BEECH mein band ho jata aur baat-cheet achanak khatam — user ko
+     lagta "Maya ne sunna band kar diya". */
+  try {
+    if (wasVoice && typeof settings === "object" && settings.wakeWord &&
+        typeof KAAN !== "undefined" && KAAN.DARWAZA) KAAN.DARWAZA.open();
+  } catch (e) {}
   /* 🤝 SACH — model par bharosa nahi, JAANCH. Aakhri amal sure:false tha aur
      jawab mein "bhej diya / ho gaya" likha hai? To app KHUD theek kar degi. */
   try { if (typeof HAQEEQAT !== "undefined") text = HAQEEQAT.check(text); } catch (e) {}
@@ -4392,13 +4657,20 @@ function testMayaVoice() {
 var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 var rec = null;
 function startListening(){
+  /* 🛡️ J1 (F46) — PEHLE: `if (listening) { stopListening(); return; }` tha.
+     Flag phans jaye (native callback kabhi na aaye) to mic button ULTA kaam
+     karta tha (dabao = band) aur wake DAIMI ignore hoti thi. Ab: muddat se
+     purana flag = murda, pehle reset phir suno. */
+  if (listening && JAWAB.age("listen") > JAWAB.LISTEN_MAX) JAWAB.reset("mic button — phansa listen flag");
+  if (thinking && JAWAB.age("think") > JAWAB.THINK_MAX) JAWAB.reset("mic button — phansa think flag");
   if (NATIVE) {
     if (listening) { stopListening(); return; }
     if (thinking) return;
     ensureAudio(); chime(660, 0.08);
     listening = true; try { SUKOON.sunStart(); } catch (e) {} setOrb("listening"); interimEl.textContent = "🎧 Native mic sun raha hai...";
+    try { JAWAB.mark("listen"); } catch (e) {}
     try { window.MayaBridge.listen(settings.stt); }
-    catch(e){ listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle"); toast("Mic start nahi ho saka"); }
+    catch(e){ listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle"); toast("Mic start nahi ho saka"); try { JAWAB.clear("listen"); } catch (e) {} }
     return;
   }
   if (!SR) { reply("Sir, is browser mein voice input support nahi — Chrome try karo. Filhaal type kar ke baat kar sakte hain.", false); return; }
@@ -4408,6 +4680,7 @@ function startListening(){
   try { rec = new SR(); } catch(e){ return; }
   rec.lang = settings.stt; rec.interimResults = true; rec.maxAlternatives = 1;
   listening = true; try { SUKOON.sunStart(); } catch (e) {} setOrb("listening"); interimEl.textContent = "";
+  try { JAWAB.mark("listen"); } catch (e) {}
   rec.onresult = function(e){
     var fin = "", intr = "";
     for (var i = e.resultIndex; i < e.results.length; i++) {
@@ -4432,6 +4705,7 @@ function startListening(){
   try { rec.start(); } catch(e){ listening = false; try { SUKOON.sunEnd(); } catch (e) {} }
 }
 function stopListening(){
+  try { JAWAB.clear("listen"); } catch (e) {}
   if (NATIVE) { try { window.MayaBridge.stopListen(); } catch(e){} }
   if (rec) { try { rec.stop(); } catch(e){} }
   listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle");
@@ -7085,6 +7359,14 @@ async function askAI(wasVoice){
     }
   }
   thinking = true; setOrb("thinking");
+  /* 🛡️ J1 (F46) — sochne ka WATCHDOG shuru + apni GENERATION (thinkGen) yaad.
+     PEHLE: dimaag atak jaye (provider hang) to `thinking` hamesha ke liye true
+     reh jati thi → mic button band, wake DAIMI ignore, aur user ko sirf orb
+     "soch raha hai" dikhta. Ab 40s baad JAWAB khud reset kar ke BOLTA hai.
+     thinkGen ka kaam: watchdog ke reset ke baad ye purana jawab aa bhi jaye to
+     reply NA ho (warna DO jawab ek sath). */
+  var myGen = ++JAWAB.thinkGen;
+  try { JAWAB.mark("think"); } catch (e) {}
   geminiChat.keyErr = false;
   geminiChat.toolsUsed = false;
 
@@ -7111,14 +7393,30 @@ async function askAI(wasVoice){
       TRACE.brain(_bn, (NAAP.cur && NAAP.cur.m.brain) || 0);
     } catch (e) {}   /* 📊 P0 */
     thinking = false; setOrb("idle");
+    try { JAWAB.clear("think"); } catch (e) {}
+    /* 🛡️ J1 (F46) — watchdog is jawab ko RAD kar chuka? phir na bolao */
+    if (myGen !== JAWAB.thinkGen) {
+      askAI._retried = false;
+      try { pushLog("JAWAB: purana jawab rad — watchdog pehle hi bata chuka"); } catch (e) {}
+      try { DIMAAG.log("JAWAB", "STALE", "watchdog reset ke baad aaya, rad"); } catch (e) {}
+      return;
+    }
     if (lu && !geminiChat.toolsUsed && out.length < 400) cachePut(cacheKey(lu), out);
     reply(out, wasVoice);
     return;
   }
   thinking = false; setOrb("idle");
+  try { JAWAB.clear("think"); } catch (e) {}
 
   var code = DIMAAG.verdict() || DIMAAG.lastCode;
   DIMAAG.lastCode = code;
+  /* 🛡️ J1 (F46) — watchdog ne user ko pehle hi bola tha ("der ho gayi");
+     ab dobara fail-ehsas bol kar baat uljhaana bekaar */
+  if (myGen !== JAWAB.thinkGen) {
+    askAI._retried = false;
+    try { pushLog("JAWAB: fail-ehsas rad — watchdog ne pehle bataya tha"); } catch (e) {}
+    return;
+  }
   var loc0 = DIMAAG.localAnswer(lu);
   if (loc0) { DIMAAG.log("LOCAL", null, "offline jawab"); aiState.provider = "LOCAL"; reply(loc0, wasVoice); return; }
 
@@ -7129,6 +7427,16 @@ async function askAI(wasVoice){
     aiState.provider = "COOLDOWN";
     toast("Sab " + order.length + " dimaag thak gaye — " + Math.round(wait / 1000) + "s baad KHUD dobara try karungi");
     pushLog("RETRY IN " + Math.round(wait / 1000) + "s (" + code + ")");
+    /* 🛡️ J1 (F54) — PEHLE sirf TOAST tha: awaaz se sawal poochne wale ko screen
+       dekhe bina kuch PATA hi nahi chalta tha ke jawab kyun nahi aaya (aur na
+       ke thori der mein khud aayega). Ab BOL kar batati hun — magar sirf voice
+       mode mein (typing wale ke liye toast kaafi hai). */
+    if (wasVoice) {
+      try {
+        JAWAB.bol("Dimaag se rabta nahi ho saka — " + Math.round(wait / 1000) +
+                  " second mein main khud dobara koshish karungi.", false);
+      } catch (e) {}
+    }
     setTimeout(function(){ askAI(wasVoice); }, wait);
     return;
   }
@@ -8776,7 +9084,11 @@ window.__wakeHeard = function (payload) {
   if (!alts || !alts.length) return;
 
   KAAN.push("heard", alts.join(" | "));
-  if (speaking || thinking || listening) return;      /* pehle se masroof */
+  /* 🛡️ J1 (F53) — PEHLE: chup-chaap return (na log, na wajah, na UI nishan).
+     Koi flag phansa ho (F46) to wake DAIMI ignore hoti thi aur aap ko kabhi pata
+     na chalta ke KYUN. Ab: wajah KAAN log + status par; aur flag muddat se purana
+     ho to khud reset kar ke wake ko USI lamhe sunne ka mauqa. */
+  if (speaking || thinking || listening) { if (!JAWAB.ignore()) return; }
 
   /* 🚪 "bas" / "theek hai" -> darwaza foran band */
   var i;
@@ -10162,16 +10474,22 @@ if (NATIVE) setTimeout(function(){ try { KAAN.flushNative(); } catch(e){} }, 220
    Isi se WebView reload ke FORAN baad wake chalti hai (purana masla: reload ke
    baad Kotlin mein APP_SUN phansa rehta aur wake daimi band). */
 if (NATIVE) setTimeout(function(){ try { SUKOON.resync(); } catch(e){} }, 1800);
-/* 🏷️ v5.11.0 — VERSION KI PEHCHAAN, ab JS taraf se bhi: toast + log line.
+
+/* 🛡️ J1 (F46) — JAWAB ka DIL: har 2 second teenon watchdog (sunna / sochna /
+   bolna). PEHLE koi watchdog tha hi nahi: ek flag phans jaye to jawab ka loop
+   DAIMI mar jata tha aur wake bhi ignore hoti thi. try/catch zaroori hai — is
+   dil ki dharkan se baqi app ki timing NAHI rukni chahiye. */
+setInterval(function(){ try { JAWAB.watchdog(); } catch (e) {} }, 2000);
+/* 🏷️ v5.12.0 — VERSION KI PEHCHAAN, ab JS taraf se bhi: toast + log line.
    (v5.10.3 ka toast Kotlin mein tha — MainActivity.onCreate; wo barqarar hai.
    Ye JS toast ISLIYE naya hai ke APK aur web-asset ka version ALAG ho sakta hai:
    purani APK + naya web-asset, ya ulta. Ab dono ek hi line mein nazar aate hain —
-   "native: 5.11.0-native" ke baghair web-asset ka bharosa andaza hai.) */
+   "native: 5.12.0-native" ke baghair web-asset ka bharosa andaza hai.) */
 if (NATIVE) setTimeout(function(){
   try {
     var nv = "?";
     try { if (window.MayaBridge && window.MayaBridge.appVersion) nv = window.MayaBridge.appVersion(); } catch(e){}
-    var v = "MAYA v5.11.0 \u2022 \uD83D\uDEE1\uFE0F WAKE MAZBOOT \u2014 calibration + expiry + heartbeat";
+    var v = "MAYA v5.12.0 \u2022 \uD83D\uDEE1\uFE0F JAWAB PAKKA \u2014 watchdog + mic khud dobara + sahi error";
     toast(v);
     pushLog(v + "   (native: " + nv + ")");
   } catch(e){}

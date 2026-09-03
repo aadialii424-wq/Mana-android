@@ -129,7 +129,7 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = MayaWebViewClient()
         setContentView(webView)
         webView.loadUrl("https://$VIRTUAL_HOST/assets/web/index.html")
-        Toast.makeText(this, "MAYA v5.11.0 • 🛡️ WAKE MAZBOOT: farsh calibration + haal ki mudat + heartbeat", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "MAYA v5.12.0 • 🛡️ JAWAB PAKKA: jawab ka watchdog + mic khud dobara + sahi error code", Toast.LENGTH_LONG).show()
         // WebView zinda hai ya nahi — 8 second baad native check (v4.0.1: onPageFinished/markAlive true karte hain)
         webViewAlive = false
         android.os.Handler(Looper.getMainLooper()).postDelayed({
@@ -321,7 +321,7 @@ class MainActivity : AppCompatActivity() {
     inner class MayaBridge {
 
         @JavascriptInterface
-        fun appVersion(): String = "5.11.0-native"
+        fun appVersion(): String = "5.12.0-native"
 
         /* 🎚️ P9 SUKOON — JS (SUKOON) har awaaz/mic ki HAAL yahan bhejti hai.
            KHALI | BOL_RAHI | APP_SUN — WakeWordService har mic-darwaze par isi
@@ -440,7 +440,12 @@ class MainActivity : AppCompatActivity() {
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     requestMicPermission()
-                    evalAsync("window.__nativeSpeechErr && window.__nativeSpeechErr(7)")
+                    /* 🛡️ J1.4 (F44) — PEHLE code 7 bhejte the. AOSP mein 7 = NO_MATCH
+                       ("samajh nahi aaya") hai; IJAZAT ka code 9 =
+                       ERROR_INSUFFICIENT_PERMISSIONS. Galat code par JS "dobara boliye"
+                       ka loop chalati thi — jabke asal masla ijazat hai, jo dobara
+                       bolne se kabhi theek nahi hoti. */
+                    evalAsync("window.__nativeSpeechErr && window.__nativeSpeechErr(9)")
                     return@runOnUiThread
                 }
                 if (!SpeechRecognizer.isRecognitionAvailable(this@MainActivity)) {
@@ -466,62 +471,90 @@ class MainActivity : AppCompatActivity() {
                        ("Funk Taka" -> "اس لاوا فنک" ki yehi wajah thi.) */
                     putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 6)
                     putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-                    putExtra("android.speech.extra.SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS", 700)
+                    /* 🛡️ J1.4 (F48) — EK line mein DO galtiyan:
+                       (a) key GHALAT: hum "android.speech.extra.SPEECH_INPUT_..." likhte
+                           the, AOSP ki asal key "android.speech.extras.SPEECH_INPUT_..."
+                           hai (PLURAL "extras"). Yani 700ms ka setting KABHI parha hi
+                           nahi gaya — chup-chaap be-asar.
+                       (b) value Int thi, aur recognition service getLongExtra() se
+                           parhti hai — Int hota to bhi ignore ho jata.
+                       Ab sarkari constant + 700L. (Imaandari: Google ki service isay
+                       ignore bhi kar sakti hai — J3 RAFTAR PANEL isi ko NAAP kar ke
+                       tay karega ke 600L behtar hai ya nahi.) */
+                    putExtra(
+                        RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS,
+                        700L
+                    )
                 }
-                recognizer = makeRecognizer().apply {
-                    setRecognitionListener(object : RecognitionListener {
-                        override fun onReadyForSpeech(params: Bundle?) {}
-                        override fun onBeginningOfSpeech() {}
-                        private var rmsTick = 0
-                        override fun onRmsChanged(rmsdB: Float) {
-                            rmsTick++
-                            if (rmsTick % 4 == 0) evalAsync("window.__nativeRms && window.__nativeRms(" + rmsdB + ")")
-                        }
-                        override fun onBufferReceived(buffer: ByteArray?) {}
-                        override fun onEndOfSpeech() { evalAsync("window.__nativePartial && window.__nativePartial('')") }
-                        override fun onError(error: Int) {
-                            /* 🔬 v5.10.3 (F01) — app ka mic khatam: wake ko foran wapas
-                               bulao. Pehle ye rasta KHALI tha; wake 60s tak soti rehti thi. */
-                            appMicOn = false
-                            try { WakeWordService.resumeFromApp() } catch (e: Exception) {}
-                            evalAsync("window.__nativeSpeechErr && window.__nativeSpeechErr($error)")
-                        }
-                        override fun onResults(results: Bundle?) {
-                            /* 🔬 v5.10.3 (F01) — nateeja mil gaya, mic khali: wake wapas */
-                            appMicOn = false
-                            try { WakeWordService.resumeFromApp() } catch (e: Exception) {}
-                            /* 🎙️ Android 3-5 andaze deta hai. Pehle sirf pehla liya jata tha
-                               aur baqi phenk diye jate the — isi liye "Monarch" -> "منار" ban
-                               jata tha. Ab SAARE andaze JS ko jate hain; SUNO un mein se wo
-                               chunta hai jismein jaane-pehchane naam sab se zyada hon. */
-                            val all = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                                ?: arrayListOf()
-                            val text = all.firstOrNull() ?: ""
-                            val conf = try {
-                                results?.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)
-                            } catch (e: Exception) { null }
-                            val arr = JSONArray()
-                            for (i in 0 until minOf(all.size, 6)) {
-                                /* har andaze ke sath uska yaqeen (0..1). Pehle ye kabhi
-                                   parha hi nahi jata tha — ab SUNO isay bhi dekhta hai. */
-                                val o = JSONObject()
-                                o.put("t", all[i])
-                                if (conf != null && i < conf.size) o.put("c", conf[i].toDouble())
-                                arr.put(o)
+                /* 🛡️ J1.4 (F49) — PEHLE yahan koi try/catch NAHI tha. makeRecognizer()
+                   ka aakhri rasta `SpeechRecognizer.createSpeechRecognizer(this)` bina
+                   guard ke hai; kuch OEM/Android-Go par ye IllegalStateException ya
+                   NoSuchMethodError phenkta hai → app CRASH, ya JS ka `listening` flag
+                   hamesha ke liye phansa (mic button ULTA kaam karta, wake DAIMI ignore).
+                   Ab: dono taraf safai + JS ko code 5 (jo bol kar batata hai). */
+                try {
+                    recognizer = makeRecognizer().apply {
+                        setRecognitionListener(object : RecognitionListener {
+                            override fun onReadyForSpeech(params: Bundle?) {}
+                            override fun onBeginningOfSpeech() {}
+                            private var rmsTick = 0
+                            override fun onRmsChanged(rmsdB: Float) {
+                                rmsTick++
+                                if (rmsTick % 4 == 0) evalAsync("window.__nativeRms && window.__nativeRms(" + rmsdB + ")")
                             }
-                            evalAsync(
-                                "window.__nativeSpeech && window.__nativeSpeech('" + jsEscape(text) +
-                                "','" + jsEscape(arr.toString()) + "')"
-                            )
-                        }
-                        override fun onPartialResults(partialResults: Bundle?) {
-                            val pt = partialResults
-                                ?.getStringArrayList("android.speech.extra.RESULTS")?.firstOrNull() ?: ""
-                            if (pt.isNotBlank()) evalAsync("window.__nativePartial && window.__nativePartial('" + jsEscape(pt) + "')")
-                        }
-                        override fun onEvent(eventType: Int, params: Bundle?) {}
-                    })
-                    startListening(intent)
+                            override fun onBufferReceived(buffer: ByteArray?) {}
+                            override fun onEndOfSpeech() { evalAsync("window.__nativePartial && window.__nativePartial('')") }
+                            override fun onError(error: Int) {
+                                /* 🔬 v5.10.3 (F01) — app ka mic khatam: wake ko foran wapas
+                                   bulao. Pehle ye rasta KHALI tha; wake 60s tak soti rehti thi. */
+                                appMicOn = false
+                                try { WakeWordService.resumeFromApp() } catch (e: Exception) {}
+                                evalAsync("window.__nativeSpeechErr && window.__nativeSpeechErr($error)")
+                            }
+                            override fun onResults(results: Bundle?) {
+                                /* 🔬 v5.10.3 (F01) — nateeja mil gaya, mic khali: wake wapas */
+                                appMicOn = false
+                                try { WakeWordService.resumeFromApp() } catch (e: Exception) {}
+                                /* 🎙️ Android 3-5 andaze deta hai. Pehle sirf pehla liya jata tha
+                                   aur baqi phenk diye jate the — isi liye "Monarch" -> "منار" ban
+                                   jata tha. Ab SAARE andaze JS ko jate hain; SUNO un mein se wo
+                                   chunta hai jismein jaane-pehchane naam sab se zyada hon. */
+                                val all = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                                    ?: arrayListOf()
+                                val text = all.firstOrNull() ?: ""
+                                val conf = try {
+                                    results?.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)
+                                } catch (e: Exception) { null }
+                                val arr = JSONArray()
+                                for (i in 0 until minOf(all.size, 6)) {
+                                    /* har andaze ke sath uska yaqeen (0..1). Pehle ye kabhi
+                                       parha hi nahi jata tha — ab SUNO isay bhi dekhta hai. */
+                                    val o = JSONObject()
+                                    o.put("t", all[i])
+                                    if (conf != null && i < conf.size) o.put("c", conf[i].toDouble())
+                                    arr.put(o)
+                                }
+                                evalAsync(
+                                    "window.__nativeSpeech && window.__nativeSpeech('" + jsEscape(text) +
+                                    "','" + jsEscape(arr.toString()) + "')"
+                                )
+                            }
+                            override fun onPartialResults(partialResults: Bundle?) {
+                                val pt = partialResults
+                                    ?.getStringArrayList("android.speech.extra.RESULTS")?.firstOrNull() ?: ""
+                                if (pt.isNotBlank()) evalAsync("window.__nativePartial && window.__nativePartial('" + jsEscape(pt) + "')")
+                            }
+                            override fun onEvent(eventType: Int, params: Bundle?) {}
+                        })
+                        startListening(intent)
+                    }
+                } catch (e: Throwable) {
+                    appMicOn = false
+                    try { stopRecognizer() } catch (e2: Exception) {}
+                    try { WakeWordService.resumeFromApp() } catch (e2: Exception) {}
+                    evalAsync(
+                        "window.__nativeSpeechErr && window.__nativeSpeechErr(5)"
+                    )
                 }
             }
         }

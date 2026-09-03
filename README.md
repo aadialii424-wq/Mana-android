@@ -1,9 +1,41 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.11.0 "WAKE MAZBOOT" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.12.0 "JAWAB PAKKA" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🛡️ v5.12.0 — "JAWAB PAKKA" *(J1: jawab ka loop pakka)*
+
+Aap ki shikayat: *"kabhi bolta hun to reply nahi aata… aur mujhe pata hi nahi chalta mic on hua
+ya nahi."* Iska forensic [`docs/FORENSIC-JAWAB-LOOP.md`](docs/FORENSIC-JAWAB-LOOP.md) mein hai
+(F44–F58); J1 un flaws ka ilaj karta hai jo jawab ko **chup-chaap** maar dete the.
+
+Naya module: **`JAWAB`** — jawab ka referee (`public/index.html`, `reply()` se pehle).
+
+| 🔑 | Cheez | Ilaj |
+|---|---|---|
+| **J1.1** | Teen **watchdog** (har 2s) | F46: sunna **12s** · sochna **40s** · bolna **20s + 110ms/harf** (adaptive). Pehle ek flag phans jaye to jawab ka loop **daimi** murda, mic button **ulta** kaam karta, wake **ignore** |
+| **J1.2** | `thinkGen` — **generation token** | F46: watchdog ne jawab rad kar diya ho to purana jawab aa bhi jaye to **bola nahi jata** (warna do jawab ek sath) |
+| **J1.3** | AOSP ke **poore 1..15** error code + har code ka **apna amal** | F44/F45: pehle `7` ka matlab **"Mic permission nahi"** likha tha (AOSP mein 7 = **NO_MATCH**, ijazat = **9**), 8..15 ke liye sirf `"Voice error"`, aur nakami ke baad mic **dobara khulta hi nahi** tha |
+| **J1.4** | Kotlin: ijazat par code **9**, silence extra ki **sahi chaabi** (`…extras…` plural) + **`700L`**, aur `listen()` par **`try/catch(Throwable)`** | F44/F48/F49: pehle code 7 bheja jata tha; raw key `"android.speech.extra.…"` + **Int** thi → 700ms **kabhi be-asar**; recognizer na bane to **crash** ya phansa flag |
+| **J1.5** | Kam-yaqeen sunai ab `reply()` ke **poore** raste se | F47: pehle `AWAAZ.speak()` seedha (SUKOON bypass → wake apni awaaz par khul sakti thi) aur `return` ke baad mic dobara nahi khulta tha |
+| **J1.6** | **Circuit breaker** (latch) | F45+ (amal mein mila): 25s ke andar 6 nakam koshishein → ruk kar **bol kar** khabar + darwaza band (pehle be-inteha, chup-chaap) |
+| **J1.7** | Wake ignore ki **wajah** | F53: pehle chup-chaap `return`. Ab KAAN log + status par (`🙉 Sun nahi sakti: …`), aur flag phansa ho to **khud ilaaj** kar ke usi lamhe sunna |
+| **J1.8** | Dimaag fail par **bol kar** khabar | F54: pehle sirf toast (awaaz wale user ko screen dekhe bina kuch pata nahi chalta tha) |
+| **J1.9** | Darwaza jawab **SHURU** par tazaa | F55: pehle sirf jawab ke baad → dimaag + lambi awaaz = darwaza beech mein band, baat-cheet khatam |
+
+⚖️ **Imaandari (plan se do barikiyan badlin):** THINK **40s** (plan 25s tha — dimaag ki seedhi
+qanooni taur par 25s se zyada le sakti hai) aur SPEAK **adaptive** (plan saabit 60s tha — 1400
+harf ka jawab ~100s bolta hai, 60s par kaatna jawab ka qatl hota). Silence extra ki qeemat
+**700ms barqarar** — 600ms J3 ka faisla hai, **naap** ke baad.
+
+🧪 **+40 test** (1241 → **1281**): lab **Section 34** (19 wiring locks), **Section 34b**
+(20 — referee ko **chalaa kar** parakha), Section 24 mein +1 (wake ignore referee se poochta hai).
+
+📄 **Ek parcha:** [`docs/REPORT-v5.12.0-aam-zubaan.md`](docs/REPORT-v5.12.0-aam-zubaan.md) · 📖 tafseel: [`docs/FIX-v5.12.0-jawab-pakka.md`](docs/FIX-v5.12.0-jawab-pakka.md)
+
+---
 
 ## 🛡️ v5.11.0 — "WAKE MAZBOOT" *(Phase 1: robustness · 12 badlaav)*
 
@@ -107,7 +139,7 @@ pehchaan" na ho to tests **FAIL** honge.
 
 📖 [`docs/FIX-v5.10.3-wake-zinda.md`](docs/FIX-v5.10.3-wake-zinda.md) · forensic: [`docs/FORENSIC-WAKE-WORD.md`](docs/FORENSIC-WAKE-WORD.md)
 
-**Ab kya:** ~~Phase 1~~ ✅ **ho gaya (v5.11.0)** → **JAWAB LOOP ka naya track (neeche)** → Phase 2 (WAKE DOCTOR v2 + live notification + dBFS calibration) → **Phase 2.5 auto-update** (F43 · *faisla: GitHub ya apna server*) → Phase 3 (wake ka dimaag Kotlin mein) → Phase 4 (offline KWS engine).
+**Ab kya:** ~~Phase 1~~ ✅ (v5.11.0) → ~~J1~~ ✅ (v5.12.0) → **J2 "MIC NAZAR" (neeche)** → Phase 2 (WAKE DOCTOR v2 + live notification + dBFS calibration) → **Phase 2.5 auto-update** (F43 · *faisla: GitHub ya apna server*) → Phase 3 (wake ka dimaag Kotlin mein) → Phase 4 (offline KWS engine).
 
 ---
 
@@ -120,7 +152,7 @@ saboot (file:line) ke sath, aur **4 phase ka structure**:
 
 | Phase | Version | Naam | Kya theek hoga |
 |---|---|---|---|
-| **J1** | v5.12.0 | **JAWAB PAKKA** | har nakami **bol kar** bataye, koi deadlock nahi (3 watchdog: listen 12s · think 25s · speak 60s), galat error-matn theek, nakami ke baad mic **khud dobara**, darwaza lambe jawab mein band na ho |
+| **J1** ✅ | v5.12.0 | **JAWAB PAKKA** | har nakami **bol kar** bataye, koi deadlock nahi (3 watchdog: listen 12s · think **40s** · speak **20s+110ms/harf**), galat error-matn theek, nakami ke baad mic **khud dobara**, darwaza lambe jawab mein band na ho |
 | **J2** | v5.12.5 | **MIC NAZAR** | hamesha nazar aane wali **MIC HAAL BAR** (5 state, 5 rang, text ke sath) + wake pehre ka **live level** + **conversation mode** (ek turn = ek mic open → cycle aadha) |
 | **J3** | v5.13.0 | **RAFTAR** | bolna khatam → **~0.6s** mein mic band (Long extras), awaaz **800ms budget** ke sath (dead air khatam), dimaag ki **streaming** (pehla jumla foran), aur **RAFTAR PANEL** (har turn ke ms — saboot) |
 | **J4** | v5.13.5 | **SAAF AWAAZ** | Urdu rate/pitch tuning, jumla-ba-jumla prosody, awaaz tez/dheemi setting |
@@ -129,7 +161,8 @@ saboot (file:line) ke sath, aur **4 phase ka structure**:
 tarah khatam **nahi** ho sakta — J2 usay **kam** karega aur UI mein saaf batayega; poori tarah
 **saabit** mic sirf **Phase 4 (offline KWS)** mein.
 
-🧪 Structure doc par **+7 test-locks** (lab Section 33) → **1241/1241 GREEN**.
+🧪 Structure doc par **+7 test-locks** (lab Section 33) → 1241/1241 GREEN.
+**J1 mukammal (v5.12.0)** → **1281/1281 GREEN**. Agla: **J2 "MIC NAZAR"**.
 
 ---
 

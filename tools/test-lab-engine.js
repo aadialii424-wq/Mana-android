@@ -612,7 +612,10 @@ Here's a thinking process:
       '🔑 Kotlin ab SAARE andaze bhejta hai (pehle sirf firstOrNull)');
     is(/CONFIDENCE_SCORES/.test(KT) && /o\.put\("c", conf\[i\]/.test(KT),
       '🔑 P8b: har andaze ka YAQEEN (confidence) bhi JS ko jata hai');
-    is(/EXTRA_MAX_RESULTS, 6\)/.test(KT.slice(KT.indexOf('fun listen'), KT.indexOf('fun listen') + 2000)),
+    /* v5.12.0: slice 2000 -> 4000. listen() ke andar ab J1.4 ke tafseeli comment bhi
+       hain (silence extra ki ghalat chaabi wala hisab) — intent ki asli lines door chali
+       gayin thi aur ye taala jhoot bolne laga tha. */
+    is(/EXTRA_MAX_RESULTS, 6\)/.test(KT.slice(KT.indexOf('fun listen'), KT.indexOf('fun listen') + 4000)),
       '🔑 P8b: MAIN MIC ke andaze 1 -> 6 (SUNO ki taqat ab zinda)');
     is(/__nativeSpeech\('" \+ jsEscape\(text\) \+\s*"','" \+ jsEscape\(arr\.toString\(\)\)/.test(KT.replace(/\s+/g, ' ')),
       'dono cheezein JS ko jati hain: pehla andaza + poori list');
@@ -1190,6 +1193,17 @@ Here's a thinking process:
     w.stripWake = function (t) { return String(t).replace(/^\s*(maya|boss)[\s,]*/i, '').trim(); };
     w.FLAGS = { on: function () { return true; } };
     w.SUNO = { pick: function (a) { return String((a && a[0]) || ''); } };
+    /* 🛡️ J1 (v5.12.0 / F53) — __wakeHeard ab masroof hone par JAWAB.ignore() se
+       WAJAH poochta hai (aur flag phansa ho to khud ilaaj karta hai). Is naqli
+       duniya mein stub: ignore() = false, yaani "masroof hun, ignore karo" — jo
+       purane amal ke hoo-bahoo barabar hai. Gin-ti is liye ke taala lage ke wake
+       waqai referee se poochti hai (chup-chaap ignore nahi karti). */
+    w.__ignoreAsk = 0;
+    w.JAWAB = {
+      ignore: function () { w.__ignoreAsk++; return false; },
+      age: function () { return 0; },
+      LISTEN_MAX: 12000, THINK_MAX: 40000, SPEAK_BASE: 20000
+    };
     w.eval(KSRC);
     const K = w.KAAN;
 
@@ -1237,6 +1251,7 @@ Here's a thinking process:
     w.said = []; w.speaking = true;
     w.__wakeHeard(JSON.stringify(['maya']));
     is(w.said.length === 0, '🔒 Maya pehle se bol rahi ho to beech mein na kude');
+    is(w.__ignoreAsk === 1, '🙉 F53: ignore karne se PEHLE referee se poocha gaya (wajah log/status par jati hai)', w.__ignoreAsk + ' dafa');
     w.speaking = false;
 
     w.__wakeHeard('kachra{{{');
@@ -1516,13 +1531,14 @@ Here's a thinking process:
       '👁️ KAAN report mein HAAL (JS) + HAAL (Kotlin) + roko ki ginti nazar aati hai');
 
     /* ── version qanoon ── */
-    is(/appVersion\(\): String = "5\.11\.0-native"/.test(MA) && MA.indexOf('4.3.0-native') === -1 &&
-       MA.indexOf('5.10.3-native') === -1,
-      '🩹 BONUS — appVersion() ka purana 4.3.0 jhoot bhi ab qatl');
-    is(fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8').indexOf('maya-v5.11.0') > 0 &&
-       /versionCode 75/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')) &&
-       /versionName "5\.11\.0"/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')),
-      '🏷️ poore app mein VERSION v5.11.0 (cache saaf, splash saaf, APK saaf)');
+    is(/appVersion\(\): String = "5\.12\.0-native"/.test(MA) && MA.indexOf('4.3.0-native') === -1 &&
+       MA.indexOf('5.11.0-native') === -1,
+      '🩹 BONUS — appVersion() ka purana 4.3.0 jhoot bhi ab qatl (v5.12.0 barqarar)');
+    is(fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8').indexOf('maya-v5.12.0') > 0 &&
+       /versionCode 76/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')) &&
+       /versionName "5\.12\.0"/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')) &&
+       fs.readFileSync(path.join(ROOT, 'public/sw.js'), 'utf8').indexOf('maya-v5.12.0') > 0,
+      '🏷️ poore app mein VERSION v5.12.0 (cache saaf, splash saaf, APK saaf)');
     is(HTML.indexOf('5.8.0') === -1, 'kahi purana 5.8.0 version nazar nahi aata');
 
     /* ── v5.9.1 hotfix — doctor ka jhoota button ab ASAL hai ── */
@@ -2284,10 +2300,10 @@ Here's a thinking process:
       '🎯 F05: appMicBusy() — blind release ki jagah asal haal');
 
     /* ── 🔖 version bump + mirror discipline ── */
-    is(/versionCode 75/.test(GR) && /versionName "5\.11\.0"/.test(GR) &&
-       /"version": "5\.11\.0"/.test(PK) && /maya-v5\.11\.0/.test(SW) &&
-       /5\.11\.0-native/.test(MA) && /MAYA v5\.11\.0/.test(MA) && /MAYA v5\.11\.0/.test(IH),
-      '🔖 v5.11.0 ka bump CHHE jagah (gradle vc75 + package.json + sw.js + appVersion + Kotlin toast + JS toast)');
+    is(/versionCode 76/.test(GR) && /versionName "5\.12\.0"/.test(GR) &&
+       /"version": "5\.12\.0"/.test(PK) && /maya-v5\.12\.0/.test(SW) &&
+       /5\.12\.0-native/.test(MA) && /MAYA v5\.12\.0/.test(MA) && /MAYA v5\.12\.0/.test(IH),
+      '🔖 v5.12.0 ka bump CHHE jagah (gradle vc76 + package.json + sw.js + appVersion + Kotlin toast + JS toast)');
     is(PUB.indexOf('pushNativePrefs') > 0 && PUB.indexOf('sWakeLang') > 0 &&
        PUB.indexOf('HAAL (Kotlin)') > 0,
       '🪞 public/ mirror tazaa hai (npm run build) — assets aur web ek jaise');
@@ -2516,6 +2532,246 @@ Here's a thinking process:
     is((FJ.match(/\*\*Acceptance/g) || []).length + (FJ.match(/Acceptance \(device par\)/g) || []).length >= 1 &&
        /^\d+\. /m.test(FJ),
       '✅ har phase ke acceptance criteria numbered hain (device par parakhne layak)');
+  }
+
+  /* ═══ 34. 🛡️ v5.12.0 "JAWAB PAKKA" — J1 ke wiring-level taale ═══
+     Aap ki shikayat: "kabhi bolta hun to reply nahi aata, aur pata nahi chalta kyun."
+     Ye locks FORENSIC-JAWAB-LOOP.md ke F44-F49, F53-F55 ko bandhte hain — taake
+     koi aane wala badlaav chup-chaap jawab ka referee tod na de. */
+  head('34. 🛡️ v5.12.0 — JAWAB PAKKA: jawab ka referee (watchdog + sahi error + mic khud dobara)');
+  {
+    const MA = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8');
+    const AS = fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/index.html'), 'utf8');
+    const n = (re) => (HTML.match(re) || []).length;
+
+    /* ── referee maujood + teeno muddatein ── */
+    is(HTML.indexOf('var JAWAB = {') > 0 && /LISTEN_MAX: 12000/.test(HTML) &&
+       /THINK_MAX: 40000/.test(HTML) && /SPEAK_BASE: 20000/.test(HTML) &&
+       /SPEAK_PER_CHAR: 110/.test(HTML),
+      '⏱️ F46: JAWAB referee maujood — teen muddatein (sunna 12s · sochna 40s · bolna 20s+110ms/harf)');
+    is(/setInterval\(function\(\)\{ try \{ JAWAB\.watchdog\(\); \} catch \(e\) \{\} \}, 2000\);/.test(HTML),
+      '💓 F46: watchdog ka DIL har 2 second dhadakta hai (try/catch ke sath — baqi app na ruke)');
+    is(n(/JAWAB\.mark\("speak", JAWAB\.SPEAK_BASE \+ JAWAB\.SPEAK_PER_CHAR/g) >= 2 &&
+       n(/JAWAB\.clear\("speak"\)/g) >= 3,
+      '🗣️ F46: bolne ka budget ADAPTIVE stamp hota hai (speak + legacy nativeSpeak dono raste)');
+
+    /* ── do-jawab ka khatma ── */
+    is(HTML.indexOf('var myGen = ++JAWAB.thinkGen;') > 0 && /JAWAB\.mark\("think"\)/.test(HTML) &&
+       n(/myGen !== JAWAB\.thinkGen/g) === 2,
+      '🧠 F46: dimaag ka GENERATION token — kamyaab AUR nakam DONO raste par purana jawab rad');
+
+    /* ── AOSP ki poori fehlist + sahi matlab ── */
+    is(/9:"mic ki ijazat nahi"/.test(HTML) && /7:"samajh nahi aaya \(no match\)"/.test(HTML) &&
+       /15:"model-download events support nahi"/.test(HTML) &&
+       HTML.indexOf('7:"Mic permission nahi"') === -1,
+      '🔢 F44: AOSP ke poore 1..15 code SAHI naam ke sath (7=no match, 9=ijazat — pehle ulta tha)');
+    is(/JAWAB\.sttError\(code\)/.test(HTML) && HTML.indexOf('var m = { 1:"Network timeout"') === -1,
+      '🚦 F44/F45: __nativeSpeechErr ab referee ke paas jata hai (purani adhoori fehlist qatl)');
+    is(/if \(code === 9\)/.test(HTML) && /code === 12 \|\| code === 13/.test(HTML) &&
+       /JAWAB\.netStreak >= 3/.test(HTML) && /JAWAB\.noMatchStreak >= 4/.test(HTML) &&
+       /KAAN\.DARWAZA\.close\(\)/.test(HTML),
+      '🎯 F45: har code ka APNA amal — ijazat/zubaan par rukna, network par 3 dafa, no-match par 4 ke baad darwaza band');
+
+    /* ── kam-yaqeen wala rasta (F47) ── */
+    is(/reply\("\\uD83D\\uDC42 Theek se sunai nahi diya/.test(HTML) &&
+       HTML.indexOf('AWAAZ.speak("Theek se sunai nahi diya, dobara boliye", {})') === -1,
+      '🔁 F47: kam-yaqeen sunai ab reply() ke POORE raste se (SUKOON + mic dobara) — speak() bypass khatam');
+
+    /* ── phanse flags ka ilaaj + circuit breaker ── */
+    is(/JAWAB\.age\("listen"\) > JAWAB\.LISTEN_MAX/.test(HTML) &&
+       /JAWAB\.age\("think"\) > JAWAB\.THINK_MAX/.test(HTML),
+      '🎛️ F46: mic button par purana flag = murda, pehle reset (pehle button ULTA kaam karta tha)');
+    is(/if \(JAWAB\.retryN > 6\)/.test(HTML) && /25000/.test(HTML) && /JAWAB\.n\.breaks\+\+/.test(HTML),
+      '🔌 F45+: dobara-suno ka CIRCUIT BREAKER — 25s mein 6 nakami = ruk kar bol kar khabar');
+
+    /* ── wake ka ignore chup-chaap nahi (F53) ── */
+    is(HTML.indexOf('if (speaking || thinking || listening) { if (!JAWAB.ignore()) return; }') > 0 &&
+       /KAAN\.push\("ignore"/.test(HTML),
+      '🙉 F53: wake ignore ki WAJAH ab log + status par (aur phansa flag ho to khud ilaaj)');
+
+    /* ── dimaag fail par awaaz (F54) + darwaza (F55) ── */
+    is(/if \(wasVoice\) \{\s*\n\s*try \{\s*\n\s*JAWAB\.bol\("Dimaag se rabta nahi ho saka/.test(HTML),
+      '📢 F54: retry ka intezar ab BOL kar bataya jata hai (pehle sirf toast — awaaz wala andhera)');
+    const RI = HTML.indexOf('function reply(text, wasVoice, link){');
+    is(RI > 0 && HTML.slice(RI, RI + 520).indexOf('KAAN.DARWAZA.open()') > 0,
+      '🚪 F55: darwaza jawab SHURU par tazaa — lamba jawab baat-cheet ko beech mein nahi todta');
+
+    /* ── Kotlin: sahi code, sahi chaabi, crash-guard ── */
+    is(/window\.__nativeSpeechErr\(9\)/.test(MA) && MA.indexOf('__nativeSpeechErr(7)') === -1,
+      '🔐 F44: Kotlin ijazat ke liye code 9 bhejta hai (pehle 7 = "samajh nahi aaya" — JS galat loop chalati thi)');
+    is(/RecognizerIntent\.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS/.test(MA) &&
+       /\n\s*700L\s*\n/.test(MA) &&
+       MA.indexOf('"android.speech.extra.SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS"') === -1,
+      '🔑 F48: silence extra ab SARKARI chaabi (plural "extras") + Long se jata hai — pehle chup-chaap be-asar tha');
+    const LI = MA.indexOf('fun listen(lang: String)');
+    const LE = MA.indexOf('fun stopListen()', LI);           /* listen() ki asal hadd */
+    is(LI > 0 && LE > LI && MA.slice(LI, LE).indexOf('} catch (e: Throwable) {') > 0 &&
+       MA.slice(LI, LE).indexOf('WakeWordService.resumeFromApp()') > 0 &&
+       MA.slice(LI, LE).indexOf('appMicOn = false') > 0 &&
+       /__nativeSpeechErr\(5\)/.test(MA.slice(LI, LE)),
+      '🛟 F49: mic khulte waqt crash/atak par try/catch — safai + wake wapas + JS ko code 5');
+
+    /* ── mirror + Qanoon 9 ── */
+    is(AS === HTML,
+      '🪞 public/index.html aur assets/web/index.html HOOBAHOO ek (APK mein wahi code jata hai jo test hua)');
+    const FX = fs.readFileSync(path.join(ROOT, 'docs/FIX-v5.12.0-jawab-pakka.md'), 'utf8');
+    const RP = fs.readFileSync(path.join(ROOT, 'docs/REPORT-v5.12.0-aam-zubaan.md'), 'utf8');
+    is(/## 📱 RELEASE REPORT/.test(FX) && /✅ PASS/.test(FX) && /❌ FAIL/.test(FX) && /adhoora/i.test(FX),
+      '📱 Qanoon 9: v5.12.0 ki release report — kya naya, kaise parakhna (PASS/FAIL), kya adhoora');
+    is((RP.match(/- \[ \]/g) || []).length >= 9 && /## 1\)/.test(RP) && /## 5\)/.test(RP) &&
+       /FAIL ka nishan/.test(RP) && /IMAANDARI|imaandari/.test(FX),
+      '📄 Qanoon 9: v5.12.0 ka EK PARCHA + FIX mein imaandari ka hisab (plan se kya alag kiya)');
+  }
+
+  /* ═══ 34b. 🧪 JAWAB ka AMAL — referee ko CHALA kar parakha (sirf wiring nahi) ═══
+     Wiring locks upar hain; yahan asli module jsdom mein chalta hai aur hum dekhte hain
+     ke watchdog waqai phansa kaam reset karta hai, error ka sahi amal hota hai, aur
+     be-inteha loop nahi chalta. */
+  head('34b. 🧪 JAWAB ka AMAL — asli waqt mein chal kar (watchdog + faislay + breaker)');
+  {
+    const JA = HTML.indexOf('var JAWAB = {');
+    const JB = HTML.indexOf('function reply(text, wasVoice, link){');
+    is(JA > 0 && JB > JA, '🔬 JAWAB ka poora module index.html se alag nikala ja saka');
+    const JSRC = HTML.slice(JA, JB);
+    const sleep = (ms) => new Promise(function (r) { setTimeout(r, ms); });
+
+    function jawabWorld(opts) {
+      const dom = new JSDOM('<!doctype html><body></body>', { runScripts: 'dangerously' });
+      const w = dom.window;
+      const st = { bubbles: [], spoken: [], logs: [], reListen: 0, doorOpen: 0, doorClose: 0, status: '' };
+      w.settings = Object.assign({ name: 'Boss', wakeWord: true }, (opts || {}).settings || {});
+      w.speaking = false; w.thinking = false; w.listening = false;
+      w.addBubble = function (who, t) { st.bubbles.push(who + ': ' + t); };
+      w.speak = function (t) { st.spoken.push(t); };
+      w.pushLog = function (m) { st.logs.push(m); };
+      w.setOrb = function () {};
+      w.statusText = { get textContent() { return st.status; }, set textContent(v) { st.status = v; } };
+      w.interimEl = { textContent: '' };
+      w.SUKOON = { sunEnd: function () {}, bolStart: function () {}, bolEnd: function () {} };
+      w.AWAAZ = { stop: function () {} };
+      w.startListening = function () { st.reListen++; };
+      w.KAAN = {
+        push: function (k, d) { st.logs.push(k + ': ' + d); },
+        DARWAZA: { open: function () { st.doorOpen++; }, close: function () { st.doorClose++; }, isOpen: function () { return true; } }
+      };
+      w.eval(JSRC);
+      return { w: w, J: w.JAWAB, st: st };
+    }
+
+    /* ── watchdog: phansa mic ── */
+    {
+      const { w, J, st } = jawabWorld();
+      w.listening = true; J.mark('listen');
+      J.at.listen = Date.now() - 13000;                 /* 13s purana = hadd se zyada */
+      J.watchdog();
+      is(w.listening === false && J.at.listen === 0 && J.n.watchdog === 1,
+        '⏱️ F46: 12s se phansa mic — watchdog ne khud reset kiya (flag + stamp dono saaf)');
+      await sleep(750);
+      is(st.reListen === 1, '🔁 F45: reset ke baad mic KHUD dobara khula (dobara "Maya" ke baghair)', st.reListen + ' dafa');
+      is(/Mic phans gaya tha/.test(st.status), '👁️ user ko status par KHAabar mili (chup-chaap nahi)', st.status);
+    }
+
+    /* ── watchdog: phansa dimaag + do-jawab ka khatma ── */
+    {
+      const { w, J, st } = jawabWorld();
+      w.thinking = true; J.mark('think');
+      const g0 = J.thinkGen;
+      J.at.think = Date.now() - 41000;
+      J.watchdog();
+      is(w.thinking === false && J.thinkGen > g0 && J.n.thinkReset === 1,
+        '🧠 F46: 40s se sochta dimaag reset + GENERATION barh gayi (purana jawab ab rad hoga)');
+      is(st.spoken.length === 1 && /der ho gayi/.test(st.spoken[0]),
+        '📢 F54: user ko BOL kar bataya gaya (pehle sirf orb ghoomta rehta)', st.spoken[0]);
+    }
+
+    /* ── watchdog: bolne ka ADAPTIVE budget (imaandari #2 ka saboot) ── */
+    {
+      const { w, J } = jawabWorld();
+      w.speaking = true;
+      J.mark('speak', J.SPEAK_BASE + J.SPEAK_PER_CHAR * 1400);   /* 1400 harf = ~174s */
+      J.at.speak = Date.now() - 60000;
+      J.watchdog();
+      is(w.speaking === true, '🗣️ F46: 1400 harf ka jawab 60s par NAHI kata (saabit hadd ka qatl khatam)');
+      J.at.speak = Date.now() - 175000;
+      J.watchdog();
+      is(w.speaking === false && J.n.speakReset === 1, '🗣️ magar budget khatam hone par reset zaroor hota hai');
+    }
+
+    /* ── STT ke faisle: ijazat ── */
+    {
+      const { J, st } = jawabWorld();
+      J.sttError(9);
+      await sleep(300);
+      is(st.reListen === 0 && /ijazat/i.test(st.spoken.join(' ')),
+        '🔐 F44: code 9 = ijazat → ijazat ka paigham, mic dobara NAHI (loop nahi)', st.spoken.join('|'));
+    }
+
+    /* ── STT ke faisle: no-match (sab se aam) ── */
+    {
+      const { J, st } = jawabWorld();
+      J.sttError(7); J.sttError(7); J.sttError(7); J.sttError(7);
+      await sleep(700);
+      is(st.doorClose === 1 && /ruk jati hun/.test(st.spoken[st.spoken.length - 1]),
+        '🚪 F45: 4 nakami ke baad darwaza BAND + bol kar rukna (be-inteha koshish nahi)');
+      is(st.reListen === 2 && /dobara boliye/.test(st.spoken[0]),
+        '🎯 F44: pehli nakami par "dobara boliye", darmiyan mein 2 khud-suno', st.reListen + ' re-listen');
+    }
+
+    /* ── STT ke faisle: network ── */
+    {
+      const { J, st } = jawabWorld();
+      J.sttError(2); J.sttError(2); J.sttError(2);
+      is(/internet/i.test(st.spoken.join(' ')) && J.netStreak === 0,
+        '🌐 F45: 3 network nakami → BOL kar khabar + hisab saaf (chup-chaap loop nahi)');
+    }
+
+    /* ── STT ke faisle: voice service murda (naya rasta) ── */
+    {
+      const { J, st } = jawabWorld();
+      J.sttError(5); J.sttError(5);
+      await sleep(200);
+      is(st.doorClose === 1 && /voice service/i.test(st.spoken.join(' ')),
+        '📵 F44: code 5 (service murda) → 2 koshish ke baad BOL kar rukna, darwaza band');
+    }
+
+    /* ── circuit breaker ── */
+    {
+      const { J, st } = jawabWorld();
+      for (let i = 0; i < 8; i++) J.hearAgain('test', 10);
+      await sleep(200);
+      is(st.reListen === 6 && J.n.breaks >= 1,
+        '🔌 F45+: 25s ke andar sirf 6 koshishein — breaker LATCH hua (agli call foran mic nahi kholti)', st.reListen + ' mic, ' + J.n.breaks + ' break');
+      is(/ruk jati hun/.test(st.spoken.join(' ')) && st.doorClose >= 1,
+        '🔌 F45+: rukne par user ko BOL kar bataya + darwaza band (latch trip par bhi)');
+    }
+
+    /* ── wake band ho to khud mic NAHI ── */
+    {
+      const { J, st } = jawabWorld({ settings: { wakeWord: false } });
+      J.hearAgain('manual', 10);
+      await sleep(120);
+      is(st.reListen === 0, '🔒 manual-mic user (wake OFF) ke liye khud mic nahi khulta — faisla aap ka');
+    }
+
+    /* ── wake ignore: wajah + khud ilaaj ── */
+    {
+      const { w, J, st } = jawabWorld();
+      w.speaking = true; J.mark('speak', J.SPEAK_BASE);
+      is(J.ignore() === false, '🙉 F53: Maya sach-much bol rahi ho to wake ignore (sahi)');
+      is(/wake ignore/.test(st.logs.join(' ')) && /Sun nahi sakti/.test(st.status),
+        '🙉 F53: ignore ki WAJAH log + status par likhi gayi', st.status);
+      J.at.speak = Date.now() - 30000;                   /* ab stamp phansa hua hai */
+      is(J.ignore() === true && w.speaking === false,
+        '🩹 F46/F53: phansa flag mile to ignore ki jagah KHUD ilaaj — wake usi lamhe zinda');
+    }
+
+    /* ── report(): nazaarat ka ek-line hisab ── */
+    {
+      const { J } = jawabWorld();
+      J.sttError(7); J.watchdog();
+      is(/STT err 1/.test(J.report()) && /watchdog/.test(J.report()),
+        '📊 report() ek line mein poora hisab deta hai (LAB/panel ke liye)', J.report());
+    }
   }
 
     console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');

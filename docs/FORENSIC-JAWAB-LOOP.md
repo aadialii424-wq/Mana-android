@@ -213,6 +213,40 @@ P4  v6.0.0   "WAKE AZAD"     ← offline KWS: mic dot SAABIT, bina internet     
 5. Lambe jawab (15s+ awaaz) ke baad baat-cheet **jaari** rahe (darwaza beech mein band na ho).
 6. App 1 ghanta khuli chhod dein → orb ka haal **asal** haal se milta ho (koi phansa hua "listening" nahi).
 
+---
+
+#### ✅ J1 ka AMAL — v5.12.0 "JAWAB PAKKA" SHIPPED (1281/1281 test GREEN)
+
+Tafseel: [`FIX-v5.12.0-jawab-pakka.md`](FIX-v5.12.0-jawab-pakka.md) · parcha:
+[`REPORT-v5.12.0-aam-zubaan.md`](REPORT-v5.12.0-aam-zubaan.md)
+
+Naya module **`JAWAB`** (jawab ka referee) `public/index.html` mein `reply()` se pehle:
+`at.{listen,think,speak}` stamps · `watchdog()` har 2s · `thinkGen` generation token ·
+`ERRNAME` 1..15 · `sttError()` · `bol()` · `hearAgain()` · `reset()` · `ignore()` · `report()`.
+
+**⚖️ Imaandari — plan se ye 6 barikiyan badlin (wajah ke sath):**
+
+| Plan | Amal | Wajah |
+|---|---|---|
+| `THINK 25s` | **40s** | dimaag ki seedhi (4 keyed + keyless providers) qanooni taur par 25s se zyada le sakti hai — 25s par kaatna **sahi jawab** ka qatl tha |
+| `SPEAK 60s` (saabit) | **20s + 110ms/harf** (adaptive) | 1400 harf ka jawab ~100s bolta hai; saabit hadd par Maya apna hi jawab kaat deti |
+| `1/2/11` → 1 retry | **3 dafa** (1.5s gap), phir **bol kar** khabar | ek retry aksar kaafi nahi hota; teesri ke baad rukna + batana behtar hai |
+| `6/7` → **foran** mic dobara | pehli nakami par **"dobara boliye" bol kar** (afterSpeak khud mic kholta hai), baad mein 500ms, **4** par darwaza band | bolna khud mic khol deta hai — dobara kholna dohra hota; aur be-inteha "dobara boliye" irritating hai (aap ki shikayat) |
+| `8` → 700ms | **800ms** | mamooli farq; mic masroof hone par thora sa sabar behtar |
+| (plan mein na tha) | **circuit breaker (F45+)** + `thinkGen` + code **5/14/15** ka rasta | amal mein pata chala: baghair breaker ke koi bhi code be-inteha loop bana deta hai; baghair `thinkGen` ke watchdog aur dimaag **dono** jawab dete |
+
+**J1.4 ka natija (F48 ka *sahi-chaabi* hissa — qeemat J3 ki):** `MainActivity.listen()` ki silence-extra chaabi **ghalat** thi
+(`"android.speech.extra.…"` — AOSP ki chaabi `"android.speech.extras.…"` **plural** hai) aur
+value **Int** thi (service `getLongExtra()` parhti hai) → wo 700ms **kabhi be-asar** raha.
+Wake wali service (v5.11.0) pehle se sahi thi; ab dono raste barabar. Ijazat ka code bhi
+**7 se 9** kiya gaya (AOSP: 7 = NO_MATCH, 9 = INSUFFICIENT_PERMISSIONS).
+
+**Kya abhi BAQI hai (isi track mein):** mic ka **nazuk dot** aur "pata nahi chalta mic on hua"
+ka mukammal ilaj **J2** mein; **raftar** **J3** mein. Silence extra ki **qeemat** (600L) bhi J3
+ka faisla hai — J1 ne sirf usay **be-asar se ba-asar** kiya hai.
+
+---
+
 ### 🎛️ J2 — v5.12.5 "MIC NAZAR" (F52, F56, F57 + churn)
 
 | # | Badlaav |
