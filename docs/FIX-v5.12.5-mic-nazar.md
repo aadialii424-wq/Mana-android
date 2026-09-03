@@ -4,7 +4,7 @@
 > **Aap ki shikayat:** *"mic par on off horha ha jo ke irritating ha... mujhe pata hi nhi
 > chalna mic on hua ha ya nhi."*
 > **Pehle:** v5.12.0 "JAWAB PAKKA" (jawab chup-chaap marna band) — [`FIX-v5.12.0-jawab-pakka.md`](FIX-v5.12.0-jawab-pakka.md)
-> **Tests:** 1320/1320 GREEN · **Build:** ✅ CI GREEN (niche §7) · **Parcha:** [`REPORT-v5.12.5-aam-zubaan.md`](REPORT-v5.12.5-aam-zubaan.md)
+> **Tests:** 1320/1320 GREEN · **Build:** ✅ CI GREEN (pehli koshish) · **APK:** 3,225,897 bytes · **Parcha:** [`REPORT-v5.12.5-aam-zubaan.md`](REPORT-v5.12.5-aam-zubaan.md)
 
 ---
 
@@ -144,7 +144,11 @@ Kul: **1281 → 1320** (39 naye: 23 wiring + 16 amal). Purane locks sudhare: ver
 ## 7. 🚦 CI / build
 
 * **Branch:** `arena/01a062e9-mana-android` · **versionCode 77** · **versionName 5.12.5**
-* **Run:** (CI green hone ke baad link yahan + parcha mein daala jata hai)
+* **CI run [33787388417](https://github.com/adil-chandio/Mana-android/actions/runs/33787388417) — ✅ SUCCESS (pehli koshish)** · Kotlin compile clean
+  (naye `WakeState.talk*`, `haalBlock()` ka baat-cheet darwaza, `pushLevel()`/`__wakeLevel`
+  aur bridge `talk(on)` ke sath)
+* **APK:** artifact `MAYA-APK` — **3,225,897 bytes** (v5.12.0 ke 3,219,176 se **+6,721 bytes** = HAALBAR + talk mode)
+* **Download:** https://github.com/adil-chandio/Mana-android/actions/runs/33787388417
 
 ---
 

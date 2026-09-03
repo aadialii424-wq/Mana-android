@@ -4,7 +4,7 @@
 > hai, kya adhoora hai, nakami par kya bhejein, aur version ki pehchaan.
 >
 > **Version:** 5.12.5 (MIC NAZAR) · **Tests:** 1320/1320 GREEN · **Phase:** J2 (mic ka haal nazar)
-> **Build:** CI (link niche §6) · Tafseel: [`FIX-v5.12.5-mic-nazar.md`](FIX-v5.12.5-mic-nazar.md)
+> **Build:** ✅ CI GREEN (pehli koshish) · **APK:** 3,225,897 bytes (3.2 MB) · Tafseel: [`FIX-v5.12.5-mic-nazar.md`](FIX-v5.12.5-mic-nazar.md)
 > **Pehle:** v5.12.0 "JAWAB PAKKA" — [`REPORT-v5.12.0-aam-zubaan.md`](REPORT-v5.12.0-aam-zubaan.md)
 
 ---
@@ -95,6 +95,9 @@ J-track: **J1 ✅ · J2 ✅** · J3 (RAFTAR) → J4 (SAAF AWAAZ) baaki.
 
 ## 6) APK kahan se
 
-GitHub → `adil-chandio/Mana-android` → **Actions** → sab se upar wali **"Build MAYA APK"** run →
-niche **Artifacts** → **`MAYA-APK`** → zip khol kar `app-debug.apk` install karein
-(purani APK ke upar chal jayegi, data safe rehta hai). Link CI green hote hi yahan daal diya jayega.
+**https://github.com/adil-chandio/Mana-android/actions/runs/33787388417**
+
+Ya: GitHub → `adil-chandio/Mana-android` → **Actions** → sab se upar wali
+**"Build MAYA APK"** run → niche **Artifacts** → **`MAYA-APK`** (3,225,897 bytes) →
+zip khol kar `app-debug.apk` phone mein install karein (purani APK ke upar chal jayegi,
+data safe rehta hai).
