@@ -3,7 +3,7 @@
 > **Forensic:** [`FORENSIC-JAWAB-LOOP.md`](FORENSIC-JAWAB-LOOP.md) (15 flaws F44–F58)
 > **Aap ki shikayat:** *"kabhi bolta hun to reply nahi aata, aur mic par on/off hota
 > rehta hai jo irritating hai — mujhe pata hi nahi chalta mic on hua ya nahi."*
-> **Tests:** 1281/1281 GREEN · **Build:** CI (niche §7) · **Parcha:** [`REPORT-v5.12.0-aam-zubaan.md`](REPORT-v5.12.0-aam-zubaan.md)
+> **Tests:** 1281/1281 GREEN · **Build:** ✅ CI GREEN (pehli koshish) · **APK:** 3,219,176 bytes · **Parcha:** [`REPORT-v5.12.0-aam-zubaan.md`](REPORT-v5.12.0-aam-zubaan.md)
 
 ---
 
@@ -126,7 +126,11 @@ Kul: **1241 → 1281** (40 naye: 19 wiring + 20 amal + 1 wake-ignore).
 ## 7. 🚦 CI / build
 
 * **Branch:** `arena/01a062e9-mana-android` · **versionCode 76** · **versionName 5.12.0**
-* **Run:** (CI green hone ke baad link yahan + parcha mein daala jata hai)
+* **CI run [33782568618](https://github.com/adil-chandio/Mana-android/actions/runs/33782568618) — ✅ SUCCESS (pehli koshish)** · Kotlin compile clean
+  (J1.4 ke naye `RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS` + `700L`
+  aur `try/catch(Throwable)` ke sath)
+* **APK:** artifact `MAYA-APK` — **3,219,176 bytes** (v5.11.0 ke 3,211,753 se **+7,423 bytes** = JAWAB module)
+* **Download:** https://github.com/adil-chandio/Mana-android/actions/runs/33782568618
 
 ---
 

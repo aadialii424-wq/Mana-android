@@ -4,7 +4,7 @@
 > hai, kya adhoora hai, nakami par kya bhejein, aur version ki pehchaan.
 >
 > **Version:** 5.12.0 (JAWAB PAKKA) · **Tests:** 1281/1281 GREEN · **Phase:** J1 (jawab ka loop pakka)
-> **Build:** CI (link niche §6) · Tafseel: [`FIX-v5.12.0-jawab-pakka.md`](FIX-v5.12.0-jawab-pakka.md)
+> **Build:** ✅ CI GREEN (pehli koshish) · **APK:** 3,219,176 bytes (3.2 MB) · Tafseel: [`FIX-v5.12.0-jawab-pakka.md`](FIX-v5.12.0-jawab-pakka.md)
 > **Forensic:** [`FORENSIC-JAWAB-LOOP.md`](FORENSIC-JAWAB-LOOP.md) (15 flaws F44–F58)
 
 ---
@@ -97,5 +97,9 @@ J-track: **J1 mukammal** · J2 (MIC NAZAR) → J3 (RAFTAR) → J4 (SAAF AWAAZ) b
 
 ## 6) APK kahan se
 
-CI green hone ke baad: **Actions → build-android-apk → sab se upar wali run → Artifacts → `app-debug`**
-(repositories: `adil-chandio/Mana-android`). Link is parcha aur FIX doc mein usi waqt daal diya jayega.
+**https://github.com/adil-chandio/Mana-android/actions/runs/33782568618**
+
+Ya: GitHub → `adil-chandio/Mana-android` → **Actions** → sab se upar wali
+**"Build MAYA APK"** run → niche **Artifacts** → **`MAYA-APK`** (3,219,176 bytes) →
+zip khol kar `app-debug.apk` phone mein install karein (purani APK ke upar chal jayegi,
+data safe rehta hai).
