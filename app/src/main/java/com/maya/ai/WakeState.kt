@@ -36,6 +36,11 @@ object WakeState {
     const val HB_MS = 10000L            /* JS heartbeat ka waqfa (1.2) */
     const val HB_MISS = 3               /* itne heartbeat gayab = JS murda → KHALI */
     const val TAIL_MS = 550L            /* echo tail — JS SUKOON.tailMs se match */
+    /* 🎛️ J2.3 (v5.12.5) — BAAT-CHEET MODE: darwaza khula ho to wake ka mic BAND,
+       taake ek turn mein mic EK dafa khule (pehle wake + app = DO, aur donon ke
+       beech 400ms ki race = F56). 90s sirf SAFETY NET hai — JS har turn par
+       taazeed karta hai aur darwaza band hote hi talkOff() bhejta hai. */
+    const val TALK_EXP_MS = 90000L
 
     /* ── halat ── */
     @Volatile var haal: String = "KHALI"        /* KHALI | BOL_RAHI | APP_SUN */
@@ -45,6 +50,10 @@ object WakeState {
     @Volatile var lastBolAt: Long = 0L
     @Volatile var pausedByApp: Boolean = false
     @Volatile var pausedAt: Long = 0L
+    /* 🎛️ J2.3 — baat-cheet mode (darwaza khula = wake ka mic band) */
+    @Volatile var talkUntil: Long = 0L
+    @Volatile var talkSince: Long = 0L
+    @Volatile var talkTurns: Long = 0L
 
     /* ── ginti (panel ke liye — chup-chaap kuch nahi hota) ── */
     @Volatile var beats: Long = 0L              /* kitne heartbeat aaye */
@@ -94,6 +103,22 @@ object WakeState {
         pausedByApp = false
         pausedAt = 0L
     }
+
+    /* ═══ 🎛️ J2.3 — BAAT-CHEET MODE ═══
+       JS ka darwaza (KAAN.DARWAZA) khulte hi talkOn(), band hote hi talkOff().
+       Ginti sirf OFF→ON par barhti hai = kitne TURN is mode mein hue (saboot:
+       acceptance 10/11 — ek turn mein ek mic, na ke do). */
+    fun talkOn() {
+        val t = now()
+        if (talkUntil <= t) { talkSince = t; talkTurns++ }
+        talkUntil = t + TALK_EXP_MS
+    }
+
+    fun talkOff() { talkUntil = 0L; talkSince = 0L }
+
+    fun talkActive(): Boolean = talkUntil > now()
+
+    fun talkLeft(): Long = if (talkUntil > now()) (talkUntil - now()) else 0L
 
     /** 1.8 — kamyab session: streak saaf, KUL ginti barqarar */
     fun sessionOk() {
@@ -154,6 +179,21 @@ object WakeState {
             owner = "NONE"
             since = t
         }
+        /* 🎛️ J2.3 — baat-cheet mode ki MUDAT bhi safety net hai: JS mar jaye
+           (WebView reload / OEM kill) ya darwaza khula reh jaye to wake HAMESHA
+           ke liye band na rahe. Heartbeat gayab = JS murda = mode khud khatam. */
+        if (talkUntil > 0L) {
+            val jsDead = lastBeat > 0L && owner == "APP" && t - lastBeat > HB_MS * HB_MISS
+            if (t > talkUntil || jsDead) {
+                talkUntil = 0L
+                talkSince = 0L
+                selfFixes++
+                val w = if (jsDead) "baat-cheet khud khatam — JS ke heartbeat gayab"
+                        else "baat-cheet ki mudat khatam (" + (TALK_EXP_MS / 1000L) + "s)"
+                lastFixWhy = w
+                if (why == null) why = w
+            }
+        }
         if (pausedByApp && pausedAt > 0L && t - pausedAt > PAUSE_EXP_MS) {
             val busy = try { MainActivity.instance?.appMicBusy() ?: false } catch (e: Throwable) { false }
             if (busy) {
@@ -185,6 +225,10 @@ object WakeState {
         s.append(",\"errStreak\":").append(errStreak)
         s.append(",\"errTotal\":").append(errTotal)
         s.append(",\"lastGood\":").append(lastGoodAt)
+        /* 🎛️ J2.3 — baat-cheet mode ka hisab panel ke liye */
+        s.append(",\"talk\":").append(if (talkActive()) "true" else "false")
+        s.append(",\"talkLeft\":").append(talkLeft() / 1000L)
+        s.append(",\"talkTurns\":").append(talkTurns)
         return s.append("}").toString()
     }
 }

@@ -88,6 +88,15 @@ class WakeWordService : Service() {
         const val READ_STRIKES = 5                    /* n<0: itni dafa, phir mic tazaa */
         const val READ_SLEEP_MS = 8L                  /* n==0: CPU spin nahi, 8ms sukoon */
         const val GATE_LIFE_MS = 90000L               /* pehre ki zyada se zyada umar */
+        /* 🎛️ J2.2 (F57) — wake ka ZINDA LEVEL JS tak: har 300ms ek push.
+           Is se pehle wake ka dB sirf trigger wale log mein aata tha, yani
+           "wake sun rahi hai ya murda hai" ka koi saboot NAZAR nahi aata tha. */
+        const val LEVEL_PUSH_MS = 300L
+        /* 🎛️ J2.3 — baat-cheet ke dauran wake ka poll DHEEMA (10s). Wajah: JS darwaza
+           band hote hi KHUD talk(false) bhejta hai, is liye 3s ke poll ki zaroorat
+           nahi — aur har poll `nSkip` ginti barhata hai (panel ka "roka gaya N"
+           be-matlab barhta, jaisa F03 mein "sulah: app ka mic" spam ke sath hua tha). */
+        const val TALK_POLL_MS = 10000L
 
         /* ═══ 🔬 v5.10.3 — NATIVE INSTRUMENT (F25/F27 ka ilaj) ═══
            PEHLE: saare counters SIRF JS (KAAN) mein rehte the aur report() bhi
@@ -224,8 +233,22 @@ class WakeWordService : Service() {
             if (haal == "BOL_RAHI") return "Maya bol rahi hai"
             if (haal == "APP_SUN") return "app ka mic chal raha hai"
             if (pausedByApp) return "sulah: app ka mic"
+            /* 🎛️ J2.3 (F56) — BAAT-CHEET MODE: darwaza khula ho to wake ka mic
+               BAND. Faida: (1) ek turn mein mic EK dafa khulta hai (pehle wake ka
+               recognizer + app ka mic = DO, aur system mic-dot dobara jhilmilata
+               tha); (2) wake ke baad 400ms ki andhi race khatam — handoff ab HAAL
+               dekh kar hota hai; (3) gate ka 90s reopen bhi isi darwaze se rukta
+               hai (J2.5), kyunke restart() pehle haalBlock() se poochta hai. */
+            if (s.talkPrefOn() && WakeState.talkActive())
+                return "baat-cheet: darwaza khula (" + (WakeState.talkLeft() / 1000L) + "s)"
             if (System.currentTimeMillis() - lastBolAt < ECHO_TAIL_MS) return "echo tail"
             return null
+        }
+
+        /* 🎛️ J2.3 — baat-cheet mode ka darwaza (JS se): WakeState + service dono */
+        fun talkMode(on: Boolean) {
+            if (on) WakeState.talkOn() else WakeState.talkOff()
+            try { instance?.onTalk(on) } catch (e: Exception) {}
         }
 
         /* L4 — tap-to-speak sab se pehle; service neeche */
@@ -534,6 +557,7 @@ class WakeWordService : Service() {
                         break
                     }
                     val d = MicKit.db(buf, n)
+                    pushLevel(d, 1)              /* 🎛️ J2.2 — pehra ka zinda level (mode 1) */
                     /* 🧭 1.3 + 1.11 (F15/F42) — CALIBRATION WINDOW (800ms):
                        PEHLE farsh PEHLE sample par LATCH ho jata tha aur sirf NEECHE
                        ja sakta tha. Nateeja: agar pehla frame kisi shor/AGC ka tha to
@@ -652,7 +676,11 @@ class WakeWordService : Service() {
                     rememberWakeRec()
                 }
                 override fun onBeginningOfSpeech() {}
-                override fun onRmsChanged(rmsdB: Float) {}
+                /* 🎛️ J2.2 (F57) — PEHLE ye KHALI tha: wake ke recognizer wale daur
+                   mein level ka koi zariya hi nahi tha (gate sirf khamoshi naapta
+                   hai). Ab recognizer ka apna RMS bhi JS tak jata hai (mode 2), yani
+                   bar wake ke DONO daur mein saans leta hai. */
+                override fun onRmsChanged(rmsdB: Float) { pushLevel(rmsdB.toDouble(), 2) }
                 override fun onBufferReceived(buffer: ByteArray?) {}
                 override fun onEndOfSpeech() {}
                 override fun onError(error: Int) {
@@ -821,7 +849,8 @@ class WakeWordService : Service() {
             val why = haalBlock()
             if (why != null) {
                 reportSkip(why)                  /* 🔬 F03 — spam nahi, hisab ke sath */
-                restart(BLOCKED_POLL_MS)         /* HAAL khali hone ka intezar (3s, pehle 700ms) */
+                /* 🎛️ J2.3 — baat-cheet mein intezar lamba (JS khud talk(false) bhejta hai) */
+                restart(if (why.startsWith("baat-cheet")) TALK_POLL_MS else BLOCKED_POLL_MS)
                 return@postDelayed
             }
             skipReset()                          /* 🔬 F03 — darwaza khul gaya, ginti saaf */
@@ -832,7 +861,12 @@ class WakeWordService : Service() {
     private fun actuallyStart() {
         if (!running) return
         val why = haalBlock()                    /* L2 — chautha darwaza */
-        if (why != null) { reportSkip(why); restart(BLOCKED_POLL_MS); return }
+        if (why != null) {
+            reportSkip(why)
+            /* 🎛️ J2.3 — baat-cheet ke dauran dheema poll (10s), warna 3s */
+            restart(if (why.startsWith("baat-cheet")) TALK_POLL_MS else BLOCKED_POLL_MS)
+            return
+        }
         skipReset()
         try {
             /* v5.7.0 — do badlaav:
@@ -916,6 +950,51 @@ class WakeWordService : Service() {
     fun sukoonOn(): Boolean = try {
         getSharedPreferences("maya", Context.MODE_PRIVATE).getBoolean("sukoon", true)
     } catch (e: Exception) { true }
+
+    /* 🎛️ J2.3 — baat-cheet mode ka LAB switch (pref). Default ON: user ne khud
+       faisla diya tha ke baat-cheet mode chalu rahe (aur LAB mein switch hai). */
+    fun talkPrefOn(): Boolean = try {
+        getSharedPreferences("maya", Context.MODE_PRIVATE).getBoolean("talk", true)
+    } catch (e: Exception) { true }
+
+    /* 🎛️ J2.3 — mode ka AMAL: ON = mic isi lamhe chhodo (gate + recognizer),
+       OFF = wapas pehre par. onHaal() jaisa hi, magar HAAL ko chhuta nahi —
+       SUKOON ka haal (KHALI/BOL_RAHI/APP_SUN) apni jagah barqarar rehta hai. */
+    fun onTalk(on: Boolean) {
+        handler.post {
+            if (!running) return@post
+            if (on) {
+                stopGate()
+                try { sr?.cancel() } catch (e: Exception) {}
+                pendingGen++                     /* pending restart murda */
+                report("talk", "baat-cheet ON — wake ka mic band (darwaza khula)")
+            } else {
+                report("talk", "baat-cheet OFF — wake wapas pehre par")
+                restart(300)
+            }
+        }
+    }
+
+    /* ═══ 🎛️ J2.2 (F57) — WAKE KA ZINDA LEVEL ═══
+       PEHLE: wake ka dB Kotlin mein hi reh jata tha (sirf trigger par ek log
+       line) — JS ko pata hi nahi chalta tha ke pehra zinda hai ya murda, aur
+       user ko mic ka haal NAZAR nahi aata tha (F52). AB: har ~300ms ek halki
+       push `__wakeLevel(db, farsh, chokhat, mode)`.
+       ⚠️ EHTIYAT: ye report() se NAHI guzarti — warna KAAN ka 40-entry log har
+       300ms bharta aur asal tareekh mit jati (F03 ka sabaq). Sirf evalToApp. */
+    @Volatile private var lastLevelAt = 0L
+    @Volatile private var lastLevel = 0.0
+    @Volatile private var lastLevelMode = 0
+    private fun r1(v: Double): String = (Math.round(v * 10) / 10.0).toString()
+    private fun pushLevel(d: Double, mode: Int) {
+        val t = System.currentTimeMillis()
+        if (t - lastLevelAt < LEVEL_PUSH_MS) return
+        lastLevelAt = t
+        lastLevel = d
+        lastLevelMode = mode
+        evalToApp("window.__wakeLevel && window.__wakeLevel(" + r1(d) + "," +
+                  r1(floorDb) + "," + r1(trigDb) + "," + mode + ")")
+    }
 
     /* L1 — HAAL badla to foran amal */
     fun onHaal(h: String) {
@@ -1054,6 +1133,14 @@ class WakeWordService : Service() {
         s.append(",\"floor\":").append(Math.round(floorDb))
         s.append(",\"trig\":").append(Math.round(trigDb))
         s.append(",\"cal\":").append(if (calOk) "true" else "false")
+        /* 🎛️ J2.2 + J2.3 — level ki taazgi aur baat-cheet ka hisab panel par */
+        s.append(",\"lv\":").append(Math.round(lastLevel))
+        s.append(",\"lvMode\":").append(lastLevelMode)
+        s.append(",\"lvAge\":").append(if (lastLevelAt > 0L) ((System.currentTimeMillis() - lastLevelAt) / 1000L) else -1L)
+        s.append(",\"talkPref\":").append(if (talkPrefOn()) "true" else "false")
+        s.append(",\"talk\":").append(if (WakeState.talkActive()) "true" else "false")
+        s.append(",\"talkLeft\":").append(WakeState.talkLeft() / 1000L)
+        s.append(",\"talkTurns\":").append(WakeState.talkTurns)
         s.append(",\"gates\":").append(gateLoops)
         s.append(",\"fgs\":").append(if (fgsOk) "true" else "false")
         s.append(",\"held\":").append(if (loopHeld) "true" else "false")

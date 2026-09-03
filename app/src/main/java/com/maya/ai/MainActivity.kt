@@ -129,7 +129,7 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = MayaWebViewClient()
         setContentView(webView)
         webView.loadUrl("https://$VIRTUAL_HOST/assets/web/index.html")
-        Toast.makeText(this, "MAYA v5.12.0 • 🛡️ JAWAB PAKKA: jawab ka watchdog + mic khud dobara + sahi error code", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "MAYA v5.12.5 • 🎛️ MIC NAZAR: mic ka haal hamesha nazar + wake ka zinda level + baat-cheet mode", Toast.LENGTH_LONG).show()
         // WebView zinda hai ya nahi — 8 second baad native check (v4.0.1: onPageFinished/markAlive true karte hain)
         webViewAlive = false
         android.os.Handler(Looper.getMainLooper()).postDelayed({
@@ -321,7 +321,7 @@ class MainActivity : AppCompatActivity() {
     inner class MayaBridge {
 
         @JavascriptInterface
-        fun appVersion(): String = "5.12.0-native"
+        fun appVersion(): String = "5.12.5-native"
 
         /* 🎚️ P9 SUKOON — JS (SUKOON) har awaaz/mic ki HAAL yahan bhejti hai.
            KHALI | BOL_RAHI | APP_SUN — WakeWordService har mic-darwaze par isi
@@ -355,6 +355,16 @@ class MainActivity : AppCompatActivity() {
            tha aur "HAAL: KHALI" likh kar humein galat raaste par bhejta tha jabke
            asli mujrim `pausedByApp=true` tha. Ab dono taraf ka haal nazar aata hai
            aur JS/Kotlin beech ka MISMATCH pakda jata hai. */
+        /* 🎛️ J2.3 (v5.12.5) — BAAT-CHEET MODE ka darwaza. JS batata hai ke
+           "Maya" wala darwaza khula hai (true) ya band (false); us dauran wake
+           service apna mic BAND rakhti hai. Nateeja: ek turn mein mic EK dafa
+           khulta hai (pehle wake + app = do) aur wake ke baad 400ms ki race (F56)
+           khud khatam. Mudat (90s) + heartbeat sirf safety net hain. */
+        @JavascriptInterface
+        fun talk(on: Boolean) {
+            try { WakeWordService.talkMode(on) } catch (e: Exception) {}
+        }
+
         @JavascriptInterface
         fun wakeState(): String {
             return try { WakeWordService.stateJson() } catch (e: Exception) { "{\"err\":1}" }

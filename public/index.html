@@ -377,6 +377,37 @@ nav button.active{color:#FFB347;background:#441c05}
 #drawer{top:0;bottom:0;left:0;right:auto;width:78vw;max-width:300px}
 #drawerScrim{top:0;left:0;right:0;bottom:0}
 
+/* ═══════════ 🎛️ J2.1 (v5.12.5 / F52) — MIC HAAL BAR ═══════════
+   Aap ki shikayat: "mic par on/off hota rehta hai jo irritating hai... mujhe
+   pata hi nahi chalta mic on hua ya nahi." Ilaj: har waqt nazar aane wali ek
+   patti — STATE + RANG + LAFZ + ZINDA LEVEL (icon akela kaam nahi karta).
+   Purane WebView ke liye conservative: flex (gap nahi), koi clamp/min/max,
+   color-mix, inset ya backdrop-filter nahi. */
+#micHaal{flex:none;display:flex;align-items:center;padding:5px 10px;background:var(--panel2);
+  border-bottom:1px solid var(--line);font-size:12px;font-weight:700;letter-spacing:.3px;
+  color:var(--dim);line-height:1.3}
+#micHaal .mh-ic{font-size:14px;margin-right:6px;flex:none}
+#micHaal .mh-tx{margin-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:54vw}
+#micHaal .mh-bar{position:relative;display:block;width:70px;height:8px;border-radius:5px;
+  background:var(--panel);border:1px solid var(--line);overflow:hidden;flex:none}
+#micHaal .mh-bar i{position:absolute;top:0;left:0;bottom:0;width:4%;background:var(--dim);
+  border-radius:4px;transition:width .12s linear}
+#micHaal .mh-db{margin-left:8px;font-size:11px;color:var(--dim);flex:none}
+#micHaal[data-state="wake"]{color:#8ff0c0}
+#micHaal[data-state="wake"] .mh-bar i{background:var(--ok)}
+#micHaal[data-state="talk"]{color:#bff3ff}
+#micHaal[data-state="talk"] .mh-bar i{background:var(--cyan)}
+#micHaal[data-state="mic"]{color:#cfe6ff}
+#micHaal[data-state="mic"] .mh-bar i{background:var(--cyan2)}
+#micHaal[data-state="soch"]{color:#ffe0a3}
+#micHaal[data-state="soch"] .mh-bar i{background:var(--warn)}
+#micHaal[data-state="bol"]{color:#e6d6ff}
+#micHaal[data-state="bol"] .mh-bar i{background:var(--purple)}
+#micHaal[data-state="masla"]{color:#ffc9c9}
+#micHaal[data-state="masla"] .mh-bar i{background:var(--danger)}
+#micHaal[data-state="band"]{color:var(--dim)}
+#micHaal[data-state="band"] .mh-bar i{background:var(--line)}
+
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD"  (v4.1.0)
    ----------------------------------------------------------------------------
@@ -568,9 +599,20 @@ nav{padding:8px 10px 10px}
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.10.2 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.12.5 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
+
+  <!-- 🎛️ J2.1 (F52) — MIC HAAL BAR: mic ka haal HAR TAB par nazar (state + rang +
+       lafz + zinda level). Ye patti is liye header ke neeche hai ke orb/chat kisi
+       bhi tab par ho, haal kabhi chhupe na. -->
+  <div id="micHaal" data-state="band" role="status" aria-live="polite"
+       title="Android ka system mic-nishan cloud-wake ki wajah se jhilmilata hai; offline wake (Phase 4) mein saabit rahega">
+    <span class="mh-ic" id="mhIc">💤</span>
+    <span class="mh-tx" id="mhTx">WAKE BAND</span>
+    <span class="mh-bar"><i id="mhFill"></i></span>
+    <span class="mh-db" id="mhDb"></span>
+  </div>
 
   <main>
     <!-- ============ HOME (orb — video jaisa) ============ -->
@@ -1141,6 +1183,10 @@ nav{padding:8px 10px 10px}
           <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labSukoon"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
         </div>
         <div class="ui-row">
+          <div class="ui-row-txt">🗣️ BAAT-CHEET — <b>ek turn mein mic EK dafa</b> <small>(default ON · "Maya" ke baad darwaza khula rahe to wake ka mic band — app ka mic turn-by-turn khud dobara. Mic ke open/close cycle AADHE, is liye system mic-nishan kam jhilmilata hai. ⚖️ SACH: Android ka system nishan cloud-wake ki wajah se phir bhi halka jhilmilayega — poori tarah SAABIT sirf offline wake (Phase 4) mein)</small></div>
+          <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labTalk"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
+        </div>
+        <div class="ui-row">
           <div class="ui-row-txt">🕸️ KHUD-MUKHTAR — <b>Maya khud sochti hai</b> <small>(P6 · 👁️ abhi ka HAAL dimaag ko · 🧠 aap ki AADAT khud pakar kar tajweez · 📌 adhoora kaam yaad · 🛡️ bol-budget 6/din + raat 12-7 khamosh. <b>Sirf 🟢 SABZ kaam — call/SMS kabhi nahi.</b>)</small></div>
           <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labKhud"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
         </div>
@@ -1511,6 +1557,7 @@ window.__nativeRms = function(db){
     var pct = Math.max(4, Math.min(100, Math.round(((db || 0) + 2) * 5)));
     document.querySelectorAll(".micbar").forEach(function(el){ el.style.width = pct + "%"; });
   } catch(e){}
+  try { HAALBAR.appLevel(db); } catch(e){}     /* 🎛️ J2.1 — MIC HAAL BAR ka zinda level */
 };
 window.__nativeSpeechErr = function(code){
   listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle"); interimEl.textContent = "";
@@ -1666,7 +1713,7 @@ var SCHEMA = {
 /* ───────────────────────── 🧪 FLAGS — har nayi cheez ek switch ke peeche ───── */
 var FLAGS = {
   KEY: "maya_flags",
-  DEF: { naap: true, saaf: false, malik: false, poolTools: false, suno: false, sach: false, boli: false, ijazat: false, bijli: false, aankh: false, nazar: false, sukoon: true, khud: false },  /* naap + sukoon default ON (bay-zarar / bugfix) · khud (P6) default OFF — pehle sabit ho, phir chale */
+  DEF: { naap: true, saaf: false, malik: false, poolTools: false, suno: false, sach: false, boli: false, ijazat: false, bijli: false, aankh: false, nazar: false, sukoon: true, talk: true, khud: false }   /* 🎛️ J2.3: talk (baat-cheet) default ON — malik ka faisla */,  /* naap + sukoon default ON (bay-zarar / bugfix) · khud (P6) default OFF — pehle sabit ho, phir chale */
   v: null,
   load: function () {
     if (FLAGS.v) return FLAGS.v;
@@ -4417,7 +4464,7 @@ var JAWAB = {
   speakBudget: 0,
   thinkGen: 0,
   n: { watchdog: 0, err: 0, reListen: 0, ignore: 0, thinkReset: 0, speakReset: 0, breaks: 0 },
-  lastErr: 0, lastWhy: "", noMatchStreak: 0, netStreak: 0, clientStreak: 0,
+  lastErr: 0, lastWhy: "", errAt: 0, noMatchStreak: 0, netStreak: 0, clientStreak: 0,
   retryN: 0, retryT: 0,           /* dobara-suno ka circuit breaker (F45+) */
 
   mark: function (w, budget) { JAWAB.at[w] = Date.now(); if (budget) JAWAB.speakBudget = budget; },
@@ -4483,7 +4530,7 @@ var JAWAB = {
   /* STT ki nakami ka FAISLA — har code ka apna amal (F44 + F45) */
   sttError: function (code) {
     code = +code || 0;
-    JAWAB.lastErr = code; JAWAB.n.err++; JAWAB.clear("listen");
+    JAWAB.lastErr = code; JAWAB.n.err++; JAWAB.errAt = Date.now(); JAWAB.clear("listen");
     var name = JAWAB.ERRNAME[code] || ("code " + code + " (anpehchan)");
     JAWAB.lastWhy = name;
     try { KAAN.push("sttErr", code + " — " + name); } catch (e) {}
@@ -4610,6 +4657,148 @@ var JAWAB = {
            " (aakhri " + JAWAB.lastErr + " — " + (JAWAB.lastWhy || "—") + ")" +
            " · mic dobara " + JAWAB.n.reListen + " (breaker " + JAWAB.n.breaks + ")" +
            " · wake ignore " + JAWAB.n.ignore;
+  }
+};
+
+/* ═══════════ 🎛️ HAALBAR (v5.12.5 / J2) — MIC KA HAAL, HAMESHA NAZAR ═══════════
+   Aap ki shikayat: "mic par on/off horha ha jo ke irritating ha... mujhe pata hi
+   nhi chalna mic on hua ha ya nhi." Forensic: F52 (haal nazar nahi aata) +
+   F57 (wake ka level Kotlin se JS tak nahi jata) + F56 (wake ke baad 400ms race).
+
+   Ye module SIRF dikhata + milaan (reconcile) karta hai:
+   · 7 state, har ek ka apna RANG aur LAFZ (icon akela andhere mein kaam nahi karta)
+   · ZINDA LEVEL: app ke mic se (`__nativeRms`) aur wake se (`__wakeLevel` — Kotlin
+     har ~300ms bhejta hai, pehre aur recognizer DONO se) → bar saans leta hai
+   · level PURANA ho jaye to ⚠️ — yaani "wake ON likha hai magar sun nahi rahi"
+     ka saboot bhi nazar aata hai (pehle andhera tha)
+   · BAAT-CHEET MODE ka darwaza yahan se Kotlin tak jata hai (J2.3): darwaza khula
+     = wake ka mic band = ek turn mein mic EK dafa
+
+   ⚖️ SACH (J2.4): Android ka SYSTEM mic-nishan cloud-wake ki wajah se jhilmilata
+   rehta hai. Ye patti usay khatam nahi karti — wo kaam offline wake (Phase 4) ka
+   hai. Iska kaam hai ke aap ko har lamhe PATA rahe ke asal mein kya ho raha hai. */
+var HAALBAR = {
+  el: null, ic: null, tx: null, fill: null, db: null,
+  FRESH: 1200,             /* Kotlin ka level is se purana = taaza nahi */
+  STALE_WARN: 6000,        /* is se purana = ⚠️ wake sun nahi rahi */
+  wakeDb: 0, wakeFloor: 0, wakeTrig: 0, wakeMode: 0, wakeAt: 0,
+  appDb: 0, appAt: 0,
+  talkPushed: false, turns: 0, n: { masla: 0, stale: 0 },
+  state: "", txLast: "", paints: 0,
+  SACH: "Android ka system mic-nishan cloud-wake ki wajah se jhilmilata hai; SAABIT mic sirf offline wake (Phase 4) mein.",
+
+  init: function () {
+    HAALBAR.el = document.getElementById("micHaal");
+    HAALBAR.ic = document.getElementById("mhIc");
+    HAALBAR.tx = document.getElementById("mhTx");
+    HAALBAR.fill = document.getElementById("mhFill");
+    HAALBAR.db = document.getElementById("mhDb");
+  },
+
+  /* Kotlin: window.__wakeLevel(db, farsh, chokhat, mode) — mode 1=pehra, 2=recognizer */
+  wakeLevel: function (db, floor, trig, mode) {
+    HAALBAR.wakeDb = +db || 0; HAALBAR.wakeFloor = +floor || 0;
+    HAALBAR.wakeTrig = +trig || 0; HAALBAR.wakeMode = +mode || 1;
+    HAALBAR.wakeAt = Date.now();
+  },
+  /* app ka mic: SpeechRecognizer ka RMS (-2..10 dB) */
+  appLevel: function (db) { HAALBAR.appDb = +db || 0; HAALBAR.appAt = Date.now(); },
+  /* koi masla — bar par 8 second tak nazar rahe */
+  masla: function (why) { HAALBAR.errWhy = String(why || "masla"); HAALBAR.errAt = Date.now(); HAALBAR.n.masla++; },
+  errWhy: "", errAt: 0,
+
+  pct: function (db, mode, floor) {
+    var p;
+    if (mode === 2) p = (db + 2) * 5;                                  /* recognizer RMS */
+    else p = (floor > 0) ? ((db - floor) * 4 + 6) : ((db - 20) * 3);   /* pehra: farsh ke upar */
+    return Math.max(4, Math.min(100, Math.round(p)));
+  },
+
+  /* haal ka FAISLA — tarteeb ahem hai (sab se khaas pehle) */
+  decide: function () {
+    var t = Date.now(), o = { st: "band", ic: "\uD83D\uDCA4", tx: "WAKE BAND \u2014 \uD83C\uDFA4 dabao aur boleyn", pct: 4, db: "" };
+    var wakeOn = false;
+    try { wakeOn = !!(settings && settings.wakeWord); } catch (e) {}
+
+    /* 1) fresh masla (JAWAB ka STT error ya wake ki khabar) */
+    if (HAALBAR.errAt && t - HAALBAR.errAt < 8000) {
+      o = { st: "masla", ic: "\u26A0\uFE0F", tx: "MASLA: " + HAALBAR.errWhy, pct: 8, db: "" };
+      return o;
+    }
+    /* 2) app ka mic khula — aap bol rahe hain */
+    if (typeof listening !== "undefined" && listening) {
+      var fresh = (t - HAALBAR.appAt) < 1500;
+      o = { st: "mic", ic: "\uD83C\uDFA4", tx: "AAP BOLEIN \u2014 sun rahi hun", pct: fresh ? HAALBAR.pct(HAALBAR.appDb, 2, 0) : 6,
+            db: fresh ? (Math.round(HAALBAR.appDb) + "dB") : "" };
+      return o;
+    }
+    /* 3) jawab soch rahi hai */
+    if (typeof thinking !== "undefined" && thinking) {
+      var sa = 0; try { sa = Math.round(JAWAB.age("think") / 1000); } catch (e) {}
+      o = { st: "soch", ic: "\uD83E\uDDE0", tx: "SOCH RAHI" + (sa ? (" (" + sa + "s)") : "") + "\u2026", pct: 30, db: "" };
+      return o;
+    }
+    /* 4) Maya bol rahi hai */
+    if (typeof speaking !== "undefined" && speaking) {
+      var sb = 0; try { sb = Math.round(JAWAB.age("speak") / 1000); } catch (e) {}
+      o = { st: "bol", ic: "\uD83D\uDD0A", tx: "BOL RAHI" + (sb ? (" (" + sb + "s)") : "") + "\u2026", pct: 40, db: "" };
+      return o;
+    }
+    if (!wakeOn) { o.tx = "WAKE BAND \u2014 \uD83C\uDFA4 dabao aur boleyn"; return o; }
+    /* 5) baat-cheet: darwaza khula, mic band — boleyn to mic khud khulega */
+    var door = false, left = 0;
+    try { door = KAAN.DARWAZA.isOpen(); left = KAAN.DARWAZA.left(); } catch (e) {}
+    if (door) {
+      o = { st: "talk", ic: "\uD83D\uDEAA", tx: "BAAT-CHEET \u2014 boleyn (" + left + "s) \u00B7 wake ka mic band", pct: 10, db: "" };
+      return o;
+    }
+    /* 6) wake ka zinda level (saboot) — ya purana level = ⚠️ */
+    var age = HAALBAR.wakeAt ? (t - HAALBAR.wakeAt) : -1;
+    if (age >= 0 && age < HAALBAR.FRESH) {
+      o = { st: "wake", ic: "\uD83D\uDC42",
+            tx: "WAKE SUN RAHI \u2014 " + (HAALBAR.wakeMode === 2 ? "kaan khula" : "pehra") +
+                "  \u00B7  \"Maya\" boleyn", pct: HAALBAR.pct(HAALBAR.wakeDb, HAALBAR.wakeMode, HAALBAR.wakeFloor),
+            db: Math.round(HAALBAR.wakeDb) + "dB" + ((HAALBAR.wakeMode === 1 && HAALBAR.wakeFloor) ? (" / farsh " + Math.round(HAALBAR.wakeFloor)) : "") };
+      return o;
+    }
+    if (age >= HAALBAR.STALE_WARN) {
+      HAALBAR.n.stale++;
+      o = { st: "masla", ic: "\u26A0\uFE0F",
+            tx: "WAKE sun nahi rahi \u2014 " + Math.round(age / 1000) + "s se level nahi aaya (KAAN DOCTOR dekhein)", pct: 6, db: "" };
+      return o;
+    }
+    o = { st: "wake", ic: "\uD83D\uDC42", tx: "WAKE SUN RAHI \u2026 (level ka intezar)", pct: 6, db: "" };
+    return o;
+  },
+
+  /* har 250ms: baat-cheet ka darwaza milao + bar paint karo */
+  tick: function () {
+    var want = false;
+    try { want = !!(settings.wakeWord && FLAGS.on("talk") && KAAN.DARWAZA.isOpen()); } catch (e) {}
+    if (want !== HAALBAR.talkPushed) {
+      HAALBAR.talkPushed = want;
+      if (want) HAALBAR.turns++;
+      try { pushLog("\uD83D\uDEAA baat-cheet " + (want ? "ON \u2014 wake ka mic band (ek turn = ek mic)" : "OFF \u2014 wake wapas pehre par")); } catch (e) {}
+      try { if (window.MayaBridge && window.MayaBridge.talk) window.MayaBridge.talk(want); } catch (e) {}
+      try { KAAN.push("talk", want ? "ON (turn " + HAALBAR.turns + ")" : "OFF"); } catch (e) {}
+    }
+    var o = HAALBAR.decide();
+    if (!HAALBAR.el) HAALBAR.init();
+    if (!HAALBAR.el) return;
+    if (HAALBAR.el.getAttribute("data-state") !== o.st) HAALBAR.el.setAttribute("data-state", o.st);
+    if (HAALBAR.ic && HAALBAR.ic.textContent !== o.ic) HAALBAR.ic.textContent = o.ic;
+    if (HAALBAR.tx && HAALBAR.txLast !== o.tx) { HAALBAR.txLast = o.tx; HAALBAR.tx.textContent = o.tx; }
+    if (HAALBAR.fill) HAALBAR.fill.style.width = o.pct + "%";
+    if (HAALBAR.db && HAALBAR.db.textContent !== o.db) HAALBAR.db.textContent = o.db;
+    HAALBAR.state = o.st;
+    HAALBAR.paints++;
+  },
+
+  report: function () {
+    return "MIC HAAL BAR: abhi " + (HAALBAR.state || "?") + " \u00B7 baat-cheet " + (HAALBAR.talkPushed ? "ON" : "OFF") +
+           " (" + HAALBAR.turns + " turn) \u00B7 wake level " +
+           (HAALBAR.wakeAt ? (Math.round((Date.now() - HAALBAR.wakeAt) / 100) / 10 + "s pehle, " + Math.round(HAALBAR.wakeDb) + "dB, mode " + HAALBAR.wakeMode) : "ab tak nahi aaya") +
+           " \u00B7 masla " + HAALBAR.n.masla + " \u00B7 level purana " + HAALBAR.n.stale + " \u00B7 paint " + HAALBAR.paints;
   }
 };
 
@@ -8745,6 +8934,19 @@ var KAAN = {
       L.push("  🎧 PEHRA      : " + (K.gate ? "KHULA" : "band") + "  ·  mic sun raha " + (K.listening ? "HAAN" : "nahi") +
              "  ·  farsh " + (K.floor || 0) + "dB  ·  chokhat " + (K.trig || 0) + "dB" +
              (K.cal === false ? "  ·  ⚠️ calibration adhoora" : "") + "  ·  pehre " + (K.gates || 0) + " dafa");
+      /* 🎛️ J2 (F52/F57) — mic ka haal, wake ka ZINDA level aur baat-cheet ka hisab.
+         Pehle panel mein wake ka level tha hi nahi: "wake ON" likha hota tha magar
+         asal mein sun rahi hai ya nahi, pata karne ka koi zariya nahi tha. */
+      L.push("  \uD83C\uDF9B\uFE0F MIC HAAL    : " + (typeof HAALBAR !== "undefined" ? HAALBAR.report() : "bar nahi mila"));
+      L.push("  \uD83D\uDEE0\uFE0F level (Kotlin): " + (K.lvAge >= 0 ? (Math.round(K.lv || 0) + "dB  \u00B7  " + (K.lvAge || 0) + "s pehle  \u00B7  " +
+             (K.lvMode === 2 ? "wake ka kaan khula" : (K.lvMode === 1 ? "khamoshi ka pehra" : "?"))) : "ab tak koi level nahi aaya") +
+             (K.lvAge >= 0 && K.lvAge > 6 ? "   \u26A0\uFE0F PURANA \u2014 wake sun nahi rahi" : ""));
+      L.push("  \uD83D\uDEAA BAAT-CHEET : " + (K.talkPref === false ? "BAND (LAB switch OFF)" : "ON (default)") +
+             (K.talk ? ("  \u00B7  ABHI khula (" + (K.talkLeft || 0) + "s baki)") : "  \u00B7  abhi band") +
+             "  \u00B7  turn " + (K.talkTurns || 0) +
+             "  \u00B7  faida: ek turn mein mic EK dafa khulta hai (cycle aadha)");
+      /* 🛡️ J1 ka referee bhi panel par (v5.12.0) — warna uska hisab sirf log mein rehta */
+      if (typeof JAWAB !== "undefined") L.push("  \uD83D\uDEE1\uFE0F JAWAB      : " + JAWAB.report());
       if ((K.selfFix || 0) > 0) {
         L.push("  🔧 khud-sudhaar: " + K.selfFix + " dafa (aakhri: " + (K.fixWhy || "?") + ")" +
                "  — agar ye barh raha hai to JS ka HAAL bhejna toota hua hai");
@@ -9077,6 +9279,14 @@ window.__wakeLog = function (kind, data) {
   try { KAAN.push(String(kind || "?"), data); } catch (e) {}
 };
 
+/* 🎛️ J2.2 (F57) — WAKE KA ZINDA LEVEL. Kotlin har ~300ms bhejta hai:
+   mode 1 = khamoshi ka pehra (gate), mode 2 = wake ka recognizer sun raha.
+   PEHLE ye rasta tha hi nahi: wake ka dB sirf trigger wali log line mein aata
+   tha, yani "wake zinda hai ya murda" ka koi NAZAR aane wala saboot nahi tha. */
+window.__wakeLevel = function (db, floor, trig, mode) {
+  try { HAALBAR.wakeLevel(db, floor, trig, mode); } catch (e) {}
+};
+
 /* Kotlin ab SAARE andaze bhejta hai — faisla yahan hota hai */
 window.__wakeHeard = function (payload) {
   var alts = [];
@@ -9164,6 +9374,7 @@ window.__wakeHealth = function () {
 };
 
 window.__wakeErr = function(code){
+  try { HAALBAR.masla("wake ka circuit khula (err " + code + ") — KAAN DOCTOR dekhein"); } catch (e) {}
   /* 🕊️ P9 — user ka wake switch KABHI khud mat mitao. Pehle yahan
      settings.wakeWord = false ho jata tha — isi liye "wake ON karo to baad
      mein apne aap band mila" karta tha. Ab: sirf batao, faisla aap ka. */
@@ -9555,6 +9766,7 @@ function labPaint(){
   n = $("#labBijli"); if (n) n.checked = f.bijli === true;
   n = $("#labNazar"); if (n) n.checked = f.nazar === true;
   n = $("#labSukoon"); if (n) n.checked = f.sukoon === true;
+  n = $("#labTalk");  if (n) n.checked = f.talk === true;   /* 🎛️ J2.3 — baat-cheet (default ON) */
   n = $("#labKhud");  if (n) n.checked = f.khud === true;
   h = $("#labHint");
   if (h) {
@@ -9570,6 +9782,7 @@ function labPaint(){
     if (f.bijli) on.push("⚡ bijli");
     if (f.nazar) on.push("👁️ nazar");
     if (f.sukoon) on.push("🎚️ sukoon");
+    if (f.talk) on.push("🗣️ baat-cheet");
     if (f.khud) on.push("🕸️ khud-mukhtar");
     h.className = "ui-hint" + (on.length ? " ok" : "");
     h.textContent = on.length ? ("Chalu: " + on.join(" · ") + "   •   " + NAAP.hist.length + " turn naape ja chuke")
@@ -9600,6 +9813,21 @@ function labPaint(){
   sw("labSukoon", "sukoon", "🎚️ awaaz+mic sukoon");
   /* 🕸️ P6 KHUD-MUKHTAR — switch ON hote hi purani 6-minute chatter band, KHUD tick chalu */
   sw("labKhud", "khud", "🕸️ khud-mukhtar");
+  /* 🎛️ J2.3 — BAAT-CHEET MODE: switch + Kotlin mirror (sukoon ki tarah LIVE pref).
+     Kotlin isay haalBlock() mein parhta hai; toggle par foran asar, ubharna nahi parta. */
+  sw("labTalk", "talk", "🗣️ baat-cheet mode (ek turn = ek mic)");
+  var labTalkMirror = function () {
+    var on = false;
+    try { on = FLAGS.on("talk"); } catch (e) {}
+    try { if (window.MayaBridge && window.MayaBridge.setPref) window.MayaBridge.setPref("talk", on); } catch (e) {}
+    /* switch OFF karte hi Kotlin ko batana zaroori hai — warna darwaza khula reh
+       jaye aur wake band (ulta bhi: ON par agli baar darwaza khulte hi chal jayega) */
+    if (!on) { try { HAALBAR.talkPushed = true; } catch (e) {} try { HAALBAR.tick(); } catch (e) {} }
+  };
+  labTalkMirror();
+  var ltk = $("#labTalk");
+  if (ltk) ltk.addEventListener("change", labTalkMirror);
+
   var lkd = $("#labKhud");
   if (lkd) lkd.addEventListener("change", function(){
     try {
@@ -10480,16 +10708,34 @@ if (NATIVE) setTimeout(function(){ try { SUKOON.resync(); } catch(e){} }, 1800);
    DAIMI mar jata tha aur wake bhi ignore hoti thi. try/catch zaroori hai — is
    dil ki dharkan se baqi app ki timing NAHI rukni chahiye. */
 setInterval(function(){ try { JAWAB.watchdog(); } catch (e) {} }, 2000);
-/* 🏷️ v5.12.0 — VERSION KI PEHCHAAN, ab JS taraf se bhi: toast + log line.
+
+/* 🎛️ J2 (F52) — MIC HAAL BAR ka dil: har 250ms haal ka faisla + paint + baat-cheet
+   ka darwaza Kotlin se milana. Isi ek jagah se darwaza jata hai (J2.3) — koi
+   doosra caller nahi, is liye "koi bhool gaya" wala bug mumkin nahi. */
+try { HAALBAR.init(); } catch (e) {}
+setInterval(function(){ try { HAALBAR.tick(); } catch (e) {} }, 250);
+
+/* 🏷️ J2 — VERSION KA EK GHAR. PEHLE header ka subtitle "PERSONAL AI v5.10.2" par
+   JAM gaya tha (koi use update nahi karta tha) — yaani app khud apni pehchaan ka
+   jhoot bolti thi, aur user ko "APK purani hai ya nayi" ka faisla karne mein
+   dhoka hota tha. Ab toast, log aur header teeno ek hi constant se bante hain, aur
+   test-lock gradle ke versionName se milaan karta hai (Section 35). */
+var MAYA_VER = "5.12.5", MAYA_NAAM = "\uD83C\uDF9B\uFE0F MIC NAZAR";
+try {
+  var _st = document.querySelector("#subTitle");
+  if (_st) _st.textContent = "PERSONAL AI v" + MAYA_VER + " \u2728";
+} catch (e) {}
+/* 🏷️ v5.12.5 — VERSION KI PEHCHAAN, ab JS taraf se bhi: toast + log line.
    (v5.10.3 ka toast Kotlin mein tha — MainActivity.onCreate; wo barqarar hai.
    Ye JS toast ISLIYE naya hai ke APK aur web-asset ka version ALAG ho sakta hai:
    purani APK + naya web-asset, ya ulta. Ab dono ek hi line mein nazar aate hain —
-   "native: 5.12.0-native" ke baghair web-asset ka bharosa andaza hai.) */
+   "native: 5.12.5-native" ke baghair web-asset ka bharosa andaza hai.) */
 if (NATIVE) setTimeout(function(){
   try {
     var nv = "?";
     try { if (window.MayaBridge && window.MayaBridge.appVersion) nv = window.MayaBridge.appVersion(); } catch(e){}
-    var v = "MAYA v5.12.0 \u2022 \uD83D\uDEE1\uFE0F JAWAB PAKKA \u2014 watchdog + mic khud dobara + sahi error";
+    var v = "MAYA v" + MAYA_VER + " \u2022 " + MAYA_NAAM +
+            " \u2014 mic ka haal hamesha nazar + wake ka zinda level + baat-cheet mode";
     toast(v);
     pushLog(v + "   (native: " + nv + ")");
   } catch(e){}

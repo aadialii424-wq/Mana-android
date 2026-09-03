@@ -1531,14 +1531,14 @@ Here's a thinking process:
       '👁️ KAAN report mein HAAL (JS) + HAAL (Kotlin) + roko ki ginti nazar aati hai');
 
     /* ── version qanoon ── */
-    is(/appVersion\(\): String = "5\.12\.0-native"/.test(MA) && MA.indexOf('4.3.0-native') === -1 &&
+    is(/appVersion\(\): String = "5\.12\.5-native"/.test(MA) && MA.indexOf('4.3.0-native') === -1 &&
        MA.indexOf('5.11.0-native') === -1,
-      '🩹 BONUS — appVersion() ka purana 4.3.0 jhoot bhi ab qatl (v5.12.0 barqarar)');
-    is(fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8').indexOf('maya-v5.12.0') > 0 &&
-       /versionCode 76/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')) &&
-       /versionName "5\.12\.0"/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')) &&
-       fs.readFileSync(path.join(ROOT, 'public/sw.js'), 'utf8').indexOf('maya-v5.12.0') > 0,
-      '🏷️ poore app mein VERSION v5.12.0 (cache saaf, splash saaf, APK saaf)');
+      '🩹 BONUS — appVersion() ka purana 4.3.0 jhoot bhi ab qatl (v5.12.5 barqarar)');
+    is(fs.readFileSync(path.join(ROOT, 'app/src/main/assets/web/sw.js'), 'utf8').indexOf('maya-v5.12.5') > 0 &&
+       /versionCode 77/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')) &&
+       /versionName "5\.12\.5"/.test(fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8')) &&
+       fs.readFileSync(path.join(ROOT, 'public/sw.js'), 'utf8').indexOf('maya-v5.12.5') > 0,
+      '🏷️ poore app mein VERSION v5.12.5 (cache saaf, splash saaf, APK saaf)');
     is(HTML.indexOf('5.8.0') === -1, 'kahi purana 5.8.0 version nazar nahi aata');
 
     /* ── v5.9.1 hotfix — doctor ka jhoota button ab ASAL hai ── */
@@ -2300,10 +2300,12 @@ Here's a thinking process:
       '🎯 F05: appMicBusy() — blind release ki jagah asal haal');
 
     /* ── 🔖 version bump + mirror discipline ── */
-    is(/versionCode 76/.test(GR) && /versionName "5\.12\.0"/.test(GR) &&
-       /"version": "5\.12\.0"/.test(PK) && /maya-v5\.12\.0/.test(SW) &&
-       /5\.12\.0-native/.test(MA) && /MAYA v5\.12\.0/.test(MA) && /MAYA v5\.12\.0/.test(IH),
-      '🔖 v5.12.0 ka bump CHHE jagah (gradle vc76 + package.json + sw.js + appVersion + Kotlin toast + JS toast)');
+    const VER = (GR.match(/versionName "([^"]+)"/) || [])[1] || '';
+    is(/versionCode 77/.test(GR) && VER === '5.12.5' &&
+       /"version": "5\.12\.5"/.test(PK) && /maya-v5\.12\.5/.test(SW) &&
+       /5\.12\.5-native/.test(MA) && /MAYA v5\.12\.5/.test(MA) &&
+       IH.indexOf('var MAYA_VER = "' + VER + '"') > 0 && IH.indexOf('PERSONAL AI v' + VER) > 0,
+      '🔖 v5.12.5 ka bump har jagah + JS ka MAYA_VER gradle ke versionName se MILTA hai (header ka subtitle ab jam nahi ho sakta)');
     is(PUB.indexOf('pushNativePrefs') > 0 && PUB.indexOf('sWakeLang') > 0 &&
        PUB.indexOf('HAAL (Kotlin)') > 0,
       '🪞 public/ mirror tazaa hai (npm run build) — assets aur web ek jaise');
@@ -2772,6 +2774,187 @@ Here's a thinking process:
       is(/STT err 1/.test(J.report()) && /watchdog/.test(J.report()),
         '📊 report() ek line mein poora hisab deta hai (LAB/panel ke liye)', J.report());
     }
+  }
+
+  /* ═══ 35. 🎛️ v5.12.5 "MIC NAZAR" — J2 ke taale (F52, F56, F57 + churn) ═══
+     Aap ki shikayat: "mic par on off horha ha jo ke irritating ha... mujhe pata hi nhi
+     chalna mic on hua ha ya nhi." Ye locks uska ilaj bandhte hain: mic ka haal NAZAR,
+     wake ka ZINDA level, aur baat-cheet mode (ek turn = ek mic). */
+  head('35. 🎛️ v5.12.5 — MIC NAZAR: mic ka haal hamesha nazar + wake ka zinda level + baat-cheet');
+  {
+    const MA = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/MainActivity.kt'), 'utf8');
+    const WS = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/WakeWordService.kt'), 'utf8');
+    const ST = fs.readFileSync(path.join(ROOT, 'app/src/main/java/com/maya/ai/WakeState.kt'), 'utf8');
+    const GR = fs.readFileSync(path.join(ROOT, 'app/build.gradle'), 'utf8');
+
+    /* ── J2.1: bar ka wajood + rang ── */
+    is(HTML.indexOf('id="micHaal"') > 0 && HTML.indexOf('id="mhIc"') > 0 && HTML.indexOf('id="mhTx"') > 0 &&
+       HTML.indexOf('id="mhFill"') > 0 && HTML.indexOf('id="mhDb"') > 0 && /role="status"/.test(HTML),
+      '🎛️ F52: MIC HAAL BAR header ke neeche maujood (icon + lafz + level bar + dB) — HAR TAB par nazar');
+    /* slice SIRF bar ka CSS — aage UI KIT layer hai (wahan @supports ke andar
+       guarded features hote hain, jo yahan galat ilzam lagate) */
+    const CS = HTML.indexOf('#micHaal{');
+    const CE = HTML.indexOf('#micHaal[data-state="band"] .mh-bar i{');
+    const CB = HTML.slice(CS, CE > CS ? CE + 120 : CS + 2000);
+    let have = 0;
+    ['wake', 'talk', 'mic', 'soch', 'bol', 'masla', 'band'].forEach(function (k) {
+      if (CB.indexOf('#micHaal[data-state="' + k + '"]') > 0) have++;
+    });
+    is(CS > 0 && have === 7, '🎨 F52: saat halaton ke APNE rang (icon akela andhere mein kaam nahi karta)', have + '/7');
+    is(CB.indexOf('gap:') === -1 && CB.indexOf('clamp(') === -1 && CB.indexOf('color-mix(') === -1 &&
+       CB.indexOf('backdrop-filter') === -1 && CB.indexOf('inset:') === -1,
+      '📜 bar ka CSS purane WebView ke qawaid ke andar (gap/clamp/color-mix/inset/backdrop-filter nahi)');
+    is(HTML.indexOf('var HAALBAR = {') > 0 && /FRESH: 1200/.test(HTML) && /STALE_WARN: 6000/.test(HTML) &&
+       /decide: function/.test(HTML) && /tick: function/.test(HTML) && /report: function/.test(HTML),
+      '🧭 HAALBAR module: taazgi (1.2s) + purana (6s) ki hadein, faisla, tick, report');
+    is(/WAKE sun nahi rahi/.test(HTML) && /HAALBAR\.n\.stale\+\+/.test(HTML),
+      '⚠️ F52: level purana ho to bar JHOOT nahi bolta — surkh ho kar "WAKE sun nahi rahi" likhta hai');
+
+    /* ── J2.2: zinda level ka rasta ── */
+    is(/window\.__wakeLevel = function \(db, floor, trig, mode\)/.test(HTML) &&
+       /HAALBAR\.wakeLevel\(db, floor, trig, mode\)/.test(HTML) && /HAALBAR\.appLevel\(db\)/.test(HTML),
+      '📡 F57: Kotlin ka __wakeLevel aur app ka __nativeRms — DONO bar tak pohanchte hain');
+    is(/setInterval\(function\(\)\{ try \{ HAALBAR\.tick\(\); \} catch \(e\) \{\} \}, 250\);/.test(HTML),
+      '💓 bar ka dil har 250ms (faisla + paint + darwaza milana)');
+    is(/const val LEVEL_PUSH_MS = 300L/.test(WS) && /pushLevel\(d, 1\)/.test(WS) &&
+       /override fun onRmsChanged\(rmsdB: Float\) \{ pushLevel\(rmsdB\.toDouble\(\), 2\) \}/.test(WS),
+      '📡 F57: wake ke DONO daur level bhejte hain — pehra (1) + recognizer (2, pehle onRmsChanged KHALI tha)');
+    const PL = WS.indexOf('private fun pushLevel');
+    is(PL > 0 && WS.slice(PL, PL + 700).indexOf('evalToApp(') > 0 && WS.slice(PL, PL + 700).indexOf('LEVEL_PUSH_MS') > 0 &&
+       WS.slice(PL, PL + 700).indexOf('report(') === -1,
+      '🧮 level throttle (300ms) + report() se BAHAR — warna KAAN ka 40-entry log har 300ms bharta (F03 ka sabaq)');
+    /* Kotlin mein ye fields \"lv\": ki sorat mein hain (escaped quotes) */
+    is(WS.indexOf('lv\\":') > 0 && WS.indexOf('lvMode\\":') > 0 && WS.indexOf('lvAge\\":') > 0 &&
+       WS.indexOf('talkTurns\\":') > 0 && WS.indexOf('talkLeft\\":') > 0,
+      '📊 stateBits mein level + baat-cheet ka hisab (panel ka saboot, andaza nahi)');
+
+    /* ── J2.3: baat-cheet mode ── */
+    is(/const val TALK_EXP_MS = 90000L/.test(ST) && /fun talkOn\(\)/.test(ST) && /fun talkOff\(\)/.test(ST) &&
+       /fun talkActive\(\)/.test(ST) && /fun talkLeft\(\)/.test(ST),
+      '🚪 J2.3: baat-cheet ka apna ghar WakeState mein (mudat 90s + turn ginti)');
+    is(ST.indexOf('baat-cheet khud khatam') > 0 && /if \(talkUntil > 0L\)/.test(ST) &&
+       ST.indexOf('talk\\":') > 0 && ST.indexOf('talkTurns\\":') > 0,
+      '🛟 J2.3: safety net — mudat khatam YA JS ke heartbeat gayab = mode KHUD khatam (wake daimi band nahi)');
+    is(/if \(s\.talkPrefOn\(\) && WakeState\.talkActive\(\)\)/.test(WS) && /baat-cheet: darwaza khula/.test(WS),
+      '🚦 J2.3/F56: haalBlock() baat-cheet mein wake ka mic rokta hai — ek turn = EK mic, 400ms race khatam');
+    const OT = WS.indexOf('fun onTalk(on: Boolean)');
+    is(OT > 0 && WS.slice(OT, OT + 800).indexOf('stopGate()') > 0 && WS.slice(OT, OT + 800).indexOf('pendingGen++') > 0 &&
+       WS.slice(OT, OT + 800).indexOf('restart(300)') > 0,
+      '🎬 J2.3: mode ON = mic ISI lamhe chhodo (gate + recognizer + pending restart murda); OFF = wapas pehra');
+    is(/const val TALK_POLL_MS = 10000L/.test(WS) &&
+       (WS.match(/why\.startsWith\("baat-cheet"\)/g) || []).length === 2,
+      '🐢 J2.3: baat-cheet ke dauran wake ka poll DHEEMA (10s, dono darwazon par) — nSkip ginti aur CPU dono bachte hain');
+    is(/fun talkPrefOn\(\): Boolean/.test(WS) && /getBoolean\("talk", true\)/.test(WS) &&
+       /fun talkMode\(on: Boolean\)/.test(WS) && /fun talk\(on: Boolean\)/.test(MA),
+      '🌉 J2.3: bridge talk() + LIVE pref (default ON — malik ka faisla), ubharna nahi parta');
+    is((HTML.match(/MayaBridge\.talk\(/g) || []).length === 1 &&
+       /want = !!\(settings\.wakeWord && FLAGS\.on\("talk"\) && KAAN\.DARWAZA\.isOpen\(\)\)/.test(HTML),
+      '🧵 darwaza SIRF ek jagah se Kotlin jata hai (HAALBAR.tick) — "koi bhool gaya" wala bug mumkin nahi');
+    is(HTML.indexOf('id="labTalk"') > 0 && /sw\("labTalk", "talk"/.test(HTML) && /talk: true,/.test(HTML) &&
+       /setPref\("talk", on\)/.test(HTML),
+      '🎚️ LAB mein BAAT-CHEET ka apna switch + pref mirror (faisla aap ke haath mein)');
+
+    /* ── J2.4: imaandari + panel + version ── */
+    is(/SACH: "Android ka system mic-nishan cloud-wake/.test(HTML) && /offline wake \(Phase 4\)/.test(HTML) &&
+       HTML.indexOf('title="Android ka system mic-nishan') > 0,
+      '⚖️ J2.4: imaandar line UI mein — jhilmilahat KAM hui, khatam nahi (SAABIT mic Phase 4 mein)');
+    is(HTML.indexOf('MIC HAAL    : ') > 0 && HTML.indexOf('level (Kotlin): ') > 0 &&
+       HTML.indexOf('BAAT-CHEET : ') > 0 && /JAWAB\.report\(\)/.test(HTML),
+      '🖥️ panel par nayi lines: MIC HAAL · level (Kotlin) · BAAT-CHEET (turn) · JAWAB (referee ka hisab)');
+    const VER2 = (GR.match(/versionName "([^"]+)"/) || [])[1] || '';
+    is(HTML.indexOf('var MAYA_VER = "' + VER2 + '"') > 0 && HTML.indexOf('PERSONAL AI v' + VER2) > 0 &&
+       /"MAYA v" \+ MAYA_VER/.test(HTML),
+      '🏷️ bonus: header subtitle + toast + log EK constant se (pehle v5.10.2 par jam tha) — gradle se milaan', VER2);
+
+    /* ── Qanoon 9 ── */
+    const FX = fs.readFileSync(path.join(ROOT, 'docs/FIX-v5.12.5-mic-nazar.md'), 'utf8');
+    const RP = fs.readFileSync(path.join(ROOT, 'docs/REPORT-v5.12.5-aam-zubaan.md'), 'utf8');
+    is(/## 📱 RELEASE REPORT/.test(FX) && /✅ PASS/.test(FX) && /❌ FAIL/.test(FX) && /adhoora/i.test(FX) &&
+       /Imaandari/.test(FX),
+      '📱 Qanoon 9: v5.12.5 ki release report — kya naya, PASS/FAIL, kya adhoora, imaandari');
+    is((RP.match(/- \[ \]/g) || []).length >= 10 && /## 1\)/.test(RP) && /## 5\)/.test(RP) &&
+       /FAIL ka nishan/.test(RP),
+      '📄 Qanoon 9: v5.12.5 ka EK PARCHA (tick ✅ layak checklist + pehchaan)');
+  }
+
+  /* ═══ 35b. 🧪 HAALBAR ka AMAL — bar ko chalaa kar parakha ═══ */
+  head('35b. 🧪 HAALBAR ka AMAL — saat halatein, level ka hisab, baat-cheet ka darwaza');
+  {
+    const HA = HTML.indexOf('var HAALBAR = {');
+    const HB = HTML.indexOf('function reply(text, wasVoice, link){');
+    is(HA > 0 && HB > HA, '🔬 HAALBAR ka poora module index.html se alag nikala ja saka');
+    const HSRC = HTML.slice(HA, HB);
+    const sleep = (ms) => new Promise(function (r) { setTimeout(r, ms); });
+
+    function barWorld(opts) {
+      const dom = new JSDOM('<!doctype html><body><div id="micHaal" data-state="band">' +
+        '<span id="mhIc"></span><span id="mhTx"></span><span class="mh-bar"><i id="mhFill"></i></span>' +
+        '<span id="mhDb"></span></div></body>', { runScripts: 'dangerously' });
+      const w = dom.window;
+      const st = { logs: [], kaan: [], talk: [], bridge: 0 };
+      w.settings = Object.assign({ wakeWord: true }, (opts || {}).settings || {});
+      w.listening = false; w.thinking = false; w.speaking = false; w.__door = false;
+      w.__bridgeTalk = opts && opts.bridgeTalk;      /* true = MayaBridge maujood */
+      w.FLAGS = { on: function (k) { return k === 'talk'; } };
+      w.pushLog = function (m) { st.logs.push(m); };
+      w.KAAN = { push: function (k, d) { st.kaan.push(k + ':' + d); },
+                 DARWAZA: { isOpen: function () { return !!w.__door; }, left: function () { return 7; } } };
+      w.JAWAB = { age: function (k) { return k === 'think' ? 3000 : 1500; }, report: function () { return 'j'; } };
+      if (w.__bridgeTalk) w.MayaBridge = { talk: function (on) { st.talk.push(on); } };
+      w.eval(HSRC);
+      w.HAALBAR.init();
+      return { w: w, H: w.HAALBAR, st: st, d: w.document };
+    }
+    const tx = (d) => d.getElementById('mhTx').textContent;
+    const fill = (d) => parseInt(d.getElementById('mhFill').style.width, 10);
+
+    { const { H, d } = barWorld({});
+      H.wakeLevel(41, 34, 48, 1); H.tick();
+      is(H.state === 'wake' && /WAKE SUN RAHI/.test(tx(d)) && /pehra/.test(tx(d)),
+        '👂 F52: wake ka level taaza = "WAKE SUN RAHI — pehra" (saboot Kotlin se)', tx(d));
+      is(fill(d) > 10 && /41dB/.test(d.getElementById('mhDb').textContent),
+        '📈 level bar hila aur dB nazar aaya (sirf icon nahi)', fill(d) + '% · ' + d.getElementById('mhDb').textContent);
+      H.wakeLevel(4, 0, 0, 2); H.tick();
+      is(/kaan khula/.test(tx(d)), '👂 F57: recognizer ke daur ka level alag pehchan ("kaan khula")', tx(d)); }
+
+    { const { H, d } = barWorld({});
+      d.getElementById('mhTx'); H.appDb = 0;
+      const w2 = d.defaultView; w2.listening = true; H.appLevel(4); H.tick();
+      is(H.state === 'mic' && /AAP BOLEIN/.test(tx(d)) && fill(d) === 30,
+        '🎤 F52: app ka mic khula = "AAP BOLEIN" + zinda level', tx(d) + ' ' + fill(d) + '%');
+      w2.listening = false; w2.thinking = true; H.tick();
+      is(H.state === 'soch' && /SOCH RAHI \(3s\)/.test(tx(d)), '🧠 soch ka haal + kitne second se', tx(d));
+      w2.thinking = false; w2.speaking = true; H.tick();
+      is(H.state === 'bol' && /BOL RAHI/.test(tx(d)), '🔊 bolne ka haal', tx(d)); }
+
+    { const { w, H, d, st } = barWorld({ bridgeTalk: true });
+      w.speaking = false; w.__door = true; H.tick();
+      is(H.state === 'talk' && /BAAT-CHEET/.test(tx(d)) && st.talk.length === 1 && st.talk[0] === true,
+        '🚪 J2.3: darwaza khulte hi Kotlin ko talk(true) — wake ka mic band (ek turn = ek mic)', tx(d));
+      H.tick(); H.tick();
+      is(st.talk.length === 1, '🧵 J2.3: bar bar push NAHI (sirf transition par) — spam nahi', st.talk.length + ' push');
+      w.__door = false; H.tick();
+      is(st.talk.length === 2 && st.talk[1] === false && H.talkPushed === false,
+        '🚪 J2.3: darwaza band hote hi talk(false) — wake wapas pehre par (mudat khatam ka intezar nahi)');
+      is(H.turns === 1 && /baat-cheet ON/.test(st.logs.join(' ')),
+        '🧮 turn ki ginti + log (acceptance ka saboot: ek turn = ek mic)', H.turns + ' turn'); }
+
+    { const { w, H, d } = barWorld({});
+      H.masla('mic ki ijazat nahi'); H.tick();
+      is(H.state === 'masla' && /MASLA: mic ki ijazat nahi/.test(tx(d)),
+        '⚠️ masla bar par 8 second tak LIKHA rehta hai (chup-chaap nahi)', tx(d));
+      H.errAt = 0; H.wakeAt = Date.now() - 9000; H.tick();
+      is(H.state === 'masla' && /WAKE sun nahi rahi/.test(tx(d)) && H.n.stale === 1,
+        '🕳️ F52: level 6s se purana = "WAKE sun nahi rahi" (wake ON ka jhoot pakda gaya)', tx(d));
+      w.settings.wakeWord = false; H.wakeAt = Date.now(); H.tick();
+      is(H.state === 'band' && /WAKE BAND/.test(tx(d)), '💤 wake switch OFF = saaf lafz (andaza nahi)', tx(d)); }
+
+    { const { H } = barWorld({});
+      is(H.pct(34, 1, 34) < H.pct(50, 1, 34) && H.pct(90, 1, 34) === 100 && H.pct(-5, 2, 0) >= 4,
+        '🧮 level ka hisab: farsh ke upar bar barhta hai, 100% par rukta hai, neeche 4% se nahi girta');
+      H.wakeLevel(41, 34, 48, 1); H.masla('x');
+      is(/MIC HAAL BAR/.test(H.report()) && /wake level/.test(H.report()),
+        '📊 report() panel ke liye ek line mein poora hisab deta hai', H.report().slice(0, 60) + '…'); }
   }
 
     console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');

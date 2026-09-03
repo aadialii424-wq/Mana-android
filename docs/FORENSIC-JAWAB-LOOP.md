@@ -264,6 +264,30 @@ ka faisla hai — J1 ne sirf usay **be-asar se ba-asar** kiya hai.
 10. Ek turn mein log mein **ek** hi `mic chala` entry (do nahi) → cycle aadha.
 11. 10 minute ki baat-cheet mein system mic-dot ke **open/close events** pehle se kam (log ginti se saboot).
 
+---
+
+#### ✅ J2 ka AMAL — v5.12.5 "MIC NAZAR" SHIPPED (1320/1320 test GREEN)
+
+Tafseel: [`FIX-v5.12.5-mic-nazar.md`](FIX-v5.12.5-mic-nazar.md) · parcha:
+[`REPORT-v5.12.5-aam-zubaan.md`](REPORT-v5.12.5-aam-zubaan.md)
+
+Naya JS module **`HAALBAR`** (MIC HAAL BAR) + Kotlin mein **`WakeState.talk*`** (baat-cheet
+mode) + `WakeWordService.pushLevel()` (zinda level).
+
+| Plan | Amal | Wajah |
+|---|---|---|
+| 5 state, 5 rang | **7 state, 7 rang** (`wake` · `talk` · `mic` · `soch` · `bol` · `masla` · `band`) | `talk` (darwaza khula, mic band) aur `masla` alag karna zaroori tha — warna "mic khula hai ya nahi" ka jawab ambiguous rehta |
+| level Kotlin se har ~300ms | wahi, magar **do mode**: 1 = pehra (gate), 2 = wake ka **recognizer** (`onRmsChanged`, jo pehle **khaali** tha) | gate sirf khamoshi naapta hai; wake ke "kaan khule" daur ka level warna milta hi nahi |
+| (plan mein na tha) | **level purana = ⚠️** (1.2s taaza, 6s = surkh "WAKE sun nahi rahi") | F52 ka dusra chehra: `wake ON` likha ho aur wake murda ho — bar ko **jhoot bolna mana** hai |
+| (plan mein na tha) | `TALK_POLL_MS = 10s` (baat-cheet mein wake ka poll dheema) | JS darwaza band hote hi khud `talk(false)` bhejta hai; 3s poll se `nSkip` ginti be-matlab barhti (F03 ka sabaq) |
+| (plan mein na tha) | **`MAYA_VER` ek ghar** (header subtitle + toast + log) + gradle se milaan ka lock | Header ka subtitle **v5.10.2** par jam tha — instrument apni pehchaan ka jhoot bolta tha |
+| conversation mode default ON | wahi (malik ka faisla) + **LAB switch** + 90s/heartbeat safety net | JS mar jaye to wake daimi band na rahe |
+
+**Kya BAQI hai:** mic-dot **SAABIT** sirf Phase 4 (offline KWS) mein — J2 ne cycle **aadha**
+kiya. **Raftar J3** mein (streaming, TTS budget, 600L silence). **Awaaz ki bariki J4** mein.
+
+---
+
 ### ⚡ J3 — v5.13.0 "RAFTAR" (F48, F50, F51, F58)
 
 | # | Badlaav |

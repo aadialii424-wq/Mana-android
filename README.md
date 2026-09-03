@@ -1,9 +1,37 @@
 # 🤖 MAYA — Personal AI Assistant
 
-**Version 5.12.0 "JAWAB PAKKA" — 0-Budget Build • Android APK + Web PWA**
+**Version 5.12.5 "MIC NAZAR" — 0-Budget Build • Android APK + Web PWA**
 
 MAYA = aap ka apna JARVIS — voice controlled AI assistant (Gemini brain),
 ab **asli Android app** (APK) ki soorat mein, native superpowers ke saath:
+
+## 🎛️ v5.12.5 — "MIC NAZAR" *(J2: mic ka haal hamesha nazar)*
+
+Aap ki shikayat: *"mic par on off horha ha jo ke irritating ha… mujhe pata hi nhi chalna mic on
+hua ha ya nhi."* Ilaj: **MIC HAAL BAR** (saabit patti, har tab par) + **wake ka zinda level**
+Kotlin se + **BAAT-CHEET MODE** (ek turn = ek mic).
+
+| 🔑 | Cheez | Ilaj |
+|---|---|---|
+| **J2.1** | **MIC HAAL BAR** — 7 state, 7 rang, **lafz** + zinda level: `👂 WAKE SUN RAHI (pehra/kaan khula)` · `🚪 BAAT-CHEET (Ns)` · `🎤 AAP BOLEIN` · `🧠 SOCH RAHI (Xs)` · `🔊 BOL RAHI` · `⚠️ MASLA: wajah` · `💤 WAKE BAND` | F52: mic ka haal **nazar hi nahi aata** tha (4px bar sirf app-mic par, wake ka koi nishan nahi) |
+| **J2.2** | Wake ka **ZINDA LEVEL** har 300ms (`__wakeLevel`, mode 1 = pehra · mode 2 = recognizer ka `onRmsChanged`, jo pehle **khaali** tha) | F57: wake ka dB Kotlin se JS tak **jata hi nahi** tha — "wake zinda hai?" ka saboot nahi |
+| **J2.3** | **BAAT-CHEET MODE** (default ON + LAB switch): darwaza khula → `WakeState.talkUntil` → `haalBlock()` wake ka mic **rok** deta hai | F56 + churn: har turn par mic **do dafa** khulta (wake + app) aur wake ke baad 400ms ki **andhi race** |
+| **J2.4** | **Imaandar line** UI mein (LAB row + bar ka title + `HAALBAR.SACH`) | Jhoot nahi: system mic-nishan cloud-wake se jhilmilata rahega, **SAABIT** sirf Phase 4 (offline KWS) mein |
+| **J2.5** | Gate ka **90s reopen** sirf darwaza **band** par | `restart()` pehle `haalBlock()` se poochta hai → baat-cheet beech mein nahi tootti |
+| **J2.6** | **Safety net**: `TALK_EXP_MS 90s` + JS heartbeat gayab = mode **khud** khatam (`selfFixes` ginti panel par) | JS/WebView mar jaye to wake **daimi** band na rahe |
+| **J2.7** | Bar **jhoot nahi bolta**: level 1.2s se purana = taaza nahi, **6s** se purana = ⚠️ surkh *"WAKE sun nahi rahi"* | Pehle `wake ON` likha hota tha magar wake murda ho to koi nishan nahi |
+| **J2.8** | Panel par 4 nayi lines: 🎛️ MIC HAAL · 🛠️ level (Kotlin) · 🚪 BAAT-CHEET (turn N) · 🛡️ JAWAB | v5.12.0 ke referee ka hisab sirf log mein chhupa tha |
+| **J2.9** | **Version ka ek ghar** (`MAYA_VER`) — header subtitle + toast + log; test-lock **gradle ke `versionName`** se milaan karta hai | Header ka subtitle **v5.10.2** par jam gaya tha (app apni pehchaan ka jhoot bolti thi) |
+
+⚖️ **Imaandari:** J2 ne mic ka cycle **aadha** kiya hai, **khatam nahi** — system mic-dot
+SAABIT sirf **Phase 4 (offline KWS)** mein hoga. **Raftar abhi wahi hai** (J3).
+
+🧪 **+39 test** (1281 → **1320**): lab **Section 35** (23 wiring locks) + **Section 35b**
+(16 — bar ko jsdom mein **chalaa kar** parakha: saat halatein, level ka hisab, darwaza reconcile).
+
+📄 **Ek parcha:** [`docs/REPORT-v5.12.5-aam-zubaan.md`](docs/REPORT-v5.12.5-aam-zubaan.md) · 📖 tafseel: [`docs/FIX-v5.12.5-mic-nazar.md`](docs/FIX-v5.12.5-mic-nazar.md)
+
+---
 
 ## 🛡️ v5.12.0 — "JAWAB PAKKA" *(J1: jawab ka loop pakka)*
 
@@ -139,7 +167,7 @@ pehchaan" na ho to tests **FAIL** honge.
 
 📖 [`docs/FIX-v5.10.3-wake-zinda.md`](docs/FIX-v5.10.3-wake-zinda.md) · forensic: [`docs/FORENSIC-WAKE-WORD.md`](docs/FORENSIC-WAKE-WORD.md)
 
-**Ab kya:** ~~Phase 1~~ ✅ (v5.11.0) → ~~J1~~ ✅ (v5.12.0) → **J2 "MIC NAZAR" (neeche)** → Phase 2 (WAKE DOCTOR v2 + live notification + dBFS calibration) → **Phase 2.5 auto-update** (F43 · *faisla: GitHub ya apna server*) → Phase 3 (wake ka dimaag Kotlin mein) → Phase 4 (offline KWS engine).
+**Ab kya:** ~~Phase 1~~ ✅ (v5.11.0) → ~~J1~~ ✅ (v5.12.0) → ~~J2~~ ✅ (v5.12.5) → **J3 "RAFTAR" (neeche)** → Phase 2 (WAKE DOCTOR v2 + live notification + dBFS calibration) → **Phase 2.5 auto-update** (F43 · *faisla: GitHub ya apna server*) → Phase 3 (wake ka dimaag Kotlin mein) → Phase 4 (offline KWS engine).
 
 ---
 
@@ -153,7 +181,7 @@ saboot (file:line) ke sath, aur **4 phase ka structure**:
 | Phase | Version | Naam | Kya theek hoga |
 |---|---|---|---|
 | **J1** ✅ | v5.12.0 | **JAWAB PAKKA** | har nakami **bol kar** bataye, koi deadlock nahi (3 watchdog: listen 12s · think **40s** · speak **20s+110ms/harf**), galat error-matn theek, nakami ke baad mic **khud dobara**, darwaza lambe jawab mein band na ho |
-| **J2** | v5.12.5 | **MIC NAZAR** | hamesha nazar aane wali **MIC HAAL BAR** (5 state, 5 rang, text ke sath) + wake pehre ka **live level** + **conversation mode** (ek turn = ek mic open → cycle aadha) |
+| **J2** ✅ | v5.12.5 | **MIC NAZAR** | hamesha nazar aane wali **MIC HAAL BAR** (**7** state, 7 rang, text ke sath) + wake pehre ka **live level** (pehra + recognizer) + **conversation mode** (ek turn = ek mic open → cycle aadha) |
 | **J3** | v5.13.0 | **RAFTAR** | bolna khatam → **~0.6s** mein mic band (Long extras), awaaz **800ms budget** ke sath (dead air khatam), dimaag ki **streaming** (pehla jumla foran), aur **RAFTAR PANEL** (har turn ke ms — saboot) |
 | **J4** | v5.13.5 | **SAAF AWAAZ** | Urdu rate/pitch tuning, jumla-ba-jumla prosody, awaaz tez/dheemi setting |
 
@@ -162,7 +190,8 @@ tarah khatam **nahi** ho sakta — J2 usay **kam** karega aur UI mein saaf batay
 **saabit** mic sirf **Phase 4 (offline KWS)** mein.
 
 🧪 Structure doc par **+7 test-locks** (lab Section 33) → 1241/1241 GREEN.
-**J1 mukammal (v5.12.0)** → **1281/1281 GREEN**. Agla: **J2 "MIC NAZAR"**.
+**J1 mukammal (v5.12.0)** → 1281/1281 · **J2 mukammal (v5.12.5)** → **1320/1320 GREEN**.
+Agla: **J3 "RAFTAR"** (jaldi sune, jaldi bole — streaming + TTS budget + NAAP panel).
 
 ---
 
