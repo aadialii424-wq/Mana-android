@@ -377,6 +377,37 @@ nav button.active{color:#FFB347;background:#441c05}
 #drawer{top:0;bottom:0;left:0;right:auto;width:78vw;max-width:300px}
 #drawerScrim{top:0;left:0;right:0;bottom:0}
 
+/* ═══════════ 🎛️ J2.1 (v5.12.5 / F52) — MIC HAAL BAR ═══════════
+   Aap ki shikayat: "mic par on/off hota rehta hai jo irritating hai... mujhe
+   pata hi nahi chalta mic on hua ya nahi." Ilaj: har waqt nazar aane wali ek
+   patti — STATE + RANG + LAFZ + ZINDA LEVEL (icon akela kaam nahi karta).
+   Purane WebView ke liye conservative: flex (gap nahi), koi clamp/min/max,
+   color-mix, inset ya backdrop-filter nahi. */
+#micHaal{flex:none;display:flex;align-items:center;padding:5px 10px;background:var(--panel2);
+  border-bottom:1px solid var(--line);font-size:12px;font-weight:700;letter-spacing:.3px;
+  color:var(--dim);line-height:1.3}
+#micHaal .mh-ic{font-size:14px;margin-right:6px;flex:none}
+#micHaal .mh-tx{margin-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:54vw}
+#micHaal .mh-bar{position:relative;display:block;width:70px;height:8px;border-radius:5px;
+  background:var(--panel);border:1px solid var(--line);overflow:hidden;flex:none}
+#micHaal .mh-bar i{position:absolute;top:0;left:0;bottom:0;width:4%;background:var(--dim);
+  border-radius:4px;transition:width .12s linear}
+#micHaal .mh-db{margin-left:8px;font-size:11px;color:var(--dim);flex:none}
+#micHaal[data-state="wake"]{color:#8ff0c0}
+#micHaal[data-state="wake"] .mh-bar i{background:var(--ok)}
+#micHaal[data-state="talk"]{color:#bff3ff}
+#micHaal[data-state="talk"] .mh-bar i{background:var(--cyan)}
+#micHaal[data-state="mic"]{color:#cfe6ff}
+#micHaal[data-state="mic"] .mh-bar i{background:var(--cyan2)}
+#micHaal[data-state="soch"]{color:#ffe0a3}
+#micHaal[data-state="soch"] .mh-bar i{background:var(--warn)}
+#micHaal[data-state="bol"]{color:#e6d6ff}
+#micHaal[data-state="bol"] .mh-bar i{background:var(--purple)}
+#micHaal[data-state="masla"]{color:#ffc9c9}
+#micHaal[data-state="masla"] .mh-bar i{background:var(--danger)}
+#micHaal[data-state="band"]{color:var(--dim)}
+#micHaal[data-state="band"] .mh-bar i{background:var(--line)}
+
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD"  (v4.1.0)
    ----------------------------------------------------------------------------
@@ -536,7 +567,7 @@ nav{padding:8px 10px 10px}
   <div class="sring"><div class="r1"></div><div class="r2"></div><div class="r3"></div><span>M</span></div>
   <h1>MAYA</h1>
   <div class="sub">PERSONAL AI SYSTEM</div>
-  <div class="ver">v5.9.1 — 🎚️ SUKOON — awaaz kabhi nahi kategi · mic-larai khatam · wake word sach mein zinda</div>
+  <div class="ver">v5.10.2 — 🗣️ ON-DEVICE: ghalat (assistant) screen ab KHULTI HI NAHI · 🕸️ KHUD-MUKHTAR (P6)</div>
   <button id="bootBtn">⚡ INITIALIZE</button>
   <div class="bootline" id="bootLine"></div>
   <div id="errPanel" style="display:none; margin-top:14px; max-width:340px; width:100%; border:1px solid #c85050; background:#3c0a0f; border-radius:12px; padding:12px; text-align:left;">
@@ -561,16 +592,27 @@ nav{padding:8px 10px 10px}
   <div class="dsep"></div>
   <button class="dbtn" data-tab="tab-cmds">⚡ Commands</button>
   <button class="dbtn" data-tab="tab-set">⚙️ Settings</button>
-  <div class="dfoot">MAYA v5.9.1 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
+  <div class="dfoot">MAYA v5.10.2 • 0-BUDGET • BRAIN POOL + AWAAZ</div>
 </aside>
 
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
     <button id="drawerBtn">☰</button>
-    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.9.1 ✨</small></div>
+    <div class="logo"><b>MAYA</b><small id="subTitle">PERSONAL AI v5.12.5 ✨</small></div>
     <div id="statusPill">OFFLINE MODE</div>
   </header>
+
+  <!-- 🎛️ J2.1 (F52) — MIC HAAL BAR: mic ka haal HAR TAB par nazar (state + rang +
+       lafz + zinda level). Ye patti is liye header ke neeche hai ke orb/chat kisi
+       bhi tab par ho, haal kabhi chhupe na. -->
+  <div id="micHaal" data-state="band" role="status" aria-live="polite"
+       title="Android ka system mic-nishan cloud-wake ki wajah se jhilmilata hai; offline wake (Phase 4) mein saabit rahega">
+    <span class="mh-ic" id="mhIc">💤</span>
+    <span class="mh-tx" id="mhTx">WAKE BAND</span>
+    <span class="mh-bar"><i id="mhFill"></i></span>
+    <span class="mh-db" id="mhDb"></span>
+  </div>
 
   <main>
     <!-- ============ HOME (orb — video jaisa) ============ -->
@@ -729,7 +771,7 @@ nav{padding:8px 10px 10px}
         <div class="chip"><div class="k">◈ AUTO LISTEN</div><div class="v" id="hudAuto">OFF</div></div>
         <div class="chip"><div class="k">◈ MAUSAM — WEATHER</div><div class="v" id="hudWeather">—</div></div>
         <div class="chip" id="hudWakeChip" style="cursor:pointer"><div class="k">◈ WAKE WORD (tap = on/off)</div><div class="v" id="hudWake">OFF</div></div>
-        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.9.1</div></div>
+        <div class="chip"><div class="k">◈ BUILD</div><div class="v" id="hudBuild">v5.10.2</div></div>
       </div>
       <div class="qactions" style="margin-top:12px">
         <button data-cmd="waqt kya hua hai">⏰ TIME</button>
@@ -1140,11 +1182,28 @@ nav{padding:8px 10px 10px}
           <div class="ui-row-txt">🎚️ SUKOON — <b>awaaz kabhi nahi kategi</b> <small>(default ON — bugfix: mic aur awaaz ki ladai khatam · "Maya online" poora sunai dega · wake switch kabhi khud nahi mitega. Sirf masla ho to OFF karo)</small></div>
           <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labSukoon"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
         </div>
+        <div class="ui-row">
+          <div class="ui-row-txt">🗣️ BAAT-CHEET — <b>ek turn mein mic EK dafa</b> <small>(default ON · "Maya" ke baad darwaza khula rahe to wake ka mic band — app ka mic turn-by-turn khud dobara. Mic ke open/close cycle AADHE, is liye system mic-nishan kam jhilmilata hai. ⚖️ SACH: Android ka system nishan cloud-wake ki wajah se phir bhi halka jhilmilayega — poori tarah SAABIT sirf offline wake (Phase 4) mein)</small></div>
+          <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labTalk"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
+        </div>
+        <div class="ui-row">
+          <div class="ui-row-txt">🕸️ KHUD-MUKHTAR — <b>Maya khud sochti hai</b> <small>(P6 · 👁️ abhi ka HAAL dimaag ko · 🧠 aap ki AADAT khud pakar kar tajweez · 📌 adhoora kaam yaad · 🛡️ bol-budget 6/din + raat 12-7 khamosh. <b>Sirf 🟢 SABZ kaam — call/SMS kabhi nahi.</b>)</small></div>
+          <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="labKhud"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
+        </div>
         <div class="ui-hint" id="labHint">—</div>
 
         <div class="ui-row">
           <div class="ui-row-txt">⚡ TRUST MODE — <b>bina poochhe sab karo</b> <small>(🔴 surkh kaam bhi — call/SMS bhi bina ijazat. Sirf tab jab poora bharosa ho)</small></div>
           <div class="ui-row-ctl"><label class="ui-sw"><input type="checkbox" id="sTrustMode"><span class="ui-sw-t"></span><span class="ui-sw-k"></span></label></div>
+        </div>
+        <div class="ui-field">
+          <div class="ui-label">👂 WAKE KI ZUBAAN <small>(wake word "Maya" kis decoder se sune — STT se ALAG. Urdu decoder "مایا" ko aksar "ہے" parh leta hai)</small></div>
+          <select class="ui-input ui-select" id="sWakeLang">
+            <option value="en-IN">English (India) — sab se pukhta (default)</option>
+            <option value="hi-IN">हिंदी Hindi (India)</option>
+            <option value="ur-PK">اردو Urdu (Pakistan) — "Maya" aksar ghalat parha jata hai</option>
+          </select>
+          <div class="ui-hint">Ye SIRF wake word ki zubaan hai — aap ki baat (STT) aur Maya ki awaaz (TTS) apni jagah wahi rahengi jo upar chuni hui hain.</div>
         </div>
         <div class="ui-field">
           <div class="ui-label">🚪 "MAYA" KEHNE KE BAAD DARWAZA KITNI DER KHULA <small>(0 = har baar "Maya" kehna paregi · 60 = lambi baat-cheet)</small></div>
@@ -1168,10 +1227,14 @@ nav{padding:8px 10px 10px}
         <div class="ui-row" style="gap:6px">
           <button type="button" class="ui-btn ui-btn-ghost" id="labOnDevice" style="margin:0">🗣️ ON-DEVICE LANGUAGE — wake ki zubaan download karo</button>
         </div>
+        <div id="labOnDeviceBox" style="display:none"></div>
         <div class="ui-hint">Yeh "Maya" sun-ne wale ka offline dimaag hai — khule Gboard → <b>Voice typing</b> mein <b>اردو + English (India)</b> download karyn (Wi-Fi par, ~80MB har ik). Iske baghair online Google "Maya" ko "ہے" jaisa ghalat parh leta hai.</div>
         <button type="button" class="ui-btn ui-btn-ghost" id="labKaan">👂 WAKE WORD KA HAAL — Maya ne kya suna?</button>
         <button type="button" class="ui-btn ui-btn-ghost" id="labNazarTest">👁️ SCREEN ABHI PARHO — dekho Maya kya dekh rahi hai</button>
         <button type="button" class="ui-btn ui-btn-ghost" id="labLedger">📜 AAJ KYA KYA KIYA — poora roznamcha</button>
+        <button type="button" class="ui-btn ui-btn-ghost" id="labKhudReport">🕸️ KHUD-MUKHTAR KA HAAL — kya seekha, kya adhoora hai</button>
+        <button type="button" class="ui-btn ui-btn-ghost" id="labKhudDry">⚗️ DRY-RUN — abhi karti to kya (karegi kuch nahi)</button>
+        <button type="button" class="ui-btn ui-btn-ghost" id="labHaal">👁️ ABHI KA HAAL — jo dimaag ko bheja jata hai</button>
         <button type="button" class="ui-btn ui-btn-ghost" id="labBaseline">📊 BASELINE DEKHO — aaj ke asli number</button>
         <button type="button" class="ui-btn ui-btn-ghost" id="labHarvest">🗃️ MERI BAATON SE TEST SET (naam/number chhupa kar)</button>
         <button type="button" class="ui-btn ui-btn-ghost" id="labDiag">📋 DIAGNOSTIC COPY KARO — sab kuch clipboard par</button>
@@ -1191,7 +1254,7 @@ nav{padding:8px 10px 10px}
       </div>
 
       <button type="button" class="ui-btn ui-btn-save" id="saveSettings">💾 SAVE KARO</button>
-      <div class="vtag">MAYA v5.9.1 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
+      <div class="vtag">MAYA v5.10.2 — BRAIN POOL + AWAAZ • MADE WITH ❤️ + AI</div>
       <div style="height:10px"></div>
     </section>
   </main>
@@ -1206,7 +1269,7 @@ nav{padding:8px 10px 10px}
 </div>
 
 <div id="toast"></div>
-<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v5.9.1 · OK</div>
+<div onclick="__mayaForceEnter()" style="position:fixed;top:2px;right:3px;z-index:999;font-size:9px;background:rgba(10,10,16,.92);border:1px solid rgba(255,122,26,.4);color:var(--accent2);padding:2px 7px;border-radius:8px;font-family:monospace;cursor:pointer" id="dbgBadge">v5.10.2 · OK</div>
 
 <script>
 /* ===== MAYA DEBUG EYES: console errors bhi badge par ===== */
@@ -1274,18 +1337,35 @@ setTimeout(function(){
 "use strict";
 /* ================= MAYA v2.1.1 — Doctor Build ================= */
 window.__mayaJSOK = true;
-try { document.getElementById("dbgBadge").textContent = "v5.9.1 OK \u2713"; } catch(e){}
+try { document.getElementById("dbgBadge").textContent = "v5.10.2 OK \u2713"; } catch(e){}
 try { if (window.MayaBridge && window.MayaBridge.markAlive) window.MayaBridge.markAlive(); } catch(e){}
 
 /* ---------- SETTINGS (v1 migration ke saath) ---------- */
-var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", ghKey:"", cerebrasKey:"", mistralKey:"", orKey:"", nvidiaKey:"", zaiKey:"", llm7Key:"", ttsKey:"", voiceEngine:"auto", gVoice:"Kore", voiceMood:"auto", neuralWifiOnly:false, neuralMaxChars:1400, edgeTTS:true, edgeVoice:"", fishKey:"", fishVoice:"", fishVoiceName:"", fishTemp:0.35, fishOn:true, trustMode:false, wakeDoor:15, micZoom:0.8, micNear:true, ttsModel:"", city:"Hyderabad", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"maya", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true, gender:"male", phone:"", musicApp:"youtube", favSong:"", ytChannel:"", assistName:"Maya", gfMode:false, persona:"maya", remember:true, convoMode:false, lang:"roman-ur", proactive:false, theme:"obsidian", accent:"#FF7A1A", radius:18, fontScale:1, edgeGlow:false };
+var DEFAULTS = { name:"Sir", apikey:"", groqKey:"", ghKey:"", cerebrasKey:"", mistralKey:"", orKey:"", nvidiaKey:"", zaiKey:"", llm7Key:"", ttsKey:"", voiceEngine:"auto", gVoice:"Kore", voiceMood:"auto", neuralWifiOnly:false, neuralMaxChars:1400, edgeTTS:true, edgeVoice:"", fishKey:"", fishVoice:"", fishVoiceName:"", fishTemp:0.35, fishOn:true, trustMode:false, wakeDoor:15, micZoom:0.8, micNear:true, ttsModel:"", city:"Hyderabad", wakeLang:"en-IN", stt:"ur-PK", tts:"ur-PK", rate:1.0, pitch:1.05, voiceName:"", voiceArtist:"maya", model:"auto", autoListen:false, voiceOn:true, wakeWord:false, turbo:true, notifSpeak:false, batteryAlert:true, gender:"male", phone:"", musicApp:"youtube", favSong:"", ytChannel:"", assistName:"Maya", gfMode:false, persona:"maya", remember:true, convoMode:false, lang:"roman-ur", proactive:false, theme:"obsidian", accent:"#FF7A1A", radius:18, fontScale:1, edgeGlow:false };
 var settings = Object.assign({}, DEFAULTS);
 try {
   var s1 = JSON.parse(localStorage.getItem("maya_settings") || "null");
   var s0 = JSON.parse(localStorage.getItem("jarvisSettings") || "null"); // v1 se upgrade
   [s0, s1].forEach(function(src){ if (src) Object.keys(src).forEach(function(k){ settings[k] = src[k]; }); });
 } catch(e){}
-function saveSettings(){ localStorage.setItem("maya_settings", JSON.stringify(settings)); }
+function saveSettings(){ localStorage.setItem("maya_settings", JSON.stringify(settings)); try { pushNativePrefs(); } catch(e){} }
+
+/* 🔬 v5.10.3 (F38) — PREF DRIFT ka ilaj.
+   PEHLE: wake_lang / mic_zoom / mic_near / sukoon SIRF tab Kotlin ko jate the jab
+   wake switch TOGGLE hota tha (setWakeService akela push-point tha). Yani Settings
+   mein zubaan ya mic zoom badlo → service PURANI qeematon par chalti rehti thi,
+   aur ek sahih fix bhi "kaam nahi kiya" lagta tha. Ab har save par prefs tazaa. */
+function pushNativePrefs(){
+  if (typeof NATIVE === "undefined" || !NATIVE || !window.MayaBridge) return;
+  try { if (window.MayaBridge.setPrefString) {
+    window.MayaBridge.setPrefString('wake_lang', settings.wakeLang || 'en-IN');
+    window.MayaBridge.setPrefString('mic_zoom', String(settings.micZoom === undefined ? 0.8 : settings.micZoom));
+  } } catch(e){}
+  try { if (window.MayaBridge.setPref) {
+    if (typeof FLAGS !== "undefined" && FLAGS && FLAGS.on) window.MayaBridge.setPref('sukoon', FLAGS.on('sukoon'));
+    window.MayaBridge.setPref('mic_near', settings.micNear !== false);
+  } } catch(e){}
+}
 
 /* ---------- MEMORY ---------- */
 var facts = [];
@@ -1363,7 +1443,7 @@ var booted = false;
 function finishBoot(){
   try { $("#splash").classList.add("gone"); $("#app").classList.add("on"); } catch(e){ __mayaForceEnter(); }
   try {
-    pushLog("MAYA v5.9.1 — SYSTEMS ONLINE  (SUKOON: audio referee)");
+    pushLog("MAYA v5.10.2 — SYSTEMS ONLINE  (KHUD-MUKHTAR: P6 · SUKOON: audio referee)");
     pushLog(settings.apikey ? "NEURAL LINK: READY" : "NEURAL LINK: NO API KEY");
     pushLog("MEMORY BANK: " + facts.length + " FACTS");
     if (window.MayaBridge) pushLog("NATIVE BRIDGE: ACTIVE");
@@ -1442,6 +1522,11 @@ window.__nativeTtsDone = function(){ speaking = false; try { SUKOON.bolEnd(); } 
    pise hue naam (Monarch / Instagram / Funk Taka) theek karta hai. */
 window.__nativeSpeech = function(text, altsJson){
   listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle");
+  try {
+    JAWAB.clear("listen");
+    JAWAB.noMatchStreak = 0; JAWAB.netStreak = 0; JAWAB.clientStreak = 0;
+    JAWAB.retryN = 0; JAWAB.retryT = 0;          /* kamyaab sunai = hisab saaf */
+  } catch (e) {}
   var alts = [];
   try { if (altsJson) alts = JSON.parse(altsJson); } catch (e) { alts = []; }
   if (!alts.length && text) alts = [text];
@@ -1452,8 +1537,12 @@ window.__nativeSpeech = function(text, altsJson){
       /* 🎯 P8b — Android ka yaqeen bohat kam? ghalat kaam karne se behtar poochh lo */
       if (SUNO.weak() && FLAGS.on("suno")) {
         pushLog("SUNO: kam yaqeen (" + SUNO.lastConf.toFixed(2) + ") \u2014 poochh rahi hoon");
-        addBubble("ai", "\uD83D\uDC42 Theek se sunai nahi diya \u2014 \u201C" + said + "\u201D kaha tha? Dobara boliye.");
-        try { if (typeof AWAAZ === "object") AWAAZ.speak("Theek se sunai nahi diya, dobara boliye", {}); } catch (e) {}
+        /* 🛡️ J1 (F47) — PEHLE: addBubble + AWAAZ.speak() SEEDHA (speak() bypass) →
+           `speaking` flag false + SUKOON.bolStart() NAHI → wake Maya ki APNI awaaz
+           par khul sakti thi; aur `return` ke baad mic DOBARA khulta hi nahi tha
+           (baat-cheet wahin khatam). Ab reply() ka poora rasta: bubble + speak +
+           SUKOON + afterSpeak → mic khud dobara. */
+        reply("\uD83D\uDC42 Theek se sunai nahi diya \u2014 \u201C" + said + "\u201D kaha tha? Dobara boliye.", true);
         return;
       }
       if (SUNO.last && SUNO.last.raw !== said && typeof pushLog === "function")
@@ -1468,12 +1557,19 @@ window.__nativeRms = function(db){
     var pct = Math.max(4, Math.min(100, Math.round(((db || 0) + 2) * 5)));
     document.querySelectorAll(".micbar").forEach(function(el){ el.style.width = pct + "%"; });
   } catch(e){}
+  try { HAALBAR.appLevel(db); } catch(e){}     /* 🎛️ J2.1 — MIC HAAL BAR ka zinda level */
 };
 window.__nativeSpeechErr = function(code){
   listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle"); interimEl.textContent = "";
-  var m = { 1:"Network timeout", 2:"Network error", 3:"Mic masla", 4:"Recognizer busy", 5:"Voice service error", 6:"Koi awaz nahi mili", 7:"Mic permission nahi" }[code] || "Voice error";
-  toast(m);
-  addBubble("ai", m + ". " + (code === 5 || code === 2 ? "Google app / voice service check karo aur dobara try karo." : "Dobara try karo, " + settings.name + "."));
+  /* 🛡️ J1 (F44 + F45) — PEHLE yahan do jurm the:
+     (1) code ka matlab GALAT: AOSP mein 7 = NO_MATCH ("samajh nahi aaya") hai,
+         magar hum "Mic permission nahi" likhte the (ijazat ka code 9 hai);
+         8..15 ke liye sirf "Voice error" — asal wajah kabhi nahi milti thi.
+     (2) nakami ke baad mic DOBARA KHULTA HI NAHI tha → dobara "Maya" kehna parti
+         thi. Aap ka tajurba: "bolta hun to reply nahi aata".
+     Ab: poori fehlist 1..15 + har code ka APNA AMAL (JAWAB.sttError). */
+  try { JAWAB.sttError(code); }
+  catch (e) { try { toast("Voice error (" + code + ") — dobara try karo"); } catch (e2) {} }
 };
 
 /* ---------- TTS ---------- */
@@ -1577,7 +1673,7 @@ var VOICE_MOODS = [
 var PERSONA_MOOD = { maya:"warm", friday:"pro", jarvis:"pro", venom:"funny", gf:"warm", coach:"hype", teacher:"calm" };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧪  MAYA LAB  —  P0 (NAAP-TOL) + P1 (SAAF ZUBAAN) + 👑 MALIK    (app v5.9.1)
+   🧪  MAYA LAB  —  P0 (NAAP-TOL) + P1 (SAAF ZUBAAN) + 👑 MALIK    (app v5.10.0)
    ---------------------------------------------------------------------------
    Ye block 3 kaam karta hai, aur teeno ALAG SWITCH ke peeche hain:
 
@@ -1617,7 +1713,7 @@ var SCHEMA = {
 /* ───────────────────────── 🧪 FLAGS — har nayi cheez ek switch ke peeche ───── */
 var FLAGS = {
   KEY: "maya_flags",
-  DEF: { naap: true, saaf: false, malik: false, poolTools: false, suno: false, sach: false, boli: false, ijazat: false, bijli: false, aankh: false, nazar: false, sukoon: true },  /* naap + sukoon default ON (bay-zarar / bugfix) */
+  DEF: { naap: true, saaf: false, malik: false, poolTools: false, suno: false, sach: false, boli: false, ijazat: false, bijli: false, aankh: false, nazar: false, sukoon: true, talk: true, khud: false }   /* 🎛️ J2.3: talk (baat-cheet) default ON — malik ka faisla */,  /* naap + sukoon default ON (bay-zarar / bugfix) · khud (P6) default OFF — pehle sabit ho, phir chale */
   v: null,
   load: function () {
     if (FLAGS.v) return FLAGS.v;
@@ -1968,6 +2064,16 @@ var DIAG = {
       add("");
     }
     if (FLAGS.on("naap")) { add("\u2500\u2500 \ud83d\udcca NAAP \u2500\u2500"); add(NAAP.report()); add(""); }
+    /* 🕸️ P6 — khud-mukhtari ka hisaab bhi diagnostic mein (andha nahi rahenge) */
+    if (FLAGS.on("khud")) {
+      add("\u2500\u2500 \ud83d\udd78\ufe0f KHUD-MUKHTAR \u2500\u2500");
+      add("  " + safe(function () { return KHUD.BUDGET.report(); }, "?"));
+      add("  haal: " + safe(function () { return KHUD.HAAL.line(); }, "?"));
+      add("  aadatain: " + safe(function () { return KHUD.AADAT.list().length; }, "?") +
+          "  · abhi banti: " + safe(function () { return KHUD.AADAT.mine().length; }, "?") +
+          "  · adhoore: " + safe(function () { return KHUD.ADHOORA.pendingList().length; }, "?"));
+      add("");
+    }
 
     add("\u2500\u2500 \u2699\ufe0f SETTINGS (keys chhupi hui) \u2500\u2500");
     s = safe(function () { return settings; }, {});
@@ -2055,7 +2161,7 @@ FLAGS.load();
 NAAP.load();
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🎙️  SUNO  —  MAYA aap ki AWAAZ theek samjhe                  (app v5.9.1)
+   🎙️  SUNO  —  MAYA aap ki AWAAZ theek samjhe                  (app v5.10.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ki apni chat se):
 
@@ -2317,7 +2423,7 @@ var SUNO = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗣️  BOLI  —  LEHJA (accent) ka asal ilaj                      (app v5.9.1)
+   🗣️  BOLI  —  LEHJA (accent) ka asal ilaj                      (app v5.10.0)
    ---------------------------------------------------------------------------
    ASAL MASLA — awaaz ka nahi, MATN ka tha.
 
@@ -4276,10 +4382,14 @@ function speak(text, wasVoice) {
   AWAAZ.speak(clean, {
     onStart: function (eng) {
       speaking = true; try { SUKOON.bolStart(); } catch (e) {} setOrb("speaking");
+      /* 🛡️ J1 (F46) — bolne ka watchdog budget: base + harf ke hisab se (1400 harf
+         ka jawab ~100s bolta hai; saabit 60s par kaat dena jawab ka qatl tha) */
+      try { JAWAB.mark("speak", JAWAB.SPEAK_BASE + JAWAB.SPEAK_PER_CHAR * String(clean || "").length); } catch (e) {}
       try { NAAP.mark("voice"); NAAP.cur && (NAAP.cur.engine = eng || AWAAZ.engine); } catch (e) {}   /* 📊 P0 */
     },
     onDone: function () {
       speaking = false; try { SUKOON.bolEnd(); } catch (e) {}
+      try { JAWAB.clear("speak"); } catch (e) {}
       try { NAAP.end({ engine: AWAAZ.engine, saaf: (NAAP.cur && NAAP.cur.saafHit) || 0 }); } catch (e) {}  /* 📊 P0 */
       afterSpeak(wasVoice);
     }
@@ -4292,7 +4402,12 @@ function nativeSpeak(clean, wasVoice) {
   AWAAZ.stop(); AWAAZ.gen++;
   AWAAZ.setEngine("device");
   speaking = true; try { SUKOON.bolStart(); } catch (e) {} setOrb("speaking");
-  AWAAZ.device(String(clean || ""), function () { speaking = false; try { SUKOON.bolEnd(); } catch (e) {} afterSpeak(wasVoice); });
+  try { JAWAB.mark("speak", JAWAB.SPEAK_BASE + JAWAB.SPEAK_PER_CHAR * String(clean || "").length); } catch (e) {}
+  AWAAZ.device(String(clean || ""), function () {
+    speaking = false; try { SUKOON.bolEnd(); } catch (e) {}
+    try { JAWAB.clear("speak"); } catch (e) {}
+    afterSpeak(wasVoice);
+  });
 }
 
 function afterSpeak(wasVoice){
@@ -4312,7 +4427,390 @@ function afterSpeak(wasVoice){
   if (settings.autoListen) setTimeout(startListening, 350);
 }
 
+/* ═══════════ 🛡️ JAWAB (v5.12.0 / J1) — jawab ka referee ═══════════
+   Aap ki shikayat: "kabhi bolta hun to reply nahi aata, aur pata nahi chalta
+   kyun." Forensic (docs/FORENSIC-JAWAB-LOOP.md) ne 15 flaws pakde; J1 un mein
+   se wo theek karta hai jo jawab ko CHUP-CHAAP maar dete the:
+
+   F46  sunne / sochne / bolne ka koi WATCHDOG nahi tha — ek flag phans jaye to
+        wake bhi ignore hoti thi (kyunke __wakeHeard `listening` dekhta hai) aur
+        mic button ULTA kaam karta tha (dabao = band). Ab teenon ka watchdog.
+   F44  error code ka matlab GALAT tha: AOSP ka 7 = NO_MATCH hai, magar hum
+        "Mic permission nahi" kehte the; 8..15 ke liye sirf "Voice error".
+        Ab poori fehlist 1..15 + har code ka APNA AMAL.
+   F45  nakami ke baad mic dobara KHULTA HI NAHI tha — dobara "Maya" kehna
+        parti thi. Ab: dobara suno / ruk kar dobara / ijazat mango / zubaan
+        badlo — aur user ko BOL KAR bataya jata hai.
+   F47  kam-yaqeen wala rasta speak() ko bypass karta tha (SUKOON nahi → wake
+        Maya ki apni awaaz par khul sakti thi) aur mic dobara nahi khulta tha.
+   F53  wake ka ignore CHUP-CHAAP hota tha. Ab wajah log + status par.
+   F54  dimaag fail par sirf toast tha — voice mode mein kuch sunai nahi deta.
+   F55  darwaza jawab SHURU par refresh nahi hota tha → lamba jawab baat-cheet
+        ko beech mein tod deta tha.
+
+   ⚠️ IMAANDARI (plan se do barikiyan badlin, wajah ke sath):
+   · Structure mein watchdog 25s(think)/60s(speak) tha. AMAL mein think 40s aur
+     speak ADAPTIVE (20s + 110ms/harf) hai — kyunke 1400 harf ka jawab 100
+     second tak bolta hai; 60s par kaat dena jawab ka qatl hota.
+   · Reset ke baad purane jawab ko `thinkGen` se roka jata hai, warna watchdog
+     aur dimaag DONO jawab de dete (do jawab ek sath). */
+var JAWAB = {
+  at: { listen: 0, think: 0, speak: 0 },
+  LISTEN_MAX: 12000,          /* mic 12s se zyada phansa = murda */
+  THINK_MAX: 40000,           /* dimaag 40s se zyada = murda */
+  SPEAK_BASE: 20000,          /* bolne ka budget: base + harf ke hisab se */
+  SPEAK_PER_CHAR: 110,
+  STUCK: 20000,               /* wake ignore ke waqt itna purana flag = phansa hua */
+  speakBudget: 0,
+  thinkGen: 0,
+  n: { watchdog: 0, err: 0, reListen: 0, ignore: 0, thinkReset: 0, speakReset: 0, breaks: 0 },
+  lastErr: 0, lastWhy: "", errAt: 0, noMatchStreak: 0, netStreak: 0, clientStreak: 0,
+  retryN: 0, retryT: 0,           /* dobara-suno ka circuit breaker (F45+) */
+
+  mark: function (w, budget) { JAWAB.at[w] = Date.now(); if (budget) JAWAB.speakBudget = budget; },
+  clear: function (w) { JAWAB.at[w] = 0; if (w === "speak") JAWAB.speakBudget = 0; },
+  age: function (w) { return JAWAB.at[w] ? (Date.now() - JAWAB.at[w]) : 0; },
+
+  /* AOSP SpeechRecognizer ERROR_* — poori fehlist 1..15 (F44) */
+  ERRNAME: {
+    1:"network ka waqt khatam", 2:"network masla", 3:"mic ka masla",
+    4:"Google ka server masla", 5:"client ka masla", 6:"koi awaaz nahi mili",
+    7:"samajh nahi aaya (no match)", 8:"mic masroof", 9:"mic ki ijazat nahi",
+    10:"bohot request bhej di gayin", 11:"server se connection toota",
+    12:"ye zubaan support nahi hoti", 13:"zubaan ka pack maujood nahi",
+    14:"support check nahi ho saka", 15:"model-download events support nahi"
+  },
+
+  /* BOL kar batana (F54) — darwaza refresh ke sath, taake jawab ke baad mic
+     khud dobara khul jaye (existing afterSpeak machinery istemal hoti hai). */
+  bol: function (text, dobara) {
+    try {
+      if (dobara !== false && typeof settings === "object" && settings.wakeWord &&
+          typeof KAAN !== "undefined" && KAAN.DARWAZA) KAAN.DARWAZA.open();
+    } catch (e) {}
+    try { addBubble("ai", text); } catch (e) {}
+    try { speak(text, dobara !== false); } catch (e) {}
+  },
+
+  /* mic dobara kholna (F45) — apni awaaz ke beech NAHI */
+  hearAgain: function (why, delay) {
+    try {
+      if (typeof settings === "object" && settings.wakeWord && typeof KAAN !== "undefined") KAAN.DARWAZA.open();
+    } catch (e) {}
+    /* 🛡️ J1 (F45+) — dobara-suno ka CIRCUIT BREAKER (amal mein mila naya flaw). PEHLE koi hisab nahi tha:
+       jo bhi code bar bar nakam hota (mic busy / voice service murda) hum har
+       1-2 second mic kholti rehtin — chup-chaap, be-inteha (battery + user ke
+       liye khamosh loop). Ab: 25s ke andar 6 koshishein nakam = ruk jao, darwaza
+       band, aur BOL kar batao. Kamyab sunai par hisab saaf (__nativeSpeech). */
+    var _n = Date.now();
+    if (!JAWAB.retryT || _n - JAWAB.retryT > 25000) { JAWAB.retryN = 0; JAWAB.retryT = _n; }
+    JAWAB.retryN++;
+    if (JAWAB.retryN > 6) {
+      /* 🛡️ J1 (F45+) — breaker LATCH hota hai: trip hone ke baad usi 25s ki khidki
+         mein dobara mic kholti hi nahi (warna agla call foran 7ween koshish par
+         trip kar ke phir khud band ho jata — aadha breaker). Khidki guzarne par
+         hisab khud saaf = nayi koshish ki ijazat. */
+      JAWAB.retryN = 6; JAWAB.retryT = Date.now(); JAWAB.n.breaks++;
+      try { KAAN.DARWAZA.close(); } catch (e) {}
+      try { KAAN.push("reListen", "circuit breaker — 25s mein 6 koshishein nakam, ruk gayi"); } catch (e) {}
+      JAWAB.bol("Mic bar bar nakam ho raha hai — main ruk jati hun. Thori der baad “Maya” keh kar bulaiye.", false);
+      return;
+    }
+    JAWAB.n.reListen++;
+    try { KAAN.push("reListen", why + " — mic " + Math.round((delay || 400) / 100) / 10 + "s baad dobara"); } catch (e) {}
+    setTimeout(function () {
+      try {
+        if (speaking || thinking) { JAWAB.hearAgain(why, 800); return; }
+        if (!(typeof settings === "object" && settings.wakeWord)) return;  /* wake band = khud mic nahi kholte */
+        startListening();
+      } catch (e) {}
+    }, delay || 400);
+  },
+
+  /* STT ki nakami ka FAISLA — har code ka apna amal (F44 + F45) */
+  sttError: function (code) {
+    code = +code || 0;
+    JAWAB.lastErr = code; JAWAB.n.err++; JAWAB.errAt = Date.now(); JAWAB.clear("listen");
+    var name = JAWAB.ERRNAME[code] || ("code " + code + " (anpehchan)");
+    JAWAB.lastWhy = name;
+    try { KAAN.push("sttErr", code + " — " + name); } catch (e) {}
+    try { pushLog("STT err " + code + " — " + name); } catch (e) {}
+    try { statusText.textContent = "⚠️ " + name; } catch (e) {}
+
+    if (code === 9) {                       /* ijazat: khud theek nahi ho sakta */
+      JAWAB.bol("Mic ki ijazat chahiye — Settings ya notification ke “Ijazat do” se ijazat dein, phir boliye.", false);
+      return;
+    }
+    if (code === 12 || code === 13) {       /* zubaan ka pack: user ka faisla */
+      JAWAB.bol("Is zubaan ka voice pack phone mein nahi hai — Settings mein STT ki zubaan badal kar dobara koshish karein.", false);
+      return;
+    }
+    if (code === 1 || code === 2 || code === 4 || code === 11) {
+      JAWAB.netStreak++;
+      if (JAWAB.netStreak >= 3) {
+        JAWAB.netStreak = 0;
+        JAWAB.bol("Internet ya Google ka masla hai — thori der baad dobara boliye.", false);
+        return;
+      }
+      JAWAB.hearAgain("network", 1500);
+      return;
+    }
+    /* 🛡️ J1 (F44) — 5 = client (voice service kaam nahi kar rahi), 14/15 = support
+       check/model events nahi ho sake. Ye sab PHONE ke masle hain, dobara bolne se
+       theek NAHI hote: is liye 2 dafa koshish, phir bol kar batana aur ruk jana. */
+    if (code === 5 || code === 14 || code === 15) {
+      JAWAB.clientStreak++;
+      if (JAWAB.clientStreak >= 2) {
+        JAWAB.clientStreak = 0;
+        try { KAAN.DARWAZA.close(); } catch (e) {}
+        JAWAB.bol("Phone ka voice service (Google app) jawab de gaya hai — MAYA dobara khol kar ya phone restart kar ke try karein.", false);
+        return;
+      }
+      JAWAB.hearAgain("client", 1500);
+      return;
+    }
+    if (code === 10) { JAWAB.hearAgain("too-many-requests", 5000); return; }
+    if (code === 8)  { JAWAB.hearAgain("mic-busy", 800); return; }
+    if (code === 3)  { JAWAB.hearAgain("audio", 1200); return; }
+    if (code === 6 || code === 7) {         /* sab se aam: suna hi nahi / samjha nahi */
+      JAWAB.noMatchStreak++;
+      if (JAWAB.noMatchStreak === 1) {
+        JAWAB.bol(code === 7 ? "Ji? Theek se sunai nahi diya — dobara boliye." : "Koi awaaz nahi aayi — boliye, main sun rahi hun.");
+        return;                              /* bol kar → afterSpeak khud mic dobara kholega */
+      }
+      if (JAWAB.noMatchStreak >= 4) {
+        JAWAB.noMatchStreak = 0;
+        try { KAAN.DARWAZA.close(); } catch (e) {}
+        JAWAB.bol("Main ruk jati hun — jab zaroorat ho “Maya” keh kar bulaiye.", false);
+        return;
+      }
+      JAWAB.hearAgain("no-match", 500);
+      return;
+    }
+    JAWAB.hearAgain("client", 1000);
+  },
+
+  /* phanse hue flags ka ilaaj (F46) — sab kuch ek jagah reset */
+  reset: function (why) {
+    try { listening = false; thinking = false; speaking = false; } catch (e) {}
+    try { SUKOON.sunEnd(); } catch (e) {}
+    try { AWAAZ.stop(); } catch (e) {}
+    JAWAB.at.listen = 0; JAWAB.at.think = 0; JAWAB.at.speak = 0; JAWAB.speakBudget = 0;
+    JAWAB.thinkGen++;                        /* purana jawab ab nahi aayega */
+    try { setOrb("idle"); } catch (e) {}
+    try { interimEl.textContent = ""; } catch (e) {}
+    try { if (window.MayaBridge && window.MayaBridge.stopListen) window.MayaBridge.stopListen(); } catch (e) {}
+    try { KAAN.push("watchdog", "reset: " + (why || "phanse flags") + " — wake wapas zinda"); } catch (e) {}
+  },
+
+  /* wake ignore hone ki WAJAH (F53) — aur phansa flag ho to khud reset */
+  ignore: function () {
+    var why = speaking ? ("Maya bol rahi hai (" + Math.round(JAWAB.age("speak") / 1000) + "s se)")
+            : thinking ? ("jawab soch rahi hai (" + Math.round(JAWAB.age("think") / 1000) + "s se)")
+            : listening ? ("mic khula hai (" + Math.round(JAWAB.age("listen") / 1000) + "s se)")
+            : "masroof";
+    JAWAB.n.ignore++;
+    try { KAAN.push("ignore", "wake ignore — " + why); } catch (e) {}
+    try { statusText.textContent = "🙉 Sun nahi sakti: " + why; } catch (e) {}
+    var stuck = (listening && JAWAB.age("listen") > JAWAB.LISTEN_MAX) ||
+                (thinking && JAWAB.age("think") > JAWAB.THINK_MAX) ||
+                (speaking && JAWAB.age("speak") > (JAWAB.speakBudget || JAWAB.SPEAK_BASE));
+    if (stuck) { JAWAB.reset("wake ignore + phansa flag"); return true; }
+    return false;
+  },
+
+  /* har 2s: teenon watchdog (F46) */
+  watchdog: function () {
+    var now = Date.now();
+    if (JAWAB.at.listen && now - JAWAB.at.listen > JAWAB.LISTEN_MAX) {
+      JAWAB.n.watchdog++;
+      try { listening = false; } catch (e) {}
+      try { SUKOON.sunEnd(); } catch (e) {}
+      try { setOrb("idle"); interimEl.textContent = ""; } catch (e) {}
+      try { if (window.MayaBridge && window.MayaBridge.stopListen) window.MayaBridge.stopListen(); } catch (e) {}
+      JAWAB.clear("listen");
+      try { KAAN.push("watchdog", "mic " + Math.round(JAWAB.LISTEN_MAX / 1000) + "s se phansa tha — khud reset (" + JAWAB.n.watchdog + " dafa)"); } catch (e) {}
+      try { statusText.textContent = "⏱️ Mic phans gaya tha — ab dobara sun rahi hun"; } catch (e) {}
+      JAWAB.hearAgain("watchdog", 600);
+    }
+    if (JAWAB.at.think && now - JAWAB.at.think > JAWAB.THINK_MAX) {
+      JAWAB.n.thinkReset++;
+      JAWAB.clear("think"); JAWAB.thinkGen++;
+      try { thinking = false; setOrb("idle"); } catch (e) {}
+      try { KAAN.push("watchdog", "dimaag " + Math.round(JAWAB.THINK_MAX / 1000) + "s se soch raha tha — jawab rad, user ko bataya"); } catch (e) {}
+      JAWAB.bol("Jawab aane mein bohat der ho gayi — dobara boliye, main sun rahi hun.");
+    }
+    var sb = JAWAB.speakBudget || JAWAB.SPEAK_BASE;
+    if (JAWAB.at.speak && now - JAWAB.at.speak > sb) {
+      JAWAB.n.speakReset++;
+      JAWAB.clear("speak");
+      try { speaking = false; SUKOON.bolEnd(); AWAAZ.stop(); setOrb("idle"); } catch (e) {}
+      try { KAAN.push("watchdog", "awaaz " + Math.round(sb / 1000) + "s budget se zyada chal rahi thi — reset"); } catch (e) {}
+      try { statusText.textContent = "⏱️ Awaaz phans gayi thi — reset"; } catch (e) {}
+    }
+  },
+
+  /* LAB/panel ke liye ek-line hisab */
+  report: function () {
+    return "watchdog " + JAWAB.n.watchdog + " · think-reset " + JAWAB.n.thinkReset +
+           " · speak-reset " + JAWAB.n.speakReset + " · STT err " + JAWAB.n.err +
+           " (aakhri " + JAWAB.lastErr + " — " + (JAWAB.lastWhy || "—") + ")" +
+           " · mic dobara " + JAWAB.n.reListen + " (breaker " + JAWAB.n.breaks + ")" +
+           " · wake ignore " + JAWAB.n.ignore;
+  }
+};
+
+/* ═══════════ 🎛️ HAALBAR (v5.12.5 / J2) — MIC KA HAAL, HAMESHA NAZAR ═══════════
+   Aap ki shikayat: "mic par on/off horha ha jo ke irritating ha... mujhe pata hi
+   nhi chalna mic on hua ha ya nhi." Forensic: F52 (haal nazar nahi aata) +
+   F57 (wake ka level Kotlin se JS tak nahi jata) + F56 (wake ke baad 400ms race).
+
+   Ye module SIRF dikhata + milaan (reconcile) karta hai:
+   · 7 state, har ek ka apna RANG aur LAFZ (icon akela andhere mein kaam nahi karta)
+   · ZINDA LEVEL: app ke mic se (`__nativeRms`) aur wake se (`__wakeLevel` — Kotlin
+     har ~300ms bhejta hai, pehre aur recognizer DONO se) → bar saans leta hai
+   · level PURANA ho jaye to ⚠️ — yaani "wake ON likha hai magar sun nahi rahi"
+     ka saboot bhi nazar aata hai (pehle andhera tha)
+   · BAAT-CHEET MODE ka darwaza yahan se Kotlin tak jata hai (J2.3): darwaza khula
+     = wake ka mic band = ek turn mein mic EK dafa
+
+   ⚖️ SACH (J2.4): Android ka SYSTEM mic-nishan cloud-wake ki wajah se jhilmilata
+   rehta hai. Ye patti usay khatam nahi karti — wo kaam offline wake (Phase 4) ka
+   hai. Iska kaam hai ke aap ko har lamhe PATA rahe ke asal mein kya ho raha hai. */
+var HAALBAR = {
+  el: null, ic: null, tx: null, fill: null, db: null,
+  FRESH: 1200,             /* Kotlin ka level is se purana = taaza nahi */
+  STALE_WARN: 6000,        /* is se purana = ⚠️ wake sun nahi rahi */
+  wakeDb: 0, wakeFloor: 0, wakeTrig: 0, wakeMode: 0, wakeAt: 0,
+  appDb: 0, appAt: 0,
+  talkPushed: false, turns: 0, n: { masla: 0, stale: 0 },
+  state: "", txLast: "", paints: 0,
+  SACH: "Android ka system mic-nishan cloud-wake ki wajah se jhilmilata hai; SAABIT mic sirf offline wake (Phase 4) mein.",
+
+  init: function () {
+    HAALBAR.el = document.getElementById("micHaal");
+    HAALBAR.ic = document.getElementById("mhIc");
+    HAALBAR.tx = document.getElementById("mhTx");
+    HAALBAR.fill = document.getElementById("mhFill");
+    HAALBAR.db = document.getElementById("mhDb");
+  },
+
+  /* Kotlin: window.__wakeLevel(db, farsh, chokhat, mode) — mode 1=pehra, 2=recognizer */
+  wakeLevel: function (db, floor, trig, mode) {
+    HAALBAR.wakeDb = +db || 0; HAALBAR.wakeFloor = +floor || 0;
+    HAALBAR.wakeTrig = +trig || 0; HAALBAR.wakeMode = +mode || 1;
+    HAALBAR.wakeAt = Date.now();
+  },
+  /* app ka mic: SpeechRecognizer ka RMS (-2..10 dB) */
+  appLevel: function (db) { HAALBAR.appDb = +db || 0; HAALBAR.appAt = Date.now(); },
+  /* koi masla — bar par 8 second tak nazar rahe */
+  masla: function (why) { HAALBAR.errWhy = String(why || "masla"); HAALBAR.errAt = Date.now(); HAALBAR.n.masla++; },
+  errWhy: "", errAt: 0,
+
+  pct: function (db, mode, floor) {
+    var p;
+    if (mode === 2) p = (db + 2) * 5;                                  /* recognizer RMS */
+    else p = (floor > 0) ? ((db - floor) * 4 + 6) : ((db - 20) * 3);   /* pehra: farsh ke upar */
+    return Math.max(4, Math.min(100, Math.round(p)));
+  },
+
+  /* haal ka FAISLA — tarteeb ahem hai (sab se khaas pehle) */
+  decide: function () {
+    var t = Date.now(), o = { st: "band", ic: "\uD83D\uDCA4", tx: "WAKE BAND \u2014 \uD83C\uDFA4 dabao aur boleyn", pct: 4, db: "" };
+    var wakeOn = false;
+    try { wakeOn = !!(settings && settings.wakeWord); } catch (e) {}
+
+    /* 1) fresh masla (JAWAB ka STT error ya wake ki khabar) */
+    if (HAALBAR.errAt && t - HAALBAR.errAt < 8000) {
+      o = { st: "masla", ic: "\u26A0\uFE0F", tx: "MASLA: " + HAALBAR.errWhy, pct: 8, db: "" };
+      return o;
+    }
+    /* 2) app ka mic khula — aap bol rahe hain */
+    if (typeof listening !== "undefined" && listening) {
+      var fresh = (t - HAALBAR.appAt) < 1500;
+      o = { st: "mic", ic: "\uD83C\uDFA4", tx: "AAP BOLEIN \u2014 sun rahi hun", pct: fresh ? HAALBAR.pct(HAALBAR.appDb, 2, 0) : 6,
+            db: fresh ? (Math.round(HAALBAR.appDb) + "dB") : "" };
+      return o;
+    }
+    /* 3) jawab soch rahi hai */
+    if (typeof thinking !== "undefined" && thinking) {
+      var sa = 0; try { sa = Math.round(JAWAB.age("think") / 1000); } catch (e) {}
+      o = { st: "soch", ic: "\uD83E\uDDE0", tx: "SOCH RAHI" + (sa ? (" (" + sa + "s)") : "") + "\u2026", pct: 30, db: "" };
+      return o;
+    }
+    /* 4) Maya bol rahi hai */
+    if (typeof speaking !== "undefined" && speaking) {
+      var sb = 0; try { sb = Math.round(JAWAB.age("speak") / 1000); } catch (e) {}
+      o = { st: "bol", ic: "\uD83D\uDD0A", tx: "BOL RAHI" + (sb ? (" (" + sb + "s)") : "") + "\u2026", pct: 40, db: "" };
+      return o;
+    }
+    if (!wakeOn) { o.tx = "WAKE BAND \u2014 \uD83C\uDFA4 dabao aur boleyn"; return o; }
+    /* 5) baat-cheet: darwaza khula, mic band — boleyn to mic khud khulega */
+    var door = false, left = 0;
+    try { door = KAAN.DARWAZA.isOpen(); left = KAAN.DARWAZA.left(); } catch (e) {}
+    if (door) {
+      o = { st: "talk", ic: "\uD83D\uDEAA", tx: "BAAT-CHEET \u2014 boleyn (" + left + "s) \u00B7 wake ka mic band", pct: 10, db: "" };
+      return o;
+    }
+    /* 6) wake ka zinda level (saboot) — ya purana level = ⚠️ */
+    var age = HAALBAR.wakeAt ? (t - HAALBAR.wakeAt) : -1;
+    if (age >= 0 && age < HAALBAR.FRESH) {
+      o = { st: "wake", ic: "\uD83D\uDC42",
+            tx: "WAKE SUN RAHI \u2014 " + (HAALBAR.wakeMode === 2 ? "kaan khula" : "pehra") +
+                "  \u00B7  \"Maya\" boleyn", pct: HAALBAR.pct(HAALBAR.wakeDb, HAALBAR.wakeMode, HAALBAR.wakeFloor),
+            db: Math.round(HAALBAR.wakeDb) + "dB" + ((HAALBAR.wakeMode === 1 && HAALBAR.wakeFloor) ? (" / farsh " + Math.round(HAALBAR.wakeFloor)) : "") };
+      return o;
+    }
+    if (age >= HAALBAR.STALE_WARN) {
+      HAALBAR.n.stale++;
+      o = { st: "masla", ic: "\u26A0\uFE0F",
+            tx: "WAKE sun nahi rahi \u2014 " + Math.round(age / 1000) + "s se level nahi aaya (KAAN DOCTOR dekhein)", pct: 6, db: "" };
+      return o;
+    }
+    o = { st: "wake", ic: "\uD83D\uDC42", tx: "WAKE SUN RAHI \u2026 (level ka intezar)", pct: 6, db: "" };
+    return o;
+  },
+
+  /* har 250ms: baat-cheet ka darwaza milao + bar paint karo */
+  tick: function () {
+    var want = false;
+    try { want = !!(settings.wakeWord && FLAGS.on("talk") && KAAN.DARWAZA.isOpen()); } catch (e) {}
+    if (want !== HAALBAR.talkPushed) {
+      HAALBAR.talkPushed = want;
+      if (want) HAALBAR.turns++;
+      try { pushLog("\uD83D\uDEAA baat-cheet " + (want ? "ON \u2014 wake ka mic band (ek turn = ek mic)" : "OFF \u2014 wake wapas pehre par")); } catch (e) {}
+      try { if (window.MayaBridge && window.MayaBridge.talk) window.MayaBridge.talk(want); } catch (e) {}
+      try { KAAN.push("talk", want ? "ON (turn " + HAALBAR.turns + ")" : "OFF"); } catch (e) {}
+    }
+    var o = HAALBAR.decide();
+    if (!HAALBAR.el) HAALBAR.init();
+    if (!HAALBAR.el) return;
+    if (HAALBAR.el.getAttribute("data-state") !== o.st) HAALBAR.el.setAttribute("data-state", o.st);
+    if (HAALBAR.ic && HAALBAR.ic.textContent !== o.ic) HAALBAR.ic.textContent = o.ic;
+    if (HAALBAR.tx && HAALBAR.txLast !== o.tx) { HAALBAR.txLast = o.tx; HAALBAR.tx.textContent = o.tx; }
+    if (HAALBAR.fill) HAALBAR.fill.style.width = o.pct + "%";
+    if (HAALBAR.db && HAALBAR.db.textContent !== o.db) HAALBAR.db.textContent = o.db;
+    HAALBAR.state = o.st;
+    HAALBAR.paints++;
+  },
+
+  report: function () {
+    return "MIC HAAL BAR: abhi " + (HAALBAR.state || "?") + " \u00B7 baat-cheet " + (HAALBAR.talkPushed ? "ON" : "OFF") +
+           " (" + HAALBAR.turns + " turn) \u00B7 wake level " +
+           (HAALBAR.wakeAt ? (Math.round((Date.now() - HAALBAR.wakeAt) / 100) / 10 + "s pehle, " + Math.round(HAALBAR.wakeDb) + "dB, mode " + HAALBAR.wakeMode) : "ab tak nahi aaya") +
+           " \u00B7 masla " + HAALBAR.n.masla + " \u00B7 level purana " + HAALBAR.n.stale + " \u00B7 paint " + HAALBAR.paints;
+  }
+};
+
 function reply(text, wasVoice, link){
+  /* 🛡️ J1 (F55) — darwaza jawab SHURU hote hi refresh. PEHLE sirf jawab ke BAAD
+     (afterSpeak) refresh hota tha: dimaag + lambi awaaz mil kar 15s le lein to
+     darwaza BEECH mein band ho jata aur baat-cheet achanak khatam — user ko
+     lagta "Maya ne sunna band kar diya". */
+  try {
+    if (wasVoice && typeof settings === "object" && settings.wakeWord &&
+        typeof KAAN !== "undefined" && KAAN.DARWAZA) KAAN.DARWAZA.open();
+  } catch (e) {}
   /* 🤝 SACH — model par bharosa nahi, JAANCH. Aakhri amal sure:false tha aur
      jawab mein "bhej diya / ho gaya" likha hai? To app KHUD theek kar degi. */
   try { if (typeof HAQEEQAT !== "undefined") text = HAQEEQAT.check(text); } catch (e) {}
@@ -4348,13 +4846,20 @@ function testMayaVoice() {
 var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 var rec = null;
 function startListening(){
+  /* 🛡️ J1 (F46) — PEHLE: `if (listening) { stopListening(); return; }` tha.
+     Flag phans jaye (native callback kabhi na aaye) to mic button ULTA kaam
+     karta tha (dabao = band) aur wake DAIMI ignore hoti thi. Ab: muddat se
+     purana flag = murda, pehle reset phir suno. */
+  if (listening && JAWAB.age("listen") > JAWAB.LISTEN_MAX) JAWAB.reset("mic button — phansa listen flag");
+  if (thinking && JAWAB.age("think") > JAWAB.THINK_MAX) JAWAB.reset("mic button — phansa think flag");
   if (NATIVE) {
     if (listening) { stopListening(); return; }
     if (thinking) return;
     ensureAudio(); chime(660, 0.08);
     listening = true; try { SUKOON.sunStart(); } catch (e) {} setOrb("listening"); interimEl.textContent = "🎧 Native mic sun raha hai...";
+    try { JAWAB.mark("listen"); } catch (e) {}
     try { window.MayaBridge.listen(settings.stt); }
-    catch(e){ listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle"); toast("Mic start nahi ho saka"); }
+    catch(e){ listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle"); toast("Mic start nahi ho saka"); try { JAWAB.clear("listen"); } catch (e) {} }
     return;
   }
   if (!SR) { reply("Sir, is browser mein voice input support nahi — Chrome try karo. Filhaal type kar ke baat kar sakte hain.", false); return; }
@@ -4364,6 +4869,7 @@ function startListening(){
   try { rec = new SR(); } catch(e){ return; }
   rec.lang = settings.stt; rec.interimResults = true; rec.maxAlternatives = 1;
   listening = true; try { SUKOON.sunStart(); } catch (e) {} setOrb("listening"); interimEl.textContent = "";
+  try { JAWAB.mark("listen"); } catch (e) {}
   rec.onresult = function(e){
     var fin = "", intr = "";
     for (var i = e.resultIndex; i < e.results.length; i++) {
@@ -4388,6 +4894,7 @@ function startListening(){
   try { rec.start(); } catch(e){ listening = false; try { SUKOON.sunEnd(); } catch (e) {} }
 }
 function stopListening(){
+  try { JAWAB.clear("listen"); } catch (e) {}
   if (NATIVE) { try { window.MayaBridge.stopListen(); } catch(e){} }
   if (rec) { try { rec.stop(); } catch(e){} }
   listening = false; try { SUKOON.sunEnd(); } catch (e) {} setOrb("idle");
@@ -4497,6 +5004,38 @@ function handleUserText(text, wasVoice){
     if (LEDGER.ASK_UNDO.test(stripped)) {
       LEDGER.undo().then(function (r) { reply(r.say, wasVoice); });
       return;
+    }
+  }
+
+  /* 🕸️ P6 KHUD-MUKHTAR — "kya seekha hai?", "abhi ka haal?", "kuch mat karo"
+     Ye teen sawal dimaag par jane ki zaroorat hi nahi (jawab app ke paas hai). */
+  if (typeof KHUD !== "undefined" && FLAGS.on("khud")) {
+    var _kt = stripped.toLowerCase();
+    if (/^(kya seekha|kya seekh|kya notice|kya yaad kiya|khud kya|kya pakda)/.test(_kt) ||
+        /(aadat|aadatain|khud[\s-]?mukhtar|khudmukhtar).*(report|haal|dikhao|batao|list)/.test(_kt)) {
+      NAAP.mark("brain"); reply(KHUD.report(), wasVoice); pushLog("KHUD: report boli"); return;
+    }
+    if (/(dry[\s-]?run|nakli chala|karti to kya|test kar ke batao)/.test(_kt)) {
+      NAAP.mark("brain"); reply(KHUD.dry(), wasVoice); pushLog("KHUD: dry-run"); return;
+    }
+    if (/^(abhi ka haal|abhi ka haal kya|haal kya hai|kya hal hai phone)/.test(_kt) ||
+        /(haal|status).*(battery|net|waqt)/.test(_kt)) {
+      NAAP.mark("brain");
+      reply("Abhi " + KHUD.HAAL.line() + ". Aur " + KHUD.BUDGET.report(), wasVoice);
+      pushLog("KHUD: HAAL bola"); return;
+    }
+    if (/^(aaj kuch mat karo|khud kuch mat karo|chup raho aaj|aaj chup)/.test(_kt)) {
+      KHUD.BUDGET.load();
+      KHUD.BUDGET.S.n = KHUD.BUDGET.DAY;
+      KHUD.BUDGET.save();
+      reply("Theek hai, aaj main khud se kuch nahi karungi aur nahi bolungi — sirf jab aap bulayenge.", wasVoice);
+      pushLog("KHUD: aaj ka budget user ne band kiya"); return;
+    }
+    if (/^(jo seekha|jo aadatain|sab aadatain|seekha hua)(.*)(bhool|mita|hata|saaf)/.test(_kt) ||
+        /(aadat|aadatain).*(bhool|mita|hata|saaf)/.test(_kt)) {
+      KHUD.AADAT.map = {}; KHUD.AADAT.save();
+      reply("Sab seekhi hui aadatain bhool gayi — ab roznamche se naye sirey se seekhungi.", wasVoice);
+      pushLog("KHUD: aadatain saaf"); return;
     }
   }
 
@@ -5346,9 +5885,9 @@ async function resolveModels(){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v5.9.1)
+   🧠🔥  BRAIN POOL v3  —  "quota khatam" ka mustaqil ilaj   (app v5.10.0)
    ---------------------------------------------------------------------------
-   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v5.9.1 se pehle Groq
+   Kyun bana: ek ya do provider par tikna = unke quota ki qaid. v5.10.0 se pehle Groq
    ne 16 August 2026 ko apne purane Llama 3.x models band kar diye the — hamara
    default wahi tha, is liye "backup brain bhi thak gaya" aata tha.
 
@@ -5699,7 +6238,7 @@ window.__httpDone = function (id, status, b64) {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v5.9.1)
+   🧠  DIMAAG ENGINE v2  —  MAYA ka sochne ka wahid rasta   (app v5.10.0)
    ---------------------------------------------------------------------------
    Purane code ke 3 asli bugs jinki wajah se "Sab free brains busy" bar bar aata tha:
 
@@ -6037,7 +6576,7 @@ async function geminiTry(m, plain){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   👁️  NAZAR  —  Maya screen PARH sakti hai                     (P7a · v5.9.1)
+   👁️  NAZAR  —  Maya screen PARH sakti hai                     (P7a · v5.10.0)
    ---------------------------------------------------------------------------
    Ye P7 ka PEHLA qadam hai: Maya screen ko DEKHTI hai, magar CHHUTI NAHI.
 
@@ -6177,7 +6716,7 @@ var NAZAR = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ⚡  BIJLI  +  👁️  AANKHEIN                              (P4 · app v5.9.1)
+   ⚡  BIJLI  +  👁️  AANKHEIN                              (P4 · app v5.10.0)
    ═══════════════════════════════════════════════════════════════════════════
 
    ⚡ BIJLI — phone control 50ms mein, DIMAAG se PEHLE
@@ -6323,7 +6862,7 @@ var AANKH = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🛡️  IJAZAT + 📜 LEDGER + ⟲ UNDO + 📊 TRACE            (P3 · app v5.9.1)
+   🛡️  IJAZAT + 📜 LEDGER + ⟲ UNDO + 📊 TRACE            (P3 · app v5.10.0)
    ---------------------------------------------------------------------------
    AMAL-WORKFLOW.md ka usool: "P3 (LAGAAM) P4/P6 (zyada taqat) se PEHLE."
 
@@ -6605,7 +7144,7 @@ var TRACE = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🤝  HAQEEQAT  —  "SACH BOLO" ka nizam                        (app v5.9.1)
+   🤝  HAQEEQAT  —  "SACH BOLO" ka nizam                        (app v5.10.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ki apni chat se — 5 dafa):
 
@@ -6770,7 +7309,7 @@ var HAQEEQAT = {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ⚡  AMAL ENGINE — P2a: TOOLS AB HAR DIMAAG KO                  (app v5.9.1)
+   ⚡  AMAL ENGINE — P2a: TOOLS AB HAR DIMAAG KO                  (app v5.10.0)
    ---------------------------------------------------------------------------
    ASAL MASLA (aap ke apne device se sabit):
 
@@ -7009,6 +7548,14 @@ async function askAI(wasVoice){
     }
   }
   thinking = true; setOrb("thinking");
+  /* 🛡️ J1 (F46) — sochne ka WATCHDOG shuru + apni GENERATION (thinkGen) yaad.
+     PEHLE: dimaag atak jaye (provider hang) to `thinking` hamesha ke liye true
+     reh jati thi → mic button band, wake DAIMI ignore, aur user ko sirf orb
+     "soch raha hai" dikhta. Ab 40s baad JAWAB khud reset kar ke BOLTA hai.
+     thinkGen ka kaam: watchdog ke reset ke baad ye purana jawab aa bhi jaye to
+     reply NA ho (warna DO jawab ek sath). */
+  var myGen = ++JAWAB.thinkGen;
+  try { JAWAB.mark("think"); } catch (e) {}
   geminiChat.keyErr = false;
   geminiChat.toolsUsed = false;
 
@@ -7035,14 +7582,30 @@ async function askAI(wasVoice){
       TRACE.brain(_bn, (NAAP.cur && NAAP.cur.m.brain) || 0);
     } catch (e) {}   /* 📊 P0 */
     thinking = false; setOrb("idle");
+    try { JAWAB.clear("think"); } catch (e) {}
+    /* 🛡️ J1 (F46) — watchdog is jawab ko RAD kar chuka? phir na bolao */
+    if (myGen !== JAWAB.thinkGen) {
+      askAI._retried = false;
+      try { pushLog("JAWAB: purana jawab rad — watchdog pehle hi bata chuka"); } catch (e) {}
+      try { DIMAAG.log("JAWAB", "STALE", "watchdog reset ke baad aaya, rad"); } catch (e) {}
+      return;
+    }
     if (lu && !geminiChat.toolsUsed && out.length < 400) cachePut(cacheKey(lu), out);
     reply(out, wasVoice);
     return;
   }
   thinking = false; setOrb("idle");
+  try { JAWAB.clear("think"); } catch (e) {}
 
   var code = DIMAAG.verdict() || DIMAAG.lastCode;
   DIMAAG.lastCode = code;
+  /* 🛡️ J1 (F46) — watchdog ne user ko pehle hi bola tha ("der ho gayi");
+     ab dobara fail-ehsas bol kar baat uljhaana bekaar */
+  if (myGen !== JAWAB.thinkGen) {
+    askAI._retried = false;
+    try { pushLog("JAWAB: fail-ehsas rad — watchdog ne pehle bataya tha"); } catch (e) {}
+    return;
+  }
   var loc0 = DIMAAG.localAnswer(lu);
   if (loc0) { DIMAAG.log("LOCAL", null, "offline jawab"); aiState.provider = "LOCAL"; reply(loc0, wasVoice); return; }
 
@@ -7053,6 +7616,16 @@ async function askAI(wasVoice){
     aiState.provider = "COOLDOWN";
     toast("Sab " + order.length + " dimaag thak gaye — " + Math.round(wait / 1000) + "s baad KHUD dobara try karungi");
     pushLog("RETRY IN " + Math.round(wait / 1000) + "s (" + code + ")");
+    /* 🛡️ J1 (F54) — PEHLE sirf TOAST tha: awaaz se sawal poochne wale ko screen
+       dekhe bina kuch PATA hi nahi chalta tha ke jawab kyun nahi aaya (aur na
+       ke thori der mein khud aayega). Ab BOL kar batati hun — magar sirf voice
+       mode mein (typing wale ke liye toast kaafi hai). */
+    if (wasVoice) {
+      try {
+        JAWAB.bol("Dimaag se rabta nahi ho saka — " + Math.round(wait / 1000) +
+                  " second mein main khud dobara koshish karungi.", false);
+      } catch (e) {}
+    }
     setTimeout(function(){ askAI(wasVoice); }, wait);
     return;
   }
@@ -7181,6 +7754,9 @@ window.__notifIncoming = function(from){
 };
 window.__autoSent = function(){
   pushLog("AUTO-SEND \u2713");
+  /* 📌 P6 ADHOORA: ye wohi tasdeeq hai jo "typed" amal ko BHEJA hua banati hai —
+     is ke bagair Maya roz wahi purana message "adhoora" samajh kar poochti rehti */
+  try { if (typeof KHUD !== "undefined" && KHUD.ADHOORA && KHUD.ADHOORA.markSent) KHUD.ADHOORA.markSent(); } catch (e) {}
   addBubble("ai", "\u2713 Bhej diya, " + settings.name + "!");
   speak("Bhej diya, " + settings.name + "!", lastWasVoice);
 };
@@ -7347,9 +7923,757 @@ async function ytPlay(query){
   return "YouTube search khol rahi hoon, " + settings.name + " — pehla wala dabana.";
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   🕸️  KHUD-MUKHTAR  —  P6: Maya khud sochti hai, magar LAGAAM ke sath
+                                                                  (app v5.10.0)
+   ---------------------------------------------------------------------------
+   ASAL MASLA (plan: docs/P6-KHUD-MUKHTAR-PLAN.md · forensic, andaza nahi):
+
+     var PRO_LINES = […6 jumlay…];
+     setInterval(… har 6 minute ek RANDOM jumla bol do …, 360000);
+
+   Ye "khud-mukhtari" NAHI THI — bay-maqsad SHOR tha. Na waqt dekhta tha, na
+   battery, na aap ka kaam. Aur raat 3 baje bhi bol sakta tha.
+
+   Dusri taraf teen cheezein pehle se MAUJOOD thin magar kabhi istemal na huin:
+     📜 LEDGER   har amal ka roznamcha (P3) — magar MAX:60, aur PARHA kabhi nahi
+     🤝 HAQEEQAT har tool ka `state` — "typed" (likha, BHEJA NAHI) darj hota tha,
+                 magar us adhoore kaam ka kisi ko YAAD nahi rehta tha
+     🔋 battery / network / waqt — sab maloom ho sakta tha, magar DIMAAG ko
+                 kabhi bataya hi nahi gaya (prompt mein HAAL ka koi zikr nahi tha)
+
+   ILAJ — 5 sutoon (HISSA 3 of the plan), EK switch ke peeche (`khud`, OFF):
+
+     👁️ HAAL    abhi ka poora haal, ~40 token — waqt, battery, net, headphone,
+                aakhri amal. Dimag ko har turn par bheja jata hai, aur prompt
+                ka qanoon: jo HAAL mein NAHI, wo ijaad MAT karo.
+     🛡️ BUDGET  khud se bolne ki LAGAAM — 6/din · do ke darmiyan 45 min ·
+                raat 12 se subah 7 KHAMOSH · Maya bol/sun rahi ho to chup ·
+                🔴 SURKH aur 🟡 ZARD kaam KABHI nahi · battery <10% par sirf
+                zaroori · har cheez DARJ (kitni roki gayi, kyun).
+     🧠 AADAT   LEDGER ko khud parh kar aadat pakarna: (tool + arg bucket +
+                ghanta) ≥4 dafa AUR ≥3 alag din → tajweez. Sirf 🟢 SABZ.
+                Ek waqt mein EK tajweez. Mana kiya → hamesha ke liye chup.
+     📌 ADHOORA "typed" wale amal jinke baad AUTO-SEND ✓ na aaya ho, 10 min se
+                purane hon → "wo kaam adhoora reh gaya tha, ab bhejun?"
+                Rozana EK se zyada nahi.
+     ⚗️ DRY-RUN "karti to ye karti" — chalta kuch nahi. Naye rules dekhne ko.
+
+   QANOON (HISSA 4 of the plan):
+     1. Switch OFF = ek line bhi nahi chalti, purana raasta jyun ka tyun.
+     2. Khud-mukhtar amal KABHI 🔴 SURKH nahi (call/SMS/WhatsApp bhejna mana).
+        🟡 ZARD bhi nahi — sirf 🟢 SABZ (torch/brightness/volume/timer/info).
+     3. Har khud-mukhtar amal LEDGER + NAAP + pushLog mein darj (⟲ undo muft).
+     4. Bol-budget se zyada kuch nahi — aur har rok DARJ hoti hai (andha nahi).
+     5. Tajweez EK dafa. "NAHI" ka matlab "dobara kabhi mat poochhna".
+     6. Koi naya Kotlin nahi — sab JS. Purani APK ke sath bhi chalega.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var KHUD = {
+  V: "1.0",
+
+  /* ─────────── 🛡️ BUDGET — be-lagam khud-mukhtari = tabahi ─────────── */
+  BUDGET: {
+    KEY: "maya_khud_budget",
+    DAY: 6,                  /* rozana kitni dafa KHUD se bolna */
+    GAP: 45 * 60000,         /* do khud-ba-khud baaton ke darmiyan */
+    QUIET_FROM: 0,           /* raat 12 baje */
+    QUIET_TO: 7,             /* subah 7 baje — KHAMOSH GHANTE */
+    LOW_BATT: 10,            /* is se neeche sirf zaroori baat */
+    ROZ: 20,                 /* har rule/tajweez ki rozana hadd (loop ka taala) */
+    S: null,
+    load: function () {
+      if (KHUD.BUDGET.S) return KHUD.BUDGET.S;
+      var s = { day: "", n: 0, last: 0, said: {}, asked: {}, denied: 0, quietBlocked: 0, gapBlocked: 0, capBlocked: 0, battBlocked: 0, busyBlocked: 0 };
+      try {
+        var raw = JSON.parse(localStorage.getItem(KHUD.BUDGET.KEY) || "{}");
+        if (raw && typeof raw === "object") {
+          if (typeof raw.day === "string") s.day = raw.day;
+          if (typeof raw.n === "number") s.n = raw.n;
+          if (typeof raw.last === "number") s.last = raw.last;
+          if (raw.said && typeof raw.said === "object") s.said = raw.said;
+          if (raw.asked && typeof raw.asked === "object") s.asked = raw.asked;
+          if (typeof raw.denied === "number") s.denied = raw.denied;
+          if (typeof raw.quietBlocked === "number") s.quietBlocked = raw.quietBlocked;
+          if (typeof raw.gapBlocked === "number") s.gapBlocked = raw.gapBlocked;
+          if (typeof raw.capBlocked === "number") s.capBlocked = raw.capBlocked;
+          if (typeof raw.battBlocked === "number") s.battBlocked = raw.battBlocked;
+          if (typeof raw.busyBlocked === "number") s.busyBlocked = raw.busyBlocked;
+        }
+      } catch (e) {}
+      KHUD.BUDGET.S = s;
+      return s;
+    },
+    save: function () {
+      try { localStorage.setItem(KHUD.BUDGET.KEY, JSON.stringify(KHUD.BUDGET.load())); } catch (e) {}
+    },
+    today: function (when) {
+      var d = new Date(when || (new Date()).getTime());
+      return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+    },
+    /* din badal gaya to ginti saaf */
+    roll: function (when) {
+      var s = KHUD.BUDGET.load();
+      var t = KHUD.BUDGET.today(when);
+      if (s.day !== t) { s.day = t; s.n = 0; s.said = {}; }
+      return s;
+    },
+    /* 🔇 khamosh ghante: raat QUIET_FROM se subah QUIET_TO tak */
+    quiet: function (when) {
+      var h = new Date(when || (new Date()).getTime()).getHours();
+      return (h >= KHUD.BUDGET.QUIET_FROM && h < KHUD.BUDGET.QUIET_TO);
+    },
+    /* kya abhi KHUD se bol/kaam kar sakti hoon? urgent = battery jaisi zaroori baat */
+    can: function (why, when, urgent) {
+      var now = when || (new Date()).getTime();
+      var s = KHUD.BUDGET.roll(now);
+      if (!FLAGS.on("khud")) return { ok: false, why: "🕸️ KHUD-MUKHTAR ka switch band hai (LAB)" };
+      /* 🤫 Maya bol rahi hai ya sun rahi hai → beech mein na tokay */
+      if (typeof SUKOON !== "undefined" && SUKOON.haal !== "KHALI") {
+        s.busyBlocked++; KHUD.BUDGET.save();
+        return { ok: false, why: "Maya abhi " + (SUKOON.haal === "BOL_RAHI" ? "bol rahi hai" : "sun rahi hai") + " — beech mein nahi bolti" };
+      }
+      if (typeof speaking !== "undefined" && speaking) {
+        s.busyBlocked++; KHUD.BUDGET.save();
+        return { ok: false, why: "Maya abhi bol rahi hai" };
+      }
+      if (KHUD.BUDGET.quiet(now)) {
+        s.quietBlocked++; KHUD.BUDGET.save();
+        return { ok: false, why: "🔇 khamosh ghante (raat 12 se subah 7) — neend zaroori hai" };
+      }
+      /* hadd PEHLE: budget khatam ho to "45 min baad" ka jhoota waada na kare */
+      if (s.n >= KHUD.BUDGET.DAY && !urgent) {
+        s.capBlocked++; KHUD.BUDGET.save();
+        return { ok: false, why: "\ud83d\udcac aaj ka bol-budget khatam (" + KHUD.BUDGET.DAY + "/" + KHUD.BUDGET.DAY + ") — kal subah 7 ke baad" };
+      }
+      if (now - s.last < KHUD.BUDGET.GAP && !urgent) {
+        s.gapBlocked++; KHUD.BUDGET.save();
+        return { ok: false, why: "\u23f3 " + Math.round((KHUD.BUDGET.GAP - (now - s.last)) / 60000) + " minute baad bol sakti hoon (45 min ka farq)" };
+      }
+      /* 🔋 battery <10% → sirf zaroori (warna Maya khud battery kha jayegi) */
+      if (!urgent) {
+        var b = KHUD.HAAL.battery();
+        /* charge ho rahi ho to ijazat — warna phone raat bhar plug par laga rahe
+           aur Maya goongi ho jaye (bina wajah ki pabandi) */
+        if (b && b.level !== null && !b.charging && b.level < KHUD.BUDGET.LOW_BATT) {
+          s.battBlocked++; KHUD.BUDGET.save();
+          return { ok: false, why: "🔋 battery " + b.level + "% — ab sirf zaroori baat, warna phone band" };
+        }
+      }
+      return { ok: true, why: "" };
+    },
+    spend: function (kind, when) {
+      var now = when || (new Date()).getTime();
+      var s = KHUD.BUDGET.roll(now);
+      s.n++;
+      s.last = now;
+      if (kind) s.said[kind] = (s.said[kind] || 0) + 1;
+      KHUD.BUDGET.save();
+      return s.n;
+    },
+    /* ek hi qism ki baat rozana ek dafa (paani yaad dilana bar bar nahi) */
+    saidToday: function (kind, when) {
+      var s = KHUD.BUDGET.roll(when);
+      return !!(kind && s.said[kind]);
+    },
+    /* rozana hadd: ek rule/tajweez 20 dafa se zyada nahi */
+    askOk: function (key, when) {
+      var s = KHUD.BUDGET.roll(when);
+      if (!s.asked[key]) s.asked[key] = { d: s.day, n: 0 };
+      if (s.asked[key].d !== s.day) s.asked[key] = { d: s.day, n: 0 };
+      return s.asked[key].n < KHUD.BUDGET.ROZ;
+    },
+    asked: function (key, when) {
+      var s = KHUD.BUDGET.roll(when);
+      if (!s.asked[key]) s.asked[key] = { d: s.day, n: 0 };
+      if (s.asked[key].d !== s.day) s.asked[key] = { d: s.day, n: 0 };
+      s.asked[key].n++;
+      KHUD.BUDGET.save();
+      return s.asked[key].n;
+    },
+    left: function (when) {
+      var s = KHUD.BUDGET.roll(when);
+      return Math.max(0, KHUD.BUDGET.DAY - s.n);
+    },
+    report: function (when) {
+      var s = KHUD.BUDGET.roll(when);
+      return "💬 " + s.n + "/" + KHUD.BUDGET.DAY + " khud se bola  ·  baqi " + KHUD.BUDGET.left(when) +
+             "  ·  roki: khamosh-ghante " + s.quietBlocked + " · farq " + s.gapBlocked +
+             " · hadd " + s.capBlocked + " · battery " + s.battBlocked + " · masroof " + s.busyBlocked;
+    }
+  },
+
+  /* ─────────── 👁️ HAAL — Maya ko apne phone ka pata ho ─────────── */
+  HAAL: {
+    _at: 0,
+    _b: null,
+    /* battery: native bridge pehle, browser baad mein, warna sach sach null */
+    battery: function () {
+      try {
+        if (typeof NATIVE !== "undefined" && NATIVE && window.MayaBridge && window.MayaBridge.battery) {
+          var j = JSON.parse(window.MayaBridge.battery());
+          if (j && typeof j.level === "number") return { level: j.level, charging: !!j.charging };
+        }
+      } catch (e) {}
+      return KHUD.HAAL._b;                 /* browser ki async reading (agar hai) */
+    },
+    /* browser battery — ek dafa, chup-chaap (purane WebView mein hai hi nahi) */
+    watch: function () {
+      try {
+        if (navigator.getBattery) {
+          navigator.getBattery().then(function (b) {
+            function upd() { KHUD.HAAL._b = { level: Math.round(b.level * 100), charging: !!b.charging }; }
+            upd();
+            try { b.addEventListener("levelchange", upd); b.addEventListener("chargingchange", upd); } catch (e) {}
+          }, function () {});
+        }
+      } catch (e) {}
+    },
+    net: function () {
+      try {
+        var c = navigator.connection;
+        if (c && c.effectiveType) return String(c.effectiveType).toUpperCase();
+      } catch (e) {}
+      try {
+        if (navigator.onLine === false) return "offline";
+      } catch (e) {}
+      return "";
+    },
+    headphone: function () {
+      try {
+        var d = navigator.mediaDevices;
+        if (d && d.enumerateDevices) {
+          d.enumerateDevices().then(function (list) {
+            var i, on = false;
+            for (i = 0; i < list.length; i++) {
+              if (list[i].kind === "audiooutput" && /headphone|headset|earbud|bluetooth|airpod/i.test(String(list[i].label || ""))) on = true;
+            }
+            KHUD.HAAL._hp = on;
+          }, function () {});
+        }
+      } catch (e) {}
+      return KHUD.HAAL._hp === true;
+    },
+    _hp: false,
+    /* din ka hissa — Urdu mein, koi library nahi */
+    waqt: function (when) {
+      var d = new Date(when || (new Date()).getTime());
+      var h = d.getHours();
+      if (h >= 4 && h < 12) return "subah";
+      if (h >= 12 && h < 16) return "dopahar";
+      if (h >= 16 && h < 19) return "shaam";
+      if (h >= 19 && h < 23) return "raat";
+      return "aadhi raat";   /* 23 se 4 tak */
+    },
+    /* ~40 token: sirf wohi jo sach mein maloom hai (andaza nahi, jhoot nahi) */
+    facts: function (when) {
+      var now = when || (new Date()).getTime();
+      var d = new Date(now);
+      var o = { hh: d.getHours(), mm: d.getMinutes(), part: KHUD.HAAL.waqt(now), batt: null, net: "", hp: false, last: null };
+      try { o.batt = KHUD.HAAL.battery(); } catch (e) { o.batt = null; }
+      try { o.net = KHUD.HAAL.net(); } catch (e) { o.net = ""; }
+      try { o.hp = KHUD.HAAL.headphone(); } catch (e) { o.hp = false; }
+      try { o.last = KHUD.HAAL.lastAmal(now); } catch (e) { o.last = null; }
+      return o;
+    },
+    line: function (when) {
+      var f = KHUD.HAAL.facts(when);
+      var p = [];
+      p.push(f.part + " " + (f.hh < 10 ? "0" : "") + f.hh + ":" + (f.mm < 10 ? "0" : "") + f.mm);
+      if (f.batt && f.batt.level !== null && f.batt.level !== undefined) {
+        p.push("battery " + f.batt.level + "%" + (f.batt.charging ? " (charge ho rahi hai)" : ""));
+      }
+      if (f.net) p.push(f.net === "offline" ? "internet BAND" : f.net);
+      if (f.hp) p.push("headphone laga hai");
+      if (f.last) p.push("aakhri amal: " + f.last);
+      return p.join(" · ");
+    },
+    /* prompt mein jane wali line — khali halat par "" (crash kabhi nahi) */
+    context: function (when) {
+      try {
+        if (!FLAGS.on("khud")) return "";
+        var l = KHUD.HAAL.line(when);
+        if (!l) return "";
+        return "\n👁️ ABHI KA HAAL (phone se naapa gaya, " + l + "). Is haal ko sirf tab zikr karo jab user ki baat se lagta khaye — misaal: battery kam ho to andhera kam karne ka mashwara. Jo HAAL mein NAHI likha, us ka daawa hargiz mat karo.";
+      } catch (e) { return ""; }
+    },
+    /* LEDGER ka aakhri KAAMYAB amal — "abhi kya kiya tha" ka pata */
+    lastAmal: function (when) {
+      var now = when || (new Date()).getTime();
+      if (typeof LEDGER === "undefined" || !LEDGER.load) return "";
+      var l = LEDGER.load(), i, e;
+      for (i = l.length - 1; i >= 0; i--) {
+        e = l[i];
+        if (!e || !e.ok || !e.t) continue;
+        var ago = Math.round((now - e.t) / 60000);
+        if (ago < 0) ago = 0;
+        var bits = [];
+        if (e.a && typeof e.a === "object") {
+          if (e.a.percent !== undefined) bits.push(e.a.percent + "%");
+          if (e.a.on !== undefined) bits.push(e.a.on ? "ON" : "OFF");
+          if (e.a.name) bits.push(String(e.a.name).slice(0, 16));
+        }
+        return e.n + (bits.length ? (" " + bits.join(" ")) : "") + " (" + (ago < 1 ? "abhi" : ago + " min pehle") + ")" + (e.st ? " [" + e.st + "]" : "");
+      }
+      return "";
+    },
+    /* prompt ka qanoon — HAAL se jhoot na banaya jaye */
+    rule: function () {
+      if (!FLAGS.on("khud")) return "";
+      return "\n👁️ HAAL KA QANOON: upar diye HAAL ko qudrati tor par istemal karo (battery kam ho to mashwara, raat ho to sone ki baat) — magar HAAL mein jo NAHI, wo ijaad mat karo. Aur khud se lambi nasihat mat shuru karo: bol-budget mehdood hai.";
+    }
+  },
+
+  /* ─────────── 🧠 AADAT — LEDGER se aadat pakarna (WTF #1) ─────────── */
+  AADAT: {
+    KEY: "maya_khud_aadat",
+    NEED: 4,          /* kam az kam 4 dafa */
+    DAYS: 3,          /* kam az kam 3 alag din */
+    WIN: 59,          /* minute — us ghante ke andar */
+    map: null,
+    load: function () {
+      if (KHUD.AADAT.map) return KHUD.AADAT.map;
+      var m = {};
+      try {
+        var raw = JSON.parse(localStorage.getItem(KHUD.AADAT.KEY) || "{}");
+        if (raw && typeof raw === "object") m = raw;
+      } catch (e) { m = {}; }
+      KHUD.AADAT.map = m;
+      return m;
+    },
+    save: function () {
+      try { localStorage.setItem(KHUD.AADAT.KEY, JSON.stringify(KHUD.AADAT.map || {})); } catch (e) {}
+    },
+    /* numbers ko bucket mein daalo — 15 aur 20 alag aadatain nahi, 10-19 ek aadat */
+    bucket: function (v) {
+      /* boolean pehle: Number(true)=1 → bucket 0 ban jata aur ON/OFF ki pehchan kho jati */
+      if (typeof v === "boolean") return v ? "on" : "off";
+      var n = Number(v);
+      if (isNaN(n)) return String(v).toLowerCase().slice(0, 18);
+      /* FLOOR (round nahi): round se 25 → 30 ho jata aur 20/25 ALAG aadatain
+         ban kar shart kabhi poori na hoti. Floor = "10 se 19 ek hi tokri". */
+      return String(Math.floor(n / 10) * 10);
+    },
+    /* (tool, arg-bucket, ghanta) ki chaabi — isi se aadat pehchani jati hai */
+    sig: function (name, args) {
+      var a = args || {}, keys = [], k, parts = [];
+      for (k in a) if (Object.prototype.hasOwnProperty.call(a, k)) keys.push(k);
+      keys.sort();
+      for (var i = 0; i < keys.length; i++) {
+        k = keys[i];
+        if (k === "code" || k === "input" || k === "text" || k === "query" || k === "url" || k === "entry") continue;  /* bekaar matn se aadat nahi banti */
+        parts.push(k + "=" + KHUD.AADAT.bucket(a[k]));
+      }
+      return name + "|" + parts.join(",");
+    },
+    dayKey: function (t) {
+      var d = new Date(t);
+      return d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate();
+    },
+    /* LEDGER ko parh kar aadatain nikalo — sirf 🟢 SABZ, sirf kaamyab amal */
+    mine: function (when) {
+      var out = [];
+      if (typeof LEDGER === "undefined" || !LEDGER.load) return out;
+      var list = LEDGER.load();
+      var seen = {}, order = [], i, e, d, k, hh;
+      for (i = 0; i < list.length; i++) {
+        e = list[i];
+        if (!e || !e.t || !e.n || e.ok !== true) continue;
+        if (typeof IJAZAT !== "undefined" && IJAZAT.T && IJAZAT.T[e.n] !== 1) continue;   /* 🟢 SABZ ke siwa kuch nahi */
+        d = new Date(e.t);
+        hh = d.getHours();
+        k = KHUD.AADAT.sig(e.n, e.a) + "@" + hh;
+        if (!seen[k]) { seen[k] = { key: k, sig: KHUD.AADAT.sig(e.n, e.a), n: e.n, a: e.a || {}, hour: hh, min: d.getMinutes(), count: 0, days: {}, last: 0 }; order.push(k); }
+        seen[k].count++;
+        seen[k].days[KHUD.AADAT.dayKey(e.t)] = 1;
+        if (e.t > seen[k].last) { seen[k].last = e.t; seen[k].min = d.getMinutes(); }
+      }
+      for (i = 0; i < order.length; i++) {
+        e = seen[order[i]];
+        e.dayCount = 0;
+        for (var dk in e.days) if (Object.prototype.hasOwnProperty.call(e.days, dk)) e.dayCount++;
+        if (e.count >= KHUD.AADAT.NEED && e.dayCount >= KHUD.AADAT.DAYS) out.push(e);
+      }
+      out.sort(function (x, y) { return (y.count - x.count) || (y.last - x.last); });
+      return out;
+    },
+    /* abhi chalane laiq aadat — ek waqt mein sirf EK (shor nahi) */
+    due: function (when) {
+      var now = when || (new Date()).getTime();
+      if (!FLAGS.on("khud")) return null;
+      var m = KHUD.AADAT.load(), found = KHUD.AADAT.mine(now), i, h, s;
+      var d0 = new Date(now);
+      var today = KHUD.BUDGET.today(now);
+      for (i = 0; i < found.length; i++) {
+        h = found[i];
+        s = h.sig + "@" + h.hour;
+        if (m[s] && (m[s].mode === "off" || m[s].mode === "denied")) continue;   /* mana kiya → kabhi nahi */
+        if (m[s] && m[s].lastRunDay === today) continue;                        /* aaj ho chuka */
+        if (d0.getHours() !== h.hour) continue;                                 /* waqt ka ghanta */
+        if (d0.getMinutes() < h.min) continue;                                  /* aadat ke waqt se pehle nahi */
+        if (d0.getMinutes() > h.min + KHUD.AADAT.WIN) continue;                 /* window nikal gayi */
+        h.sigKey = s;
+        return h;
+      }
+      return null;
+    },
+    find: function (sigKey) {
+      var found = KHUD.AADAT.mine(), i;
+      for (i = 0; i < found.length; i++) if (found[i].sig + "@" + found[i].hour === sigKey) return found[i];
+      return null;
+    },
+    human: function (h) {
+      var bits = [], a = h.a || {}, k;
+      for (k in a) if (Object.prototype.hasOwnProperty.call(a, k)) {
+        if (k === "percent") bits.push(a[k] + "%");
+        else if (k === "on") bits.push(a[k] ? "ON" : "OFF");
+        else if (typeof a[k] !== "object") bits.push(String(a[k]).slice(0, 18));
+      }
+      return h.n + (bits.length ? (" (" + bits.join(", ") + ")") : "") +
+             " — roz taqreeban " + (h.hour < 10 ? "0" : "") + h.hour + ":" + (h.min < 10 ? "0" : "") + h.min;
+    },
+    /* 💥 WTF #1 — "ye aap ne kabhi bataya nahi tha, aap ne ghaur bhi nahi kiya tha" */
+    propose: function (h) {
+      var sigKey = h.sigKey || (h.sig + "@" + h.hour);
+      if (KHUD.pending) return false;
+      /* 🔑 ek hi aadat ki tajweez ZINDAGI mein EK dafa — HAAN/POOCH/NAHI jo bhi
+         kaha, wo faisla mehfooz hai. (NAHI = hamesha ke liye chup.) */
+      var already = KHUD.AADAT.load()[sigKey];
+      if (already && already.mode) return false;
+      if (!KHUD.BUDGET.askOk("aadat:" + sigKey)) return false;
+      KHUD.BUDGET.asked("aadat:" + sigKey);
+      var txt = "🧠 MAYA NE KUCH NOTICE KIYA\n\n  Pichle " + h.dayCount + " alag dinon mein " + h.count + " dafa:\n  " + KHUD.AADAT.human(h) +
+                "\n\n  Ye aap ne kabhi bataya nahi tha — maine apne 📜 roznamche (LEDGER) se khud nikala.\n  Roz is waqt KHUD kar diya karun?";
+      return KHUD.card("🧠 AADAT", txt, ["✅ HAAN, ROZ KARO", "⏰ POOCH KAR KARO", "❌ NAHI"], function (which) {
+        var m = KHUD.AADAT.load();
+        if (which === 0) m[sigKey] = { mode: "auto", n: h.n, a: h.a, hour: h.hour, min: h.min, count: h.count, days: h.dayCount, made: (new Date()).getTime(), runs: 0, lastRunDay: "" };
+        else if (which === 1) m[sigKey] = { mode: "ask", n: h.n, a: h.a, hour: h.hour, min: h.min, count: h.count, days: h.dayCount, made: (new Date()).getTime(), runs: 0, lastRunDay: "" };
+        else { m[sigKey] = { mode: "off", made: (new Date()).getTime() }; KHUD.BUDGET.load().denied++; KHUD.BUDGET.save(); }
+        KHUD.AADAT.save();
+        try { pushLog("KHUD/AADAT: " + sigKey + " → " + (which === 0 ? "ROZ KARO" : which === 1 ? "POOCH KAR" : "NAHI (hamesha ke liye)")); } catch (e) {}
+        try {
+          if (typeof toast === "function") toast(which === 2 ? "❌ theek hai — ye tajweez dobara nahi aayegi" : "✅ seekh liya — roz " + (h.hour < 10 ? "0" : "") + h.hour + " baje ke aas paas");
+        } catch (e) {}
+        KHUD.pending = null;
+        return which;
+      });
+    },
+    /* aadat chalao — 🟢 SABZ hi, warna INKAR (qanoon 2) */
+    run: function (sigKey, mode, when) {
+      var h = KHUD.AADAT.find(sigKey);
+      /* roznamcha sirf 60 amal rakhta hai — purani aadat ka saboot ghum sakta hai.
+         Magar aap ka FAISLA (mode + args) localStorage mein hai: wahi kaafi hai. */
+      if (!h) {
+        var st = KHUD.AADAT.load()[sigKey];
+        if (!st || !st.n) return { ok: false, why: "aadat ka data nahi mila (na roznamche mein, na mehfooz faislon mein)" };
+        h = { n: st.n, a: st.a || {}, hour: st.hour || 0, min: st.min || 0, count: st.count || 0, dayCount: st.days || 0, sigKey: sigKey };
+      }
+      if (typeof IJAZAT !== "undefined" && IJAZAT.T && IJAZAT.T[h.n] !== 1) {
+        return { ok: false, why: "🚫 " + h.n + " 🟢 SABZ nahi — khud-mukhtar amal kabhi zard/surkh nahi karta" };
+      }
+      if (mode === "dry") return { ok: true, dry: true, say: "⚗️ DRY-RUN: karti to " + KHUD.AADAT.human(h) };
+      if (mode === "ask") {
+        if (KHUD.pending) return { ok: false, why: "ek aur tajweez pehle se khuli hai" };
+        KHUD.card("⏰ AADAT", "Roz is waqt aap " + KHUD.AADAT.human(h) + " karte ho.\nAb kar doon?", ["✅ HAAN", "❌ NAHI"], function (which) {
+          KHUD.pending = null;
+          if (which === 0) KHUD.AADAT.act(h, sigKey);
+          else { try { if (typeof toast === "function") toast("❌ theek hai, nahi kiya"); } catch (e) {} }
+          return which;
+        });
+        return { ok: true, asked: true };
+      }
+      return KHUD.AADAT.act(h, sigKey);
+    },
+    act: function (h, sigKey) {
+      /* pehle markRun: nakaam ho ya kaamyab, us ghanta dobara koshish NAHI
+         (warna tick har 2 min ek hi kaam bar bar karta — loop ka taala) */
+      KHUD.AADAT.markRun(sigKey);
+      try {
+        var p = execTool(h.n, h.a || {});
+        if (p && p.then) {
+          p.then(function (out) {
+            var okb = !!(out && out.ok !== false && out.done !== false);
+            try { pushLog("KHUD/AADAT: " + h.n + " " + (okb ? "\u2705 khud kar diya" : "\u274C nakaam")); } catch (e) {}
+          }, function () { try { pushLog("KHUD/AADAT: " + h.n + " \u274C (error)"); } catch (e) {} });
+        }
+      } catch (e) { return { ok: false, why: String((e && e.message) || e) }; }
+      return { ok: true, tool: h.n };
+    },
+    markRun: function (sigKey) {
+      var m = KHUD.AADAT.load();
+      if (!m[sigKey]) m[sigKey] = { mode: "auto" };
+      m[sigKey].runs = (m[sigKey].runs || 0) + 1;
+      m[sigKey].lastRunDay = KHUD.BUDGET.today();
+      m[sigKey].lastRun = (new Date()).getTime();
+      KHUD.AADAT.save();
+    },
+    list: function () {
+      var m = KHUD.AADAT.load(), out = [], k;
+      for (k in m) if (Object.prototype.hasOwnProperty.call(m, k)) out.push({ key: k, v: m[k] });
+      out.sort(function (a, b) { return (b.v.count || 0) - (a.v.count || 0); });
+      return out;
+    }
+  },
+
+  /* ─────────── 📌 ADHOORA — "type kar diya, SEND nahi hua" (WTF #2) ─────────── */
+  ADHOORA: {
+    OLD: 10 * 60000,       /* 10 min se purana ho to hi poocho */
+    RECENT: 3 * 24 * 3600000,   /* 3 din se purani cheez adhoori nahi, bhooli hui hai */
+    SENT_WINDOW: 30 * 60000,
+    /* AUTO-SEND ✓ aaya → pichle 30 min ke "typed" amal BHEJE hue maano */
+    markSent: function (when) {
+      if (typeof LEDGER === "undefined" || !LEDGER.load) return 0;
+      var now = when || (new Date()).getTime();
+      var l = LEDGER.load(), i, e, n = 0;
+      for (i = 0; i < l.length; i++) {
+        e = l[i];
+        if (!e || e.st !== "typed" || e.sent) continue;
+        if (now - e.t <= KHUD.ADHOORA.SENT_WINDOW) { e.sent = 1; n++; }
+      }
+      if (n) { try { LEDGER.save(); } catch (e2) {} }
+      return n;
+    },
+    /* LEDGER mein dhoondo: typed/started, tasdeeq nahi aayi, 10 min se purana */
+    find: function (when) {
+      if (!FLAGS.on("khud")) return null;
+      if (typeof LEDGER === "undefined" || !LEDGER.load) return null;
+      var now = when || (new Date()).getTime();
+      var l = LEDGER.load(), i, e, out = [];
+      for (i = l.length - 1; i >= 0; i--) {
+        e = l[i];
+        if (!e || !e.t) continue;
+        if (e.st !== "typed" && e.st !== "started") continue;
+        if (e.ok !== true) continue;
+        if (e.sent || e.kdone) continue;
+        var age = now - e.t;
+        if (age < KHUD.ADHOORA.OLD) continue;
+        if (age > KHUD.ADHOORA.RECENT) continue;
+        out.push(e);
+        if (out.length >= 3) break;
+      }
+      if (!out.length) return null;
+      return out[0];
+    },
+    what: function (e) {
+      var a = e.a || {};
+      var kya = a.text || a.message || "";
+      return (a.name ? (a.name + " ko ") : "") + e.n + (kya ? (" — “" + String(kya).slice(0, 50) + "”") : "");
+    },
+    /* 💥 WTF #2 — asli chat ka adhoora kaam, ek dafa poochho phir chup */
+    offer: function (when) {
+      var e = KHUD.ADHOORA.find(when);
+      if (!e) return false;
+      if (KHUD.pending) return false;
+      if (!KHUD.BUDGET.askOk("adhoora")) return false;
+      KHUD.BUDGET.asked("adhoora");
+      var ago = Math.round(((when || (new Date()).getTime()) - e.t) / 60000);
+      var d = new Date(e.t);
+      var hh = (d.getHours() < 10 ? "0" : "") + d.getHours() + ":" + (d.getMinutes() < 10 ? "0" : "") + d.getMinutes();
+      var txt = "📌 EK KAAM ADHOORA REH GAYA THA\n\n  " + hh + " par " + KHUD.ADHOORA.what(e) + "\n  (" + (ago < 60 ? ago + " minute" : Math.round(ago / 60) + " ghante") + " pehle — " +
+                (e.st === "typed" ? "matn TYPE hua tha magar BHEJA nahi gaya" : "chala tha magar tasdeeq nahi aayi") + ")\n\n  Ab kar doon?";
+      return KHUD.card("📌 ADHOORA", txt, ["✅ HAAN, ABHI KARO", "❌ REHNE DO"], function (which) {
+        KHUD.pending = null;
+        if (which !== 0) { try { e.kdone = 1; LEDGER.save(); } catch (e2) {} try { pushLog("KHUD/ADHOORA: user ne mana kiya"); } catch (e3) {} return which; }
+        try {
+          var p = execTool(e.n, e.a || {});
+          if (p && p.then) p.then(function (out) {
+            try { pushLog("KHUD/ADHOORA: " + e.n + " " + (out && out.ok !== false ? "✅" : "❌")); } catch (e4) {}
+            try { e.kdone = 1; LEDGER.save(); } catch (e5) {}
+          }, function () {});
+        } catch (e6) {}
+        return which;
+      });
+    },
+    pendingList: function (when) {
+      var now = when || (new Date()).getTime();
+      if (typeof LEDGER === "undefined" || !LEDGER.load) return [];
+      var l = LEDGER.load(), i, e, out = [];
+      for (i = l.length - 1; i >= 0; i--) {
+        e = l[i];
+        if (!e || !e.t || e.sent || e.kdone) continue;
+        if (e.st !== "typed" && e.st !== "started") continue;
+        out.push("  • " + new Date(e.t).toLocaleString() + "  " + e.n + (e.a && e.a.name ? (" → " + e.a.name) : "") + "  [" + e.st + "]");
+        if (out.length >= 5) break;
+      }
+      return out;
+    }
+  },
+
+  /* ─────────── 🃏 card + 💬 bolne ki lagaam ─────────── */
+  pending: null,
+  card: function (tag, text, labels, onPick) {
+    if (KHUD.pending) return false;
+    var done = false;
+    function finish(w) {
+      if (done) return;
+      done = true;
+      try { if (row && row.parentNode) row.parentNode.removeChild(row); } catch (e) {}
+      KHUD.pending = null;
+      try { onPick(w); } catch (e) {}
+    }
+    var row = null;
+    try {
+      var host = (typeof log !== "undefined" && log && log.appendChild) ? log : document.body;
+      row = document.createElement("div");
+      row.className = "row ai";
+      var b = document.createElement("div");
+      b.className = "bubble";
+      var html = "<span class='who'>" + esc(tag) + "</span>" + esc(text).replace(/\n/g, "<br>") +
+                 "<div style='margin-top:9px;display:flex;gap:8px;flex-wrap:wrap'>";
+      var i;
+      for (i = 0; i < labels.length; i++) {
+        html += "<button type='button' class='ui-btn" + (i === 0 ? "" : " ui-btn-ghost") + "' data-k='" + i +
+                "' style='margin:0;min-height:40px'>" + esc(labels[i]) + "</button>";
+      }
+      html += "</div><div class='ui-hint' style='margin-top:6px'>Jawab na diya to ye card 5 minute baad khud hat jayega — dobara nahi poochhungi.</div>";
+      b.innerHTML = html;
+      row.appendChild(b);
+      host.appendChild(row);
+      try { host.scrollTop = host.scrollHeight; } catch (e2) {}
+      b.addEventListener("click", function (ev) {
+        var t = ev.target;
+        if (!t || !t.getAttribute) return;
+        var v = t.getAttribute("data-k");
+        if (v === null) return;
+        finish(parseInt(v, 10));
+      });
+    } catch (e) { KHUD.pending = null; return false; }
+    KHUD.pending = finish;
+    setTimeout(function () { finish(-1); }, 300000);   /* 5 min — jawab na aaya to chup */
+    return true;
+  },
+
+  /* khud se bolna — BUDGET se guzar kar hi */
+  say: function (msg, kind, urgent, when) {
+    if (!msg) return false;
+    var g = KHUD.BUDGET.can(kind || "baat", when, urgent);
+    if (!g.ok) { try { pushLog("KHUD roka: " + g.why); } catch (e) {} return false; }
+    KHUD.BUDGET.spend(kind, when);
+    try {
+      if (typeof reply === "function") reply(msg, false);
+      else if (typeof toast === "function") toast(msg);
+    } catch (e) { return false; }
+    try { pushLog("KHUD: khud boli (" + (kind || "baat") + ")"); } catch (e2) {}
+    try { if (typeof LEDGER !== "undefined" && LEDGER.load) LEDGER.push("notify", { title: "KHUD-MUKHTAR", text: String(msg).slice(0, 40) }, { ok: true, state: "info" }, undefined); } catch (e3) {}
+    return true;
+  },
+
+  /* ⚗️ DRY-RUN — "karti to ye karti", chalta kuch nahi */
+  dry: function (when) {
+    var L = ["⚗️ DRY-RUN — ye karti, magar KIYA KUCH NAHI", ""];
+    var now = when || (new Date()).getTime();
+    var g = KHUD.BUDGET.can("dry", now);
+    L.push("  bol-budget : " + (g.ok ? "✅ abhi bol sakti hoon" : ("🚫 " + g.why)));
+    L.push("  " + KHUD.BUDGET.report(now));
+    var a = KHUD.AADAT.due(now);
+    L.push("  aadat      : " + (a ? ("🟢 " + KHUD.AADAT.human(a) + " → karti to abhi chala deti") : "koi aadat is waqt banti nahi"));
+    var ad = KHUD.ADHOORA.find(now);
+    L.push("  adhoora    : " + (ad ? ("📌 " + KHUD.ADHOORA.what(ad) + " → poochti") : "koi adhoora kaam nahi mila"));
+    var b = KHUD.HAAL.battery();
+    L.push("  haal       : " + KHUD.HAAL.line(now));
+    if (b && b.level !== null && b.level < 15 && !b.charging) L.push("  battery    : 🔋 " + b.level + "% — saver ka mashwara karti");
+    L.push("");
+    L.push("  (🕸️ switch ON ho to ye sab ASAL mein hota — har amal 📜 LEDGER mein darj)");
+    return L.join("\n");
+  },
+
+  report: function (when) {
+    var now = when || (new Date()).getTime();
+    var L = ["🕸️ KHUD-MUKHTAR — Maya ne kya NOTICE kiya", ""];
+    L.push("  " + (FLAGS.on("khud") ? "🟢 switch ON" : "⭕ switch OFF (LAB mein chalu karo)"));
+    L.push("  " + KHUD.BUDGET.report(now));
+    L.push("  👁️ HAAL: " + (KHUD.HAAL.line(now) || "kuch maloom nahi"));
+    L.push("");
+    var m = KHUD.AADAT.list(), i;
+    L.push("🧠 SEEKHI HUI AADATAIN — " + m.length);
+    if (!m.length) L.push("  abhi koi nahi. 📜 LEDGER mein " + (typeof LEDGER !== "undefined" && LEDGER.load ? LEDGER.load().length : 0) + " amal darj hain.");
+    for (i = 0; i < m.length && i < 8; i++) {
+      var v = m[i].v;
+      var mode = v.mode === "auto" ? "✅ ROZ KHUD" : v.mode === "ask" ? "⏰ POOCH KAR" : v.mode === "denied" ? "🚫 MANA" : "❌ BAND";
+      L.push("  " + mode + "  " + m[i].key + (v.count ? ("   (" + v.count + " dafa, " + (v.days || 0) + " din)") : "") + (v.runs ? ("  · chala " + v.runs + " dafa") : ""));
+    }
+    L.push("");
+    var found = KHUD.AADAT.mine(now);
+    L.push("🔍 ABHI BANTI HUI AADATAIN — " + found.length + "  (≥" + KHUD.AADAT.NEED + " dafa AUR ≥" + KHUD.AADAT.DAYS + " alag din, sirf 🟢 SABZ)");
+    for (i = 0; i < found.length && i < 6; i++) L.push("  • " + KHUD.AADAT.human(found[i]) + "   " + found[i].count + " dafa / " + found[i].dayCount + " din");
+    if (!found.length) {
+      L.push("  kuch nahi mili" + (typeof IJAZAT !== "undefined" && !FLAGS.on("ijazat") ? "  ⚠️ 📜 LEDGER khali hai kyunki 🛡️ IJAZAT ka switch band hai — roznamcha wahin banta hai" : " — roznamcha abhi chhota hai"));
+    }
+    L.push("");
+    var pl = KHUD.ADHOORA.pendingList(now);
+    L.push("📌 ADHOORE KAAM — " + pl.length);
+    for (i = 0; i < pl.length; i++) L.push(pl[i]);
+    if (!pl.length) L.push("  koi nahi ✅  (matn TYPE kar ke SEND na dabane wale kaam yahan aate hain)");
+    L.push("");
+    L.push("🔇 KHAMOSH GHANTE: raat 12 se subah 7  ·  💬 hadd " + KHUD.BUDGET.DAY + "/din  ·  ⏳ farq 45 min");
+    L.push("🚫 khud se kabhi 🔴 SURKH ya 🟡 ZARD kaam NAHI (sirf 🟢 SABZ)");
+    return L.join("\n");
+  },
+
+  /* har 2 minute ek halka sa jhonk — koi network call nahi, sirf hisab */
+  tick: function (when) {
+    try {
+      if (!FLAGS.on("khud")) return null;
+      var now = when || (new Date()).getTime();
+      if (KHUD.pending) return null;                       /* ek card khula hai → chup */
+      if (typeof thinking !== "undefined" && thinking) return null;
+      /* 📌 adhoora kaam — sab se aham (asli kaam adhoora pada hai) */
+      var ad = KHUD.ADHOORA.find(now);
+      if (ad && KHUD.BUDGET.can("adhoora", now).ok) {
+        if (KHUD.ADHOORA.offer(now)) return { kind: "adhoora", e: ad };
+      }
+      /* 🧠 aadat — 🟢 SABZ hi, aur qanoon ke mutabiq */
+      var h = KHUD.AADAT.due(now);
+      if (h) {
+        var s = KHUD.AADAT.load()[h.sigKey];
+        var mode = s ? s.mode : null;
+        if (!mode) {
+          if (KHUD.BUDGET.can("aadat", now).ok && KHUD.AADAT.propose(h)) return { kind: "aadat-tajweez", h: h };
+        } else if (mode === "auto") {
+          var g = KHUD.BUDGET.can("aadat", now);
+          if (g.ok) { KHUD.BUDGET.spend("aadat", now); KHUD.AADAT.run(h.sigKey, "auto", now); return { kind: "aadat-auto", h: h }; }
+        } else if (mode === "ask") {
+          if (KHUD.BUDGET.can("aadat", now).ok) { KHUD.AADAT.run(h.sigKey, "ask", now); return { kind: "aadat-ask", h: h }; }
+        }
+      }
+      /* 🔋 battery — zaroori baat (urgent: gap aur hadd se chhoot) */
+      var b = KHUD.HAAL.battery();
+      if (b && b.level !== null && b.level <= 15 && !b.charging && !KHUD.BUDGET.saidToday("battery", now)) {
+        if (KHUD.say("🔋 " + (settings && settings.name ? settings.name + ", " : "") + "battery " + b.level + "% par hai aur charge nahi ho rahi — battery saver chalu kar do, warna main bhi thori der mein so jaungi.", "battery", b.level <= 10, now)) return { kind: "battery" };
+      }
+      /* 💧 3 ghante se chup ho, din ka waqt ho → ek hi baat, rozana ek dafa */
+      if (!settings || settings.proactive !== false) {
+        var lastAct = 0;
+        try { if (typeof MAYA_V4 !== "undefined" && MAYA_V4.lastInteract) lastAct = MAYA_V4.lastInteract; } catch (e) { lastAct = 0; }
+        if (lastAct && now - lastAct > 3 * 3600000 && !KHUD.BUDGET.saidToday("idle", now) && KHUD.BUDGET.can("idle", now).ok) {
+          var hr = new Date(now).getHours();
+          var msg = (hr >= 12 && hr < 18)
+            ? "💧 " + ((settings && settings.name) || "Boss") + ", teen ghante se phone par ho — paani pi lo, do minute aankhein band kar lo. Main yahin hoon."
+            : "🌙 " + ((settings && settings.name) || "Boss") + ", kaafi der se jaage ho — thora aaram kar lo. Zaroorat ho to bula lena.";
+          if (KHUD.say(msg, "idle", false, now)) return { kind: "idle" };
+        }
+      }
+      return null;
+    } catch (e) { return null; }
+  },
+
+  timer: null,
+  start: function () {
+    try { if (KHUD.timer) { clearInterval(KHUD.timer); KHUD.timer = null; } } catch (e) {}
+    if (!FLAGS.on("khud")) return false;
+    KHUD.HAAL.watch();
+    KHUD.timer = setInterval(function () { try { KHUD.tick(); } catch (e) {} }, 120000);
+    try { pushLog("🕸️ KHUD-MUKHTAR zinda — har 2 min jhonk (bol-budget " + KHUD.BUDGET.DAY + "/din)"); } catch (e2) {}
+    return true;
+  },
+  stop: function () {
+    try { if (KHUD.timer) clearInterval(KHUD.timer); } catch (e) {}
+    KHUD.timer = null;
+  }
+};
+
 /* ---------- WAKE WORD ('Maya' / 'Boss') ---------- */
 /* ═══════════════════════════════════════════════════════════════════════════
-   👂  KAAN  —  wake word ka asal ilaj                          (v5.9.1)
+   👂  KAAN  —  wake word ka asal ilaj                          (v5.10.0)
    ---------------------------------------------------------------------------
    User: "background mein mic on/off hota hai, magar 'Maya' bolne par kuch
           nahi hota."
@@ -7388,13 +8712,22 @@ async function ytPlay(query){
 var SUKOON = {
   haal: "KHALI",
   tailMs: 550,          /* echo tail — WakeWordService.ECHO_TAIL_MS se match */
+  /* 🧭 v5.11.0 (1.2 / F02) — HAAL ab LEVEL-TRIGGERED: sirf badalne par nahi,
+     balki har 10s heartbeat ke sath bhi jata hai. Kotlin side (WakeState) 3
+     heartbeat gayab hone par KHUD KHALI ho jata hai — pehle ek khoya hua call
+     wake ko hamesha ke liye band kar deta tha. */
+  HB_MS: 10000,         /* WakeState.HB_MS se match */
   _tailT: null,
+  _hbT: null,
+  beats: 0,
   _native: function (h) {
     try { if (window.MayaBridge && window.MayaBridge.setHaal) window.MayaBridge.setHaal(h); } catch (e) {}
     try { if (typeof KAAN !== "undefined" && KAAN.push) KAAN.push("haal", h); } catch (e) {}
   },
-  set: function (h) {
-    if (SUKOON.haal === h) return;
+  /* force=true → dedup bypass: Kotlin ko dobara bhejna LAZMI ho (sunEnd/bolEnd
+     par), warna ek khoya hua "KHALI" hamesha ke liye purana haal chhod jata tha. */
+  set: function (h, force) {
+    if (!force && SUKOON.haal === h) return;
     SUKOON.haal = h;
     SUKOON._native(h);
   },
@@ -7408,14 +8741,36 @@ var SUKOON = {
   bolEnd: function () {
     if (SUKOON._tailT) clearTimeout(SUKOON._tailT);
     SUKOON._tailT = setTimeout(function () {
-      if (SUKOON.haal === "BOL_RAHI") SUKOON.set("KHALI");
+      if (SUKOON.haal === "BOL_RAHI") SUKOON.set("KHALI", true);
     }, SUKOON.tailMs);
   },
   sunStart: function () {
     if (SUKOON._tailT) { clearTimeout(SUKOON._tailT); SUKOON._tailT = null; }
     SUKOON.set("APP_SUN");
   },
-  sunEnd: function () { SUKOON.set("KHALI"); }
+  sunEnd: function () { SUKOON.set("KHALI", true); },
+  /* 🧭 1.2 — heartbeat: "main zinda hun, haal ye hai" (har 10s) */
+  beat: function () {
+    try {
+      if (window.MayaBridge && window.MayaBridge.wakeBeat) window.MayaBridge.wakeBeat(SUKOON.haal);
+      SUKOON.beats++;
+    } catch (e) {}
+  },
+  hbStart: function () {
+    try { if (SUKOON._hbT) clearInterval(SUKOON._hbT); } catch (e) {}
+    SUKOON.beat();
+    SUKOON._hbT = setInterval(SUKOON.beat, SUKOON.HB_MS);
+  },
+  /* 🧭 1.2 — WebView reload / boot / app wapsi: poora resync (dedup bypass ke sath).
+     Purani APK par bridge na ho to purana rasta (setHaal) hi istemal hota hai. */
+  resync: function () {
+    var ok = false;
+    try {
+      if (window.MayaBridge && window.MayaBridge.wakeResync) { window.MayaBridge.wakeResync(SUKOON.haal); ok = true; }
+    } catch (e) {}
+    if (!ok) { try { SUKOON._native(SUKOON.haal); } catch (e) {} }
+    SUKOON.hbStart();
+  }
 };
 
 var KAAN = {
@@ -7485,6 +8840,32 @@ var KAAN = {
     if (kind === "wake") KAAN.woke++;
   },
 
+  /* 🔬 v5.10.3 (F25) — NATIVE BUFFER FLUSH.
+     Kotlin ab har waqia PEHLE apne ring buffer mein darj karta hai, phir UI ko bhejta
+     hai. Is liye UI ke mare hue daur (screen off / app swipe / OEM kill) ke waqiat bhi
+     yahan pohanch jate hain — "suna 0" ka ambiguity khatam: ab pata chalta hai ke
+     recognizer behra tha, ya report raste mein giri thi. */
+  flushNative: function () {
+    var got = 0;
+    try {
+      if (!window.MayaBridge || !window.MayaBridge.wakeEvents) return 0;
+      var arr = JSON.parse(window.MayaBridge.wakeEvents() || "[]");
+      for (var i = 0; i < arr.length; i++) {
+        var ev = arr[i];
+        if (!ev || !ev.k) continue;
+        KAAN.log.push({ t: ev.t || (new Date()).getTime(), k: String(ev.k),
+                        d: String(ev.d || "").slice(0, 90), nat: 1 });
+        got++;
+      }
+      if (got) {
+        KAAN.log.sort(function (a, b) { return b.t - a.t; });
+        if (KAAN.log.length > KAAN.MAX) KAAN.log.length = KAAN.MAX;
+        KAAN.lastAt = (new Date()).getTime();
+      }
+    } catch (e) {}
+    return got;
+  },
+
   /* saare andazon mein se koi wake word hai? */
   match: function (alts) {
     var i, a;
@@ -7499,11 +8880,25 @@ var KAAN = {
     return null;
   },
 
+  /* 🔬 v5.10.3 (F11) — 10..15 PEHLE MAUJOOD HI NAHI the, is liye panel
+     "aakhri err 11 — ?" chhapta tha. AOSP ki qanooni fehrist poori ki gayi. */
   ERRNAME: { 1: "network timeout", 2: "network", 3: "audio", 4: "server", 5: "client",
              6: "koi awaaz nahi (khamoshi)", 7: "samajh nahi aaya", 8: "recognizer busy",
-             9: "permission nahi" },
+             9: "permission nahi",
+             10: "bohot request (hamara hi hammer)", 11: "server se connection toota",
+             12: "ye zubaan is recognizer ko supported nahi",
+             13: "zubaan ka pack download nahi hua",
+             14: "service support check ki ijazat nahi deti",
+             15: "model-download events support nahi" },
+  /* har code ka ILAJ — sirf naam nahi, rasta bhi */
+  ERRFIX: { 9: "Mic ki ijazat dein: Settings \u2192 Apps \u2192 MAYA \u2192 Permissions \u2192 Microphone",
+            10: "Wake ne bohot tezi se koshish ki \u2014 ab sust ho gayi hai (thik hai)",
+            11: "Google ki speech service toot rahi hai \u2014 internet check karein, ya LAB \u2192 wake ki zubaan 'English (India)' karein",
+            12: "Ye zubaan is phone ki service ko aati hi nahi \u2014 LAB \u2192 WAKE KI ZUBAAN badlein",
+            13: "Zubaan ka offline pack download nahi hua \u2014 \uD83D\uDDE3\uFE0F ON-DEVICE LANGUAGE dabayein" },
 
   report: function () {
+    try { KAAN.flushNative(); } catch (e0) {}   /* 🔬 F25 — UI ke mare daur ke waqiat bhi */
     var L = ["\uD83D\uDC42 WAKE WORD ka haal", ""], i, e, d;
     L.push("  switch      : " + ((settings && settings.wakeWord) ? "ON" : "OFF"));
     L.push("  suna        : " + KAAN.heard + " dafa");
@@ -7511,9 +8906,70 @@ var KAAN = {
     L.push("  nakami      : " + KAAN.errs + (KAAN.lastErr ? ("   (aakhri: " + KAAN.lastErr + " \u2014 " + (KAAN.ERRNAME[KAAN.lastErr] || "?") + ")") : ""));
     L.push("  mic chala   : " + KAAN.starts + " dafa");
     /* 🎚️ P9 SUKOON — ab NAZAR aata hai mic ne kyun nahi khula (andha nahi rahenge) */
-    L.push("  HAAL        : " + (typeof SUKOON !== "undefined" ? SUKOON.haal : "?") +
+    L.push("  HAAL (JS)   : " + (typeof SUKOON !== "undefined" ? SUKOON.haal : "?") +
            "   (awaaz kabhi nahi kategi — sirf KHALI par mic khulta hai)");
-    L.push("  roka gaya   : " + KAAN.skips + " dafa (Maya bol rahi thi / app ka mic)  ·  err8 maaf: " + KAAN.err8);
+    L.push("  roka gaya   : " + KAAN.skips + " dafa report · err8 maaf: " + KAAN.err8);
+    /* 🔬 v5.10.3 (F04) — KOTLIN KA SACH. PEHLE panel sirf JS ka haal dikhata tha:
+       "HAAL: KHALI" likh kar humein galat raaste par bhejta tha, jabke Kotlin mein
+       `pausedByApp = true` phansa hua tha (asal mujrim). Ab dono taraf ka haal +
+       MISMATCH ki pakad + delivery ka hisab (kitni reports UI tak pohanchin). */
+    var K = null;
+    try { if (window.MayaBridge && window.MayaBridge.wakeState) K = JSON.parse(window.MayaBridge.wakeState() || "null"); } catch (ek) { K = null; }
+    if (K) {
+      L.push("  HAAL (Kotlin): " + (K.haal || "?") +
+             (K.pausedByApp ? ("  ·  SULAH " + Math.round((K.pausedFor || 0) / 1000) + "s se") : "") +
+             (K.block ? ("  ·  RUKAWAT: " + K.block) : ""));
+      var jsH = (typeof SUKOON !== "undefined") ? SUKOON.haal : "";
+      if (String(K.haal || "") !== String(jsH || "") || (K.pausedByApp && jsH === "KHALI")) {
+        L.push("  ⚠️ MISMATCH: JS aur Kotlin ka HAAL alag — wake isi liye phansi thi (ab pakda gaya)");
+      }
+      L.push("  service      : " + (K.alive ? ("ZINDA · " + Math.round((K.uptime || 0) / 60) + " min se") : "☠️ MURDA (service chal hi nahi rahi)"));
+      L.push("  wake zubaan  : " + (K.lang || "?") + "   ·  wake ka recognizer: " + (K.using || "?") +
+             (K.appUsing ? ("   ·  app ka: " + K.appUsing) : "") + (K.cand ? ("  (" + K.cand + ")") : ""));
+      /* 🧭 v5.11.0 (1.1/1.2/1.3) — ab halat ka POORA hisab nazar aata hai: kis ne
+         lagayi, kab se, heartbeat zinda hai ya nahi, farsh/chokhat kya hai. */
+      L.push("  🧭 WAKE STATE : owner " + (K.owner || "?") + "  ·  " + (K.haalAge || 0) + "s se" +
+             "  ·  heartbeat " + (K.beats || 0) + (K.beatAge >= 0 ? (" (aakhri " + K.beatAge + "s pehle)") : " (ab tak koi nahi)") +
+             "  ·  JS beats " + (typeof SUKOON !== "undefined" ? (SUKOON.beats || 0) : 0));
+      L.push("  🎧 PEHRA      : " + (K.gate ? "KHULA" : "band") + "  ·  mic sun raha " + (K.listening ? "HAAN" : "nahi") +
+             "  ·  farsh " + (K.floor || 0) + "dB  ·  chokhat " + (K.trig || 0) + "dB" +
+             (K.cal === false ? "  ·  ⚠️ calibration adhoora" : "") + "  ·  pehre " + (K.gates || 0) + " dafa");
+      /* 🎛️ J2 (F52/F57) — mic ka haal, wake ka ZINDA level aur baat-cheet ka hisab.
+         Pehle panel mein wake ka level tha hi nahi: "wake ON" likha hota tha magar
+         asal mein sun rahi hai ya nahi, pata karne ka koi zariya nahi tha. */
+      L.push("  \uD83C\uDF9B\uFE0F MIC HAAL    : " + (typeof HAALBAR !== "undefined" ? HAALBAR.report() : "bar nahi mila"));
+      L.push("  \uD83D\uDEE0\uFE0F level (Kotlin): " + (K.lvAge >= 0 ? (Math.round(K.lv || 0) + "dB  \u00B7  " + (K.lvAge || 0) + "s pehle  \u00B7  " +
+             (K.lvMode === 2 ? "wake ka kaan khula" : (K.lvMode === 1 ? "khamoshi ka pehra" : "?"))) : "ab tak koi level nahi aaya") +
+             (K.lvAge >= 0 && K.lvAge > 6 ? "   \u26A0\uFE0F PURANA \u2014 wake sun nahi rahi" : ""));
+      L.push("  \uD83D\uDEAA BAAT-CHEET : " + (K.talkPref === false ? "BAND (LAB switch OFF)" : "ON (default)") +
+             (K.talk ? ("  \u00B7  ABHI khula (" + (K.talkLeft || 0) + "s baki)") : "  \u00B7  abhi band") +
+             "  \u00B7  turn " + (K.talkTurns || 0) +
+             "  \u00B7  faida: ek turn mein mic EK dafa khulta hai (cycle aadha)");
+      /* 🛡️ J1 ka referee bhi panel par (v5.12.0) — warna uska hisab sirf log mein rehta */
+      if (typeof JAWAB !== "undefined") L.push("  \uD83D\uDEE1\uFE0F JAWAB      : " + JAWAB.report());
+      if ((K.selfFix || 0) > 0) {
+        L.push("  🔧 khud-sudhaar: " + K.selfFix + " dafa (aakhri: " + (K.fixWhy || "?") + ")" +
+               "  — agar ye barh raha hai to JS ka HAAL bhejna toota hua hai");
+      }
+      if (K.held) L.push("  ⛔ wake RUKI hui hai — mic ki ijazat chahiye (notification par “Ijazat do”)");
+      if (K.fgs === false) L.push("  ⚠️ foreground service nahi bani — Android/OEM ne roka (wake beemar)");
+      L.push("  KOTLIN ginti : suna " + (K.nHeard || 0) + " · mic chala " + (K.nStart || 0) +
+             " · nakami " + (K.nErr || 0) + " · roka " + (K.nSkip || 0) +
+             ((K.nDead || 0) ? ("  ·  ☠️ dead " + K.nDead) : "") +
+             ((K.errStreak || 0) ? ("  ·  IS SESSION lagatar " + K.errStreak + " (err " + (K.lastErr || 0) + ")") : "") +
+             ((K.errTotal || 0) ? ("  ·  KUL nakami " + K.errTotal) : ""));
+      L.push("  delivery     : UI ko bheje " + (K.sent || 0) + "  ·  GIRE " + (K.dropped || 0) +
+             ((K.heardOffline || 0) ? ("  ⚠ " + K.heardOffline + " wake UI mare hone ki wajah se zaya (Phase 3 mein ilaj)") : ""));
+      if ((K.errStreak || 0) >= 5) {
+        L.push("  ☠️ CIRCUIT OPEN: 5 lagatar nakami — koshishen sust kar di gayi hain (30s cap)");
+        var f = KAAN.ERRFIX[K.lastErr];
+        if (f) L.push("     💡 ILAJ: " + f);
+      } else if (K.lastErr && KAAN.ERRFIX[K.lastErr]) {
+        L.push("  💡 aakhri err ka ilaj: " + KAAN.ERRFIX[K.lastErr]);
+      }
+    } else {
+      L.push("  HAAL (Kotlin): ? — purani APK (wakeState bridge v5.10.3 se hai)");
+    }
     L.push("");
     if (!KAAN.log.length) {
       L.push("  \u26A0\uFE0F Service se ABHI TAK KUCH NAHI aaya.");
@@ -7521,7 +8977,7 @@ var KAAN = {
       L.push("  Iska matlab ya to:");
       L.push("   \u2022 wake word switch OFF hai, ya");
       L.push("   \u2022 mic ki ijazat nahi mili, ya");
-      L.push("   \u2022 purani APK hai (v5.9.1 se pehle diagnostics thi hi nahi)");
+      L.push("   \u2022 purani APK hai (v5.10.0 se pehle diagnostics thi hi nahi)");
       return L.join("\n");
     }
     L.push("  \u2500\u2500 aakhri " + Math.min(KAAN.log.length, 22) + " waqiat \u2500\u2500");
@@ -7586,10 +9042,10 @@ var KAAN = {
     } else {
       L.push("  \uD83D\uDC49 KYA KARNA HAI:");
       if (bad.indexOf("aiai") >= 0) L.push("     \u2022 [VOICE INPUT] dabao \u2192 \"Speech Recognition & Synthesis\" chuno");
-      /* v5.9.1 — pehle yahan purane bracket-button ka hawala likha hota tha magar
+      /* v5.10.0 — pehle yahan purane bracket-button ka hawala likha hota tha magar
          aisa button kahin THA HI NAHI (user dhoondta reh jata). Ab neeche ASLI
          button hai: 🗣️ */
-      if (bad.indexOf("ondevice") >= 0) L.push("     \u2022 neeche \uD83D\uDDE3\uFE0F ON-DEVICE LANGUAGE button dabao \u2192 \u0627\u0631\u062F\u0648 + English (India) download karo (offline chalegi)");
+      if (bad.indexOf("ondevice") >= 0) L.push("     \u2022 neeche \uD83D\uDDE3\uFE0F ON-DEVICE LANGUAGE button dabao \u2014 wo AAP KE PHONE ki fehrist se sirf ASLI darwaze dikhata hai (v5.10.1: pehle ye button andhayan 'Digital assistant' ki screen khol deta tha)");
       if (bad.indexOf("gtts") >= 0) L.push("     \u2022 Play Store \u2192 \"Speech Recognition & Synthesis\" install/enable karo");
       if (bad.indexOf("batt") >= 0) L.push("     \u2022 [BATTERY] dabao \u2192 MAYA ko \"Unrestricted\" karo");
       if (bad.indexOf("mic") >= 0) L.push("     \u2022 Mic ki ijazat do");
@@ -7623,12 +9079,212 @@ var KAAN = {
     else if (r.snr >= 12) L.push("  \uD83D\uDC49 Thora qareeb aa kar boliye, ya zoom barhao.");
     else L.push("  \uD83D\uDC49 Bohat shor hai ya awaaz door se aa rahi hai. Qareeb aa kar boliye.");
     cb(L.join("\n"));
+  },
+
+  /* ═══ 🗣️ ON-DEVICE LANGUAGE ki SEEDHI (v5.10.2) ═══
+     User ki video ne pakda: button dabaya to phone ki "Digital assistant app"
+     screen khul gayi (Google Go / Ella / None) — jahan offline speech ki koi
+     cheez hi NAHI hoti.
+
+     Do chhed the (dono Kotlin mein):
+       1. `startActivity()` sirf ActivityNotFoundException par rukta hai. Kai OEM
+          (Android Go / Infinix / itel) ACTION_VOICE_INPUT_SETTINGS ko apni
+          "Digital assistant" screen par alias kar dete hain — intent CHAL jata
+          hai magar GALAT screen khulti hai, aur hum `return true` kar dete the.
+       2. Gboard ka component Android 11+ ki PACKAGE VISIBILITY se chhupa tha
+          (manifest mein <queries> tha hi nahi) — pehla qadam hamesha fail.
+
+     Ab: Kotlin `onDeviceMap()` phone par SACH MEIN maujood cheezon ki fehrist
+     bhejta hai (RecognitionService list · keyboard · assistant ka naam), aur
+     `go()` kisi bhi screen ko khud khole — us component ko POOCHH kar.
+     Ye function wahi fehrist insani zubaan mein badalta hai + sirf ASLI
+     darwazon ke button banata hai. Andaza nahi — saboot. */
+  /* 🗣️ ON-DEVICE (v5.10.2) — phone ki ASLI fehrist, sirf ASLI darwaze, aur har
+     darwaze ka apna HINT (b.h). v5.10.1 ek chhed chhor gaya tha: screen ka NAAM
+     to batata tha, magar GALAT screen (Digital assistant) khol bhi deta tha aur
+     phir kehta tha "us mein Voice typing dhoondo" — aap ne khud dekha:
+     ✅ Jo screen khuli: com.android.settings/.Settings$ManageAssistActivity.
+     Ab (a) Kotlin wo rung kholta hi nahi, (b) JS bhi naam par khud pehchan kar
+     saaf keh deta hai ke ye assistant screen hai. */
+  onDevice: function () {
+    var d = null;
+    try {
+      if (window.MayaBridge && window.MayaBridge.onDeviceMap) d = JSON.parse(window.MayaBridge.onDeviceMap());
+    } catch (e) { d = null; }
+    var L = ["\uD83D\uDDE3\uFE0F ON-DEVICE LANGUAGE \u2014 aap ke phone ki ASLI fehrist", ""], btns = [], i, k;
+
+    if (!d) {
+      /* purani APK (v5.10.1 se pehle onDeviceMap bridge hai hi nahi) — Qanoon 2 */
+      L.push("  \u26A0\uFE0F Ye APK itni purani hai ke phone ki fehrist nahi bhej sakti.");
+      L.push("     (v5.10.1+ mein ye panel phone par SACH MEIN maujood cheezein dikhata");
+      L.push("      hai, aur sirf wo button banata hai jo is phone par ASAL MEIN khulta hai.)");
+      L.push("");
+      L.push("  Abhi ke liye likha hua raasta:");
+      L.push("     Settings \u2192 System \u2192 Languages aur input \u2192 On-screen keyboard");
+      L.push("     \u2192 Gboard \u2192 Voice typing \u2192 'Faster voice typing' ON");
+      L.push("     \u2192 Offline speech recognition \u2192 \u0627\u0631\u062F\u0648 + English (India)");
+      btns.push({ t: "\u2699\uFE0F Voice input settings kholo", k: "voice",
+                  h: "Voice typing \u2192 Faster voice typing \u2192 Offline speech recognition" });
+      return { txt: L.join("\n"), btns: btns, d: null };
+    }
+
+    var srv = d.srv || [], kb = d.kb || [];
+    var GB = -1, GBGO = -1, GG = -1, TTS = -1;
+    for (i = 0; i < kb.length; i++) {
+      k = String(kb[i]);
+      if (k === "com.google.android.inputmethod.latin") GB = i;
+      else if (k === "com.google.android.inputmethod.latin.go") GBGO = i;
+      else if (k === "com.google.android.apps.searchlite") GG = i;
+      else if (k === "com.google.android.tts") TTS = i;
+    }
+
+    /* fehrist se hi pehchano (andaza nahi): Google ka speech service + AiAi.
+       v5.10.1 sirf 'poori Google app' (googlequicksearchbox) dekhta tha, is liye
+       aap ke phone par \u2014 jahan com.google.android.tts MAUJOOD tha \u2014 wo
+       "poori Google app NAHI, pehle install karo" keh kar apni hi fehrist se
+       takra gaya tha. Ab fehrist khud bolti hai. */
+    var GSP = null, AIAISVC = null, sp;
+    for (i = 0; i < srv.length; i++) {
+      sp = String((srv[i] && srv[i].pkg) || "");
+      if (sp === "com.google.android.tts" || sp.indexOf("googlequicksearchbox") >= 0) GSP = srv[i];
+      /* AiAi ke package naam kai phones par alag hote hain: com.google.android.as,
+         com.google.android.as.oss, aur purane builds par "systemintelligence". */
+      if (sp.indexOf("com.google.android.as") === 0 || sp.indexOf("systemintelligence") >= 0 ||
+          sp.indexOf("as.oss") >= 0 || sp.indexOf("AiAi") >= 0) AIAISVC = srv[i];
+    }
+    var hasAiAi = !!(d.aiai || AIAISVC);
+
+    L.push("  \uD83E\uDDE9 Speech recognition services is phone par \u2014 " + srv.length);
+    for (i = 0; i < srv.length && i < 6; i++) {
+      L.push("     \u2022 " + (srv[i].label || srv[i].pkg) + "   \u2014 " + srv[i].pkg);
+    }
+    if (!srv.length) L.push("     \u2022 KOI NAHI \u274C (isi liye \"Maya\" sunai hi nahi deti)");
+    L.push("");
+    L.push("  " + (hasAiAi ? "\u2705" : "\u274C") + " Android System Intelligence : " + (hasAiAi ? "maujood (on-device recognizer ka ghar)" : "NAHI \u2014 naya on-device recognizer is phone par nahi"));
+    L.push("  " + (GSP ? "\u2705" : "\u274C") + " Google ka speech service    : " + (GSP ? ((GSP.label || GSP.pkg) + "  \u2014 " + GSP.pkg) : "NAHI"));
+    L.push("  " + (d.goog ? "\u2705" : (GSP ? "\u26AA" : "\u274C")) + " Poori Google app           : " + (d.goog ? "maujood" : ("NAHI" + (GSP ? "  (magar speech service maujood hai \u2014 zubaan pack usi mein hoti hain)" : ""))));
+    L.push("  " + (d.ondevice ? "\u2705" : "\u26A0\uFE0F") + " On-device recognizer      : " + (d.ondevice ? "MAUJOOD \u2014 offline chalega" : "nahi (Android 13+ chahiye + AiAi)"));
+    L.push("  \uD83C\uDFAF Abhi chal raha hai        : " + (d.using || "-"));
+    L.push("  \uD83C\uDFF7\uFE0F Default voice-input      : " + (KAAN.ERRSVC(d.svc) || "?"));
+    L.push("  \u2328\uFE0F Keyboard                 : " + (GB >= 0 ? "Gboard \u2705" : (GBGO >= 0 ? "Gboard Go \u26A0\uFE0F" : "Gboard NAHI \u274C")));
+    if (d.asst) L.push("  \uD83E\uDD16 Default assistant       : " + d.asst + "  (Maya is se azad hai \u2014 Maya apna recognizer khud chunti hai)");
+    L.push("");
+
+    /* ── seedhi: sirf ASLI darwaze, har darwaze ka apna hint ── */
+    L.push("  \uD83E\uDE9C SEEDHI \u2014 sirf wo darwaze jo IS PHONE PAR MAUJOOD hain:");
+    if (GB >= 0) {
+      btns.push({ t: "\u2699\uFE0F 1. Gboard \u2192 Voice typing settings", k: "gboardvoice",
+                  h: "Voice typing \u2192 'Faster voice typing' ON \u2192 'Offline speech recognition' \u2192 \u0627\u0631\u062F\u0648 + English (India) download (~80MB har ek, Wi-Fi par)" });
+      L.push("     1. [\u2699\uFE0F Gboard Voice typing] dabao");
+      L.push("        \u2192 'Faster voice typing' ON");
+      L.push("        \u2192 'Offline speech recognition' \u2192 \u0627\u0631\u062F\u0648 + English (India) download");
+    } else if (GBGO >= 0) {
+      /* Gboard Go: chhota keyboard — us mein Voice typing settings aksar HOTI HI
+         NAHI. Jhoota waada nahi: darwaza dikha rahe hain magar saaf bata kar. */
+      btns.push({ t: "\u2699\uFE0F 1. Gboard Go ki settings dekho (Voice typing ho to)", k: "gboardvoice",
+                  h: "Agar 'Voice typing' mile to Faster voice typing ON + Offline speech recognition; na mile to poora Gboard install karo" });
+      btns.push({ t: "\u2328\uFE0F Keyboard settings (poora Gboard yahan se lao)", k: "gboard",
+                  h: "On-screen keyboard \u2192 Gboard (agar list mein nahi to Play Store se install karo)" });
+      L.push("     1. \u26A0\uFE0F IS PHONE PAR 'GBOARD GO' HAI, poora Gboard NAHI. Go mein");
+      L.push("        'Voice typing' ki settings aksar hoti hi nahi \u2014 is liye jhoota");
+      L.push("        waada nahi: pehle poora Gboard install karo (Play Store), phir");
+      L.push("        us ki settings mein 'Offline speech recognition' milega.");
+      if (d.play) btns.push({ t: "\uD83D\uDED2 Play Store: Gboard (poora)", k: "market:com.google.android.inputmethod.latin",
+                  h: "Play Store par 'Install' dabao \u2014 phir MAYA band kar ke dobara kholo aur ye panel dobara dekho" });
+    } else {
+      L.push("     1. \u274C GBOARD IS PHONE PAR NAHI HAI \u2014 is liye 'Voice typing' ki screen");
+      L.push("        kabhi nahi khulegi. Play Store se Gboard install karo, phir ye");
+      L.push("        darwaza khud ban jayega.");
+      btns.push({ t: "\u2328\uFE0F Keyboard settings (Gboard yahan se dhoondo)", k: "gboard",
+                  h: "On-screen keyboard \u2192 Gboard (list mein na ho to Play Store se install karo)" });
+      if (d.play) btns.push({ t: "\uD83D\uDED2 Play Store: Gboard", k: "market:com.google.android.inputmethod.latin",
+                  h: "Play Store par 'Install' dabao \u2014 phir MAYA band kar ke dobara kholo" });
+    }
+
+    btns.push({ t: "\uD83C\uDFA4 2. Voice input / speech services", k: "voiceservices",
+                h: (srv.length > 1
+                    ? "Default service chuno: " + (GSP ? (GSP.label || GSP.pkg) : "Speech Services by Google") + " \u2014 'Android System Intelligence' NAHI"
+                    : (GSP ? "Is phone par SIRF EK service hai (" + (GSP.label || GSP.pkg) + ") \u2014 wahi default hai, chunne ki zaroorat NAHI"
+                           : "Yahan service chunne ko kuch nahi \u2014 pehle Speech Services by Google install karo")) });
+    if (srv.length > 1) {
+      L.push("     2. [\uD83C\uDFA4 Voice input] \u2192 default service \"" + (GSP ? (GSP.label || GSP.pkg) : "Speech Services by Google") + "\"");
+      L.push("        chuno \u2014 \"Android System Intelligence\" NAHI");
+    } else if (GSP) {
+      L.push("     2. [\uD83C\uDFA4 Voice input] \u2192 is phone par SIRF EK service hai (\"" + (GSP.label || GSP.pkg) + "\")");
+      L.push("        \u2014 wahi default hai, chunne ki zaroorat NAHI. Bas us ke offline pack");
+      L.push("        download karo (Gboard \u2192 Voice typing se, ya neeche app-info se).");
+    } else {
+      L.push("     2. \u274C KOI speech service NAHI \u2014 chunne ko kuch nahi. Pehle install karo.");
+    }
+    if (GSP) {
+      btns.push({ t: "\uD83D\uDCE6 " + (GSP.label || GSP.pkg) + " ki app-info", k: "appinfo:" + GSP.pkg,
+                  h: "Ye app zubaan ke offline pack rakhti hai \u2014 update/permissions dekh lo, 'Clear data' NAHI karna (pack urr jayenge)" });
+    } else if (d.play) {
+      btns.push({ t: "\uD83D\uDED2 Play Store: Speech Services by Google", k: "market:com.google.android.tts",
+                  h: "Play Store par 'Install' dabao \u2014 isi app mein offline zubaan pack hoti hain" });
+    }
+    if (AIAISVC) {
+      /* AiAi = on-device recognizer ka ghar. Is ki app-info bhi kaam ki hai
+         (update / storage dekhna), magar 'Clear data' se pack urr jate hain. */
+      btns.push({ t: "\uD83D\uDCE6 " + (AIAISVC.label || AIAISVC.pkg) + " ki app-info", k: "appinfo:" + AIAISVC.pkg,
+                  h: "On-device recognizer isi app mein rehta hai \u2014 update/storage dekho, 'Clear data' NAHI karna (download kiye pack urr jayenge)" });
+    }
+    L.push("     3. MAYA band karo \u2192 dobara kholo \u2192 \uD83E\uDE7A KAAN DOCTOR mein");
+    L.push("        'On-device recognizer' ki line parho \u2014 jhoot nahi, haqeeqat likhi hogi");
+    L.push("");
+    L.push("  \u270D\uFE0F Agar koi bhi button kaam na kare \u2014 LIKHA HUA raasta (kabhi ghalat nahi hota):");
+    L.push("     Settings \u2192 System \u2192 Languages aur input \u2192 On-screen keyboard \u2192 Gboard");
+    L.push("     \u2192 Voice typing \u2192 Faster voice typing ON \u2192 Offline speech recognition");
+    L.push("     \u2192 \u0627\u0631\u062F\u0648 (Urdu) + English (India) download  (~80MB har ek, Wi-Fi par)");
+    L.push("");
+
+    /* ── imaandari: assistant wali screen se ye masla HAL NAHI HOTA ── */
+    L.push("  \uD83D\uDED1 'Digital assistant app' (Google Go / Ella / None) wali screen se ye");
+    L.push("     masla HAL NAHI HOTA \u2014 wo assistant ki pasand hai, MAYA ki awaaz ki");
+    L.push("     qismat us se nahi badalti. v5.10.1 tak humara button naam to batata tha");
+    L.push("     magar wo screen KHOL bhi deta tha; v5.10.2 mein wo rung BAND hai \u2014");
+    L.push("     agar koi screen khulti hai to wo zubaan ki hi hoti hai.");
+
+    /* ── ab wo SACH jo aap ke phone par laagoo hota hai (jhooti umeed bhi nahi) ── */
+    L.push("");
+    if (d.ondevice || hasAiAi) {
+      L.push("  \uD83D\uDC4D On-device ka GHAR is phone par maujood hai. Pack download karo (upar wali");
+      L.push("     seedhi), phir MAYA band kar ke dobara kholo: wake bina internet ke chalegi.");
+    } else if (GSP) {
+      L.push("  \uD83E\uDD1D SACH (na jhooti umeed, na jhoota dar): naya on-device recognizer (AiAi)");
+      L.push("     is phone par NAHI, magar Google ka speech service MAUJOOD hai \u2014 is liye");
+      L.push("     zubaan pack DOWNLOAD ho sakta hai aur GBOARD KI VOICE TYPING offline chalegi.");
+      L.push("     MAGAR Maya ki WAKE abhi online recognizer se hoti hai (internet zaroori):");
+      L.push("     Maya abhi EXTRA_PREFER_OFFLINE istemal nahi karti \u2014 ye jaan boojh kar");
+      L.push("     nahi kiya gaya, taake bina pack wale phone par wake toote na.");
+      L.push("     \u2705 v5.10.3 se WAKE KI ZUBAAN ka APNA switch hai (STT se azad) \u2014 LAB mein");
+      L.push("     '\uD83D\uDC42 WAKE KI ZUBAAN' = English (India) default. Urdu decoder \"\u0645\u0627\u06CC\u0627\" ko");
+      L.push("     aksar \"\u06C1\u06D2\" jaisa parh leta tha; ab STT Urdu rahegi, wake English sune gi.");
+    } else {
+      L.push("  \uD83E\uDD1D SACH: is phone par offline (on-device) wake mumkin NAHI lagta \u2014 na AiAi");
+      L.push("     hai na Google ka speech service. Maya \"Maya\" ONLINE recognizer se sunegi");
+      L.push("     (internet zaroori). \u2705 v5.10.3: wake ki zubaan ka APNA switch hai \u2014 LAB");
+      L.push("     mein '\uD83D\uDC42 WAKE KI ZUBAAN' (default English-India). Urdu decoder \"\u0645\u0627\u06CC\u0627\"");
+      L.push("     ko aksar \"\u06C1\u06D2\" parh leta tha; STT Urdu reh kar bhi wake theek sunegi.");
+    }
+    btns.push({ t: "\uD83D\uDD0E Kyun? KAAN DOCTOR ki poori report", k: "__doctor" });
+    btns.push({ t: "\uD83E\uDD16 Digital assistant settings (ye on-device zubaan ke liye NAHI)", k: "assistant",
+                h: "Ye assistant ki PASAND ki screen hai \u2014 zubaan ka offline pack YAHAN NAHI hota" });
+    return { txt: L.join("\n"), btns: btns, d: d };
   }
 };
 
-/* Kotlin ki har report yahan aati hai (v5.9.1) */
+/* Kotlin ki har report yahan aati hai (v5.10.0) */
 window.__wakeLog = function (kind, data) {
   try { KAAN.push(String(kind || "?"), data); } catch (e) {}
+};
+
+/* 🎛️ J2.2 (F57) — WAKE KA ZINDA LEVEL. Kotlin har ~300ms bhejta hai:
+   mode 1 = khamoshi ka pehra (gate), mode 2 = wake ka recognizer sun raha.
+   PEHLE ye rasta tha hi nahi: wake ka dB sirf trigger wali log line mein aata
+   tha, yani "wake zinda hai ya murda" ka koi NAZAR aane wala saboot nahi tha. */
+window.__wakeLevel = function (db, floor, trig, mode) {
+  try { HAALBAR.wakeLevel(db, floor, trig, mode); } catch (e) {}
 };
 
 /* Kotlin ab SAARE andaze bhejta hai — faisla yahan hota hai */
@@ -7638,7 +9294,11 @@ window.__wakeHeard = function (payload) {
   if (!alts || !alts.length) return;
 
   KAAN.push("heard", alts.join(" | "));
-  if (speaking || thinking || listening) return;      /* pehle se masroof */
+  /* 🛡️ J1 (F53) — PEHLE: chup-chaap return (na log, na wajah, na UI nishan).
+     Koi flag phansa ho (F46) to wake DAIMI ignore hoti thi aur aap ko kabhi pata
+     na chalta ke KYUN. Ab: wajah KAAN log + status par; aur flag muddat se purana
+     ho to khud reset kar ke wake ko USI lamhe sunne ka mauqa. */
+  if (speaking || thinking || listening) { if (!JAWAB.ignore()) return; }
 
   /* 🚪 "bas" / "theek hai" -> darwaza foran band */
   var i;
@@ -7693,7 +9353,28 @@ window.__wakeHeard = function (payload) {
   setTimeout(startListening, 400);
 };
 
+/* 🧭 v5.11.0 (1.12 / F41) — app wapas aane par KOTLIN khud ye bulata hai
+   (MainActivity.onResume): HAAL resync + wake ki sehat ka ek nazar. Pehle app
+   wapsi par dono taraf ka haal alag reh sakta tha aur wake chup-chaap band rehti. */
+window.__wakeHealth = function () {
+  try { SUKOON.resync(); } catch (e) {}
+  try {
+    if (!window.MayaBridge || !window.MayaBridge.wakeState) return;
+    var K = JSON.parse(window.MayaBridge.wakeState() || "null");
+    if (!K) return;
+    var msg = "";
+    if (K.held) msg = "Wake RUKI hui hai \u2014 mic ki ijazat chahiye (notification par \u201CIjazat do\u201D)";
+    else if (K.fgs === false) msg = "Wake beemar \u2014 foreground service nahi ban saki (Android/OEM ne roka)";
+    else if ((K.errStreak || 0) >= 5) msg = "Wake ka CIRCUIT KHULA hai \u2014 internet/Google masla (" + (KAAN.ERRNAME[K.lastErr] || ("err " + K.lastErr)) + ")";
+    else if (K.alive === false) msg = "Wake service MURDA hai \u2014 WAKE switch OFF/ON karein";
+    if (msg) { KAAN.push("sehat", msg); toast(msg); }
+    else KAAN.push("sehat", "wake sehatmand \u00B7 haal " + (K.haal || "?") + " \u00B7 farsh " + (K.floor || 0) +
+                   "dB \u00B7 chokhat " + (K.trig || 0) + "dB \u00B7 " + (K.using || "?"));
+  } catch (e) {}
+};
+
 window.__wakeErr = function(code){
+  try { HAALBAR.masla("wake ka circuit khula (err " + code + ") — KAAN DOCTOR dekhein"); } catch (e) {}
   /* 🕊️ P9 — user ka wake switch KABHI khud mat mitao. Pehle yahan
      settings.wakeWord = false ho jata tha — isi liye "wake ON karo to baad
      mein apne aap band mila" karta tha. Ab: sirf batao, faisla aap ka. */
@@ -7830,7 +9511,7 @@ document.querySelectorAll(".qactions button").forEach(function(b){
 
 /* ---------- SETTINGS TAB ---------- */
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v5.9.1)
+   🗄️  SETFORM v1 — Settings ka EK hi darwaza   (app v5.10.0)
    ---------------------------------------------------------------------------
    Purana bug (user ne pakda): "girlfriend mode on karta hun, groq key lagata
    hun — thori der baad wo option khud band ho jata hai."
@@ -7890,6 +9571,10 @@ var SET_FIELDS = [
   { id: "sFishTemp",    key: "fishTemp",      t: "num",   def: 0.35 },
   { id: "sTrustMode",   key: "trustMode",     t: "check", def: false },
   { id: "sWakeDoor",    key: "wakeDoor",      t: "num",   def: 15 },
+  /* 🔬 v5.10.3 (F12) — wake ki zubaan AB STT se AZAD. Urdu decoder "\u0645\u0627\u06CC\u0627"
+     ko aksar "\u06C1\u06D2" parh leta tha — hamara apna DOCTOR ye kehta tha, magar code
+     mein wake_lang = settings.stt bandha tha. */
+  { id: "sWakeLang",    key: "wakeLang",      t: "sel",   def: "en-IN" },
   { id: "sMicZoom",     key: "micZoom",       t: "num",   def: 0.8 },
   { id: "sMicNear",     key: "micNear",       t: "check", def: true },
   { id: "sStt",         key: "stt",           t: "sel",   def: "ur-PK" },
@@ -8081,6 +9766,8 @@ function labPaint(){
   n = $("#labBijli"); if (n) n.checked = f.bijli === true;
   n = $("#labNazar"); if (n) n.checked = f.nazar === true;
   n = $("#labSukoon"); if (n) n.checked = f.sukoon === true;
+  n = $("#labTalk");  if (n) n.checked = f.talk === true;   /* 🎛️ J2.3 — baat-cheet (default ON) */
+  n = $("#labKhud");  if (n) n.checked = f.khud === true;
   h = $("#labHint");
   if (h) {
     var on = [];
@@ -8094,6 +9781,9 @@ function labPaint(){
     if (f.ijazat) on.push("🛡️ ijazat");
     if (f.bijli) on.push("⚡ bijli");
     if (f.nazar) on.push("👁️ nazar");
+    if (f.sukoon) on.push("🎚️ sukoon");
+    if (f.talk) on.push("🗣️ baat-cheet");
+    if (f.khud) on.push("🕸️ khud-mukhtar");
     h.className = "ui-hint" + (on.length ? " ok" : "");
     h.textContent = on.length ? ("Chalu: " + on.join(" · ") + "   •   " + NAAP.hist.length + " turn naape ja chuke")
                               : "Sab band — Maya bilkul purane tareeqe par chal rahi hai.";
@@ -8121,6 +9811,31 @@ function labPaint(){
   sw("labNazar", "nazar", "👁️ screen parhna");
   /* 🎚️ P9 SUKOON — gate Kotlin mein yeh pref LIVE parhta hai: toggle par turant mirror */
   sw("labSukoon", "sukoon", "🎚️ awaaz+mic sukoon");
+  /* 🕸️ P6 KHUD-MUKHTAR — switch ON hote hi purani 6-minute chatter band, KHUD tick chalu */
+  sw("labKhud", "khud", "🕸️ khud-mukhtar");
+  /* 🎛️ J2.3 — BAAT-CHEET MODE: switch + Kotlin mirror (sukoon ki tarah LIVE pref).
+     Kotlin isay haalBlock() mein parhta hai; toggle par foran asar, ubharna nahi parta. */
+  sw("labTalk", "talk", "🗣️ baat-cheet mode (ek turn = ek mic)");
+  var labTalkMirror = function () {
+    var on = false;
+    try { on = FLAGS.on("talk"); } catch (e) {}
+    try { if (window.MayaBridge && window.MayaBridge.setPref) window.MayaBridge.setPref("talk", on); } catch (e) {}
+    /* switch OFF karte hi Kotlin ko batana zaroori hai — warna darwaza khula reh
+       jaye aur wake band (ulta bhi: ON par agli baar darwaza khulte hi chal jayega) */
+    if (!on) { try { HAALBAR.talkPushed = true; } catch (e) {} try { HAALBAR.tick(); } catch (e) {} }
+  };
+  labTalkMirror();
+  var ltk = $("#labTalk");
+  if (ltk) ltk.addEventListener("change", labTalkMirror);
+
+  var lkd = $("#labKhud");
+  if (lkd) lkd.addEventListener("change", function(){
+    try {
+      if (FLAGS.on("khud")) { KHUD.start(); }
+      else { KHUD.stop(); }
+      startProactive();   /* dobara: ab faisla KHUD ka hai ya purane shor ka */
+    } catch (e) {}
+  });
   var labSukoonMirror = function () {
     try {
       if (window.MayaBridge && window.MayaBridge.setPref) window.MayaBridge.setPref("sukoon", FLAGS.on("sukoon"));
@@ -8166,25 +9881,78 @@ function labPaint(){
     try { window.MayaBridge.openSetting("battery"); } catch (e) { toast("Sirf APK mein"); }
   });
 
-  /* 🗣️ v5.9.1 — jo cheez doctor sirf LIKHTA tha, ab MAUJOOD hai */
+  /* 🗣️ v5.10.0 — jo cheez doctor sirf LIKHTA tha, ab MAUJOOD hai */
+  /* 🗣️ v5.10.2 — ON-DEVICE LANGUAGE ka panel: phone ki ASLI fehrist + sirf wo
+     button jo is phone par sach mein kuch kholte hain. Purana handler screen
+     ka NAAM poochhe bagair "jo screen khuli us mein dhoondo…" likh deta tha —
+     aur screen khulti thi DIGITAL ASSISTANT ki (user ki video = saboot). */
   var lod = $("#labOnDevice");
   if (lod) lod.addEventListener("click", function(){
-    var ok = false;
-    try { ok = window.MayaBridge.openSetting("ondevice") === true; } catch (e) {}
-    /* Likha hua shajra bhi saath — koi ghalat screen khul jaye to raasta yaad rahe */
-    show("\uD83D\uDDE3\uFE0F ON-DEVICE LANGUAGE\n\n" +
-      "Jo screen khuli us mein dhoondo:\n" +
-      "  Gboard \u2192 Voice typing \u2192 'Faster voice typing' ON\n" +
-      "  phir 'Offline speech recognition' par dabao \u2192 ALL list se:\n" +
-      "     \u0627\u0631\u062F\u0648 (Urdu)  +  English (India)   DOWNLOAD\n\n" +
-      "(har zubaan ~80MB — Wi-Fi par khoob hoga)\n\n" +
-      "Agar woh screen na khuli to chhota raasta:\n" +
-      "  Settings \u2192 System \u2192 Languages & input \u2192 On-screen keyboard\n" +
-      "  \u2192 Gboard \u2192 Voice typing \u2192 Faster voice typing ON\n\n" +
-      "Ho jaye to MAYA band karo \u2192 dobara kholo \u2192 \uD83E\uDE7A KAAN DOCTOR mein\n" +
-      "'On-device recognizer: maujood' likhna chahiye.");
-    if (!ok) { try { window.MayaBridge.openSetting("voice"); } catch (e2) { toast("Settings khol nahi saki — manual raasta upar"); } }
+    var r = null;
+    try { r = KAAN.onDevice(); } catch (e) { r = null; }
+    if (!r) { show("\uD83D\uDDE3\uFE0F ON-DEVICE LANGUAGE chal nahi saka: " + String((e && e.message) || e)); return; }
+    show(r.txt);                                  /* poori fehrist labOut mein bhi */
+    onDevicePanel(r);
+    try { pushLog("\uD83D\uDDE3\uFE0F ON-DEVICE panel khula"); } catch (e2) {}
   });
+
+  function onDevicePanel(r){
+    var box = $("#labOnDeviceBox");
+    if (!box) return;
+    try { while (box.firstChild) box.removeChild(box.firstChild); } catch (e) { box.innerHTML = ""; }
+    var pre = document.createElement("pre");
+    pre.className = "ui-pre show";
+    pre.style.display = "block";
+    pre.style.maxHeight = "170px";
+    pre.textContent = r.txt;
+    box.appendChild(pre);
+    var i, btns = r.btns || [];
+    for (i = 0; i < btns.length; i++) {
+      (function (b) {
+        var el = document.createElement("button");
+        el.type = "button";
+        el.className = "ui-btn ui-btn-ghost";
+        el.style.marginTop = "6px";
+        el.textContent = b.t;
+        el.addEventListener("click", function () {
+          if (b.k === "__doctor") { try { show(KAAN.doctor()); } catch (e) {} return; }
+          var name = null, ok = false;
+          /* v5.10.1: pehle POOCHHO ke kaun si screen khuli — andaza nahi */
+          try {
+            if (window.MayaBridge && window.MayaBridge.openSettingNamed) name = window.MayaBridge.openSettingNamed(b.k);
+            else ok = window.MayaBridge.openSetting(b.k) === true;   /* purani APK */
+          } catch (e) { name = null; ok = false; }
+          if (name) {
+            /* v5.10.2: har darwaze ka apna HINT (b.h) — aam "Voice typing dhoondo"
+               wala mashwara har screen par sach nahi hota. Aur agar kisi OEM ne
+               phir bhi assistant screen thons di to JS khud pehchan kar saaf
+               keh deta hai (Kotlin ke block ka doosra qila). */
+            var nm = String(name), hint = b.h || "Voice typing \u2192 Faster voice typing \u2192 Offline speech recognition";
+            if (/assist/i.test(nm)) {
+              toast("\u26A0\uFE0F Ye DIGITAL ASSISTANT screen hai \u2014 zubaan ka pack yahan NAHI");
+              show(r.txt + "\n\n\u26A0\uFE0F Jo screen khuli: " + nm +
+                   "\n\uD83D\uDED1 Ye 'Digital assistant' ki screen hai \u2014 is mein offline zubaan ka pack HOTA HI NAHI." +
+                   "\n\u261D\uFE0F Upar likha hua manual raasta istemal karo (Settings \u2192 Languages aur input \u2192 Gboard \u2192 Voice typing).");
+            } else {
+              toast("\u2705 Khuli: " + nm.split("/").pop());
+              show(r.txt + "\n\n\u2705 Jo screen khuli: " + nm + "\n\u261D\uFE0F " + hint);
+            }
+          } else if (ok) {
+            toast("Screen khul gayi — upar likha raasta dhoondo");
+          } else {
+            /* toast 2 second mein ghayab — likha hua raasta MEHFOOZ rakho */
+            toast("\u274C is phone par wo screen maujood nahi — manual raasta neeche likh diya");
+            show(r.txt + "\n\n\u274C \"" + b.t + "\" \u2014 is phone par wo screen maujood nahi." +
+                 "\n\u261D\uFE0F Upar likha hua manual raasta istemal karo (wo kabhi ghalat nahi hota).");
+          }
+          try { pushLog("ON-DEVICE: " + b.k + " \u2192 " + (name || (ok ? "khuli (naam maloom nahi)" : "NAHI khuli"))); } catch (e2) {}
+        });
+        box.appendChild(el);
+      })(btns[i]);
+    }
+    box.style.display = "block";
+    try { if (typeof MayaUI !== "undefined" && MayaUI.layout) MayaUI.layout(); } catch (e3) {}
+  }
 
   var kb = $("#labKaan");
   if (kb) kb.addEventListener("click", function(){ show(KAAN.report()); });
@@ -8209,6 +9977,25 @@ function labPaint(){
   var lb = $("#labLedger");
   if (lb) lb.addEventListener("click", function(){
     show(LEDGER.today() + "\n\n\u27F2 \"wapas karo\" bolo to aakhri wapas-hone-laiq kaam palat dungi.");
+  });
+
+  /* 🕸️ P6 — KHUD-MUKHTAR ki teen aankhein */
+  var khr = $("#labKhudReport");
+  if (khr) khr.addEventListener("click", function(){
+    try { show(KHUD.report()); pushLog("KHUD: report dekhi"); } catch (e) { show("KHUD-MUKHTAR chal nahi saka: " + String((e && e.message) || e)); }
+  });
+  var khd = $("#labKhudDry");
+  if (khd) khd.addEventListener("click", function(){
+    try { show(KHUD.dry()); } catch (e) { show("DRY-RUN chal nahi saka: " + String((e && e.message) || e)); }
+  });
+  var hal = $("#labHaal");
+  if (hal) hal.addEventListener("click", function(){
+    try {
+      show("\uD83D\uDC41 ABHI KA HAAL\n\n  " + (KHUD.HAAL.line() || "kuch maloom nahi") +
+           "\n\n  dimaag ko ye line har turn par jati hai (~40 token):\n  " +
+           (KHUD.HAAL.context() || "(switch OFF hai — is liye abhi kuch nahi ja rahi)") +
+           "\n\n  🛡️ " + KHUD.BUDGET.report());
+    } catch (e) { show("HAAL chal nahi saka: " + String((e && e.message) || e)); }
   });
 
   var b = $("#labBaseline");
@@ -8513,10 +10300,26 @@ window.selectArtist = function(id) { settings.voiceArtist = id; saveSettings(); 
 function setWakeService(on){
   if (!NATIVE) { toast("Wake word sirf APK version mein hai"); return; }
   try {
-    window.MayaBridge.setPrefString && (window.MayaBridge.setPrefString('wake_lang', settings.stt || 'en-IN'),
-      window.MayaBridge.setPrefString('mic_zoom', String(settings.micZoom === undefined ? 0.8 : settings.micZoom)),
-      window.MayaBridge.setPref('sukoon', FLAGS.on('sukoon')),
-      window.MayaBridge.setPref('mic_near', settings.micNear !== false)), window.MayaBridge.wakeService(on);
+    /* 🔬 v5.10.3 (F12 + F38) — wake ki zubaan AB `settings.wakeLang` se aati hai
+       (pehle `settings.stt` thi: Urdu decoder "مایا" ko "ہے" parh leta tha),
+       aur prefs HAR save par push hote hain — sirf toggle par nahi. */
+    pushNativePrefs();
+    /* 🔬 v5.10.3 (F39) — PEHLE is call ka jawab PHENK diya jata tha: mic ki ijazat
+       na hone par Kotlin `false` lotata tha (aur ijazat ka dialog kholta tha), magar JS
+       phir bhi "Wake word ON" toast kar ke switch ON dikha deta tha — SWITCH JHOOT
+       BOLTA THA. Ab jawab parha jata hai aur halat saaf batayi jati hai. */
+    var ok = true;
+    if (window.MayaBridge.wakeService) {
+      try { ok = (window.MayaBridge.wakeService(on) !== false); } catch(e2) { ok = false; }
+    }
+    if (on && !ok) {
+      settings.wakeWord = false; saveSettings();
+      var swb = $("#sWake"); if (swb) swb.checked = false;
+      hudRefresh();
+      toast("⚠️ Wake ON nahi hui — mic ki ijazat chahiye (dialog khul raha hai)");
+      pushLog("WAKE: service start nahi hui — mic permission missing");
+      return;
+    }
     if (on) { try { if (!window.MayaBridge.batteryUnrestricted()) window.MayaBridge.requestBatteryUnrestricted(); } catch(e){} }
     toast(on ? "\uD83D\uDC42 Wake word ON — ab 'Maya' ya 'Boss' bolo" : "Wake word OFF");
     pushLog("WAKE WORD: " + (on ? "ON" : "OFF"));
@@ -8566,7 +10369,7 @@ $("#sPitch").addEventListener("input", function(){ $("#pitchVal").textContent = 
 /* ---------- DIAGNOSTICS ---------- */
 (function(_b){ if (_b) _b.addEventListener("click", function(){
   var out = [];
-  out.push("MAYA v5.9.1 — DOCTOR REPORT");
+  out.push("MAYA v5.10.2 — DOCTOR REPORT");
   out.push("TIME: " + new Date().toLocaleString());
   out.push("UA: " + String(navigator.userAgent).slice(0, 90));
   out.push("WEBVIEW: Chrome " + window.__webviewMajor + (window.__oldWebview ? " (PURANA < 87 — update karo!)" : " (OK ✅)"));
@@ -8891,6 +10694,52 @@ populateVoiceSelect();
 renderArtists();
 setTimeout(consolidateMemory, 4000);
 if (NATIVE && settings.wakeWord) setTimeout(function(){ try { setWakeService(true); } catch(e){} }, 1500);
+/* 🔬 v5.10.3 (F25) — app khulte hi Kotlin ka native buffer JS mein utaar lo:
+   screen-off/app-swipe daur ke waqiat (jo UI tak kabhi nahi pohanche the) yahan
+   aa jate hain, aur KAAN panel poori tareekh dikhata hai. */
+if (NATIVE) setTimeout(function(){ try { KAAN.flushNative(); } catch(e){} }, 2200);
+/* 🧭 v5.11.0 (1.2 / F41) — boot par HAAL ka poora resync + heartbeat shuru.
+   Isi se WebView reload ke FORAN baad wake chalti hai (purana masla: reload ke
+   baad Kotlin mein APP_SUN phansa rehta aur wake daimi band). */
+if (NATIVE) setTimeout(function(){ try { SUKOON.resync(); } catch(e){} }, 1800);
+
+/* 🛡️ J1 (F46) — JAWAB ka DIL: har 2 second teenon watchdog (sunna / sochna /
+   bolna). PEHLE koi watchdog tha hi nahi: ek flag phans jaye to jawab ka loop
+   DAIMI mar jata tha aur wake bhi ignore hoti thi. try/catch zaroori hai — is
+   dil ki dharkan se baqi app ki timing NAHI rukni chahiye. */
+setInterval(function(){ try { JAWAB.watchdog(); } catch (e) {} }, 2000);
+
+/* 🎛️ J2 (F52) — MIC HAAL BAR ka dil: har 250ms haal ka faisla + paint + baat-cheet
+   ka darwaza Kotlin se milana. Isi ek jagah se darwaza jata hai (J2.3) — koi
+   doosra caller nahi, is liye "koi bhool gaya" wala bug mumkin nahi. */
+try { HAALBAR.init(); } catch (e) {}
+setInterval(function(){ try { HAALBAR.tick(); } catch (e) {} }, 250);
+
+/* 🏷️ J2 — VERSION KA EK GHAR. PEHLE header ka subtitle "PERSONAL AI v5.10.2" par
+   JAM gaya tha (koi use update nahi karta tha) — yaani app khud apni pehchaan ka
+   jhoot bolti thi, aur user ko "APK purani hai ya nayi" ka faisla karne mein
+   dhoka hota tha. Ab toast, log aur header teeno ek hi constant se bante hain, aur
+   test-lock gradle ke versionName se milaan karta hai (Section 35). */
+var MAYA_VER = "5.12.5", MAYA_NAAM = "\uD83C\uDF9B\uFE0F MIC NAZAR";
+try {
+  var _st = document.querySelector("#subTitle");
+  if (_st) _st.textContent = "PERSONAL AI v" + MAYA_VER + " \u2728";
+} catch (e) {}
+/* 🏷️ v5.12.5 — VERSION KI PEHCHAAN, ab JS taraf se bhi: toast + log line.
+   (v5.10.3 ka toast Kotlin mein tha — MainActivity.onCreate; wo barqarar hai.
+   Ye JS toast ISLIYE naya hai ke APK aur web-asset ka version ALAG ho sakta hai:
+   purani APK + naya web-asset, ya ulta. Ab dono ek hi line mein nazar aate hain —
+   "native: 5.12.5-native" ke baghair web-asset ka bharosa andaza hai.) */
+if (NATIVE) setTimeout(function(){
+  try {
+    var nv = "?";
+    try { if (window.MayaBridge && window.MayaBridge.appVersion) nv = window.MayaBridge.appVersion(); } catch(e){}
+    var v = "MAYA v" + MAYA_VER + " \u2022 " + MAYA_NAAM +
+            " \u2014 mic ka haal hamesha nazar + wake ka zinda level + baat-cheet mode";
+    toast(v);
+    pushLog(v + "   (native: " + nv + ")");
+  } catch(e){}
+}, 2600);
 setTimeout(refreshHandsFreeStatus, 800);
 setInterval(refreshHandsFreeStatus, 10000);
 if (NATIVE) {
@@ -8983,6 +10832,11 @@ sysPrompt = function(){
     if (settings.musicApp && settings.musicApp !== "youtube") p += "\nMusic app preference: " + settings.musicApp + ".";
     if (typeof MALIK !== "undefined") p += MALIK.block();   /* \uD83D\uDC51 P1 */
     if (typeof HAQEEQAT !== "undefined") p += HAQEEQAT.rule();   /* \uD83E\uDD1D P3 */
+    /* \uD83D\uDC41 P6 KHUD-MUKHTAR — abhi ka HAAL (~40 token) + us ko istemal karne ka qanoon */
+    if (typeof KHUD !== "undefined" && FLAGS.on("khud")) {
+      try { p += KHUD.HAAL.context(); } catch (e) {}
+      try { p += KHUD.HAAL.rule(); } catch (e) {}
+    }
     if (settings.convoMode) p += "\nCONVERSATION MODE: thora zyada emotional/expressive tone — real insaan jaisi feel.";
   } catch(e){}
   return p;
@@ -9157,7 +11011,7 @@ document.querySelectorAll(".setgrp-head").forEach(function(h){
   h.addEventListener("click", function(){ h.parentElement.classList.toggle("open"); });
 });
 
-/* NOTE: loadV4Form / doosra saveSettings handler v5.9.1 mein khatam.
+/* NOTE: loadV4Form / doosra saveSettings handler v5.10.0 mein khatam.
    Ab SETFORM (upar) hi settings ka wahid darwaza hai — dekho SET_FIELDS.
    Sliders live update karte hain, baqi sab SAVE par ek hi tarteeb se. */
 try { $("#sRadius").addEventListener("input", function(){ $("#radiusVal").textContent = this.value; settings.radius = parseInt(this.value,10) || 18; saveSettings(); applyTheme(); }); } catch(e){}
@@ -9214,7 +11068,11 @@ renderFacts = function(){
   try { hudRefresh(); } catch(e){}
 };
 
-/* ---------- PROACTIVE MODE (video jaisa — khud ba khud baat) ---------- */
+/* ---------- PROACTIVE MODE (purana: har 6 minute ek RANDOM jumla) ----------
+   ⚠️ P6 ke baad ye sirf TAB chalta hai jab 🕸️ KHUD-MUKHTAR ka switch BAND ho.
+   Plan (docs/P6-KHUD-MUKHTAR-PLAN.md §1.2) isay "bay-maqsad shor" kehta hai —
+   is liye KHUD ON hote hi ye raasta chhor diya jata hai (khatam nahi kiya:
+   Qanoon 1 — switch OFF par purana rawaiya bilkul waisa hi rahe). */
 var PRO_LINES = [
   "{n}, soch rahi thi... aaj ka din kaisa ja raha hai?",
   "Bore ho rahi hoon {n} — koi quiz karein ya interesting fact sunaun?",
@@ -9223,8 +11081,23 @@ var PRO_LINES = [
   "Mausam check karun? ya battery? bas bol do.",
   "Waise {n}, mujhe tumhari baatein yaad rehti hain — kaafi memory bank bhar gaya hai."
 ];
+/* 🕸️ P6 KHUD-MUKHTAR ka darwaza: `khud` ON ho to bay-maqsad 6-minute wali
+   chatter KHUD-BA-KHUD KHATAM — ab har baat ki WAJAH hoti hai (aadat, adhoora
+   kaam, battery, teen ghante ki chuppi) aur har baat BUDGET se guzarti hai
+   (6/din · 45 min ka farq · raat 12 se subah 7 khamosh). Switch OFF = purana
+   raasta bilkul jyun ka tyun (Qanoon 1). */
 function startProactive(){
   if (MAYA_V4.proactiveTimer) { clearInterval(MAYA_V4.proactiveTimer); MAYA_V4.proactiveTimer = null; }
+  var khudOn = false;
+  try { khudOn = (typeof KHUD !== "undefined" && FLAGS.on("khud")); } catch (e) { khudOn = false; }
+  if (khudOn) {
+    try { KHUD.HAAL.watch(); } catch (e) {}
+    MAYA_V4.proactiveTimer = setInterval(function(){
+      try { KHUD.tick(); } catch (e) {}
+    }, 120000);                     /* har 2 min halki jhonk — koi network call nahi */
+    try { pushLog("\uD83D\uDD78\uFE0F KHUD-MUKHTAR: proactive ka shor band — ab bol-budget wali baatein"); } catch (e2) {}
+    return;
+  }
   if (!settings.proactive) return;
   MAYA_V4.proactiveTimer = setInterval(function(){
     try {
@@ -9248,8 +11121,9 @@ function startProactive(){
 
 /* ---------- v4 INIT ---------- */
 applyTheme(); renderThemeUI(); paintPersonas(); loadV4Form(); try { renderFacts(); } catch(e){} startProactive();
-try { $("#hudBuild").textContent = "v5.9.1"; } catch(e){}
-try { pushLog("MAYA v5.9.1 — DIMAAG v2 + AWAAZ v6 ONLINE"); } catch(e){}
+try { if (typeof KHUD !== "undefined" && FLAGS.on("khud")) KHUD.start(); } catch(e){}
+try { $("#hudBuild").textContent = "v5.10.2"; } catch(e){}
+try { pushLog("MAYA v5.10.2 — DIMAAG v2 + AWAAZ v6 + \uD83D\uDD78\uFE0F KHUD-MUKHTAR ONLINE"); } catch(e){}
 
 /* ============================================================================
    MAYA UI KIT v5 — "IRONCLAD" runtime   (v4.1.0)
@@ -9508,7 +11382,7 @@ var MayaUI = (function () {
     for (i = 0; i < reopen.length; i++) delCls(reopen[i], "is-open");
 
     var out = [];
-    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v5.9.1");
+    out.push("\uD83E\uDDEA MAYA UI CHECK \u2014 v5.10.2");
     out.push("WEBVIEW: Chrome " + (window.__webviewMajor || "?") + (window.__oldWebview ? " (PURANA)" : ""));
     out.push("");
     out.push("VISIBLE: " + okc + "   INVISIBLE: " + bad + (bad ? "  \u274C" : "  \u2705"));
