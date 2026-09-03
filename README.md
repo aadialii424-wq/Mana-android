@@ -107,7 +107,29 @@ pehchaan" na ho to tests **FAIL** honge.
 
 📖 [`docs/FIX-v5.10.3-wake-zinda.md`](docs/FIX-v5.10.3-wake-zinda.md) · forensic: [`docs/FORENSIC-WAKE-WORD.md`](docs/FORENSIC-WAKE-WORD.md)
 
-**Ab kya:** ~~Phase 1~~ ✅ **ho gaya (v5.11.0)** → **Phase 2** (WAKE DOCTOR v2 + live notification + dBFS calibration) → **Phase 2.5 auto-update** (F43 — APK ka apna rasta, §17 · *aap ka faisla chahiye: GitHub ya apna server*) → Phase 3 (wake ka dimaag Kotlin mein — screen-off/app-band/reboot) → Phase 4 (offline KWS engine).
+**Ab kya:** ~~Phase 1~~ ✅ **ho gaya (v5.11.0)** → **JAWAB LOOP ka naya track (neeche)** → Phase 2 (WAKE DOCTOR v2 + live notification + dBFS calibration) → **Phase 2.5 auto-update** (F43 · *faisla: GitHub ya apna server*) → Phase 3 (wake ka dimaag Kotlin mein) → Phase 4 (offline KWS engine).
+
+---
+
+## 🔬 NAYA FORENSIC — "JAWAB LOOP" (F44–F58) + STRUCTURE (J1–J4)
+
+Aap ki shikayat: *"kabhi bolta hun to reply nahi aata, mic on/off irritating hai, pata hi nahi
+chalta mic on hua ya nahi, jaldi sune jaldi bole."* Iska **microscope** ho gaya —
+[`docs/FORENSIC-JAWAB-LOOP.md`](docs/FORENSIC-JAWAB-LOOP.md) mein **15 naye flaws (F44–F58)**
+saboot (file:line) ke sath, aur **4 phase ka structure**:
+
+| Phase | Version | Naam | Kya theek hoga |
+|---|---|---|---|
+| **J1** | v5.12.0 | **JAWAB PAKKA** | har nakami **bol kar** bataye, koi deadlock nahi (3 watchdog: listen 12s · think 25s · speak 60s), galat error-matn theek, nakami ke baad mic **khud dobara**, darwaza lambe jawab mein band na ho |
+| **J2** | v5.12.5 | **MIC NAZAR** | hamesha nazar aane wali **MIC HAAL BAR** (5 state, 5 rang, text ke sath) + wake pehre ka **live level** + **conversation mode** (ek turn = ek mic open → cycle aadha) |
+| **J3** | v5.13.0 | **RAFTAR** | bolna khatam → **~0.6s** mein mic band (Long extras), awaaz **800ms budget** ke sath (dead air khatam), dimaag ki **streaming** (pehla jumla foran), aur **RAFTAR PANEL** (har turn ke ms — saboot) |
+| **J4** | v5.13.5 | **SAAF AWAAZ** | Urdu rate/pitch tuning, jumla-ba-jumla prosody, awaaz tez/dheemi setting |
+
+⚖️ **Imaandari:** Android ka **system mic-dot jhilmilana** cloud-wake (Google ASR) ke sath poori
+tarah khatam **nahi** ho sakta — J2 usay **kam** karega aur UI mein saaf batayega; poori tarah
+**saabit** mic sirf **Phase 4 (offline KWS)** mein.
+
+🧪 Structure doc par **+7 test-locks** (lab Section 33) → **1241/1241 GREEN**.
 
 ---
 

@@ -2492,6 +2492,32 @@ Here's a thinking process:
       '📄 Qanoon 9: v5.11.0 ka EK PARCHA bhi hai (tick ✅ layak checklist + pehchaan)');
   }
 
+  /* ═══ 33. 📋 JAWAB LOOP ka STRUCTURE (aap ki farmaish: "pehle structure banao") ═══
+     Ye locks PLAN ko bandhte hain — taake amal ke waqt koi flaw chhoot na jaye aur
+     koi phase bina acceptance criteria ke "ho gaya" na kehla sake. */
+  head('33. 📋 JAWAB LOOP — forensic F44-F58 + structure J1-J4 (plan-doc-first ka taala)');
+  {
+    const FJ = fs.readFileSync(path.join(ROOT, 'docs/FORENSIC-JAWAB-LOOP.md'), 'utf8');
+    let ids = 0;
+    for (let n = 44; n <= 58; n++) if (FJ.indexOf('F' + n + ' ') > 0 || FJ.indexOf('F' + n + ' —') > 0) ids++;
+    is(ids >= 15, '🔬 jawab-loop ke 15 flaws darj hain (F44..F58) — aap ki teeno shikayaton ke saboot', ids + '/15');
+    is(/J1  v5\.12\.0  "JAWAB PAKKA"/.test(FJ) && /J2  v5\.12\.5  "MIC NAZAR"/.test(FJ) &&
+       /J3  v5\.13\.0  "RAFTAR"/.test(FJ) && /J4  v5\.13\.5  "SAAF AWAAZ"/.test(FJ),
+      '🏗️ chaaron phase naam + version ke sath darj hain (tarteeb: pakka → nazar → raftar → awaaz)');
+    is(/LISTEN 12s/.test(FJ) && /THINK 25s/.test(FJ) && /SPEAK 60s/.test(FJ),
+      '⏱️ J1: teen watchdog ki muddat likhi hai (phansa hua mic/think/speak khud reset hoga)');
+    is(/COMPLETE_SILENCE_LENGTH_MILLIS=600L/.test(FJ) && /800ms/.test(FJ) && /STREAMING/.test(FJ),
+      '⚡ J3: raftar ke teeno hathiyar — Long silence extra, TTS 800ms budget, dimaag ki streaming');
+    is(/IMAANDARI/.test(FJ) && /jhilmilana poori tarah khatam nahi ho sakta/.test(FJ) &&
+       /offline KWS/.test(FJ),
+      '⚖️ imaandari: system mic-dot ki haqeeqat likhi hai (jhoot nahi) + uska asal ilaj (Phase 4)');
+    is(/## 5\. ❓ Do faisle/.test(FJ) && /CONVERSATION MODE/.test(FJ) && /raftar ya khoobsurti/.test(FJ),
+      '❓ jo do faisle MALIK ke hain wo saaf likhe hain (baqi kaam agent ka)');
+    is((FJ.match(/\*\*Acceptance/g) || []).length + (FJ.match(/Acceptance \(device par\)/g) || []).length >= 1 &&
+       /^\d+\. /m.test(FJ),
+      '✅ har phase ke acceptance criteria numbered hain (device par parakhne layak)');
+  }
+
     console.log('\n\x1b[1m\x1b[35m══════════════════════════════════════════════════════════\x1b[0m');
     if (fail === 0) console.log('\x1b[1m\x1b[32m✅ SAB TEST PASS — ' + pass + '/' + pass + '\x1b[0m');
     else console.log('\x1b[1m\x1b[31m❌ ' + fail + ' TEST FAIL — ' + pass + '/' + (pass + fail) + ' pass\x1b[0m');
